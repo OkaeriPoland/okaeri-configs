@@ -113,8 +113,14 @@ public class BukkitConfigurer extends Configurer {
         data = ConfigUtil.addCommentsToFields(this.getCommentPrefix(), this.getSectionSeparator(), data, declaration);
 
         String header = ConfigUtil.convertToComment(this.getCommentPrefix(), declaration.getHeader(), true);
-        String output = header + this.getSectionSeparator() + data;
+        String output = "";
 
+        if (header != null) {
+            output += header;
+            output += this.getSectionSeparator();
+        }
+
+        output += data;
         FileUtils.write(file, output, StandardCharsets.UTF_8);
     }
 }

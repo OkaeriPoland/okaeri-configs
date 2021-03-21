@@ -5,6 +5,7 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,30 @@ public abstract class OkaeriConfig {
 
     public OkaeriConfig() {
         this.declaration = ConfigDeclaration.from(this);
+    }
+
+    @SneakyThrows
+    public void set(String key, Object value) {
+        if (this.configurer == null) {
+            throw new IllegalAccessException("configurer cannot be null");
+        }
+        this.configurer.setValue(key, value);
+    }
+
+    @SneakyThrows
+    public Object get(String key) {
+        if (this.configurer == null) {
+            throw new IllegalAccessException("configurer cannot be null");
+        }
+        return this.configurer.getValue(key);
+    }
+
+    @SneakyThrows
+    public <T> T get(String key, Class<T> clazz) {
+        if (this.configurer == null) {
+            throw new IllegalAccessException("configurer cannot be null");
+        }
+        return this.configurer.getValue(key, clazz, null);
     }
 
     public void save() throws IllegalAccessException, IOException {

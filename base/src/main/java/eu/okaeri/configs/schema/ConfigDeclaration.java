@@ -18,7 +18,9 @@ public class ConfigDeclaration {
         Class<? extends OkaeriConfig> clazz = config.getClass();
 
         Header header = clazz.getAnnotation(Header.class);
-        declaration.setHeader(header.value());
+        if (header != null) {
+            declaration.setHeader(header.value());
+        }
 
         declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
                 .map(field -> FieldDeclaration.from(field, config))

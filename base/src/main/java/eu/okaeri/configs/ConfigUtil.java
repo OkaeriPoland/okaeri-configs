@@ -3,30 +3,30 @@ package eu.okaeri.configs;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class ConfigUtil {
 
     public static String convertToComment(String prefix, String[] strings, boolean spacing) {
 
-        StringBuilder buf = new StringBuilder();
+        if (strings == null) {
+            return null;
+        }
 
+        List<String> lines = new ArrayList<>();
         for (String line : strings) {
-            if (line.contains("\n")) {
-                String[] parts = line.split("\n");
-                for (String part : parts) {
-                    if (!part.startsWith(prefix)) {
-                        buf.append(prefix).append(spacing ? " " : "");
-                    }
-                    buf.append(part).append("\n");
+            String[] parts = line.split("\n");
+            for (String part : parts) {
+                if (part.startsWith(prefix)) {
+                    lines.add(part);
+                    continue;
                 }
-            } else {
-                if (!line.startsWith(prefix)) {
-                    buf.append(prefix).append(spacing ? " " : "");
-                }
-                buf.append(line).append("\n");
+                lines.add(prefix + (spacing ? " " : "") + part);
             }
         }
 
-        return buf.toString();
+        return String.join("\n", lines) + "\n";
     }
 
     public static String removeStartingWith(String prefix, String text) {
@@ -50,20 +50,31 @@ public final class ConfigUtil {
         String[] lines = data.split("\n");
 
         for (String line : lines) {
-            for (FieldDeclaration field : declaration.getFields()) {
-                String name = field.getName();
-                if (line.startsWith(name + ":")) {
-                    buf.append(separator);
-                    String[] comment = field.getComment();
-                    if (comment == null) {
-                        continue;
-                    }
-                    buf.append(ConfigUtil.convertToComment(prefix, comment, true));
-                }
+
+            FieldDeclaration field = fieldDeclarationOrNull(declaration, line);
+            if (field == null) {
+                buf.append(line).append("\n");
+                continue;
             }
-            buf.append(line).append("\n");
+
+            String comment = ConfigUtil.convertToComment(prefix, field.getComment(), true);
+            if (comment == null) {
+                buf.append(line).append("\n");
+                continue;
+            }
+
+            buf.append(separator).append(comment).append(line).append("\n");
         }
 
         return buf.toString();
+    }
+
+    private static FieldDeclaration fieldDeclarationOrNull(ConfigDeclaration declaration, String line) {
+        for (FieldDeclaration field : declaration.getFields()) {
+            if (line.startsWith(field.getName() + ":")) {
+                return field;
+            }
+        }
+        return null;
     }
 }
