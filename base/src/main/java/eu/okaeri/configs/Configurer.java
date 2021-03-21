@@ -20,7 +20,7 @@ public abstract class Configurer {
 
     public abstract String getSectionSeparator();
 
-    public abstract void setValue(String key, Object value);
+    public abstract void setValue(String key, Object value, GenericsDeclaration genericType);
 
     public abstract Object getValue(String key);
 
@@ -29,19 +29,16 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyCollection(Collection<?> value) {
+    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType) {
 
         List collection = new ArrayList();
-        for (Object collectionElement : value) {
+        GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtype().get(0);
 
-            if (this.isToStringObject(collectionElement)) {
-                collection.add(this.resolveType(collectionElement, String.class, null));
-                continue;
-            }
+        for (Object collectionElement : value) {
 
             SerializationData serialized = TransformerRegistry.serializeOrNull(collectionElement);
             if (serialized == null) {
-                collection.add(collectionElement);
+                collection.add(this.simplify(collectionElement, collectionSubtype));
                 continue;
             }
 
@@ -52,7 +49,23 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplify(Object value) {
+    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType) {
+
+        Map<Object, Object> map = new LinkedHashMap<>();
+        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtype().get(0);
+        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtype().get(1);
+
+        for (Map.Entry<Object, Object> entry : value.entrySet()) {
+            Object key = this.simplify(entry.getKey(), keyDeclaration);
+            Object kValue = this.simplify(entry.getValue(), valueDeclaration);
+            map.put(key, kValue);
+        }
+
+        return map;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Object simplify(Object value, GenericsDeclaration genericType) {
 
         ObjectSerializer serializer = TransformerRegistry.getSerializer(value.getClass());
         if (serializer == null) {
@@ -62,7 +75,11 @@ public abstract class Configurer {
             }
 
             if (value instanceof Collection) {
-                return this.simplifyCollection((Collection<?>) value);
+                return this.simplifyCollection((Collection<?>) value, genericType);
+            }
+
+            if (value instanceof Map) {
+                return this.simplifyMap((Map<Object, Object>) value, genericType);
             }
 
             return value;

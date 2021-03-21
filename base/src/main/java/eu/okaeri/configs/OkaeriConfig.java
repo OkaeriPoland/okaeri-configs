@@ -26,7 +26,7 @@ public abstract class OkaeriConfig {
         if (this.configurer == null) {
             throw new IllegalAccessException("configurer cannot be null");
         }
-        this.configurer.setValue(key, value);
+        this.configurer.setValue(key, value, this.declaration.getFieldDeclarationOrNull(key));
     }
 
     @SneakyThrows
@@ -56,7 +56,7 @@ public abstract class OkaeriConfig {
         }
 
         for (FieldDeclaration field : this.declaration.getFields()) {
-            this.configurer.setValue(field.getName(), field.getValue());
+            this.configurer.setValue(field.getName(), field.getValue(), field.getType());
         }
 
         this.configurer.writeToFile(this.bindFile, this.declaration);
