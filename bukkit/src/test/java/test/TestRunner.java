@@ -19,6 +19,12 @@ public final class TestRunner {
         config.setBindFile(bindFile);
         config.setConfigurer(configurer);
 
+        config.load();
+        System.out.println(config);
+
+        config.getWhitelist().add("127.0.0.2");
+        System.out.println(config);
+
         config.save();
     }
 }

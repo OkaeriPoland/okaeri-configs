@@ -37,5 +37,5 @@ public class TestConfig extends OkaeriConfig {
     private Map<String, String> messages = Collections.singletonMap("test", "testing");
 
     @Comment({"Nie edytuj tej wartosci", "Do not edit"})
-    private int version = 2;
+    private Integer version = 2;
 }
