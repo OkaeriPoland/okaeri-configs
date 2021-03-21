@@ -23,6 +23,7 @@ public class FieldDeclaration {
 
         declaration.setField(field);
         declaration.setObject(object);
+        declaration.setType(field.getType());
         field.setAccessible(accessible);
 
         return declaration;

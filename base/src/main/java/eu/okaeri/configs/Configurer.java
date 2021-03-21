@@ -1,9 +1,15 @@
 package eu.okaeri.configs;
 
+import eu.okaeri.configs.schema.ConfigDeclaration;
+
 import java.io.File;
 import java.io.IOException;
 
-public interface OkaeriConfigurer {
+public interface Configurer {
+
+    String getCommentPrefix();
+
+    String getSectionSeparator();
 
     void setValue(String key, Object value);
 
@@ -51,7 +57,7 @@ public interface OkaeriConfigurer {
         return this.getValue(key, String.class);
     }
 
-    void writeToFile(File file) throws IOException;
+    void writeToFile(File file, ConfigDeclaration declaration) throws IOException;
 
-    void loadFromFile(File file) throws IOException;
+    void loadFromFile(File file, ConfigDeclaration declaration) throws IOException;
 }
