@@ -1,22 +1,19 @@
 package eu.okaeri.configs.bukkit;
 
-import eu.okaeri.configs.ConfigUtil;
 import eu.okaeri.configs.Configurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
-import eu.okaeri.configs.serdes.SerializationData;
 import eu.okaeri.configs.transformer.TransformerRegistry;
+import eu.okaeri.configs.util.ConfigUtil;
 import lombok.AllArgsConstructor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 @AllArgsConstructor
 public class BukkitConfigurer extends Configurer {
@@ -36,17 +33,7 @@ public class BukkitConfigurer extends Configurer {
     @Override
     @SuppressWarnings("unchecked")
     public void setValue(String key, Object value) {
-
-        ObjectSerializer serializer = TransformerRegistry.getSerializer(value.getClass());
-        if (serializer == null) {
-            this.config.set(key, value);
-            return;
-        }
-
-        SerializationData serializationData = new SerializationData();
-        serializer.serialize(value, serializationData);
-
-        this.config.set(key, serializationData.asMap());
+        this.config.set(key, this.simplify(value));
     }
 
     @Override
@@ -89,7 +76,7 @@ public class BukkitConfigurer extends Configurer {
             return clazz.cast(serializer.deserialize(new DeserializationData(values), type));
         }
 
-        return super.resolveType(object, clazz, null);
+        return super.resolveType(object, clazz, type);
     }
 
     @Override
