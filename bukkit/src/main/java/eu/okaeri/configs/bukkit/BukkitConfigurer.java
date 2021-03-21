@@ -4,6 +4,10 @@ import eu.okaeri.configs.ConfigUtil;
 import eu.okaeri.configs.Configurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.DeserializationData;
+import eu.okaeri.configs.serdes.ObjectSerializer;
+import eu.okaeri.configs.serdes.SerializationData;
+import eu.okaeri.configs.transformer.TransformerRegistry;
 import lombok.AllArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -32,8 +36,19 @@ public class BukkitConfigurer extends Configurer {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void setValue(String key, Object value) {
-        this.config.set(key, value);
+
+        ObjectSerializer serializer = TransformerRegistry.getSerializer(value.getClass());
+        if (serializer == null) {
+            this.config.set(key, value);
+            return;
+        }
+
+        SerializationData serializationData = new SerializationData();
+        serializer.serialize(value, serializationData);
+
+        this.config.set(key, serializationData.asMap());
     }
 
     @Override
@@ -63,6 +78,17 @@ public class BukkitConfigurer extends Configurer {
             }
 
             return super.resolveType(map, clazz, type);
+        }
+
+        if (object instanceof MemorySection) {
+
+            ObjectSerializer serializer = TransformerRegistry.getSerializer(clazz);
+            if (serializer == null) {
+                return super.resolveType(object, clazz, null);
+            }
+
+            Map<String, Object> values = ((MemorySection) object).getValues(false);
+            return clazz.cast(serializer.deserialize(new DeserializationData(values), type));
         }
 
         return super.resolveType(object, clazz, null);

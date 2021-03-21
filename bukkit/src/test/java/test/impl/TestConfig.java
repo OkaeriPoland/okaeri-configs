@@ -7,6 +7,7 @@ import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.annotation.Header;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.bukkit.Location;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -38,9 +39,14 @@ public class TestConfig extends OkaeriConfig {
     @Comment({"Wiadomosci", "Messages"})
     private Map<String, String> messages = Collections.singletonMap("test", "testing");
 
+    @Comment("Test complex map 1")
     private Map<String, Map<String, Integer>> complexMap = Collections.singletonMap("aa", Collections.singletonMap("bb", 222));
 
+    @Comment("Test complex map 2")
     private Map<String, Map<Integer, String>> complexMap2 = Collections.singletonMap("bb", Collections.singletonMap(232, "aadda"));
+
+    @Comment("Spawn")
+    private Location spawn = new Location(null, 1, 2, 3, 4, 5);
 
     @Comment({"Poziomy", "levels"})
     private Map<Integer, String> levels = Collections.singletonMap(1, "aaaaaa");
