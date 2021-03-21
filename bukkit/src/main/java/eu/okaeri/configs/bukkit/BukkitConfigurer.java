@@ -9,16 +9,14 @@ import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
 import eu.okaeri.configs.transformer.TransformerRegistry;
 import lombok.AllArgsConstructor;
-import org.apache.commons.io.FileUtils;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 @AllArgsConstructor
 public class BukkitConfigurer extends Configurer {
@@ -108,7 +106,7 @@ public class BukkitConfigurer extends Configurer {
 
         this.config.save(file);
 
-        String data = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        String data = this.readFile(file);
         data = ConfigUtil.removeStartingWith(this.getCommentPrefix(), data);
         data = ConfigUtil.addCommentsToFields(this.getCommentPrefix(), this.getSectionSeparator(), data, declaration);
 
@@ -121,6 +119,22 @@ public class BukkitConfigurer extends Configurer {
         }
 
         output += data;
-        FileUtils.write(file, output, StandardCharsets.UTF_8);
+        this.writeFile(file, output);
+    }
+
+    private String readFile(File file) throws IOException {
+        StringBuilder fileContents = new StringBuilder((int) file.length());
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                fileContents.append(scanner.nextLine()).append("\n");
+            }
+            return fileContents.toString();
+        }
+    }
+
+    private void writeFile(File file, String text) throws FileNotFoundException {
+        try (PrintStream out = new PrintStream(new FileOutputStream(file))) {
+            out.print(text);
+        }
     }
 }
