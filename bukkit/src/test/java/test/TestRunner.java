@@ -55,6 +55,8 @@ public final class TestRunner {
         empty.set("elon-musk-2", "witam dziwniejsze\nhmmm hehe");
 
         empty.save();
+        empty.load();
+
         System.out.println(empty.get("elon-musk-2"));
     }
 

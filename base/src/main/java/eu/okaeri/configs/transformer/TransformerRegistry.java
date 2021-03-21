@@ -3,9 +3,7 @@ package eu.okaeri.configs.transformer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.ObjectSerializer;
-import eu.okaeri.configs.transformer.impl.StringToDoubleTransformer;
-import eu.okaeri.configs.transformer.impl.StringToFloatTransformer;
-import eu.okaeri.configs.transformer.impl.StringToIntegerTransformer;
+import eu.okaeri.configs.transformer.impl.*;
 import lombok.SneakyThrows;
 
 import java.util.Map;
@@ -17,9 +15,13 @@ public final class TransformerRegistry {
     private static final Map<Class<?>, ObjectSerializer> SERIALIZER_MAP = new ConcurrentHashMap<>();
 
     static {
+        register(new StringToBooleanTransformer());
+        register(new StringToByteTransformer());
+        register(new StringToCharacterTransformer());
         register(new StringToDoubleTransformer());
         register(new StringToFloatTransformer());
         register(new StringToIntegerTransformer());
+        register(new StringToLongTransformer());
     }
 
     public static void register(ObjectTransformer transformer) {

@@ -13,12 +13,8 @@ import java.io.IOException;
 
 public abstract class OkaeriConfig {
 
-    @Getter
-    @Setter
-    private File bindFile;
-    @Getter
-    @Setter
-    private Configurer configurer;
+    @Getter @Setter private File bindFile;
+    @Getter @Setter private Configurer configurer;
     private ConfigDeclaration declaration;
 
     public OkaeriConfig() {
