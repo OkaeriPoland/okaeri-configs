@@ -1,63 +1,84 @@
 package eu.okaeri.configs;
 
 import eu.okaeri.configs.schema.ConfigDeclaration;
+import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.transformer.ObjectTransformer;
+import eu.okaeri.configs.transformer.TransformerRegistry;
 
 import java.io.File;
 import java.io.IOException;
 
-public interface Configurer {
+public abstract class Configurer {
 
-    String getCommentPrefix();
+    public abstract String getCommentPrefix();
 
-    String getSectionSeparator();
+    public abstract String getSectionSeparator();
 
-    void setValue(String key, Object value);
+    public abstract void setValue(String key, Object value);
 
-    Object getValue(String key);
+    public abstract Object getValue(String key);
 
-    default <T> T getValue(String key, Class<T> clazz) {
+    public <T> T getValue(String key, Class<T> clazz, GenericsDeclaration genericType) {
         Object value = this.getValue(key);
         if (value == null) return null;
-        return clazz.cast(value);
+        return this.resolveType(value, clazz, genericType);
     }
 
-    default Byte getValueAsByte(String key) {
-        return this.getValue(key, Byte.class);
+    public <T> T resolveType(Object object, Class<T> clazz, GenericsDeclaration genericType) {
+
+        GenericsDeclaration source = new GenericsDeclaration(object.getClass());
+        GenericsDeclaration target = (genericType == null) ? new GenericsDeclaration(clazz) : genericType;
+
+        ObjectTransformer transformer = TransformerRegistry.getTransformer(source, target);
+        if (transformer == null) {
+            return clazz.cast(object);
+        }
+
+        //noinspection unchecked
+        return clazz.cast(transformer.transform(object));
     }
 
-    default Character getValueAsCharacter(String key) {
-        return this.getValue(key, Character.class);
+    public boolean keyExists(String key) {
+        return this.getValue(key) != null;
     }
 
-    default Short getValueAsShort(String key) {
-        return this.getValue(key, Short.class);
+    public Byte getValueAsByte(String key) {
+        return this.getValue(key, Byte.class, null);
     }
 
-    default Integer getValueAsInteger(String key) {
-        return this.getValue(key, Integer.class);
+    public Character getValueAsCharacter(String key) {
+        return this.getValue(key, Character.class, null);
     }
 
-    default Long getValueAsLong(String key) {
-        return this.getValue(key, Long.class);
+    public Short getValueAsShort(String key) {
+        return this.getValue(key, Short.class, null);
     }
 
-    default Float getValueAsFloat(String key) {
-        return this.getValue(key, Float.class);
+    public Integer getValueAsInteger(String key) {
+        return this.getValue(key, Integer.class, null);
     }
 
-    default Double getValueAsDouble(String key) {
-        return this.getValue(key, Double.class);
+    public Long getValueAsLong(String key) {
+        return this.getValue(key, Long.class, null);
     }
 
-    default Boolean getValueAsBoolean(String key) {
-        return this.getValue(key, Boolean.class);
+    public Float getValueAsFloat(String key) {
+        return this.getValue(key, Float.class, null);
     }
 
-    default String getValueAsString(String key) {
-        return this.getValue(key, String.class);
+    public Double getValueAsDouble(String key) {
+        return this.getValue(key, Double.class, null);
     }
 
-    void writeToFile(File file, ConfigDeclaration declaration) throws IOException;
+    public Boolean getValueAsBoolean(String key) {
+        return this.getValue(key, Boolean.class, null);
+    }
 
-    void loadFromFile(File file, ConfigDeclaration declaration) throws IOException;
+    public String getValueAsString(String key) {
+        return this.getValue(key, String.class, null);
+    }
+
+    public abstract void writeToFile(File file, ConfigDeclaration declaration) throws IOException;
+
+    public abstract void loadFromFile(File file, ConfigDeclaration declaration) throws IOException;
 }

@@ -2,6 +2,7 @@ package eu.okaeri.configs;
 
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
+import eu.okaeri.configs.schema.GenericsDeclaration;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +12,12 @@ import java.io.IOException;
 
 public abstract class OkaeriConfig {
 
-    @Getter @Setter private File bindFile;
-    @Getter @Setter private Configurer configurer;
+    @Getter
+    @Setter
+    private File bindFile;
+    @Getter
+    @Setter
+    private Configurer configurer;
     private ConfigDeclaration declaration;
 
     public OkaeriConfig() {
@@ -49,7 +54,13 @@ public abstract class OkaeriConfig {
         this.configurer.loadFromFile(this.bindFile, this.declaration);
 
         for (FieldDeclaration field : this.declaration.getFields()) {
-            Object value = this.configurer.getValue(field.getName(), field.getType());
+            String fieldName = field.getName();
+            if (!this.configurer.keyExists(fieldName)) {
+                continue;
+            }
+            GenericsDeclaration type = field.getType();
+            GenericsDeclaration genericType = field.getType();
+            Object value = this.configurer.getValue(fieldName, type.getType(), genericType);
             field.updateValue(value);
         }
     }
