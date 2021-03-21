@@ -31,9 +31,9 @@ public class BukkitConfigurer extends Configurer {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void setValue(String key, Object value) {
-        this.config.set(key, this.simplify(value));
+    public void setValue(String key, Object value, GenericsDeclaration type) {
+        Object simplified = this.simplify(value, type);
+        this.config.set(key, simplified);
     }
 
     @Override

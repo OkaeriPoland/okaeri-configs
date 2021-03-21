@@ -63,6 +63,7 @@ public final class TestRunner {
     @SneakyThrows
     private static void config() {
 
+        long start = System.currentTimeMillis();
         File bindFile = new File("config.yml");
         BukkitConfigurer configurer = new BukkitConfigurer(new YamlConfiguration());
 
@@ -75,11 +76,10 @@ public final class TestRunner {
         }
 
         config.load();
+        long took = System.currentTimeMillis() - start;
+        System.out.println(took + " ms");
+
         System.out.println(config);
-
-//        config.getWhitelist().add("127.0.0.2");
-//        System.out.println(config);
-
         config.save();
     }
 }

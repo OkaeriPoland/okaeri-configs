@@ -7,6 +7,7 @@ import lombok.Data;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Data
@@ -28,6 +29,25 @@ public class ConfigDeclaration {
                 .collect(Collectors.toList()));
 
         return declaration;
+    }
+
+    public Optional<FieldDeclaration> getField(String key) {
+        return this.fields.stream()
+                .filter(field -> field.getName().equals(key))
+                .findAny();
+    }
+
+    public GenericsDeclaration getFieldDeclarationOrNull(String key) {
+
+        Optional<FieldDeclaration> genericField = this.getField(key);
+        GenericsDeclaration genericType = null;
+
+        if (genericField.isPresent()) {
+            FieldDeclaration field = genericField.get();
+            genericType = field.getType();
+        }
+
+        return genericType;
     }
 
     private String[] header;
