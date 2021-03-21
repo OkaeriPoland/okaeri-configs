@@ -1,6 +1,8 @@
 package test;
 
 import eu.okaeri.configs.bukkit.BukkitConfigurer;
+import eu.okaeri.configs.bukkit.serdes.LocationSerializer;
+import eu.okaeri.configs.transformer.TransformerRegistry;
 import lombok.SneakyThrows;
 import org.bukkit.configuration.file.YamlConfiguration;
 import test.impl.TestConfig;
@@ -11,6 +13,8 @@ public final class TestRunner {
 
     @SneakyThrows
     public static void main(String[] args) {
+
+        TransformerRegistry.register(new LocationSerializer());
 
         File bindFile = new File("config.yml");
         BukkitConfigurer configurer = new BukkitConfigurer(new YamlConfiguration());
