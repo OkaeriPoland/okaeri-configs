@@ -42,42 +42,6 @@ public abstract class Configurer {
         return this.getValue(key) != null;
     }
 
-    public Byte getValueAsByte(String key) {
-        return this.getValue(key, Byte.class, null);
-    }
-
-    public Character getValueAsCharacter(String key) {
-        return this.getValue(key, Character.class, null);
-    }
-
-    public Short getValueAsShort(String key) {
-        return this.getValue(key, Short.class, null);
-    }
-
-    public Integer getValueAsInteger(String key) {
-        return this.getValue(key, Integer.class, null);
-    }
-
-    public Long getValueAsLong(String key) {
-        return this.getValue(key, Long.class, null);
-    }
-
-    public Float getValueAsFloat(String key) {
-        return this.getValue(key, Float.class, null);
-    }
-
-    public Double getValueAsDouble(String key) {
-        return this.getValue(key, Double.class, null);
-    }
-
-    public Boolean getValueAsBoolean(String key) {
-        return this.getValue(key, Boolean.class, null);
-    }
-
-    public String getValueAsString(String key) {
-        return this.getValue(key, String.class, null);
-    }
-
     public abstract void writeToFile(File file, ConfigDeclaration declaration) throws IOException;
 
     public abstract void loadFromFile(File file, ConfigDeclaration declaration) throws IOException;
