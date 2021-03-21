@@ -30,7 +30,7 @@ public class FieldDeclaration {
 
         declaration.setField(field);
         declaration.setObject(object);
-        declaration.setType(GenericsDeclaration.from(field.getGenericType().getTypeName()));
+        declaration.setType(GenericsDeclaration.from(field.getGenericType()));
         field.setAccessible(accessible);
 
         return declaration;

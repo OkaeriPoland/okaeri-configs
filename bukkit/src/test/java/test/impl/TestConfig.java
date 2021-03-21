@@ -10,9 +10,7 @@ import lombok.EqualsAndHashCode;
 import org.bukkit.Location;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -53,6 +51,21 @@ public class TestConfig extends OkaeriConfig {
 
     @Comment({"Nie edytuj tej wartosci", "Do not edit"})
     private Integer version = 2;
+
+    @Comment({"Test enum", "very nice", "right?"})
+    private TestEnum testEnum = TestEnum.ONE_THO_THREE;
+
+    @Comment("Test enum list")
+    private List<TestEnum> testEnumList = Arrays.asList(TestEnum.ONE, TestEnum.ONE_THO_THREE);
+
+    @Comment("Test enum set")
+    private Set<TestEnum> testEnumSet = new HashSet<>(Arrays.asList(TestEnum.ONE, TestEnum.ONE_THO_THREE));
+
+    @Comment("Test custom object list")
+    private List<Location> testLocationList = Arrays.asList(
+            new Location(null, 1, 2, 3, 4, 5),
+            new Location(null, 3, 3, 5, 6,9)
+    );
 
     @Exclude
     private Instant start = Instant.now();

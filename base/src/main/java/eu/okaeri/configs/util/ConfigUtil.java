@@ -1,4 +1,4 @@
-package eu.okaeri.configs;
+package eu.okaeri.configs.util;
 
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;

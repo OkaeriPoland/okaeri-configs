@@ -70,7 +70,10 @@ public final class TestRunner {
         config.setBindFile(bindFile);
         config.setConfigurer(configurer);
 
-        config.save();
+        if (!bindFile.exists()) {
+            config.save();
+        }
+
         config.load();
         System.out.println(config);
 

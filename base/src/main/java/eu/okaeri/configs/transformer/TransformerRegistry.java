@@ -3,6 +3,7 @@ package eu.okaeri.configs.transformer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.ObjectSerializer;
+import eu.okaeri.configs.serdes.SerializationData;
 import eu.okaeri.configs.transformer.impl.*;
 import lombok.SneakyThrows;
 
@@ -37,8 +38,26 @@ public final class TransformerRegistry {
         return TRANSFORMER_MAP.get(pair);
     }
 
+    public static boolean canTransform(Class<?> from, Class<?> to) {
+        return getTransformer(new GenericsDeclaration(from), new GenericsDeclaration(to)) != null;
+    }
+
     public static ObjectSerializer getSerializer(Class<?> clazz) {
         return SERIALIZER_MAP.get(clazz);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static SerializationData serializeOrNull(Object object) {
+
+        ObjectSerializer serializer = getSerializer(object.getClass());
+        if (serializer == null) {
+            return null;
+        }
+
+        SerializationData data = new SerializationData();
+        serializer.serialize(object, data);
+
+        return data;
     }
 
     @SneakyThrows
@@ -47,10 +66,6 @@ public final class TransformerRegistry {
 
         if (object == null) {
             return null;
-        }
-
-        if (object.getClass() == to) {
-            return (D) object;
         }
 
         try {

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,6 +12,10 @@ import java.util.stream.Collectors;
 @Data
 @AllArgsConstructor
 public class GenericsDeclaration {
+
+    public static GenericsDeclaration from(Type type) {
+        return from(type.getTypeName());
+    }
 
     @SneakyThrows
     public static GenericsDeclaration from(String typeName) {
