@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -21,6 +22,7 @@ public class ConfigDeclaration {
 
         declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
                 .map(field -> FieldDeclaration.from(field, config))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 
         return declaration;

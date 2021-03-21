@@ -54,7 +54,11 @@ public final class ConfigUtil {
                 String name = field.getName();
                 if (line.startsWith(name + ":")) {
                     buf.append(separator);
-                    buf.append(ConfigUtil.convertToComment(prefix, field.getComment(), true));
+                    String[] comment = field.getComment();
+                    if (comment == null) {
+                        continue;
+                    }
+                    buf.append(ConfigUtil.convertToComment(prefix, comment, true));
                 }
             }
             buf.append(line).append("\n");

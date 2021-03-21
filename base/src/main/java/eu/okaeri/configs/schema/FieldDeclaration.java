@@ -2,6 +2,7 @@ package eu.okaeri.configs.schema;
 
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Exclude;
 import lombok.Data;
 
 import java.lang.reflect.Field;
@@ -15,15 +16,21 @@ public class FieldDeclaration {
         boolean accessible = field.isAccessible();
         field.setAccessible(true);
 
-        CustomKey annotation = field.getAnnotation(CustomKey.class);
-        declaration.setName((((annotation == null) || "".equals(annotation.value())) ? field.getName() : annotation.value()));
+        if (field.getAnnotation(Exclude.class) != null) {
+            return null;
+        }
+
+        CustomKey customKey = field.getAnnotation(CustomKey.class);
+        declaration.setName((((customKey == null) || "".equals(customKey.value())) ? field.getName() : customKey.value()));
 
         Comment comment = field.getAnnotation(Comment.class);
-        declaration.setComment(comment.value());
+        if (comment != null) {
+            declaration.setComment(comment.value());
+        }
 
         declaration.setField(field);
         declaration.setObject(object);
-        declaration.setType(field.getType());
+        declaration.setType(GenericsDeclaration.from(field.getGenericType().getTypeName()));
         field.setAccessible(accessible);
 
         return declaration;
@@ -46,7 +53,7 @@ public class FieldDeclaration {
 
     private String name;
     private String[] comment;
-    private Class<?> type;
+    private GenericsDeclaration type;
 
     private Field field;
     private Object object;

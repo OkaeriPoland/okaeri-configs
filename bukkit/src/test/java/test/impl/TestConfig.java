@@ -3,10 +3,12 @@ package test.impl;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.annotation.Header;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,16 @@ public class TestConfig extends OkaeriConfig {
     @Comment({"Wiadomosci", "Messages"})
     private Map<String, String> messages = Collections.singletonMap("test", "testing");
 
+    private Map<String, Map<String, Integer>> complexMap = Collections.singletonMap("aa", Collections.singletonMap("bb", 222));
+
+    private Map<String, Map<Integer, String>> complexMap2 = Collections.singletonMap("bb", Collections.singletonMap(232, "aadda"));
+
+    @Comment({"Poziomy", "levels"})
+    private Map<Integer, String> levels = Collections.singletonMap(1, "aaaaaa");
+
     @Comment({"Nie edytuj tej wartosci", "Do not edit"})
     private Integer version = 2;
+
+    @Exclude
+    private Instant start = Instant.now();
 }
