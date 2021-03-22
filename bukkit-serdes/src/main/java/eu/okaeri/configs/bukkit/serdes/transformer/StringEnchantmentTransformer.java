@@ -1,7 +1,7 @@
 package eu.okaeri.configs.bukkit.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.transformer.TwoSideObjectTransformer;
+import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
 import org.bukkit.enchantments.Enchantment;
 
 public class StringEnchantmentTransformer extends TwoSideObjectTransformer<String, Enchantment> {

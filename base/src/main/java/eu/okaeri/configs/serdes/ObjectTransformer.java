@@ -1,4 +1,4 @@
-package eu.okaeri.configs.serdes.transformer;
+package eu.okaeri.configs.serdes;
 
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
@@ -6,13 +6,11 @@ import eu.okaeri.configs.schema.GenericsPair;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class TwoSideObjectTransformer<L, R> {
+public abstract class ObjectTransformer<S, D> {
 
     public abstract GenericsPair getPair();
 
-    public abstract R leftToRight(L data);
-
-    public abstract L rightToLeft(R data);
+    public abstract D transform(S data);
 
     protected GenericsPair generics(GenericsDeclaration from, GenericsDeclaration to) {
         return new GenericsPair(from, to);

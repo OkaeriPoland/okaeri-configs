@@ -1,7 +1,7 @@
 package eu.okaeri.configs.bukkit.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.transformer.TwoSideObjectTransformer;
+import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
