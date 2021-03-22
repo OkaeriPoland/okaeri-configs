@@ -7,21 +7,21 @@ import eu.okaeri.configs.bukkit.serdes.impl.PotionEffectSerializer;
 import eu.okaeri.configs.bukkit.serdes.transformer.StringEnchantmentTransformer;
 import eu.okaeri.configs.bukkit.serdes.transformer.StringWorldTransformer;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
-import eu.okaeri.configs.transformer.TransformerRegistry;
+import eu.okaeri.configs.serdes.transformer.TransformerRegistry;
 
 public class BukkitSerdes implements OkaeriSerdesPack {
 
     @Override
-    public void register() {
+    public void register(TransformerRegistry registry) {
 
         // serializer/deserializer
-        TransformerRegistry.register(new ItemMetaSerializer());
-        TransformerRegistry.register(new ItemStackSerializer());
-        TransformerRegistry.register(new LocationSerializer());
-        TransformerRegistry.register(new PotionEffectSerializer());
+        registry.register(new ItemMetaSerializer());
+        registry.register(new ItemStackSerializer());
+        registry.register(new LocationSerializer());
+        registry.register(new PotionEffectSerializer());
 
         // transformers
-        TransformerRegistry.register(new StringWorldTransformer());
-        TransformerRegistry.register(new StringEnchantmentTransformer());
+        registry.register(new StringWorldTransformer());
+        registry.register(new StringEnchantmentTransformer());
     }
 }
