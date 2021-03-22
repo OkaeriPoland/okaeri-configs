@@ -33,10 +33,7 @@ implementation 'eu.okaeri:okaeri-configs-bukkit:1.0.0'
 
 ## Usage
 
+Please use BukkitConfigurer as your configurer:
 ```java
-TestConfig config = (TestConfig) new TestConfig()
-    .withConfigurer(new BukkitConfigurer()) // specify configurer implementation
-    .withBindFile("config.yml") // specify File or pathname
-    .saveDefaults() // save file if does not exists
-    .load(true); // load and save to update comments/new fields
+new BukkitConfigurer()
 ```

@@ -79,3 +79,21 @@ public class TestConfig extends OkaeriConfig {
     /* ... */
 }
 ```
+
+## Usage
+```java
+TestConfig config = (TestConfig) new TestConfig()
+    .withConfigurer(new BukkitConfigurer()) // specify configurer implementation
+    .withBindFile("config.yml") // specify File or pathname
+    .saveDefaults() // save file if does not exists
+    .load(true); // load and save to update comments/new fields
+```
+
+## Supported types
+- Basic Java types: Boolean, Byte, Character, Double, Float, Integer, Long, String
+- Complex types:
+  - `Map<K, V>`: results in LinkedHashMap
+  - `Set<T>`: results in HashSet
+  - `List<T>`: results in ArrayList
+- Enum types: any enum is automatically transformed using `valueOf()` and `name()`
+- Custom types using `ObjectSerializer`/`ObjectTransformer` (see in supported platforms)
