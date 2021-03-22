@@ -1,11 +1,11 @@
 package eu.okaeri.configs.bukkit.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.transformer.ObjectTransformer;
+import eu.okaeri.configs.transformer.TwoSideObjectTransformer;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
-public class StringToWorldTransformer extends ObjectTransformer<String, World> {
+public class StringWorldTransformer extends TwoSideObjectTransformer<String, World> {
 
     @Override
     public GenericsPair getPair() {
@@ -13,7 +13,12 @@ public class StringToWorldTransformer extends ObjectTransformer<String, World> {
     }
 
     @Override
-    public World transform(String data) {
+    public World leftToRight(String data) {
         return Bukkit.getWorld(data);
+    }
+
+    @Override
+    public String rightToLeft(World data) {
+        return data.getName();
     }
 }

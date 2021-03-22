@@ -2,8 +2,13 @@ package eu.okaeri.example;
 
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.*;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -76,6 +81,15 @@ public class ExampleConfig extends OkaeriConfig {
 
     @Comment("Math test")
     private BigInteger bigInteger = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999876543210");
+
+    @Comment("ItemStack test")
+    private ItemStack itemStack; {
+        this.itemStack = new ItemStack(Material.STONE_SWORD, 10);
+        ItemMeta meta = this.itemStack.getItemMeta();
+        meta.setDisplayName(ChatColor.RED + "Color Name");
+        meta.addEnchant(Enchantment.DAMAGE_ALL, 3, false);
+        this.itemStack.setItemMeta(meta);
+    }
 
     @Exclude
     private Instant start = Instant.now();

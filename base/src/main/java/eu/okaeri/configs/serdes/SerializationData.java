@@ -3,10 +3,7 @@ package eu.okaeri.configs.serdes;
 import eu.okaeri.configs.Configurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SerializationData {
 
@@ -35,6 +32,13 @@ public class SerializationData {
     public <T> void addCollection(String key, Collection<?> collection, Class<T> collectionClazz) {
         GenericsDeclaration genericType = new GenericsDeclaration(collection.getClass(), Collections.singletonList(new GenericsDeclaration(collectionClazz)));
         Object object = this.configurer.simplifyCollection(collection, genericType);
+        this.data.put(key, object);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <K, V> void addAsMap(String key, Map<K, V> map, Class<K> keyClazz, Class<V> valueClazz) {
+        GenericsDeclaration genericType = new GenericsDeclaration(map.getClass(), Arrays.asList(new GenericsDeclaration(keyClazz), new GenericsDeclaration(valueClazz)));
+        Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType);
         this.data.put(key, object);
     }
 

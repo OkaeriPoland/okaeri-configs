@@ -36,6 +36,32 @@ public final class TransformerRegistry {
         TRANSFORMER_MAP.put(transformer.getPair(), transformer);
     }
 
+    @SuppressWarnings("unchecked")
+    public static void register(TwoSideObjectTransformer transformer) {
+        register(new ObjectTransformer() {
+            @Override
+            public GenericsPair getPair() {
+                return transformer.getPair();
+            }
+
+            @Override
+            public Object transform(Object data) {
+                return transformer.leftToRight(data);
+            }
+        });
+        register(new ObjectTransformer() {
+            @Override
+            public GenericsPair getPair() {
+                return transformer.getPair().reverse();
+            }
+
+            @Override
+            public Object transform(Object data) {
+                return transformer.rightToLeft(data);
+            }
+        });
+    }
+
     public static void registerWithReversedToString(ObjectTransformer transformer) {
         TRANSFORMER_MAP.put(transformer.getPair(), transformer);
         TRANSFORMER_MAP.put(transformer.getPair().reverse(), new ObjectToStringTransformer());
