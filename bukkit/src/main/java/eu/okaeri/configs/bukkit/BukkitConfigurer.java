@@ -55,13 +55,13 @@ public class BukkitConfigurer extends Configurer {
     }
 
     @Override
-    public <T> T resolveType(Object object, Class<T> clazz, GenericsDeclaration type) {
+    public <T> T resolveType(Object object, Class<T> clazz, GenericsDeclaration genericTarget) {
 
         if ((object instanceof MemorySection) && (clazz == Map.class)) {
 
             Map<String, Object> values = ((MemorySection) object).getValues(false);
-            GenericsDeclaration keyDeclaration = type.getSubtype().get(0);
-            GenericsDeclaration valueDeclaration = type.getSubtype().get(1);
+            GenericsDeclaration keyDeclaration = genericTarget.getSubtype().get(0);
+            GenericsDeclaration valueDeclaration = genericTarget.getSubtype().get(1);
             Map<Object, Object> map = new LinkedHashMap<>();
 
             for (Map.Entry<String, Object> entry : values.entrySet()) {
@@ -70,7 +70,7 @@ public class BukkitConfigurer extends Configurer {
                 map.put(key, value);
             }
 
-            return super.resolveType(map, clazz, type);
+            return super.resolveType(map, clazz, genericTarget);
         }
 
         if (object instanceof MemorySection) {
@@ -81,10 +81,10 @@ public class BukkitConfigurer extends Configurer {
             }
 
             Map<String, Object> values = ((MemorySection) object).getValues(false);
-            return clazz.cast(serializer.deserialize(new DeserializationData(values), type));
+            return clazz.cast(serializer.deserialize(new DeserializationData(values, this), genericTarget));
         }
 
-        return super.resolveType(object, clazz, type);
+        return super.resolveType(object, clazz, genericTarget);
     }
 
     @Override

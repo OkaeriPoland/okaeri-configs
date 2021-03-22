@@ -1,5 +1,7 @@
 # Okaeri Configs | Bukkit
 
+Example plugin is available in [bukkit-example](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit-example).
+
 ## Installation
 ### Maven
 Add repository to the `repositories` section:
@@ -14,7 +16,15 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-bukkit</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.1</version>
+</dependency>
+```
+Additionally if you want to serialize/deserialize [supported bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit-serdes):
+```xml
+<dependency>
+  <groupId>eu.okaeri</groupId>
+  <artifactId>okaeri-configs-bukkit-serdes</artifactId>
+  <version>1.2.1</version>
 </dependency>
 ```
 ### Gradle
@@ -24,7 +34,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-bukkit:1.1.1'
+implementation 'eu.okaeri:okaeri-configs-bukkit:1.2.1'
 ```
 
 ## Limitations
@@ -36,4 +46,8 @@ implementation 'eu.okaeri:okaeri-configs-bukkit:1.1.1'
 Please use BukkitConfigurer as your configurer:
 ```java
 new BukkitConfigurer()
+```
+For [serializers/deserializers/transformers](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit-serdes) use:
+```java
+new BukkitSerdes()
 ```

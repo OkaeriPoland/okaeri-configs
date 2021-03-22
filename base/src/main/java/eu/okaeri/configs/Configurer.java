@@ -25,7 +25,11 @@ public abstract class Configurer {
     public abstract Object getValue(String key);
 
     public boolean isToStringObject(Object object) {
-        return object.getClass().isEnum() || TransformerRegistry.canTransform(object.getClass(), String.class);
+        if (object instanceof Class) {
+            Class<?> clazzObject = (Class<?>) object;
+            return clazzObject.isEnum() || TransformerRegistry.canTransform(clazzObject, String.class);
+        }
+        return object.getClass().isEnum() || this.isToStringObject(object.getClass());
     }
 
     @SuppressWarnings("unchecked")
@@ -36,7 +40,7 @@ public abstract class Configurer {
 
         for (Object collectionElement : value) {
 
-            SerializationData serialized = TransformerRegistry.serializeOrNull(collectionElement);
+            SerializationData serialized = TransformerRegistry.serializeOrNull(collectionElement, this);
             if (serialized == null) {
                 collection.add(this.simplify(collectionElement, collectionSubtype));
                 continue;
@@ -67,11 +71,17 @@ public abstract class Configurer {
     @SuppressWarnings("unchecked")
     public Object simplify(Object value, GenericsDeclaration genericType) {
 
-        ObjectSerializer serializer = TransformerRegistry.getSerializer(value.getClass());
+        if (value == null) {
+            return null;
+        }
+
+        Class<?> serializerType = (genericType != null) ? genericType.getType() : value.getClass();
+        ObjectSerializer serializer = TransformerRegistry.getSerializer(serializerType);
+
         if (serializer == null) {
 
-            if (this.isToStringObject(value)) {
-                return this.resolveType(value, String.class, null);
+            if (this.isToStringObject(serializerType)) {
+                return this.resolveType(value, genericType, String.class, null);
             }
 
             if (value instanceof Collection) {
@@ -82,11 +92,11 @@ public abstract class Configurer {
                 return this.simplifyMap((Map<Object, Object>) value, genericType);
             }
 
-            throw new IllegalArgumentException("cannot simplify type " + value.getClass() + ": " + value);
+            throw new IllegalArgumentException("cannot simplify type " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
             // return value; // - disallow unprocessed fallback (strict mode)
         }
 
-        SerializationData serializationData = new SerializationData();
+        SerializationData serializationData = new SerializationData(this);
         serializer.serialize(value, serializationData);
 
         return serializationData.asMap();
@@ -100,10 +110,25 @@ public abstract class Configurer {
 
     @SneakyThrows
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, Class<T> clazz, GenericsDeclaration genericType) {
+    public <T> T resolveType(Object object, Class<T> clazz, GenericsDeclaration genericTarget) {
 
-        GenericsDeclaration source = new GenericsDeclaration(object.getClass());
-        GenericsDeclaration target = (genericType == null) ? new GenericsDeclaration(clazz) : genericType;
+        if (object == null) {
+            return null;
+        }
+
+        return this.resolveType(object, new GenericsDeclaration(object.getClass()), clazz, genericTarget);
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> clazz, GenericsDeclaration genericTarget) {
+
+        if (object == null) {
+            return null;
+        }
+
+        GenericsDeclaration source = (genericSource == null) ? new GenericsDeclaration(object.getClass()) : genericSource;
+        GenericsDeclaration target = (genericTarget == null) ? new GenericsDeclaration(clazz) : genericTarget;
 
         // enums
         if ((object instanceof String) && clazz.isEnum()) {
@@ -120,20 +145,20 @@ public abstract class Configurer {
         // deserialization
         ObjectSerializer objectSerializer = TransformerRegistry.getSerializer(clazz);
         if ((object instanceof Map) && (objectSerializer != null)) {
-            DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object);
-            Object deserialized = objectSerializer.deserialize(deserializationData, genericType);
+            DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, this);
+            Object deserialized = objectSerializer.deserialize(deserializationData, genericTarget);
             return clazz.cast(deserialized);
         }
 
         // generics
-        if (genericType != null) {
+        if (genericTarget != null) {
 
             // collections
             if ((object instanceof Collection) && (clazz == List.class)) {
 
                 Collection<?> sourceList = (Collection<?>) object;
                 List<Object> targetList = new ArrayList<>();
-                GenericsDeclaration listDeclaration = genericType.getSubtype().get(0);
+                GenericsDeclaration listDeclaration = genericTarget.getSubtype().get(0);
 
                 for (Object item : sourceList) {
                     Object converted = this.resolveType(item, listDeclaration.getType(), listDeclaration);
@@ -147,7 +172,7 @@ public abstract class Configurer {
 
                 Collection<?> sourceList = (Collection<?>) object;
                 Set<Object> targetList = new HashSet<>();
-                GenericsDeclaration listDeclaration = genericType.getSubtype().get(0);
+                GenericsDeclaration listDeclaration = genericTarget.getSubtype().get(0);
 
                 for (Object item : sourceList) {
                     Object converted = this.resolveType(item, listDeclaration.getType(), listDeclaration);
@@ -161,8 +186,8 @@ public abstract class Configurer {
             if ((object instanceof Map) && (clazz == Map.class)) {
 
                 Map<Object, Object> values = ((Map<Object, Object>) object);
-                GenericsDeclaration keyDeclaration = genericType.getSubtype().get(0);
-                GenericsDeclaration valueDeclaration = genericType.getSubtype().get(1);
+                GenericsDeclaration keyDeclaration = genericTarget.getSubtype().get(0);
+                GenericsDeclaration valueDeclaration = genericTarget.getSubtype().get(1);
                 Map<Object, Object> map = new LinkedHashMap<>();
 
                 for (Map.Entry<Object, Object> entry : values.entrySet()) {

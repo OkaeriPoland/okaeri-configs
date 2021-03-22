@@ -3,12 +3,14 @@ package eu.okaeri.configs;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 
 public abstract class OkaeriConfig {
@@ -23,6 +25,17 @@ public abstract class OkaeriConfig {
 
     public OkaeriConfig withConfigurer(Configurer configurer) {
         this.configurer = configurer;
+        return this;
+    }
+
+    public OkaeriConfig withConfigurer(Configurer configurer, OkaeriSerdesPack... serdesPack) {
+        this.configurer = configurer;
+        Arrays.stream(serdesPack).forEach(OkaeriSerdesPack::register);
+        return this;
+    }
+
+    public OkaeriConfig withSerdesPack(OkaeriSerdesPack serdesPack) {
+        serdesPack.register();
         return this;
     }
 

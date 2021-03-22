@@ -2,7 +2,6 @@ package test;
 
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.bukkit.BukkitConfigurer;
-import eu.okaeri.configs.bukkit.serdes.LocationSerializer;
 import eu.okaeri.configs.transformer.TransformerRegistry;
 import lombok.SneakyThrows;
 import org.bukkit.configuration.file.YamlConfiguration;
