@@ -1,10 +1,7 @@
 package test.impl;
 
 import eu.okaeri.configs.OkaeriConfig;
-import eu.okaeri.configs.annotation.Comment;
-import eu.okaeri.configs.annotation.CustomKey;
-import eu.okaeri.configs.annotation.Exclude;
-import eu.okaeri.configs.annotation.Header;
+import eu.okaeri.configs.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.bukkit.Location;
@@ -26,6 +23,7 @@ import java.util.*;
 @Header("#    https://wiki.okaeri.eu/en/services/noproxy/minecraft      #")
 @Header("#                                                              #")
 @Header("################################################################")
+@Names(strategy = NameStrategy.SNAKE_CASE, modifier = NameModifier.TO_LOWER_CASE)
 public class TestConfig extends OkaeriConfig {
 
     @Comment({"Klucz prywatny API", "API secret"})
@@ -45,7 +43,7 @@ public class TestConfig extends OkaeriConfig {
     private Map<String, Map<Integer, String>> complexMap2 = Collections.singletonMap("bb", Collections.singletonMap(232, "aadda"));
 
     @Comment("Spawn")
-    private Location spawn = new Location(null, 1, 2, 3, 4, 5);
+    private Location spawnLOC = new Location(null, 1, 2, 3, 4, 5);
 
     @Comment({"Poziomy", "levels"})
     private Map<Integer, String> levels = Collections.singletonMap(1, "aaaaaa");
@@ -72,10 +70,10 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Uber-complex-map test")
     private Map<TestEnum, Location> enumToLocationMap = Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5));
 
-    @CustomKey("complex-map")
+    @CustomKey("list-to-uber-complex-map")
     @Comment("List-to-Uber-complex-map test")
     private List<Map<TestEnum, Location>> listMapEnumToLocationMap = Arrays.asList(
-            Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5)),
+            Collections.singletonMap(TestEnum.THREE, new Location(null, 331, 2, 3, 4, 5)),
             Collections.singletonMap(TestEnum.ONE_THO_THREE, new Location(null, 3, 2, 3, 4, 5))
     );
 

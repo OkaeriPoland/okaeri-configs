@@ -1,20 +1,18 @@
 package eu.okaeri.configs.schema;
 
-import eu.okaeri.configs.annotation.Comment;
-import eu.okaeri.configs.annotation.Comments;
-import eu.okaeri.configs.annotation.CustomKey;
-import eu.okaeri.configs.annotation.Exclude;
+import eu.okaeri.configs.annotation.*;
 import lombok.Data;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 @Data
 public class FieldDeclaration {
 
-    public static FieldDeclaration from(Field field, Object object) {
+    public static FieldDeclaration from(ConfigDeclaration config, Field field, Object object) {
 
         FieldDeclaration declaration = new FieldDeclaration();
         boolean accessible = field.isAccessible();
@@ -25,7 +23,25 @@ public class FieldDeclaration {
         }
 
         CustomKey customKey = field.getAnnotation(CustomKey.class);
-        declaration.setName((((customKey == null) || "".equals(customKey.value())) ? field.getName() : customKey.value()));
+        if (customKey != null) {
+            declaration.setName("".equals(customKey.value()) ? field.getName() : customKey.value());
+        } else if (config.getNameStrategy() != null) {
+
+            Names nameStrategy = config.getNameStrategy();
+            NameStrategy strategy = nameStrategy.strategy();
+            NameModifier modifier = nameStrategy.modifier();
+
+            String name = strategy.getRegex().matcher(field.getName()).replaceAll(strategy.getReplacement());
+            if (modifier == NameModifier.TO_UPPER_CASE) {
+                name = name.toUpperCase(Locale.ROOT);
+            } else if (modifier == NameModifier.TO_LOWER_CASE){
+                name = name.toLowerCase(Locale.ROOT);
+            }
+
+            declaration.setName(name);
+        } else {
+            declaration.setName(field.getName());
+        }
 
         declaration.setComment(readComments(field));
         declaration.setField(field);

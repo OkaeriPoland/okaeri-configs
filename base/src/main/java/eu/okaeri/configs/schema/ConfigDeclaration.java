@@ -3,6 +3,7 @@ package eu.okaeri.configs.schema;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Header;
 import eu.okaeri.configs.annotation.Headers;
+import eu.okaeri.configs.annotation.Names;
 import lombok.Data;
 
 import java.util.*;
@@ -16,9 +17,10 @@ public class ConfigDeclaration {
         ConfigDeclaration declaration = new ConfigDeclaration();
         Class<? extends OkaeriConfig> clazz = config.getClass();
 
+        declaration.setNameStrategy(clazz.getAnnotation(Names.class));
         declaration.setHeader(readHeader(clazz));
         declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
-                .map(field -> FieldDeclaration.from(field, config))
+                .map(field -> FieldDeclaration.from(declaration, field, config))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 
@@ -63,6 +65,7 @@ public class ConfigDeclaration {
         return genericType;
     }
 
+    private Names nameStrategy;
     private String[] header;
     private List<FieldDeclaration> fields;
 }

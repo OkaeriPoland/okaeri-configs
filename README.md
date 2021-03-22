@@ -2,7 +2,7 @@
 
 Currently supported platforms:
 
-- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit) [~40kB]
+- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit) [~50kB]
 
 ## Genesis
 
@@ -16,7 +16,6 @@ Okaeri's configuration library is an easy way to use java classes as config adap
 ## Example
 
 ```java
-
 @Header("################################################################")
 @Header("#                                                              #")
 @Header("#    okaeri-configs test                                       #")
@@ -28,6 +27,7 @@ Okaeri's configuration library is an easy way to use java classes as config adap
 @Header("#    https://github.com/OkaeriPoland/okaeri-configs            #")
 @Header("#                                                              #")
 @Header("################################################################")
+@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
 public class TestConfig extends OkaeriConfig {
 
     @Comment({"Klucz prywatny API", "API secret"})
@@ -74,7 +74,7 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Uber-complex-map test")
     private Map<TestEnum, Location> enumToLocationMap = Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5));
 
-    @CustomKey("complex-map")
+    @CustomKey("list-to-uber-complex-map")
     @Comment("List-to-Uber-complex-map test")
     private List<Map<TestEnum, Location>> listMapEnumToLocationMap = Arrays.asList(
             Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5)),
