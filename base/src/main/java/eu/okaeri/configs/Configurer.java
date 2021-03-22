@@ -2,11 +2,9 @@ package eu.okaeri.configs;
 
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import eu.okaeri.configs.serdes.DeserializationData;
-import eu.okaeri.configs.serdes.ObjectSerializer;
-import eu.okaeri.configs.serdes.SerializationData;
-import eu.okaeri.configs.transformer.ObjectTransformer;
-import eu.okaeri.configs.transformer.TransformerRegistry;
+import eu.okaeri.configs.serdes.*;
+import eu.okaeri.configs.serdes.transformer.ObjectTransformer;
+import eu.okaeri.configs.serdes.transformer.TransformerRegistry;
 import lombok.SneakyThrows;
 
 import java.io.File;
@@ -15,6 +13,22 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public abstract class Configurer {
+
+    private TransformerRegistry registry = new TransformerRegistry(); {
+        this.registry.register(new DefaultSerdes());
+    }
+
+    public void setRegistry(TransformerRegistry registry) {
+        this.registry = registry;
+    }
+
+    public TransformerRegistry getRegistry() {
+        return this.registry;
+    }
+
+    public void register(OkaeriSerdesPack pack) {
+        this.registry.register(pack);
+    }
 
     public abstract String getCommentPrefix();
 
@@ -27,7 +41,7 @@ public abstract class Configurer {
     public boolean isToStringObject(Object object) {
         if (object instanceof Class) {
             Class<?> clazzObject = (Class<?>) object;
-            return clazzObject.isEnum() || TransformerRegistry.canTransform(clazzObject, String.class);
+            return clazzObject.isEnum() || this.registry.canTransform(clazzObject, String.class);
         }
         return object.getClass().isEnum() || this.isToStringObject(object.getClass());
     }
@@ -40,7 +54,7 @@ public abstract class Configurer {
 
         for (Object collectionElement : value) {
 
-            SerializationData serialized = TransformerRegistry.serializeOrNull(collectionElement, this);
+            SerializationData serialized = this.registry.serializeOrNull(collectionElement, this);
             if (serialized == null) {
                 collection.add(this.simplify(collectionElement, collectionSubtype));
                 continue;
@@ -76,7 +90,7 @@ public abstract class Configurer {
         }
 
         Class<?> serializerType = (genericType != null) ? genericType.getType() : value.getClass();
-        ObjectSerializer serializer = TransformerRegistry.getSerializer(serializerType);
+        ObjectSerializer serializer = this.registry.getSerializer(serializerType);
 
         if (serializer == null) {
 
@@ -143,7 +157,7 @@ public abstract class Configurer {
         }
 
         // deserialization
-        ObjectSerializer objectSerializer = TransformerRegistry.getSerializer(clazz);
+        ObjectSerializer objectSerializer = this.registry.getSerializer(clazz);
         if ((object instanceof Map) && (objectSerializer != null)) {
             DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, this);
             Object deserialized = objectSerializer.deserialize(deserializationData, genericTarget);
@@ -201,7 +215,7 @@ public abstract class Configurer {
         }
 
         // basic transformer
-        ObjectTransformer transformer = TransformerRegistry.getTransformer(source, target);
+        ObjectTransformer transformer = this.registry.getTransformer(source, target);
         if (transformer == null) {
             return clazz.cast(object);
         }

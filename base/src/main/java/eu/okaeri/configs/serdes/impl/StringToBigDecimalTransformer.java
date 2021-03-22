@@ -1,7 +1,7 @@
-package eu.okaeri.configs.transformer.impl;
+package eu.okaeri.configs.serdes.impl;
 
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.transformer.ObjectTransformer;
+import eu.okaeri.configs.serdes.transformer.ObjectTransformer;
 
 import java.math.BigDecimal;
 

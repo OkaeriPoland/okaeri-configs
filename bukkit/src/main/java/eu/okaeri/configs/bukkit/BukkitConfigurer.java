@@ -5,7 +5,6 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
-import eu.okaeri.configs.transformer.TransformerRegistry;
 import eu.okaeri.configs.util.ConfigUtil;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
@@ -75,7 +74,7 @@ public class BukkitConfigurer extends Configurer {
 
         if (object instanceof MemorySection) {
 
-            ObjectSerializer serializer = TransformerRegistry.getSerializer(clazz);
+            ObjectSerializer serializer = this.getRegistry().getSerializer(clazz);
             if (serializer == null) {
                 return super.resolveType(object, clazz, null);
             }

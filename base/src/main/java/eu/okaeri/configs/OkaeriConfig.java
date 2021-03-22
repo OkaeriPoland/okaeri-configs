@@ -30,12 +30,12 @@ public abstract class OkaeriConfig {
 
     public OkaeriConfig withConfigurer(Configurer configurer, OkaeriSerdesPack... serdesPack) {
         this.configurer = configurer;
-        Arrays.stream(serdesPack).forEach(OkaeriSerdesPack::register);
+        Arrays.stream(serdesPack).forEach(this.configurer::register);
         return this;
     }
 
     public OkaeriConfig withSerdesPack(OkaeriSerdesPack serdesPack) {
-        serdesPack.register();
+        this.configurer.register(serdesPack);
         return this;
     }
 
