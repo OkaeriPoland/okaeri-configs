@@ -2,12 +2,10 @@ package eu.okaeri.configs.schema;
 
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Header;
+import eu.okaeri.configs.annotation.Headers;
 import lombok.Data;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -18,17 +16,32 @@ public class ConfigDeclaration {
         ConfigDeclaration declaration = new ConfigDeclaration();
         Class<? extends OkaeriConfig> clazz = config.getClass();
 
-        Header header = clazz.getAnnotation(Header.class);
-        if (header != null) {
-            declaration.setHeader(header.value());
-        }
-
+        declaration.setHeader(readHeader(clazz));
         declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
                 .map(field -> FieldDeclaration.from(field, config))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 
         return declaration;
+    }
+
+    private static String[] readHeader(Class<?> clazz) {
+
+        Headers headers = clazz.getAnnotation(Headers.class);
+        if (headers != null) {
+            List<String> headerList = new ArrayList<>();
+            for (Header header : headers.value()) {
+                headerList.addAll(Arrays.asList(header.value()));
+            }
+            return headerList.toArray(new String[0]);
+        }
+
+        Header header = clazz.getAnnotation(Header.class);
+        if (header != null) {
+            return header.value();
+        }
+
+        return null;
     }
 
     public Optional<FieldDeclaration> getField(String key) {
