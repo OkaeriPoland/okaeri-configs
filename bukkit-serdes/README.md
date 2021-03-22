@@ -15,8 +15,8 @@ Serializers/Deserializers/Transformers for Bukkit types. See [bukkit](https://gi
 
 ### Transformers
 
-| Side | Side |
+| Side | Side | Type |
 |-|-|
-| java.lang.String | org.bukkit.enchantments.Enchantment |
-| java.lang.String | org.bukkit.potion.PotionEffectType |
-| java.lang.String | org.bukkit.World |
+| java.lang.String | org.bukkit.enchantments.Enchantment | Two-side |
+| java.lang.String | org.bukkit.potion.PotionEffectType | Two-side |
+| java.lang.String | org.bukkit.World | Two-side |
