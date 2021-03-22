@@ -21,6 +21,34 @@ public abstract class OkaeriConfig {
         this.declaration = ConfigDeclaration.from(this);
     }
 
+    public OkaeriConfig withConfigurer(Configurer configurer) {
+        this.configurer = configurer;
+        return this;
+    }
+
+    public OkaeriConfig withBindFile(File bindFile) {
+        this.bindFile = bindFile;
+        return this;
+    }
+
+    public OkaeriConfig withBindFile(String pathname) {
+        this.bindFile = new File(pathname);
+        return this;
+    }
+
+    public OkaeriConfig saveDefaults() throws IOException, IllegalAccessException {
+
+        if (this.bindFile == null) {
+            throw new IllegalAccessException("bindFile cannot be null");
+        }
+
+        if (this.bindFile.exists()) {
+            return this;
+        }
+
+        return this.save();
+    }
+
     @SneakyThrows
     public void set(String key, Object value) {
         if (this.configurer == null) {
@@ -45,7 +73,7 @@ public abstract class OkaeriConfig {
         return this.configurer.getValue(key, clazz, null);
     }
 
-    public void save() throws IllegalAccessException, IOException {
+    public OkaeriConfig save() throws IllegalAccessException, IOException {
 
         if (this.bindFile == null) {
             throw new IllegalAccessException("bindFile cannot be null");
@@ -60,9 +88,18 @@ public abstract class OkaeriConfig {
         }
 
         this.configurer.writeToFile(this.bindFile, this.declaration);
+        return this;
     }
 
-    public void load() throws IllegalAccessException, IOException {
+    public OkaeriConfig load(boolean update) throws IllegalAccessException, IOException {
+        this.load();
+        if (update) {
+            this.save();
+        }
+        return this;
+    }
+
+    public OkaeriConfig load() throws IllegalAccessException, IOException {
 
         if (this.bindFile == null) {
             throw new IllegalAccessException("bindFile cannot be null");
@@ -84,5 +121,7 @@ public abstract class OkaeriConfig {
             Object value = this.configurer.getValue(fieldName, type.getType(), genericType);
             field.updateValue(value);
         }
+
+        return this;
     }
 }

@@ -34,25 +34,9 @@ implementation 'eu.okaeri:okaeri-configs-bukkit:1.0.0'
 ## Usage
 
 ```java
-final class Demo {
-    public static void main(String[] args) {
-
-        // prepare bindFile, configurer
-        File bindFile = new File("config.yml");
-        BukkitConfigurer configurer = new BukkitConfigurer(new YamlConfiguration());
-
-        // attach properties to config implementation
-        TestConfig config = new TestConfig();
-        config.setBindFile(bindFile);
-        config.setConfigurer(configurer);
-
-        // save defaults if file does not exists
-        if (!bindFile.exists()) {
-            config.save();
-        }
-
-        // load from file
-        config.load();
-    }
-}
+TestConfig config = (TestConfig) new TestConfig()
+    .withConfigurer(new BukkitConfigurer()) // specify configurer implementation
+    .withBindFile("config.yml") // specify File or pathname
+    .saveDefaults() // save file if does not exists
+    .load(true); // load and save to update comments/new fields
 ```

@@ -7,18 +7,26 @@ import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.transformer.TransformerRegistry;
 import eu.okaeri.configs.util.ConfigUtil;
-import lombok.AllArgsConstructor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Scanner;
 
-@AllArgsConstructor
 public class BukkitConfigurer extends Configurer {
 
     private YamlConfiguration config;
+
+    public BukkitConfigurer() {
+        this(new YamlConfiguration());
+    }
+
+    public BukkitConfigurer(YamlConfiguration config) {
+        this.config = config;
+    }
 
     @Override
     public String getCommentPrefix() {
