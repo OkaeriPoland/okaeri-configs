@@ -16,17 +16,28 @@ public final class TransformerRegistry {
     private static final Map<Class<?>, ObjectSerializer> SERIALIZER_MAP = new ConcurrentHashMap<>();
 
     static {
-        register(new StringToBooleanTransformer());
-        register(new StringToByteTransformer());
-        register(new StringToCharacterTransformer());
-        register(new StringToDoubleTransformer());
-        register(new StringToFloatTransformer());
-        register(new StringToIntegerTransformer());
-        register(new StringToLongTransformer());
+        register(new ObjectToStringTransformer());
+        register(new StringToStringTransformer());
+
+        registerWithReversedToString(new StringToBigDecimalTransformer());
+        registerWithReversedToString(new StringToBigIntegerTransformer());
+        registerWithReversedToString(new StringToBooleanTransformer());
+        registerWithReversedToString(new StringToByteTransformer());
+        registerWithReversedToString(new StringToCharacterTransformer());
+        registerWithReversedToString(new StringToDoubleTransformer());
+        registerWithReversedToString(new StringToFloatTransformer());
+        registerWithReversedToString(new StringToIntegerTransformer());
+        registerWithReversedToString(new StringToLongTransformer());
+        registerWithReversedToString(new StringToShortTransformer());
     }
 
     public static void register(ObjectTransformer transformer) {
         TRANSFORMER_MAP.put(transformer.getPair(), transformer);
+    }
+
+    public static void registerWithReversedToString(ObjectTransformer transformer) {
+        TRANSFORMER_MAP.put(transformer.getPair(), transformer);
+        TRANSFORMER_MAP.put(transformer.getPair().reverse(), new ObjectToStringTransformer());
     }
 
     public static void register(ObjectSerializer serializer) {

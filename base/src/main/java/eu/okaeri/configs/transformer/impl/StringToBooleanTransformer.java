@@ -3,7 +3,7 @@ package eu.okaeri.configs.transformer.impl;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.transformer.ObjectTransformer;
 
-public class StringToBooleanTransformer implements ObjectTransformer<String, Boolean> {
+public class StringToBooleanTransformer extends ObjectTransformer<String, Boolean> {
 
     @Override
     public GenericsPair getPair() {

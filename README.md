@@ -90,7 +90,8 @@ TestConfig config = (TestConfig) new TestConfig()
 ```
 
 ## Supported types
-- Basic Java types: Boolean, Byte, Character, Double, Float, Integer, Long, String
+- Basic Java types: Boolean, Byte, Character, Double, Float, Integer, Long, Short, String
+- Math types: `java.math.BigInteger`, `java.math.BigDecimal`
 - Complex types:
   - `Map<K, V>`: results in LinkedHashMap
   - `Set<T>`: results in HashSet
