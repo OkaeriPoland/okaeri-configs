@@ -64,18 +64,13 @@ public final class TestRunner {
     private static void config() {
 
         long start = System.currentTimeMillis();
-        File bindFile = new File("config.yml");
-        BukkitConfigurer configurer = new BukkitConfigurer(new YamlConfiguration());
 
-        TestConfig config = new TestConfig();
-        config.setBindFile(bindFile);
-        config.setConfigurer(configurer);
+        TestConfig config = (TestConfig) new TestConfig()
+                .withConfigurer(new BukkitConfigurer())
+                .withBindFile("config.yml")
+                .saveDefaults()
+                .load(true);
 
-        if (!bindFile.exists()) {
-            config.save();
-        }
-
-        config.load();
         long took = System.currentTimeMillis() - start;
         System.out.println(took + " ms");
 

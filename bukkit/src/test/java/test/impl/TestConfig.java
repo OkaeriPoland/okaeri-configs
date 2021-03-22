@@ -70,6 +70,7 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Uber-complex-map test")
     private Map<TestEnum, Location> enumToLocationMap = Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5));
 
+    @CustomKey("complex-map")
     @Comment("List-to-Uber-complex-map test")
     private List<Map<TestEnum, Location>> listMapEnumToLocationMap = Arrays.asList(
             Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5)),
