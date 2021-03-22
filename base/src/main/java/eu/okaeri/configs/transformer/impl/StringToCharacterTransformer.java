@@ -3,7 +3,7 @@ package eu.okaeri.configs.transformer.impl;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.transformer.ObjectTransformer;
 
-public class StringToCharacterTransformer implements ObjectTransformer<String, Character> {
+public class StringToCharacterTransformer extends ObjectTransformer<String, Character> {
 
     @Override
     public GenericsPair getPair() {

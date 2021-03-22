@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.bukkit.Location;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 
@@ -76,6 +77,9 @@ public class TestConfig extends OkaeriConfig {
             Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5)),
             Collections.singletonMap(TestEnum.ONE_THO_THREE, new Location(null, 3, 2, 3, 4, 5))
     );
+
+    @Comment("Math test")
+    private BigInteger bigInteger = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999876543210");
 
     @Exclude
     private Instant start = Instant.now();

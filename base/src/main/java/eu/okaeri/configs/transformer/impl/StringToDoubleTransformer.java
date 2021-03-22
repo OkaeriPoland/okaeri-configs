@@ -3,7 +3,7 @@ package eu.okaeri.configs.transformer.impl;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.transformer.ObjectTransformer;
 
-public class StringToDoubleTransformer implements ObjectTransformer<String, Double> {
+public class StringToDoubleTransformer extends ObjectTransformer<String, Double> {
 
     @Override
     public GenericsPair getPair() {

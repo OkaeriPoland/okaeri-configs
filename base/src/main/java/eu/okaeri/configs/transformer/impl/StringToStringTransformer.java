@@ -3,15 +3,15 @@ package eu.okaeri.configs.transformer.impl;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.transformer.ObjectTransformer;
 
-public class StringToLongTransformer extends ObjectTransformer<String, Long> {
+public class StringToStringTransformer extends ObjectTransformer<String, String> {
 
     @Override
     public GenericsPair getPair() {
-        return this.genericsPair(String.class, Long.class);
+        return this.genericsPair(String.class, String.class);
     }
 
     @Override
-    public Long transform(String data) {
-        return Long.parseLong(data);
+    public String transform(String data) {
+        return data;
     }
 }

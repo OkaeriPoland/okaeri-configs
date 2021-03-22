@@ -3,7 +3,7 @@ package eu.okaeri.configs.transformer.impl;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.transformer.ObjectTransformer;
 
-public class StringToFloatTransformer implements ObjectTransformer<String, Float> {
+public class StringToFloatTransformer extends ObjectTransformer<String, Float> {
 
     @Override
     public GenericsPair getPair() {

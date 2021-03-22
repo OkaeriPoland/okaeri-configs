@@ -82,7 +82,8 @@ public abstract class Configurer {
                 return this.simplifyMap((Map<Object, Object>) value, genericType);
             }
 
-            return value;
+            throw new IllegalArgumentException("cannot simplify type " + value.getClass() + ": " + value);
+            // return value; // - disallow unprocessed fallback (strict mode)
         }
 
         SerializationData serializationData = new SerializationData();
