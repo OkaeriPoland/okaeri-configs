@@ -14,7 +14,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-bukkit</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 ### Gradle
@@ -24,7 +24,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-bukkit:1.0.0'
+implementation 'eu.okaeri:okaeri-configs-bukkit:1.1.0'
 ```
 
 ## Limitations
