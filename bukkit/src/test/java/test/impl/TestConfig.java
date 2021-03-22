@@ -15,17 +15,17 @@ import java.util.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Header({"################################################################\n" +
-        "#                                                              #\n" +
-        "#    OK! No.Proxy Minecraft                                    #\n" +
-        "#                                                              #\n" +
-        "#    Nie wiesz jak skonfigurować? Zerknij do dokumentacji!     #\n" +
-        "#    https://wiki.okaeri.eu/pl/uslugi/noproxy/minecraft        #\n" +
-        "#                                                              #\n" +
-        "#    Trouble configuring? Check out the documentation!         #\n" +
-        "#    https://wiki.okaeri.eu/en/services/noproxy/minecraft      #\n" +
-        "#                                                              #\n" +
-        "################################################################"})
+@Header("################################################################")
+@Header("#                                                              #")
+@Header("#    OK! No.Proxy Minecraft                                    #")
+@Header("#                                                              #")
+@Header("#    Nie wiesz jak skonfigurować? Zerknij do dokumentacji!     #")
+@Header("#    https://wiki.okaeri.eu/pl/uslugi/noproxy/minecraft        #")
+@Header("#                                                              #")
+@Header("#    Trouble configuring? Check out the documentation!         #")
+@Header("#    https://wiki.okaeri.eu/en/services/noproxy/minecraft      #")
+@Header("#                                                              #")
+@Header("################################################################")
 public class TestConfig extends OkaeriConfig {
 
     @Comment({"Klucz prywatny API", "API secret"})
@@ -63,9 +63,10 @@ public class TestConfig extends OkaeriConfig {
     private Set<TestEnum> testEnumSet = new HashSet<>(Arrays.asList(TestEnum.ONE, TestEnum.ONE_THO_THREE));
 
     @Comment("Test custom object list")
+    @Comment(".. and repeating comments")
     private List<Location> testLocationList = Arrays.asList(
             new Location(null, 1, 2, 3, 4, 5),
-            new Location(null, 3, 3, 5, 6,9)
+            new Location(null, 3, 3, 5, 6, 9)
     );
 
     @Comment("Uber-complex-map test")
