@@ -1,0 +1,5 @@
+name: OkaeriConfigsDemo
+version: 1.0
+main: eu.okaeri.example.OkaeriConfigPlugin
+description: 'Okaeri Configs demo plugin'
+author: 'Dawid Sawicki <dawid@okaeri.eu>'

@@ -1,5 +1,6 @@
 package eu.okaeri.configs.transformer;
 
+import eu.okaeri.configs.Configurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.ObjectSerializer;
@@ -58,14 +59,14 @@ public final class TransformerRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public static SerializationData serializeOrNull(Object object) {
+    public static SerializationData serializeOrNull(Object object, Configurer configurer) {
 
         ObjectSerializer serializer = getSerializer(object.getClass());
         if (serializer == null) {
             return null;
         }
 
-        SerializationData data = new SerializationData();
+        SerializationData data = new SerializationData(configurer);
         serializer.serialize(object, data);
 
         return data;

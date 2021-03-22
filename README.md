@@ -95,7 +95,7 @@ public class TestConfig extends OkaeriConfig {
 
 ```java
 TestConfig config = (TestConfig) new TestConfig()
-    .withConfigurer(new BukkitConfigurer()) // specify configurer implementation
+    .withConfigurer(new BukkitConfigurer(), new BukkitSerdes()) // specify configurer implementation, optionally additional serdes packages
     .withBindFile("config.yml") // specify File or pathname
     .saveDefaults() // save file if does not exists
     .load(true); // load and save to update comments/new fields
