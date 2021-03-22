@@ -1,12 +1,9 @@
-package eu.okaeri.configs.serdes.transformer;
+package eu.okaeri.configs.serdes;
 
 import eu.okaeri.configs.Configurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.ObjectSerializer;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
-import eu.okaeri.configs.serdes.SerializationData;
-import eu.okaeri.configs.serdes.impl.*;
+import eu.okaeri.configs.serdes.impl.ObjectToStringTransformer;
 import lombok.SneakyThrows;
 
 import java.util.Map;

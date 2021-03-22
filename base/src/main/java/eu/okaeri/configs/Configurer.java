@@ -3,8 +3,8 @@ package eu.okaeri.configs;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.*;
-import eu.okaeri.configs.serdes.transformer.ObjectTransformer;
-import eu.okaeri.configs.serdes.transformer.TransformerRegistry;
+import eu.okaeri.configs.serdes.ObjectTransformer;
+import eu.okaeri.configs.serdes.TransformerRegistry;
 import lombok.SneakyThrows;
 
 import java.io.File;

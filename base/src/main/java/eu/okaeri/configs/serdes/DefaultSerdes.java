@@ -1,7 +1,6 @@
 package eu.okaeri.configs.serdes;
 
 import eu.okaeri.configs.serdes.impl.*;
-import eu.okaeri.configs.serdes.transformer.TransformerRegistry;
 
 public class DefaultSerdes implements OkaeriSerdesPack {
 
