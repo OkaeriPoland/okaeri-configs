@@ -1,6 +1,6 @@
 # Okaeri Configs
 Currently supported platforms:
-- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit) [~50kb]
+- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit) [~40kB]
 
 ## Genesis
 Okaeri's configuration library is an easy way to use java classes as config adapters:
