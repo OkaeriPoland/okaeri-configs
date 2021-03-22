@@ -39,7 +39,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
         }
 
         if (!itemMeta.getEnchants().isEmpty()) {
-            data.add("enchantments", itemMeta.getEnchants());
+            data.addAsMap("enchantments", itemMeta.getEnchants(), Enchantment.class, Integer.class);
         }
 
         if (!itemMeta.getItemFlags().isEmpty()) {
@@ -57,7 +57,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
                 : Collections.emptyList();
 
         Map<Enchantment, Integer> enchantments = data.containsKey("enchantments")
-                ? data.getAsMapWithKeys("enchantments", Enchantment.class, Integer.class)
+                ? data.getAsMap("enchantments", Enchantment.class, Integer.class)
                 : Collections.emptyMap();
 
         List<ItemFlag> itemFlags = data.containsKey("item-flags")

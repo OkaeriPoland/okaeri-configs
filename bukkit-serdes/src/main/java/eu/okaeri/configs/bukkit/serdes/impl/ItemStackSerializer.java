@@ -29,7 +29,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
         }
 
         if (itemStack.hasItemMeta()) {
-            data.add("item-meta", itemStack.getItemMeta());
+            data.add("item-meta", itemStack.getItemMeta(), ItemMeta.class);
         }
     }
 

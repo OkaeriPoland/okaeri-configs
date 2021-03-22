@@ -34,7 +34,7 @@ public class DeserializationData {
     }
 
     @SuppressWarnings("unchecked")
-    public <K, V> Map<K, V> getAsMapWithKeys(String key, Class<K> keyClazz, Class<V> valueClazz) {
+    public <K, V> Map<K, V> getAsMap(String key, Class<K> keyClazz, Class<V> valueClazz) {
         GenericsDeclaration genericType = new GenericsDeclaration(Map.class, Arrays.asList(new GenericsDeclaration(keyClazz), new GenericsDeclaration(valueClazz)));
         return (Map<K, V>) this.configurer.resolveType(this.data.get(key), Map.class, genericType);
     }
