@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +42,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
         }
 
         if (!itemMeta.getItemFlags().isEmpty()) {
-            data.add("item-flags", new ArrayList<>(itemMeta.getItemFlags()));
+            data.addCollection("item-flags", itemMeta.getItemFlags(), ItemFlag.class);
         }
     }
 
