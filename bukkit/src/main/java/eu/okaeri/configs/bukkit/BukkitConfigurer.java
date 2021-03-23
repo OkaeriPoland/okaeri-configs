@@ -3,15 +3,12 @@ package eu.okaeri.configs.bukkit;
 import eu.okaeri.configs.Configurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import eu.okaeri.configs.serdes.DeserializationData;
-import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.util.ConfigUtil;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -54,36 +51,15 @@ public class BukkitConfigurer extends Configurer {
     }
 
     @Override
-    public <T> T resolveType(Object object, Class<T> clazz, GenericsDeclaration genericTarget) {
-
-        if ((object instanceof MemorySection) && Map.class.isAssignableFrom(clazz)) {
-
-            Map<String, Object> values = ((MemorySection) object).getValues(false);
-            GenericsDeclaration keyDeclaration = genericTarget.getSubtype().get(0);
-            GenericsDeclaration valueDeclaration = genericTarget.getSubtype().get(1);
-            Map<Object, Object> map = new LinkedHashMap<>();
-
-            for (Map.Entry<String, Object> entry : values.entrySet()) {
-                Object key = this.resolveType(entry.getKey(), keyDeclaration.getType(), keyDeclaration);
-                Object value = this.resolveType(entry.getValue(), valueDeclaration.getType(), valueDeclaration);
-                map.put(key, value);
-            }
-
-            return super.resolveType(map, clazz, genericTarget);
-        }
+    @SuppressWarnings("unchecked")
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
 
         if (object instanceof MemorySection) {
-
-            ObjectSerializer serializer = this.getRegistry().getSerializer(clazz);
-            if (serializer == null) {
-                return super.resolveType(object, clazz, genericTarget);
-            }
-
             Map<String, Object> values = ((MemorySection) object).getValues(false);
-            return clazz.cast(serializer.deserialize(new DeserializationData(values, this), genericTarget));
+            return super.resolveType(values, GenericsDeclaration.single(values), targetClazz, genericTarget);
         }
 
-        return super.resolveType(object, clazz, genericTarget);
+        return super.resolveType(object, GenericsDeclaration.single(object), targetClazz, genericTarget);
     }
 
     @Override

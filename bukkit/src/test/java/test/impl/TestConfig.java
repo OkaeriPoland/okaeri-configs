@@ -86,6 +86,15 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Math test")
     private BigInteger bigInteger = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999876543210");
 
+    @Comment("Serializable test")
+    private SerializableSubconfig elo = new SerializableSubconfig("hehehehe", true, Arrays.asList("abchehe", "dfghe"));
+
+    @Comment("Test serializable list")
+    private List<SerializableSubconfig> serializableList = Arrays.asList(
+            new SerializableSubconfig("hehe", true, Arrays.asList("abc", "dfg")),
+            new SerializableSubconfig("heh2e", true, Arrays.asList("axxbc", "dfddg"))
+    );
+
     @Exclude
     private Instant start = Instant.now();
 }
