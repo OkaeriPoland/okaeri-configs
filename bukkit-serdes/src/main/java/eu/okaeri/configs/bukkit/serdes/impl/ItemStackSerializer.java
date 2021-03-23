@@ -11,8 +11,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
 
     @Override
-    public Class<? super ItemStack> getType() {
-        return ItemStack.class;
+    public boolean supports(Class<? super ItemStack> type) {
+        return type.isAssignableFrom(ItemStack.class);
     }
 
     @Override

@@ -4,7 +4,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 
 public interface ObjectSerializer<T> {
 
-    Class<? super T> getType();
+    boolean supports(Class<? super T> type);
 
     void serialize(T object, SerializationData data);
 
