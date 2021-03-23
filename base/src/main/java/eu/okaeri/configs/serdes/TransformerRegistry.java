@@ -1,10 +1,8 @@
 package eu.okaeri.configs.serdes;
 
-import eu.okaeri.configs.Configurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.impl.ObjectToStringTransformer;
-import lombok.SneakyThrows;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,41 +66,5 @@ public class TransformerRegistry {
 
     public ObjectSerializer getSerializer(Class<?> clazz) {
         return this.serializerMap.get(clazz);
-    }
-
-    @SuppressWarnings("unchecked")
-    public SerializationData serializeOrNull(Object object, Configurer configurer) {
-
-        ObjectSerializer serializer = this.getSerializer(object.getClass());
-        if (serializer == null) {
-            return null;
-        }
-
-        SerializationData data = new SerializationData(configurer);
-        serializer.serialize(object, data);
-
-        return data;
-    }
-
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public <S, D> D transform(S object, Class<D> to) {
-
-        if (object == null) {
-            return null;
-        }
-
-        try {
-            return to.cast(object);
-        }
-        catch (ClassCastException exception) {
-
-            ObjectTransformer transformer = this.getTransformer(new GenericsDeclaration(object.getClass()), new GenericsDeclaration(to));
-            if (transformer == null) {
-                throw new IllegalAccessException("no transformer for " + object.getClass() + " -> " + to + " pair");
-            }
-
-            return (D) transformer.transform(object);
-        }
     }
 }

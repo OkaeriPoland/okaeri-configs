@@ -53,14 +53,7 @@ public abstract class Configurer {
         GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtype().get(0);
 
         for (Object collectionElement : value) {
-
-            SerializationData serialized = this.registry.serializeOrNull(collectionElement, this);
-            if (serialized == null) {
-                collection.add(this.simplify(collectionElement, collectionSubtype));
-                continue;
-            }
-
-            collection.add(serialized.asMap());
+            collection.add(this.simplify(collectionElement, collectionSubtype));
         }
 
         return collection;
@@ -168,24 +161,10 @@ public abstract class Configurer {
         if (genericTarget != null) {
 
             // collections
-            if ((object instanceof Collection) && (clazz == List.class)) {
+            if ((object instanceof Collection) && Collection.class.isAssignableFrom(clazz)) {
 
                 Collection<?> sourceList = (Collection<?>) object;
-                List<Object> targetList = new ArrayList<>();
-                GenericsDeclaration listDeclaration = genericTarget.getSubtype().get(0);
-
-                for (Object item : sourceList) {
-                    Object converted = this.resolveType(item, listDeclaration.getType(), listDeclaration);
-                    targetList.add(converted);
-                }
-
-                return clazz.cast(targetList);
-            }
-
-            if ((object instanceof Collection) && (clazz == Set.class)) {
-
-                Collection<?> sourceList = (Collection<?>) object;
-                Set<Object> targetList = new HashSet<>();
+                Collection<Object> targetList = (clazz == Set.class) ? new HashSet<>() : new ArrayList<>();
                 GenericsDeclaration listDeclaration = genericTarget.getSubtype().get(0);
 
                 for (Object item : sourceList) {
