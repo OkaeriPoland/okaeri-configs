@@ -17,7 +17,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-bukkit</artifactId>
-  <version>1.5.5</version>
+  <version>1.5.6</version>
 </dependency>
 ```
 Additionally if you want to serialize/deserialize [supported bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit-serdes):
@@ -25,7 +25,7 @@ Additionally if you want to serialize/deserialize [supported bukkit objects](htt
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-bukkit-serdes</artifactId>
-  <version>1.5.5</version>
+  <version>1.5.6</version>
 </dependency>
 ```
 ### Gradle
@@ -35,7 +35,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-bukkit:1.5.5'
+implementation 'eu.okaeri:okaeri-configs-bukkit:1.5.6'
 ```
 
 ## Limitations
