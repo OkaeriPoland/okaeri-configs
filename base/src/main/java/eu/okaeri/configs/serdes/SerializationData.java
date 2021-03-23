@@ -24,20 +24,20 @@ public class SerializationData {
     }
 
     public <T> void add(String key, Object value, Class<T> clazz) {
-        GenericsDeclaration genericType = new GenericsDeclaration(clazz);
+        GenericsDeclaration genericType = GenericsDeclaration.of(clazz);
         Object object = this.configurer.simplify(value, genericType);
         this.data.put(key, object);
     }
 
     public <T> void addCollection(String key, Collection<?> collection, Class<T> collectionClazz) {
-        GenericsDeclaration genericType = new GenericsDeclaration(collection.getClass(), Collections.singletonList(new GenericsDeclaration(collectionClazz)));
+        GenericsDeclaration genericType = GenericsDeclaration.of(collection, Collections.singletonList(collectionClazz));
         Object object = this.configurer.simplifyCollection(collection, genericType);
         this.data.put(key, object);
     }
 
     @SuppressWarnings("unchecked")
     public <K, V> void addAsMap(String key, Map<K, V> map, Class<K> keyClazz, Class<V> valueClazz) {
-        GenericsDeclaration genericType = new GenericsDeclaration(map.getClass(), Arrays.asList(new GenericsDeclaration(keyClazz), new GenericsDeclaration(valueClazz)));
+        GenericsDeclaration genericType = GenericsDeclaration.of(map, Arrays.asList(keyClazz, valueClazz));
         Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType);
         this.data.put(key, object);
     }

@@ -95,6 +95,12 @@ public class TestConfig extends OkaeriConfig {
             new SerializableSubconfig("heh2e", true, Arrays.asList("axxbc", "dfddg"))
     );
 
+    @Comment("Test primitive int")
+    private int testPrimitiveInt = 22;
+
+    @Comment("Test primitive double")
+    private double testPrimitiveDouble = 23123.223323334678;
+
     @Exclude
     private Instant start = Instant.now();
 }

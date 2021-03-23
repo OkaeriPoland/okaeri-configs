@@ -171,7 +171,7 @@ public abstract class OkaeriConfig {
             GenericsDeclaration genericType = field.getType();
 
             Object valueFromMap = map.get(fieldName);
-            Object value = this.configurer.resolveType(valueFromMap, GenericsDeclaration.single(valueFromMap), field.getType().getType(), field.getType());
+            Object value = this.configurer.resolveType(valueFromMap, GenericsDeclaration.of(valueFromMap), field.getType().getType(), field.getType());
             field.updateValue(value);
         }
 
@@ -179,7 +179,7 @@ public abstract class OkaeriConfig {
     }
 
     public OkaeriConfig updateDeclaration() {
-        this.declaration = ConfigDeclaration.from(this);
+        this.declaration = ConfigDeclaration.of(this);
         return this;
     }
 }
