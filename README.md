@@ -2,7 +2,7 @@
 
 Currently supported platforms:
 
-- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit) [~50kB]
+- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit) [~60kB]
 
 ## Genesis
 
