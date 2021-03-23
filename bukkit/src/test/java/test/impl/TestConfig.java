@@ -103,6 +103,9 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Test primitive double")
     private double testPrimitiveDouble = 23123.223323334678;
 
+    @Comment("Test boolean")
+    private boolean testBoolean = true;
+
     @Exclude
     private Instant start = Instant.now();
 }
