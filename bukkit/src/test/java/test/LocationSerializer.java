@@ -10,8 +10,8 @@ import org.bukkit.World;
 public class LocationSerializer implements ObjectSerializer<Location> {
 
     @Override
-    public Class<? super Location> getType() {
-        return Location.class;
+    public boolean supports(Class<? super Location> type) {
+        return type.isAssignableFrom(Location.class);
     }
 
     @Override
