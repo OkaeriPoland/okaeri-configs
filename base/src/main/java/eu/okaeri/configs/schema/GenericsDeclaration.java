@@ -5,7 +5,10 @@ import lombok.Data;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
@@ -14,6 +17,15 @@ public class GenericsDeclaration {
 
     private static final Map<String, Class<?>> PRIMITIVES = new HashMap<>();
     private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new HashMap<>();
+
+    public static boolean isUnboxedCompatibleWithBoxed(Class<?> unboxedClazz, Class<?> boxedClazz) {
+        Class<?> primitiveWrapper = PRIMITIVE_WRAPPERS.get(unboxedClazz);
+        return primitiveWrapper == boxedClazz;
+    }
+
+    public static boolean doBoxTypesMatch(Class<?> clazz1, Class<?> clazz2) {
+        return isUnboxedCompatibleWithBoxed(clazz1, clazz2) || isUnboxedCompatibleWithBoxed(clazz2, clazz1);
+    }
 
     static {
         PRIMITIVES.put(boolean.class.getName(), boolean.class);
