@@ -56,7 +56,7 @@ public class BukkitConfigurer extends Configurer {
     @Override
     public <T> T resolveType(Object object, Class<T> clazz, GenericsDeclaration genericTarget) {
 
-        if ((object instanceof MemorySection) && (clazz == Map.class)) {
+        if ((object instanceof MemorySection) && Map.class.isAssignableFrom(clazz)) {
 
             Map<String, Object> values = ((MemorySection) object).getValues(false);
             GenericsDeclaration keyDeclaration = genericTarget.getSubtype().get(0);
@@ -76,7 +76,7 @@ public class BukkitConfigurer extends Configurer {
 
             ObjectSerializer serializer = this.getRegistry().getSerializer(clazz);
             if (serializer == null) {
-                return super.resolveType(object, clazz, null);
+                return super.resolveType(object, clazz, genericTarget);
             }
 
             Map<String, Object> values = ((MemorySection) object).getValues(false);
