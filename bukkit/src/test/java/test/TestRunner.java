@@ -64,7 +64,7 @@ public final class TestRunner {
         long start = System.currentTimeMillis();
 
         TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
-            it.withConfigurer(new BukkitConfigurer());
+            it.withConfigurer(new BukkitConfigurer("# ", ""));
             it.withSerdesPack(registry -> registry.register(new LocationSerializer()));
             it.withBindFile("config.yml");
             it.saveDefaults();

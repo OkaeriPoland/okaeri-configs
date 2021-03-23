@@ -32,13 +32,13 @@ public class TestConfig extends OkaeriConfig {
     private String token = "";
 
     @CustomKey("white-list")
-    @Comment({"Biala lista (wpisane nicki lub ip nie beda blokowane)", "Whitelist (nicknames or ips)"})
+    @Comment({"", "Biala lista (wpisane nicki lub ip nie beda blokowane)", "Whitelist (nicknames or ips)"})
     private List<String> whitelist = Collections.singletonList("127.0.0.1");
 
-    @Comment({"Wiadomosci", "Messages"})
+    @Comment({"", "Wiadomosci", "Messages"})
     private Map<String, String> messages = Collections.singletonMap("test", "testing");
 
-    @Comment("Test complex map 1")
+    @Comment({" ", "Test complex map 1"})
     private Map<String, Map<String, Integer>> complexMap = Collections.singletonMap("aa", Collections.singletonMap("bb", 222));
 
     @Comment("Test complex map 2")
