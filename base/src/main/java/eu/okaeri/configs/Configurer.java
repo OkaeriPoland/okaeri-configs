@@ -94,6 +94,11 @@ public abstract class Configurer {
 
         if (serializer == null) {
 
+            if (serializerType.isPrimitive()) {
+                Class<?> wrappedPrimitive = GenericsDeclaration.of(serializerType).wrap();
+                return this.simplify(wrappedPrimitive.cast(value), GenericsDeclaration.of(wrappedPrimitive));
+            }
+
             if (this.isToStringObject(serializerType)) {
                 return this.resolveType(value, genericType, String.class, null);
             }
@@ -119,7 +124,7 @@ public abstract class Configurer {
     public <T> T getValue(String key, Class<T> clazz, GenericsDeclaration genericType) {
         Object value = this.getValue(key);
         if (value == null) return null;
-        return this.resolveType(value, new GenericsDeclaration(value.getClass()), clazz, genericType);
+        return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType);
     }
 
     @SneakyThrows
@@ -130,8 +135,13 @@ public abstract class Configurer {
             return null;
         }
 
-        GenericsDeclaration source = (genericSource == null) ? new GenericsDeclaration(object.getClass()) : genericSource;
-        GenericsDeclaration target = (genericTarget == null) ? new GenericsDeclaration(targetClazz) : genericTarget;
+        GenericsDeclaration source = (genericSource == null) ? GenericsDeclaration.of(object) : genericSource;
+        GenericsDeclaration target = (genericTarget == null) ? GenericsDeclaration.of(targetClazz) : genericTarget;
+
+        // primitives
+        if (target.isPrimitive()) {
+            target = GenericsDeclaration.of(target.wrap());
+        }
 
         // enums
         if ((object instanceof String) && targetClazz.isEnum()) {
@@ -140,8 +150,9 @@ public abstract class Configurer {
             return targetClazz.cast(enumMethod.invoke(null, strObject));
         }
 
-        if (object.getClass().isEnum() && (targetClazz == String.class)) {
-            Method enumMethod = object.getClass().getMethod("name");
+        Class<?> objectClazz = object.getClass();
+        if (objectClazz.isEnum() && (targetClazz == String.class)) {
+            Method enumMethod = objectClazz.getMethod("name");
             return targetClazz.cast(enumMethod.invoke(object));
         }
 
@@ -160,9 +171,7 @@ public abstract class Configurer {
                 config = ((OkaeriConfig) allocateInstance.invoke(unsafeInstance, targetClazz)).updateDeclaration();
             }
 
-            List<GenericsDeclaration> subtypes = Arrays.asList(new GenericsDeclaration(String.class), new GenericsDeclaration(Object.class));
-            Map configMap = this.resolveType(object, source, Map.class, new GenericsDeclaration(Map.class, subtypes));
-
+            Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)));
             config.setConfigurer(this);
             config.update(configMap);
 
@@ -188,7 +197,7 @@ public abstract class Configurer {
                 GenericsDeclaration listDeclaration = genericTarget.getSubtype().get(0);
 
                 for (Object item : sourceList) {
-                    Object converted = this.resolveType(item, GenericsDeclaration.single(item), listDeclaration.getType(), listDeclaration);
+                    Object converted = this.resolveType(item, GenericsDeclaration.of(item), listDeclaration.getType(), listDeclaration);
                     targetList.add(converted);
                 }
 
@@ -204,8 +213,8 @@ public abstract class Configurer {
                 Map<Object, Object> map = (Map<Object, Object>) this.createInstance(targetClazz);
 
                 for (Map.Entry<Object, Object> entry : values.entrySet()) {
-                    Object key = this.resolveType(entry.getKey(), GenericsDeclaration.single(entry.getKey()), keyDeclaration.getType(), keyDeclaration);
-                    Object value = this.resolveType(entry.getValue(), GenericsDeclaration.single(entry.getValue()), valueDeclaration.getType(), valueDeclaration);
+                    Object key = this.resolveType(entry.getKey(), GenericsDeclaration.of(entry.getKey()), keyDeclaration.getType(), keyDeclaration);
+                    Object value = this.resolveType(entry.getValue(), GenericsDeclaration.of(entry.getValue()), valueDeclaration.getType(), valueDeclaration);
                     map.put(key, value);
                 }
 
@@ -219,7 +228,12 @@ public abstract class Configurer {
             return targetClazz.cast(object);
         }
 
-        //noinspection unchecked
+        // primitives
+        if (targetClazz.isPrimitive()) {
+            Object transformed = transformer.transform(object);
+            return (T) GenericsDeclaration.of(targetClazz).unwrapValue(transformed);
+        }
+
         return targetClazz.cast(transformer.transform(object));
     }
 

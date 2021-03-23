@@ -12,7 +12,7 @@ import java.util.Locale;
 @Data
 public class FieldDeclaration {
 
-    public static FieldDeclaration from(ConfigDeclaration config, Field field, Object object) {
+    public static FieldDeclaration of(ConfigDeclaration config, Field field, Object object) {
 
         FieldDeclaration declaration = new FieldDeclaration();
         boolean accessible = field.isAccessible();
@@ -46,7 +46,7 @@ public class FieldDeclaration {
         declaration.setComment(readComments(field));
         declaration.setField(field);
         declaration.setObject(object);
-        declaration.setType(GenericsDeclaration.from(field.getGenericType()));
+        declaration.setType(GenericsDeclaration.of(field.getGenericType()));
         field.setAccessible(accessible);
 
         return declaration;

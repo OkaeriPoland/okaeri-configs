@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Data
 public class ConfigDeclaration {
 
-    public static ConfigDeclaration from(OkaeriConfig config) {
+    public static ConfigDeclaration of(OkaeriConfig config) {
 
         ConfigDeclaration declaration = new ConfigDeclaration();
         Class<? extends OkaeriConfig> clazz = config.getClass();
@@ -20,7 +20,7 @@ public class ConfigDeclaration {
         declaration.setNameStrategy(clazz.getAnnotation(Names.class));
         declaration.setHeader(readHeader(clazz));
         declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
-                .map(field -> FieldDeclaration.from(declaration, field, config))
+                .map(field -> FieldDeclaration.of(declaration, field, config))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 

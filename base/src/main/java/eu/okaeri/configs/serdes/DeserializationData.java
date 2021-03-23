@@ -25,20 +25,20 @@ public class DeserializationData {
 
     public <T> T get(String key, Class<T> clazz) {
         Object object = this.data.get(key);
-        return this.configurer.resolveType(object, GenericsDeclaration.single(object), clazz, null);
+        return this.configurer.resolveType(object, GenericsDeclaration.of(object), clazz, null);
     }
 
     @SuppressWarnings("unchecked")
     public <T> List<T> getAsList(String key, Class<T> listType) {
-        GenericsDeclaration genericType = new GenericsDeclaration(List.class, Collections.singletonList(new GenericsDeclaration(listType)));
         Object object = this.data.get(key);
-        return this.configurer.resolveType(object, GenericsDeclaration.single(object), List.class, genericType);
+        GenericsDeclaration genericType = GenericsDeclaration.of(List.class, Collections.singletonList(listType));
+        return this.configurer.resolveType(object, GenericsDeclaration.of(object), List.class, genericType);
     }
 
     @SuppressWarnings("unchecked")
     public <K, V> Map<K, V> getAsMap(String key, Class<K> keyClazz, Class<V> valueClazz) {
-        GenericsDeclaration genericType = new GenericsDeclaration(Map.class, Arrays.asList(new GenericsDeclaration(keyClazz), new GenericsDeclaration(valueClazz)));
         Object object = this.data.get(key);
-        return (Map<K, V>) this.configurer.resolveType(object, GenericsDeclaration.single(object), Map.class, genericType);
+        GenericsDeclaration genericType = GenericsDeclaration.of(Map.class, Arrays.asList(keyClazz, valueClazz));
+        return (Map<K, V>) this.configurer.resolveType(object, GenericsDeclaration.of(object), Map.class, genericType);
     }
 }

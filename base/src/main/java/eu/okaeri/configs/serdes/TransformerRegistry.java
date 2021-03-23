@@ -61,7 +61,7 @@ public class TransformerRegistry {
     }
 
     public boolean canTransform(Class<?> from, Class<?> to) {
-        return this.getTransformer(new GenericsDeclaration(from), new GenericsDeclaration(to)) != null;
+        return this.getTransformer(GenericsDeclaration.of(from), GenericsDeclaration.of(to)) != null;
     }
 
     public ObjectSerializer getSerializer(Class<?> clazz) {

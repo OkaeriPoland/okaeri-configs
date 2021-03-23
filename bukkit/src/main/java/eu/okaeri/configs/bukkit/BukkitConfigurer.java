@@ -56,10 +56,10 @@ public class BukkitConfigurer extends Configurer {
 
         if (object instanceof MemorySection) {
             Map<String, Object> values = ((MemorySection) object).getValues(false);
-            return super.resolveType(values, GenericsDeclaration.single(values), targetClazz, genericTarget);
+            return super.resolveType(values, GenericsDeclaration.of(values), targetClazz, genericTarget);
         }
 
-        return super.resolveType(object, GenericsDeclaration.single(object), targetClazz, genericTarget);
+        return super.resolveType(object, GenericsDeclaration.of(object), targetClazz, genericTarget);
     }
 
     @Override
