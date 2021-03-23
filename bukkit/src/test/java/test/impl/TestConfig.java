@@ -106,6 +106,9 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Test boolean")
     private boolean testBoolean = true;
 
+    @Comment("Test long")
+    private long testLong = 100000000L;
+
     @Exclude
     private Instant start = Instant.now();
 }
