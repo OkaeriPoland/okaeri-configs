@@ -25,6 +25,7 @@ public abstract class OkaeriConfig {
     private ConfigDeclaration declaration;
 
     public OkaeriConfig() {
+        this.updateDeclaration();
     }
 
     public OkaeriConfig withConfigurer(Configurer configurer) {
@@ -142,6 +143,10 @@ public abstract class OkaeriConfig {
     }
 
     public OkaeriConfig update() throws IllegalAccessException {
+
+        if (this.declaration == null) {
+            throw new IllegalAccessException("declaration cannot be null: config not initialized");
+        }
 
         for (FieldDeclaration field : this.declaration.getFields()) {
 
