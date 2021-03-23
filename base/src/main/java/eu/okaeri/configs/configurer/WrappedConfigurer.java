@@ -38,16 +38,6 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public String getCommentPrefix() {
-        return this.parent.getCommentPrefix();
-    }
-
-    @Override
-    public String getSectionSeparator() {
-        return this.parent.getSectionSeparator();
-    }
-
-    @Override
     public void setValue(String key, Object value, GenericsDeclaration genericType) {
         this.parent.setValue(key, value, genericType);
     }

@@ -30,10 +30,6 @@ public abstract class Configurer {
         this.registry.register(pack);
     }
 
-    public abstract String getCommentPrefix();
-
-    public abstract String getSectionSeparator();
-
     public abstract void setValue(String key, Object value, GenericsDeclaration genericType);
 
     public abstract Object getValue(String key);

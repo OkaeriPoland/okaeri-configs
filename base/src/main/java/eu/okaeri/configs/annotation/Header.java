@@ -7,4 +7,5 @@ import java.lang.annotation.*;
 @Repeatable(Headers.class)
 public @interface Header {
     String[] value();
+    boolean raw() default false;
 }

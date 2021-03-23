@@ -6,5 +6,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(Comments.class)
 public @interface Comment {
-    String[] value();
+    String[] value() default "";
 }

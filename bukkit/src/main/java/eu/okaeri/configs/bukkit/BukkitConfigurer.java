@@ -1,37 +1,49 @@
 package eu.okaeri.configs.bukkit;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
+import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
+import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import eu.okaeri.configs.util.ConfigUtil;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Optional;
 
 public class BukkitConfigurer extends Configurer {
 
     private YamlConfiguration config;
+    private String commentPrefix = "# ";
+    private String sectionSeparator = SectionSeparator.NEW_LINE;
 
-    public BukkitConfigurer() {
-        this(new YamlConfiguration());
+    public BukkitConfigurer(YamlConfiguration config, String commentPrefix, String sectionSeparator) {
+        this(commentPrefix, sectionSeparator);
+    }
+
+    public BukkitConfigurer(String commentPrefix, String sectionSeparator) {
+        this();
+        this.commentPrefix = commentPrefix;
+        this.sectionSeparator = sectionSeparator;
+    }
+
+    public BukkitConfigurer(String sectionSeparator) {
+        this();
+        this.sectionSeparator = sectionSeparator;
     }
 
     public BukkitConfigurer(YamlConfiguration config) {
         this.config = config;
     }
 
-    @Override
-    public String getCommentPrefix() {
-        return "#";
-    }
-
-    @Override
-    public String getSectionSeparator() {
-        return "\n";
+    public BukkitConfigurer() {
+        this(new YamlConfiguration());
     }
 
     @Override
@@ -74,37 +86,45 @@ public class BukkitConfigurer extends Configurer {
     @Override
     public void writeToFile(File file, ConfigDeclaration declaration) throws IOException {
 
+        // bukkit's save
         this.config.save(file);
 
-        String data = this.readFile(file);
-        data = ConfigUtil.removeStartingWith(this.getCommentPrefix(), data);
-        data = ConfigUtil.addCommentsToFields(this.getCommentPrefix(), this.getSectionSeparator(), data, declaration);
-
-        String header = ConfigUtil.convertToComment(this.getCommentPrefix(), declaration.getHeader(), true);
-        String output = "";
-
-        if (header != null) {
-            output += header;
-            output += this.getSectionSeparator();
-        }
-
-        output += data;
-        this.writeFile(file, output);
+        // add comments
+        ConfigPostprocessor.of(file).read()
+                .removeLines((line) -> line.startsWith(this.commentPrefix))
+                .updateLines((line) -> {
+                    // find field declaration
+                    Optional<FieldDeclaration> fieldOptional = declaration.getFields().stream()
+                            .filter(field -> line.startsWith(field.getName() + ":"))
+                            .findAny();
+                    if (!fieldOptional.isPresent()) {
+                        return line;
+                    }
+                    // prepend comment if declared
+                    FieldDeclaration field = fieldOptional.get();
+                    if (field.getComment() == null) {
+                        return line;
+                    }
+                    return this.sectionSeparator + this.buildComment(field.getComment()) + line;
+                })
+                .updateContext(context -> {
+                    // add header if available
+                    if (declaration.getHeader() == null) {
+                        return context;
+                    }
+                    return this.buildComment(declaration.getHeader()) + this.sectionSeparator + context;
+                })
+                .write();
     }
 
-    private String readFile(File file) throws IOException {
-        StringBuilder fileContents = new StringBuilder((int) file.length());
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                fileContents.append(scanner.nextLine()).append("\n");
-            }
-            return fileContents.toString();
+    private String buildComment(String[] strings) {
+        if (strings == null) return null;
+        List<String> lines = new ArrayList<>();
+        for (String line : strings) {
+            String[] parts = line.split("\n");
+            String prefix = line.startsWith(this.commentPrefix.trim()) ? "" : this.commentPrefix;
+            lines.add((line.isEmpty() ? "" : prefix) + line);
         }
-    }
-
-    private void writeFile(File file, String text) throws FileNotFoundException {
-        try (PrintStream out = new PrintStream(new FileOutputStream(file))) {
-            out.print(text);
-        }
+        return String.join("\n", lines) + "\n";
     }
 }
