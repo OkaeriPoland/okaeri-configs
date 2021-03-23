@@ -225,10 +225,16 @@ public abstract class Configurer {
         ObjectTransformer transformer = this.registry.getTransformer(source, target);
         if (transformer == null) {
 
-            // unbox primitive
+            // unbox primitive (Integer -> int)
             if (targetClazz.isPrimitive() && GenericsDeclaration.doBoxTypesMatch(targetClazz, objectClazz)) {
                 GenericsDeclaration primitiveDeclaration = GenericsDeclaration.of(object);
                 return (T) primitiveDeclaration.unwrapValue(object);
+            }
+
+            // transform primitives through String (int -> long)
+            if (targetClazz.isPrimitive()) {
+                Object simplified = this.simplify(object, GenericsDeclaration.of(objectClazz));
+                return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz));
             }
 
             return targetClazz.cast(object);
