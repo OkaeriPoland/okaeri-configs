@@ -10,8 +10,8 @@ import org.bukkit.potion.PotionEffectType;
 public class PotionEffectSerializer implements ObjectSerializer<PotionEffect> {
 
     @Override
-    public Class<? super PotionEffect> getType() {
-        return PotionEffect.class;
+    public boolean supports(Class<? super PotionEffect> type) {
+        return type.isAssignableFrom(PotionEffect.class);
     }
 
     @Override

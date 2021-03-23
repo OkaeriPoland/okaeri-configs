@@ -5,12 +5,13 @@ import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.impl.ObjectToStringTransformer;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TransformerRegistry {
 
     private final Map<GenericsPair, ObjectTransformer> transformerMap = new ConcurrentHashMap<>();
-    private final Map<Class<?>, ObjectSerializer> serializerMap = new ConcurrentHashMap<>();
+    private final Set<ObjectSerializer> serializerSet = ConcurrentHashMap.newKeySet();
 
     public void register(ObjectTransformer transformer) {
         this.transformerMap.put(transformer.getPair(), transformer);
@@ -52,7 +53,7 @@ public class TransformerRegistry {
     }
 
     public void register(ObjectSerializer serializer) {
-        this.serializerMap.put(serializer.getType(), serializer);
+        this.serializerSet.add(serializer);
     }
 
     public ObjectTransformer getTransformer(GenericsDeclaration from, GenericsDeclaration to) {
@@ -65,6 +66,9 @@ public class TransformerRegistry {
     }
 
     public ObjectSerializer getSerializer(Class<?> clazz) {
-        return this.serializerMap.get(clazz);
+        return this.serializerSet.stream()
+                .filter(serializer -> serializer.supports(clazz))
+                .findFirst()
+                .orElse(null);
     }
 }
