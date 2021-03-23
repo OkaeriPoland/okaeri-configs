@@ -22,8 +22,8 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     private static final char ALT_COLOR_CHAR = '&';
 
     @Override
-    public Class<? super ItemMeta> getType() {
-        return ItemMeta.class;
+    public boolean supports(Class<? super ItemMeta> type) {
+        return type.isAssignableFrom(ItemMeta.class);
     }
 
     @Override
