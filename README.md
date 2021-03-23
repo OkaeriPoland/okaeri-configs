@@ -30,6 +30,7 @@ Okaeri's configuration library is an easy way to use java classes as config adap
 @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
 public class TestConfig extends OkaeriConfig {
 
+    @Variable("APP_TOKEN") // use jvm property or environment variable if available
     @Comment({"Klucz prywatny API", "API secret"})
     private String token = "";
 
@@ -93,13 +94,24 @@ public class TestConfig extends OkaeriConfig {
 
 ## Usage
 
+### With create(clazz, initializer)
 ```java
-TestConfig config = (TestConfig) new TestConfig()
+TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
+    it.withConfigurer(new BukkitConfigurer(), new BukkitSerdes()); // specify configurer implementation, optionally additional serdes packages
+    it.withBindFile("config.yml"); // specify File or pathname
+    it.saveDefaults(); // save file if does not exists
+    it.load(true); // load and save to update comments/new fields 
+});
+```
+
+### With create(clazz)
+```java
+TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
     .withConfigurer(new BukkitConfigurer(), new BukkitSerdes()) // specify configurer implementation, optionally additional serdes packages
     .withBindFile("config.yml") // specify File or pathname
     .saveDefaults() // save file if does not exists
     .load(true); // load and save to update comments/new fields
-```
+````
 
 ## Supported types
 

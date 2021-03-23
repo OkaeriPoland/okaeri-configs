@@ -2,6 +2,7 @@ package eu.okaeri.configs.schema;
 
 import eu.okaeri.configs.annotation.*;
 import lombok.Data;
+import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Locale;
 @Data
 public class FieldDeclaration {
 
+    @SneakyThrows
     public static FieldDeclaration of(ConfigDeclaration config, Field field, Object object) {
 
         FieldDeclaration declaration = new FieldDeclaration();
@@ -21,6 +23,9 @@ public class FieldDeclaration {
         if (field.getAnnotation(Exclude.class) != null) {
             return null;
         }
+
+        Object startingValue = field.get(object);
+        declaration.setStartingValue(startingValue);
 
         CustomKey customKey = field.getAnnotation(CustomKey.class);
         if (customKey != null) {
@@ -42,6 +47,9 @@ public class FieldDeclaration {
         } else {
             declaration.setName(field.getName());
         }
+
+        Variable variable = field.getAnnotation(Variable.class);
+        declaration.setVariable(variable);
 
         declaration.setComment(readComments(field));
         declaration.setField(field);
@@ -79,16 +87,24 @@ public class FieldDeclaration {
     }
 
     public Object getValue() throws IllegalAccessException {
+
+        if ((this.variable != null) && (this.variable.mode() == VariableMode.RUNTIME)) {
+            return this.startingValue;
+        }
+
         boolean accessible = this.field.isAccessible();
         this.field.setAccessible(true);
         Object value = this.field.get(this.object);
         this.field.setAccessible(accessible);
+
         return value;
     }
 
+    private Object startingValue;
     private String name;
     private String[] comment;
     private GenericsDeclaration type;
+    private Variable variable;
 
     private Field field;
     private Object object;

@@ -1,5 +1,6 @@
 package test.impl;
 
+import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.*;
 import lombok.Data;
@@ -26,6 +27,7 @@ import java.util.*;
 @Names(strategy = NameStrategy.SNAKE_CASE, modifier = NameModifier.TO_LOWER_CASE)
 public class TestConfig extends OkaeriConfig {
 
+    @Variable("APP_TOKEN")
     @Comment({"Klucz prywatny API", "API secret"})
     private String token = "";
 
@@ -87,12 +89,12 @@ public class TestConfig extends OkaeriConfig {
     private BigInteger bigInteger = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999876543210");
 
     @Comment("Serializable test")
-    private SerializableSubconfig elo = new SerializableSubconfig("hehehehe", true, Arrays.asList("abchehe", "dfghe"));
+    private SerializableSubconfig elo = ConfigManager.initialize(new SerializableSubconfig("testString0", true, Arrays.asList("abchehe", "dfghe")));
 
     @Comment("Test serializable list")
     private List<SerializableSubconfig> serializableList = Arrays.asList(
-            new SerializableSubconfig("hehe", true, Arrays.asList("abc", "dfg")),
-            new SerializableSubconfig("heh2e", true, Arrays.asList("axxbc", "dfddg"))
+            ConfigManager.initialize(new SerializableSubconfig("testString1", true, Arrays.asList("abc", "dfg"))),
+            ConfigManager.initialize(new SerializableSubconfig("testString2", true, Arrays.asList("axxbc", "dfddg")))
     );
 
     @Comment("Test primitive int")

@@ -1,5 +1,7 @@
 package eu.okaeri.configs;
 
+import eu.okaeri.configs.annotation.Variable;
+import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -23,7 +25,6 @@ public abstract class OkaeriConfig {
     private ConfigDeclaration declaration;
 
     public OkaeriConfig() {
-        this.updateDeclaration();
     }
 
     public OkaeriConfig withConfigurer(Configurer configurer) {
@@ -145,37 +146,35 @@ public abstract class OkaeriConfig {
         for (FieldDeclaration field : this.declaration.getFields()) {
 
             String fieldName = field.getName();
+            GenericsDeclaration genericType = field.getType();
+            Class<?> type = field.getType().getType();
+            Variable variable = field.getVariable();
+            boolean updateValue = true;
+
+            if (variable != null) {
+                String property = this.getPropertyOrEnv(variable.value());
+                if (property != null) {
+                    Object value = this.configurer.resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType);
+                    field.updateValue(value);
+                    updateValue = false;
+                }
+            }
+
             if (!this.configurer.keyExists(fieldName)) {
                 continue;
             }
 
-            GenericsDeclaration type = field.getType();
-            GenericsDeclaration genericType = field.getType();
-            Object value = this.configurer.getValue(fieldName, type.getType(), genericType);
-            field.updateValue(value);
+            Object value = this.configurer.getValue(fieldName, type, genericType);
+            if (updateValue) field.updateValue(value);
+            field.setStartingValue(value);
         }
 
         return this;
     }
 
-    public OkaeriConfig update(Map<String, Object> map) throws IllegalAccessException {
-
-        for (FieldDeclaration field : this.declaration.getFields()) {
-
-            String fieldName = field.getName();
-            if (!map.containsKey(fieldName)) {
-                continue;
-            }
-
-            GenericsDeclaration type = field.getType();
-            GenericsDeclaration genericType = field.getType();
-
-            Object valueFromMap = map.get(fieldName);
-            Object value = this.configurer.resolveType(valueFromMap, GenericsDeclaration.of(valueFromMap), field.getType().getType(), field.getType());
-            field.updateValue(value);
-        }
-
-        return this;
+    private String getPropertyOrEnv(String name) {
+        String property = System.getProperty(name);
+        return (property == null) ? System.getenv(name) : property;
     }
 
     public OkaeriConfig updateDeclaration() {
