@@ -176,7 +176,7 @@ public abstract class Configurer {
             }
 
             // maps
-            if ((object instanceof Map) && (clazz == Map.class)) {
+            if ((object instanceof Map) && Map.class.isAssignableFrom(clazz)) {
 
                 Map<Object, Object> values = ((Map<Object, Object>) object);
                 GenericsDeclaration keyDeclaration = genericTarget.getSubtype().get(0);

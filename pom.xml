@@ -6,7 +6,7 @@
 
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <packaging>pom</packaging>
 
     <properties>
