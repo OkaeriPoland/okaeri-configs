@@ -24,18 +24,21 @@ public class DeserializationData {
     }
 
     public <T> T get(String key, Class<T> clazz) {
-        return this.configurer.resolveType(this.data.get(key), clazz, null);
+        Object object = this.data.get(key);
+        return this.configurer.resolveType(object, GenericsDeclaration.single(object), clazz, null);
     }
 
     @SuppressWarnings("unchecked")
     public <T> List<T> getAsList(String key, Class<T> listType) {
         GenericsDeclaration genericType = new GenericsDeclaration(List.class, Collections.singletonList(new GenericsDeclaration(listType)));
-        return this.configurer.resolveType(this.data.get(key), List.class, genericType);
+        Object object = this.data.get(key);
+        return this.configurer.resolveType(object, GenericsDeclaration.single(object), List.class, genericType);
     }
 
     @SuppressWarnings("unchecked")
     public <K, V> Map<K, V> getAsMap(String key, Class<K> keyClazz, Class<V> valueClazz) {
         GenericsDeclaration genericType = new GenericsDeclaration(Map.class, Arrays.asList(new GenericsDeclaration(keyClazz), new GenericsDeclaration(valueClazz)));
-        return (Map<K, V>) this.configurer.resolveType(this.data.get(key), Map.class, genericType);
+        Object object = this.data.get(key);
+        return (Map<K, V>) this.configurer.resolveType(object, GenericsDeclaration.single(object), Map.class, genericType);
     }
 }

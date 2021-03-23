@@ -103,6 +103,7 @@ TestConfig config = (TestConfig) new TestConfig()
 
 ## Supported types
 
+- Subconfigs: Any config can be used in the fields of another (`OkaeriConfig`)
 - Basic Java types: Boolean, Byte, Character, Double, Float, Integer, Long, Short, String
 - Math types: `java.math.BigInteger`, `java.math.BigDecimal`
 - Complex types:

@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -75,11 +76,17 @@ public abstract class Configurer {
         return map;
     }
 
+    @SneakyThrows
     @SuppressWarnings("unchecked")
     public Object simplify(Object value, GenericsDeclaration genericType) {
 
         if (value == null) {
             return null;
+        }
+
+        if (OkaeriConfig.class.isAssignableFrom(value.getClass())) {
+            OkaeriConfig config = (OkaeriConfig) value;
+            return config.asMap(this);
         }
 
         Class<?> serializerType = (genericType != null) ? genericType.getType() : value.getClass();
@@ -112,95 +119,108 @@ public abstract class Configurer {
     public <T> T getValue(String key, Class<T> clazz, GenericsDeclaration genericType) {
         Object value = this.getValue(key);
         if (value == null) return null;
-        return this.resolveType(value, clazz, genericType);
+        return this.resolveType(value, new GenericsDeclaration(value.getClass()), clazz, genericType);
     }
 
     @SneakyThrows
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, Class<T> clazz, GenericsDeclaration genericTarget) {
-
-        if (object == null) {
-            return null;
-        }
-
-        return this.resolveType(object, new GenericsDeclaration(object.getClass()), clazz, genericTarget);
-    }
-
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> clazz, GenericsDeclaration genericTarget) {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
 
         if (object == null) {
             return null;
         }
 
         GenericsDeclaration source = (genericSource == null) ? new GenericsDeclaration(object.getClass()) : genericSource;
-        GenericsDeclaration target = (genericTarget == null) ? new GenericsDeclaration(clazz) : genericTarget;
+        GenericsDeclaration target = (genericTarget == null) ? new GenericsDeclaration(targetClazz) : genericTarget;
 
         // enums
-        if ((object instanceof String) && clazz.isEnum()) {
+        if ((object instanceof String) && targetClazz.isEnum()) {
             String strObject = (String) object;
-            Method enumMethod = clazz.getMethod("valueOf", String.class);
-            return clazz.cast(enumMethod.invoke(null, strObject));
+            Method enumMethod = targetClazz.getMethod("valueOf", String.class);
+            return targetClazz.cast(enumMethod.invoke(null, strObject));
         }
 
-        if (object.getClass().isEnum() && (clazz == String.class)) {
+        if (object.getClass().isEnum() && (targetClazz == String.class)) {
             Method enumMethod = object.getClass().getMethod("name");
-            return clazz.cast(enumMethod.invoke(object));
+            return targetClazz.cast(enumMethod.invoke(object));
+        }
+
+        // subconfig
+        if (OkaeriConfig.class.isAssignableFrom(targetClazz)) {
+
+            OkaeriConfig config;
+            try {
+                config = (OkaeriConfig) targetClazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException exception) {
+                Class<?> unsafeClazz = Class.forName("sun.misc.Unsafe");
+                Field theUnsafeField = unsafeClazz.getDeclaredField("theUnsafe");
+                theUnsafeField.setAccessible(true);
+                Object unsafeInstance = theUnsafeField.get(null);
+                Method allocateInstance = unsafeClazz.getDeclaredMethod("allocateInstance", Class.class);
+                config = ((OkaeriConfig) allocateInstance.invoke(unsafeInstance, targetClazz)).updateDeclaration();
+            }
+
+            List<GenericsDeclaration> subtypes = Arrays.asList(new GenericsDeclaration(String.class), new GenericsDeclaration(Object.class));
+            Map configMap = this.resolveType(object, source, Map.class, new GenericsDeclaration(Map.class, subtypes));
+
+            config.setConfigurer(this);
+            config.update(configMap);
+
+            return (T) config;
         }
 
         // deserialization
-        ObjectSerializer objectSerializer = this.registry.getSerializer(clazz);
+        ObjectSerializer objectSerializer = this.registry.getSerializer(targetClazz);
         if ((object instanceof Map) && (objectSerializer != null)) {
             DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, this);
             Object deserialized = objectSerializer.deserialize(deserializationData, genericTarget);
-            return clazz.cast(deserialized);
+            return targetClazz.cast(deserialized);
         }
 
         // generics
         if (genericTarget != null) {
 
             // collections
-            if ((object instanceof Collection) && Collection.class.isAssignableFrom(clazz)) {
+            if ((object instanceof Collection) && Collection.class.isAssignableFrom(targetClazz)) {
 
                 Collection<?> sourceList = (Collection<?>) object;
-                Collection<Object> targetList = (Collection<Object>) this.createInstance(clazz);
+                Collection<Object> targetList = (Collection<Object>) this.createInstance(targetClazz);
                 GenericsDeclaration listDeclaration = genericTarget.getSubtype().get(0);
 
                 for (Object item : sourceList) {
-                    Object converted = this.resolveType(item, listDeclaration.getType(), listDeclaration);
+                    Object converted = this.resolveType(item, GenericsDeclaration.single(item), listDeclaration.getType(), listDeclaration);
                     targetList.add(converted);
                 }
 
-                return clazz.cast(targetList);
+                return targetClazz.cast(targetList);
             }
 
             // maps
-            if ((object instanceof Map) && Map.class.isAssignableFrom(clazz)) {
+            if ((object instanceof Map) && Map.class.isAssignableFrom(targetClazz)) {
 
                 Map<Object, Object> values = ((Map<Object, Object>) object);
                 GenericsDeclaration keyDeclaration = genericTarget.getSubtype().get(0);
                 GenericsDeclaration valueDeclaration = genericTarget.getSubtype().get(1);
-                Map<Object, Object> map = (Map<Object, Object>) this.createInstance(clazz);
+                Map<Object, Object> map = (Map<Object, Object>) this.createInstance(targetClazz);
 
                 for (Map.Entry<Object, Object> entry : values.entrySet()) {
-                    Object key = this.resolveType(entry.getKey(), keyDeclaration.getType(), keyDeclaration);
-                    Object value = this.resolveType(entry.getValue(), valueDeclaration.getType(), valueDeclaration);
+                    Object key = this.resolveType(entry.getKey(), GenericsDeclaration.single(entry.getKey()), keyDeclaration.getType(), keyDeclaration);
+                    Object value = this.resolveType(entry.getValue(), GenericsDeclaration.single(entry.getValue()), valueDeclaration.getType(), valueDeclaration);
                     map.put(key, value);
                 }
 
-                return clazz.cast(map);
+                return targetClazz.cast(map);
             }
         }
 
         // basic transformer
         ObjectTransformer transformer = this.registry.getTransformer(source, target);
         if (transformer == null) {
-            return clazz.cast(object);
+            return targetClazz.cast(object);
         }
 
         //noinspection unchecked
-        return clazz.cast(transformer.transform(object));
+        return targetClazz.cast(transformer.transform(object));
     }
 
     public Object createInstance(Class<?> clazz) {

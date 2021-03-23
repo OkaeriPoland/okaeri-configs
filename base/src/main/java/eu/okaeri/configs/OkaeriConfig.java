@@ -11,16 +11,19 @@ import lombok.SneakyThrows;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-
+@Getter
+@Setter
 public abstract class OkaeriConfig {
 
-    @Getter @Setter private File bindFile;
-    @Getter @Setter private Configurer configurer;
+    private File bindFile;
+    private Configurer configurer;
     private ConfigDeclaration declaration;
 
     public OkaeriConfig() {
-        this.declaration = ConfigDeclaration.from(this);
+        this.updateDeclaration();
     }
 
     public OkaeriConfig withConfigurer(Configurer configurer) {
@@ -104,6 +107,17 @@ public abstract class OkaeriConfig {
         return this;
     }
 
+    public Map<String, Object> asMap(Configurer configurer) throws IllegalAccessException {
+
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (FieldDeclaration field : this.declaration.getFields()) {
+            Object simplified = configurer.simplify(field.getValue(), field.getType());
+            map.put(field.getName(), simplified);
+        }
+
+        return map;
+    }
+
     public OkaeriConfig load(boolean update) throws IllegalAccessException, IOException {
         this.load();
         if (update) {
@@ -123,18 +137,49 @@ public abstract class OkaeriConfig {
         }
 
         this.configurer.loadFromFile(this.bindFile, this.declaration);
+        return this.update();
+    }
+
+    public OkaeriConfig update() throws IllegalAccessException {
 
         for (FieldDeclaration field : this.declaration.getFields()) {
+
             String fieldName = field.getName();
             if (!this.configurer.keyExists(fieldName)) {
                 continue;
             }
+
             GenericsDeclaration type = field.getType();
             GenericsDeclaration genericType = field.getType();
             Object value = this.configurer.getValue(fieldName, type.getType(), genericType);
             field.updateValue(value);
         }
 
+        return this;
+    }
+
+    public OkaeriConfig update(Map<String, Object> map) throws IllegalAccessException {
+
+        for (FieldDeclaration field : this.declaration.getFields()) {
+
+            String fieldName = field.getName();
+            if (!map.containsKey(fieldName)) {
+                continue;
+            }
+
+            GenericsDeclaration type = field.getType();
+            GenericsDeclaration genericType = field.getType();
+
+            Object valueFromMap = map.get(fieldName);
+            Object value = this.configurer.resolveType(valueFromMap, GenericsDeclaration.single(valueFromMap), field.getType().getType(), field.getType());
+            field.updateValue(value);
+        }
+
+        return this;
+    }
+
+    public OkaeriConfig updateDeclaration() {
+        this.declaration = ConfigDeclaration.from(this);
         return this;
     }
 }

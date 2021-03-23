@@ -13,6 +13,13 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class GenericsDeclaration {
 
+    public static GenericsDeclaration single(Object object) {
+        if (object == null) {
+            return null;
+        }
+        return new GenericsDeclaration(object.getClass());
+    }
+
     public static GenericsDeclaration from(Type type) {
         return from(type.getTypeName());
     }

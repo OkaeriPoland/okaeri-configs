@@ -71,6 +71,6 @@ public final class TestRunner {
         System.out.println(took + " ms");
 
         System.out.println(config);
-        config.save();
+//        config.save();
     }
 }
