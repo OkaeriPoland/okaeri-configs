@@ -164,7 +164,7 @@ public abstract class Configurer {
             if ((object instanceof Collection) && Collection.class.isAssignableFrom(clazz)) {
 
                 Collection<?> sourceList = (Collection<?>) object;
-                Collection<Object> targetList = (clazz == Set.class) ? new HashSet<>() : new ArrayList<>();
+                Collection<Object> targetList = (Collection<Object>) this.createInstance(clazz);
                 GenericsDeclaration listDeclaration = genericTarget.getSubtype().get(0);
 
                 for (Object item : sourceList) {
@@ -181,7 +181,7 @@ public abstract class Configurer {
                 Map<Object, Object> values = ((Map<Object, Object>) object);
                 GenericsDeclaration keyDeclaration = genericTarget.getSubtype().get(0);
                 GenericsDeclaration valueDeclaration = genericTarget.getSubtype().get(1);
-                Map<Object, Object> map = new LinkedHashMap<>();
+                Map<Object, Object> map = (Map<Object, Object>) this.createInstance(clazz);
 
                 for (Map.Entry<Object, Object> entry : values.entrySet()) {
                     Object key = this.resolveType(entry.getKey(), keyDeclaration.getType(), keyDeclaration);
@@ -201,6 +201,26 @@ public abstract class Configurer {
 
         //noinspection unchecked
         return clazz.cast(transformer.transform(object));
+    }
+
+    public Object createInstance(Class<?> clazz) {
+        try {
+            if (Collection.class.isAssignableFrom(clazz)) {
+                if (clazz == Set.class) return new HashSet<>();
+                if (clazz == List.class) return new ArrayList<>();
+                return clazz.newInstance();
+            }
+
+            if (Map.class.isAssignableFrom(clazz)) {
+                if (clazz == Map.class) return new LinkedHashMap<>();
+                return clazz.newInstance();
+            }
+
+            throw new IllegalArgumentException("cannot create instance of " + clazz);
+        }
+        catch (Exception exception) {
+            throw new IllegalArgumentException("failed to create instance of " + clazz, exception);
+        }
     }
 
     public boolean keyExists(String key) {
