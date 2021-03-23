@@ -65,6 +65,7 @@ public class TransformerRegistry {
         return this.getTransformer(GenericsDeclaration.of(from), GenericsDeclaration.of(to)) != null;
     }
 
+    @SuppressWarnings("unchecked")
     public ObjectSerializer getSerializer(Class<?> clazz) {
         return this.serializerSet.stream()
                 .filter(serializer -> serializer.supports(clazz))
