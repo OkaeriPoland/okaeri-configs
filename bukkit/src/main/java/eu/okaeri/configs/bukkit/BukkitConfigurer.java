@@ -1,6 +1,6 @@
 package eu.okaeri.configs.bukkit;
 
-import eu.okaeri.configs.Configurer;
+import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.util.ConfigUtil;

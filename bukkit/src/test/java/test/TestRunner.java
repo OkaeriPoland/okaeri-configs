@@ -1,5 +1,6 @@
 package test;
 
+import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.bukkit.BukkitConfigurer;
 import lombok.SneakyThrows;
@@ -28,6 +29,7 @@ public final class TestRunner {
             String hmm = "działa";
         };
 
+        inline.updateDeclaration();
         inline.setBindFile(bindFile);
         inline.setConfigurer(configurer);
 
@@ -42,6 +44,7 @@ public final class TestRunner {
         BukkitConfigurer configurer = new BukkitConfigurer(new YamlConfiguration());
 
         OkaeriConfig empty = new OkaeriConfig() {};
+        empty.updateDeclaration();
         empty.setBindFile(bindFile);
         empty.setConfigurer(configurer);
 
@@ -60,12 +63,13 @@ public final class TestRunner {
 
         long start = System.currentTimeMillis();
 
-        TestConfig config = (TestConfig) new TestConfig()
-                .withConfigurer(new BukkitConfigurer())
-                .withSerdesPack(registry -> registry.register(new LocationSerializer()))
-                .withBindFile("config.yml")
-                .saveDefaults()
-                .load(true);
+        TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
+            it.withConfigurer(new BukkitConfigurer());
+            it.withSerdesPack(registry -> registry.register(new LocationSerializer()));
+            it.withBindFile("config.yml");
+            it.saveDefaults();
+            it.load(true);
+        });
 
         long took = System.currentTimeMillis() - start;
         System.out.println(took + " ms");

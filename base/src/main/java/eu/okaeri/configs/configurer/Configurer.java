@@ -1,10 +1,9 @@
-package eu.okaeri.configs;
+package eu.okaeri.configs.configurer;
 
+import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.*;
-import eu.okaeri.configs.serdes.ObjectTransformer;
-import eu.okaeri.configs.serdes.TransformerRegistry;
 import lombok.SneakyThrows;
 
 import java.io.File;
@@ -172,8 +171,8 @@ public abstract class Configurer {
             }
 
             Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)));
-            config.setConfigurer(this);
-            config.update(configMap);
+            config.setConfigurer(new InMemoryWrappedConfigurer(this, configMap));
+            config.update();
 
             return (T) config;
         }
