@@ -16,14 +16,8 @@ public class HjsonConfigurer extends Configurer {
 
     @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-
         Object simplified = this.simplify(value, type);
         JsonValue jsonValue = this.toJsonValue(simplified);
-
-//        if ((field != null) && (field.getComment() != null)) {
-//            jsonValue.setComment(String.join("\n", field.getComment()));
-//        }
-
         this.json.set(key, jsonValue);
     }
 
@@ -146,15 +140,5 @@ public class HjsonConfigurer extends Configurer {
         }
 
         return value.asString();
-    }
-
-    private void jsonValueWithComment(String key, JsonValue value, ConfigDeclaration declaration) {
-        declaration.getField(key).ifPresent(field -> {
-            String[] comment = field.getComment();
-            if (comment == null) {
-                return;
-            }
-            value.setComment(String.join("\n", comment));
-        });
     }
 }
