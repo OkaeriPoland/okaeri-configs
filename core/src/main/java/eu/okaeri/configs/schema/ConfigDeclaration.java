@@ -53,16 +53,7 @@ public class ConfigDeclaration {
     }
 
     public GenericsDeclaration getFieldDeclarationOrNull(String key) {
-
-        Optional<FieldDeclaration> genericField = this.getField(key);
-        GenericsDeclaration genericType = null;
-
-        if (genericField.isPresent()) {
-            FieldDeclaration field = genericField.get();
-            genericType = field.getType();
-        }
-
-        return genericType;
+        return this.getField(key).map(FieldDeclaration::getType).orElse(null);
     }
 
     private Names nameStrategy;
