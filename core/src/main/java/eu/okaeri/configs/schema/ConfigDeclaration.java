@@ -17,6 +17,7 @@ public class ConfigDeclaration {
         ConfigDeclaration declaration = new ConfigDeclaration();
         declaration.setNameStrategy(clazz.getAnnotation(Names.class));
         declaration.setHeader(readHeader(clazz));
+        declaration.setReal(OkaeriConfig.class.isAssignableFrom(clazz));
         declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
                 .map(field -> FieldDeclaration.of(declaration, field, config))
                 .filter(Objects::nonNull)
@@ -74,4 +75,5 @@ public class ConfigDeclaration {
     private Names nameStrategy;
     private String[] header;
     private List<FieldDeclaration> fields;
+    private boolean real;
 }

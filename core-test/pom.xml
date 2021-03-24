@@ -62,7 +62,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-gson</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.4</version>
             <scope>compile</scope>
         </dependency>
 
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-json-simple</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.4</version>
             <scope>compile</scope>
         </dependency>
 
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-hocon</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.4</version>
             <scope>compile</scope>
         </dependency>
 
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-hjson</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.4</version>
             <scope>compile</scope>
         </dependency>
 
@@ -94,13 +94,13 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-bukkit</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-bukkit-serdes</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
