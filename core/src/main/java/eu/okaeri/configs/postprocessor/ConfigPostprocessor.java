@@ -1,10 +1,12 @@
 package eu.okaeri.configs.postprocessor;
 
+import lombok.Data;
 import lombok.SneakyThrows;
 
 import java.io.*;
 import java.util.Scanner;
 
+@Data
 public class ConfigPostprocessor {
 
     private File file;
@@ -18,14 +20,21 @@ public class ConfigPostprocessor {
         return new ConfigPostprocessor(file);
     }
 
+    public static ConfigPostprocessor of(File file, String context) {
+        return new ConfigPostprocessor(file).updateContext(value -> context);
+    }
+
     @SneakyThrows
     public ConfigPostprocessor read() {
+        if (!this.file.exists()) return this;
         this.context = this.readFile(this.file);
         return this;
     }
 
     @SneakyThrows
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public ConfigPostprocessor write() {
+        if (!this.file.exists()) this.file.createNewFile();
         this.writeFile(this.file, this.context);
         return this;
     }

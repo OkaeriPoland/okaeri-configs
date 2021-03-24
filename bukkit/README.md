@@ -17,7 +17,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-bukkit</artifactId>
-  <version>1.6.0</version>
+  <version>1.6.3</version>
 </dependency>
 ```
 Additionally if you want to serialize/deserialize [supported bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit-serdes):
@@ -25,7 +25,7 @@ Additionally if you want to serialize/deserialize [supported bukkit objects](htt
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-bukkit-serdes</artifactId>
-  <version>1.6.0</version>
+  <version>1.6.3</version>
 </dependency>
 ```
 ### Gradle
@@ -35,7 +35,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-bukkit:1.6.0'
+implementation 'eu.okaeri:okaeri-configs-bukkit:1.6.3'
 ```
 
 ## Limitations
@@ -46,7 +46,12 @@ implementation 'eu.okaeri:okaeri-configs-bukkit:1.6.0'
 
 Please use BukkitConfigurer as your configurer:
 ```java
+// default ('# ', '\n')
 new BukkitConfigurer()
+// remove empty spaces between sections (no empty newlines)
+new BukkitConfigurer(SectionSeparator.NONE)
+// change comment character and section separator (no space after # in comments, no empty newlines)
+new BukkitConfigurer("#", SectionSeparator.NONE)
 ```
 For [serializers/deserializers/transformers](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit-serdes) use:
 ```java

@@ -6,7 +6,6 @@ import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.TransformerRegistry;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -88,12 +87,12 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public void writeToFile(File file, ConfigDeclaration declaration) throws IOException {
+    public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
         this.parent.writeToFile(file, declaration);
     }
 
     @Override
-    public void loadFromFile(File file, ConfigDeclaration declaration) throws IOException {
+    public void loadFromFile(File file, ConfigDeclaration declaration) throws Exception {
         this.parent.loadFromFile(file, declaration);
     }
 }

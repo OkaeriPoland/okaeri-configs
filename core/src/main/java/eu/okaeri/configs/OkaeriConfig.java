@@ -11,7 +11,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,7 +53,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig saveDefaults() throws IOException, IllegalAccessException {
+    public OkaeriConfig saveDefaults() throws Exception {
 
         if (this.bindFile == null) {
             throw new IllegalAccessException("bindFile cannot be null");
@@ -91,7 +90,7 @@ public abstract class OkaeriConfig {
         return this.configurer.getValue(key, clazz, null);
     }
 
-    public OkaeriConfig save() throws IllegalAccessException, IOException {
+    public OkaeriConfig save() throws Exception {
 
         if (this.bindFile == null) {
             throw new IllegalAccessException("bindFile cannot be null");
@@ -109,7 +108,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public Map<String, Object> asMap(Configurer configurer) throws IllegalAccessException {
+    public Map<String, Object> asMap(Configurer configurer) throws Exception {
 
         Map<String, Object> map = new LinkedHashMap<>();
         for (FieldDeclaration field : this.declaration.getFields()) {
@@ -120,7 +119,7 @@ public abstract class OkaeriConfig {
         return map;
     }
 
-    public OkaeriConfig load(boolean update) throws IllegalAccessException, IOException {
+    public OkaeriConfig load(boolean update) throws Exception {
         this.load();
         if (update) {
             this.save();
@@ -128,7 +127,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig load() throws IllegalAccessException, IOException {
+    public OkaeriConfig load() throws Exception {
 
         if (this.bindFile == null) {
             throw new IllegalAccessException("bindFile cannot be null");
@@ -142,7 +141,7 @@ public abstract class OkaeriConfig {
         return this.update();
     }
 
-    public OkaeriConfig update() throws IllegalAccessException {
+    public OkaeriConfig update() throws Exception {
 
         if (this.declaration == null) {
             throw new IllegalAccessException("declaration cannot be null: config not initialized");

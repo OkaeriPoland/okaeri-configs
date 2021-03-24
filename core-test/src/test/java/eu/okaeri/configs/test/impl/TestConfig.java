@@ -1,4 +1,4 @@
-package test.impl;
+package eu.okaeri.configs.test.impl;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
