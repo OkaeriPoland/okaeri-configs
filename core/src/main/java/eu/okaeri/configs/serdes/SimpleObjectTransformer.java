@@ -7,7 +7,7 @@ public abstract class SimpleObjectTransformer {
     private SimpleObjectTransformer() {
     }
 
-    public static <S, D> ObjectTransformer<S, D> of(Class<?> from, Class<?> to, SimpleObjectTransformerExecutor<S, D> transformer) {
+    public static <S, D> ObjectTransformer<S, D> of(Class<S> from, Class<D> to, SimpleObjectTransformerExecutor<S, D> transformer) {
         return new ObjectTransformer<S, D>() {
             @Override
             public GenericsPair getPair() {
