@@ -36,6 +36,7 @@ Lightbend's config at the time of implementing has poor support for dynamically 
   - [multi-line comments #152 from Mar 18, 2014](https://github.com/lightbend/config/issues/152)]
 - Only top root is guaranteed to be ordered (current Lightbend's HOCON stores configs as unordered maps), see in lightbend/config:
   - [Keep config item order in ConfigObject #365 from Dec 28, 2015](https://github.com/lightbend/config/issues/365)
+- HOCON features like includes and substitutions were not tested and are not expected to be working
 
 ## Usage
 
