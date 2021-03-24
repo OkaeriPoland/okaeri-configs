@@ -31,9 +31,9 @@ implementation 'eu.okaeri:okaeri-configs-gson:1.6.3'
 
 ## Limitations
 Lightbend's config at the time of implementing has poor support for dynamically generated configs and is missing features in general:
-- Only top level comments and header are available (trough standard ConfigPostprocessor hack), see in lightbend/config:
-  - [Allow comment on root element (or header comment) #481 from Jul 20, 2017](https://github.com/lightbend/config/issues/481)]
-  - [multi-line comments #152 from Mar 18, 2014](https://github.com/lightbend/config/issues/152)]
+- Only top level comments and header are available (through standard ConfigPostprocessor hack), see in lightbend/config:
+  - [Allow comment on root element (or header comment) #481 from Jul 20, 2017](https://github.com/lightbend/config/issues/481)
+  - [multi-line comments #152 from Mar 18, 2014](https://github.com/lightbend/config/issues/152)
 - Only top root is guaranteed to be ordered (current Lightbend's HOCON stores configs as unordered maps), see in lightbend/config:
   - [Keep config item order in ConfigObject #365 from Dec 28, 2015](https://github.com/lightbend/config/issues/365)
 - HOCON features like includes and substitutions were not tested and are not expected to be working
