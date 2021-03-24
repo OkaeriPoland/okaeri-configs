@@ -1,8 +1,13 @@
 # Okaeri Configs
 
-Currently supported platforms:
-
-- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit) [~60kB]
+## Supported platforms
+### YAML
+- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit): no need for additional dependencies when writing Minecraft plugins
+### JSON
+- [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/gson): ideal for GSON lovers, comes with additional cost of ~300kB if no gson is available in the classpath
+- [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/gson): fairly limited but still working, no pretty print
+### HOCON
+- [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon): plays well with the Play Framework lovers, but beware of limitations
 
 ## Genesis
 
@@ -12,6 +17,7 @@ Okaeri's configuration library is an easy way to use java classes as config adap
 - Allows for even complex types to be serialized/deserialized
 - Enhances your configs with durable comments and strongly-typed fields
 - Provides ability to access typed fields with the classic getters and setters
+- Core library is just ~60kB in size, most of the adapters require only ~100 lines of code
 
 ## Example
 

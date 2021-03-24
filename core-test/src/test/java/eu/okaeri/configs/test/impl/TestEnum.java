@@ -1,4 +1,4 @@
-package test.impl;
+package eu.okaeri.configs.test.impl;
 
 public enum TestEnum {
     HALF,

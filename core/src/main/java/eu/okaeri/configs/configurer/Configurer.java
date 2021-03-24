@@ -7,7 +7,6 @@ import eu.okaeri.configs.serdes.*;
 import lombok.SneakyThrows;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -269,7 +268,7 @@ public abstract class Configurer {
         return this.getValue(key) != null;
     }
 
-    public abstract void writeToFile(File file, ConfigDeclaration declaration) throws IOException;
+    public abstract void writeToFile(File file, ConfigDeclaration declaration) throws Exception;
 
-    public abstract void loadFromFile(File file, ConfigDeclaration declaration) throws IOException;
+    public abstract void loadFromFile(File file, ConfigDeclaration declaration) throws Exception;
 }

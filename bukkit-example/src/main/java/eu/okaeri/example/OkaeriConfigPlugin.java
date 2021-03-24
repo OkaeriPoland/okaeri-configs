@@ -6,7 +6,6 @@ import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 
 public class OkaeriConfigPlugin extends JavaPlugin {
@@ -26,7 +25,7 @@ public class OkaeriConfigPlugin extends JavaPlugin {
                     .withBindFile(new File(this.getDataFolder(), "config.yml"))
                     .saveDefaults()
                     .load(true);
-        } catch (IllegalAccessException | IOException exception) {
+        } catch (Exception exception) {
             this.getLogger().log(Level.SEVERE, "Error loading config.yml", exception);
             this.getPluginLoader().disablePlugin(this);
         }
