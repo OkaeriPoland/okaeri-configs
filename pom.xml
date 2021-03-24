@@ -6,7 +6,7 @@
 
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs</artifactId>
-    <version>1.5.6</version>
+    <version>1.6.0</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -15,7 +15,7 @@
     </properties>
 
     <modules>
-        <module>base</module>
+        <module>core</module>
         <module>bukkit</module>
         <module>bukkit-serdes</module>
     </modules>
