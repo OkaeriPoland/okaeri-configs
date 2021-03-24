@@ -58,11 +58,25 @@ public class HjsonConfigurer extends Configurer {
 
     private void addComments(Object object, ConfigDeclaration declaration, String key) {
 
-        FieldDeclaration field = declaration.getField(key).orElse(null);
+        FieldDeclaration field = declaration.getField(key)
+                .orElse(null);
 
         if (object instanceof JsonObject) {
             JsonObject jsonObject = (JsonObject) object;
-            jsonObject.names().forEach(name -> this.addComments(jsonObject.get(name), declaration, name));
+            // root
+            if (field == null) {
+                jsonObject.names().forEach(name -> {
+                    JsonValue value = jsonObject.get(name);
+                    this.addComments(value, declaration, name);
+                });
+            }
+            // sub
+            else {
+                jsonObject.names().forEach(name -> {
+                    ConfigDeclaration configDeclaration = ConfigDeclaration.of(field.getType().getType());
+                    this.addComments(jsonObject.get(name), configDeclaration, name);
+                });
+            }
         }
 
         if ((object instanceof JsonArray) && (field != null)) {

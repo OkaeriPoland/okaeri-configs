@@ -5,9 +5,9 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.bukkit.BukkitConfigurer;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.gson.GsonConfigurer;
-import eu.okaeri.configs.json_simple.JsonSimpleConfigurer;
-import eu.okaeri.configs.hocon.HoconConfigurer;
 import eu.okaeri.configs.hjson.HjsonConfigurer;
+import eu.okaeri.configs.hocon.HoconConfigurer;
+import eu.okaeri.configs.json_simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
 import lombok.SneakyThrows;
 
