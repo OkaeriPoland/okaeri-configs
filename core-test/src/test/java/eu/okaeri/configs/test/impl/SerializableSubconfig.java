@@ -1,10 +1,7 @@
 package eu.okaeri.configs.test.impl;
 
 import eu.okaeri.configs.OkaeriConfig;
-import eu.okaeri.configs.annotation.NameModifier;
-import eu.okaeri.configs.annotation.NameStrategy;
-import eu.okaeri.configs.annotation.Names;
-import eu.okaeri.configs.annotation.Variable;
+import eu.okaeri.configs.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -18,6 +15,8 @@ import java.util.List;
 public class SerializableSubconfig extends OkaeriConfig {
     @Variable("APP_TEST_STRING")
     private String testString;
+    @Comment("siema")
     private Boolean testBool;
+    @Comment("lista bk")
     private List<String> listOfStrings;
 }

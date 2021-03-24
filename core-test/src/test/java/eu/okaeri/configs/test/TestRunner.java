@@ -7,6 +7,7 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.gson.GsonConfigurer;
 import eu.okaeri.configs.json_simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.hocon.HoconConfigurer;
+import eu.okaeri.configs.hjson.HjsonConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
 import lombok.SneakyThrows;
 
@@ -36,6 +37,11 @@ public final class TestRunner {
         config("config.hocon.conf", new HoconConfigurer());
         empty("empty.hocon.conf", new HoconConfigurer());
         inline("inline.hocon.conf", new HoconConfigurer());
+
+        // hocon
+        config("config.hjson.hjson", new HjsonConfigurer());
+        empty("empty.hjson.hjson", new HjsonConfigurer());
+        inline("inline.hjson.hjson", new HjsonConfigurer());
     }
 
     @SneakyThrows

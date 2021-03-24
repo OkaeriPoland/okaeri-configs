@@ -24,7 +24,7 @@ public class FieldDeclaration {
             return null;
         }
 
-        Object startingValue = field.get(object);
+        Object startingValue = (object == null) ? null : field.get(object);
         declaration.setStartingValue(startingValue);
 
         CustomKey customKey = field.getAnnotation(CustomKey.class);

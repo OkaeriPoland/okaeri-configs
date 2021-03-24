@@ -1,17 +1,23 @@
 package eu.okaeri.configs.configurer;
 
+import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.schema.ConfigDeclaration;
+import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.*;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
 public abstract class Configurer {
+
+    @Getter @Setter
+    private OkaeriConfig parent;
 
     private TransformerRegistry registry = new TransformerRegistry(); {
         this.registry.register(new DefaultSerdes());
@@ -29,7 +35,7 @@ public abstract class Configurer {
         this.registry.register(pack);
     }
 
-    public abstract void setValue(String key, Object value, GenericsDeclaration genericType);
+    public abstract void setValue(String key, Object value, GenericsDeclaration genericType, FieldDeclaration field);
 
     public abstract Object getValue(String key);
 
@@ -152,24 +158,10 @@ public abstract class Configurer {
 
         // subconfig
         if (OkaeriConfig.class.isAssignableFrom(targetClazz)) {
-
-            OkaeriConfig config;
-            try {
-                config = (OkaeriConfig) targetClazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException exception) {
-                Class<?> unsafeClazz = Class.forName("sun.misc.Unsafe");
-                Field theUnsafeField = unsafeClazz.getDeclaredField("theUnsafe");
-                theUnsafeField.setAccessible(true);
-                Object unsafeInstance = theUnsafeField.get(null);
-                Method allocateInstance = unsafeClazz.getDeclaredMethod("allocateInstance", Class.class);
-                config = ((OkaeriConfig) allocateInstance.invoke(unsafeInstance, targetClazz)).updateDeclaration();
-            }
-
+            OkaeriConfig config = ConfigManager.create((Class<? extends OkaeriConfig>) targetClazz);
             Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)));
             config.setConfigurer(new InMemoryWrappedConfigurer(this, configMap));
-            config.update();
-
-            return (T) config;
+            return (T) config.update();
         }
 
         // deserialization

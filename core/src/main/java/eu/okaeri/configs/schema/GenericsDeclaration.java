@@ -1,5 +1,6 @@
 package eu.okaeri.configs.schema;
 
+import eu.okaeri.configs.OkaeriConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -171,5 +172,9 @@ public class GenericsDeclaration {
 
     public boolean isPrimitive() {
         return this.type.isPrimitive();
+    }
+
+    public boolean isConfig() {
+        return OkaeriConfig.class.isAssignableFrom(this.type);
     }
 }

@@ -27,13 +27,18 @@ public abstract class OkaeriConfig {
         this.updateDeclaration();
     }
 
-    public OkaeriConfig withConfigurer(Configurer configurer) {
+    public void setConfigurer(Configurer configurer) {
         this.configurer = configurer;
+        this.configurer.setParent(this);
+    }
+
+    public OkaeriConfig withConfigurer(Configurer configurer) {
+        this.setConfigurer(configurer);
         return this;
     }
 
     public OkaeriConfig withConfigurer(Configurer configurer, OkaeriSerdesPack... serdesPack) {
-        this.configurer = configurer;
+        this.setConfigurer(configurer);
         Arrays.stream(serdesPack).forEach(this.configurer::register);
         return this;
     }
@@ -71,7 +76,9 @@ public abstract class OkaeriConfig {
         if (this.configurer == null) {
             throw new IllegalAccessException("configurer cannot be null");
         }
-        this.configurer.setValue(key, value, this.declaration.getFieldDeclarationOrNull(key));
+        FieldDeclaration field = this.declaration.getField(key).orElse(null);
+        GenericsDeclaration fieldGenerics = this.declaration.getFieldDeclarationOrNull(key);
+        this.configurer.setValue(key, value, fieldGenerics, field);
     }
 
     @SneakyThrows
@@ -101,7 +108,7 @@ public abstract class OkaeriConfig {
         }
 
         for (FieldDeclaration field : this.declaration.getFields()) {
-            this.configurer.setValue(field.getName(), field.getValue(), field.getType());
+            this.configurer.setValue(field.getName(), field.getValue(), field.getType(), field);
         }
 
         this.configurer.writeToFile(this.bindFile, this.declaration);

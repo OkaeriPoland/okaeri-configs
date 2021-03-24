@@ -19,6 +19,9 @@
         <module>bukkit</module>
         <module>bukkit-serdes</module>
         <module>gson</module>
+        <module>hjson</module>
+        <module>hocon</module>
+        <module>json-simple</module>
     </modules>
 
     <dependencies>
