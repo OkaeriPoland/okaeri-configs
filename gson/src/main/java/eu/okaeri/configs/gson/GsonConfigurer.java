@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
+import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 
 import java.io.File;
@@ -35,7 +36,7 @@ public class GsonConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type) {
+    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type);
         this.map.put(key, simplified);
     }

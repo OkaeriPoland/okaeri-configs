@@ -47,7 +47,7 @@ public class BukkitConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type) {
+    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type);
         this.config.set(key, simplified);
     }

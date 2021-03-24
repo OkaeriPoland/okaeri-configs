@@ -39,7 +39,7 @@ public class HoconConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type) {
+    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type);
         this.map.put(key, simplified);
     }

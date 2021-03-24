@@ -12,11 +12,9 @@ import java.util.stream.Collectors;
 @Data
 public class ConfigDeclaration {
 
-    public static ConfigDeclaration of(OkaeriConfig config) {
+    public static ConfigDeclaration of(Class<?> clazz, OkaeriConfig config) {
 
         ConfigDeclaration declaration = new ConfigDeclaration();
-        Class<? extends OkaeriConfig> clazz = config.getClass();
-
         declaration.setNameStrategy(clazz.getAnnotation(Names.class));
         declaration.setHeader(readHeader(clazz));
         declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
@@ -25,6 +23,14 @@ public class ConfigDeclaration {
                 .collect(Collectors.toList()));
 
         return declaration;
+    }
+
+    public static ConfigDeclaration of(OkaeriConfig config) {
+        return of(config.getClass(), config);
+    }
+
+    public static ConfigDeclaration of(Class<?> clazz) {
+        return of(clazz, null);
     }
 
     private static String[] readHeader(Class<?> clazz) {

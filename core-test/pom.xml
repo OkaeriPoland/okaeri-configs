@@ -82,6 +82,14 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- hjson -->
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-configs-hjson</artifactId>
+            <version>1.6.3</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- bukkit -->
         <dependency>
             <groupId>eu.okaeri</groupId>

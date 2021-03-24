@@ -1,5 +1,6 @@
 package eu.okaeri.configs.configurer;
 
+import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 
 import java.util.Map;
@@ -31,7 +32,7 @@ public class InMemoryWrappedConfigurer extends WrappedConfigurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type) {
+    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         this.map.put(key, value);
     }
 }
