@@ -2,12 +2,12 @@
 
 ## Supported platforms
 ### YAML
-- [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit): no need for additional dependencies when writing Minecraft plugins
+- 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit): no need for additional dependencies when writing Minecraft plugins
 ### JSON
-- [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/gson): ideal for GSON lovers, comes with additional cost of ~300kB if no gson is available in the classpath
-- [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/gson): fairly limited but still working, no pretty print
+- 🌟 [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/gson): ideal for GSON lovers, best suited for in-app storage or advanced user configurations
+- [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/gson): fairly limited but still working, no pretty print, probably best suited for simple in-app storage
 ### HOCON
-- [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon): plays well with the Play Framework lovers, but beware of limitations
+- [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon): use Human-Optimized Config Object Notation for your configs, but beware of limitations
 
 ## Genesis
 
