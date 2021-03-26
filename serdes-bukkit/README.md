@@ -1,6 +1,6 @@
 # Okaeri Configs | Bukkit
 
-Serializers/Deserializers/Transformers for Bukkit types. See [bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit).
+Serializers/Deserializers/Transformers for Bukkit types. See [yaml-bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit).
 
 ## Supported types
 
