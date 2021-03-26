@@ -20,7 +20,7 @@ Add dependency to the `dependencies` section:
   <version>1.6.4</version>
 </dependency>
 ```
-Additionally if you want to serialize/deserialize [supported bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit-serdes):
+Additionally if you want to serialize/deserialize [supported bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit):
 ```xml
 <dependency>
   <groupId>eu.okaeri</groupId>
