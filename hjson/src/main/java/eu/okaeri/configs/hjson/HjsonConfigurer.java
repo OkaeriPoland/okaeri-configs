@@ -2,6 +2,7 @@ package eu.okaeri.configs.hjson;
 
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
+import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -13,6 +14,20 @@ import java.util.*;
 public class HjsonConfigurer extends Configurer {
 
     private JsonObject json = new JsonObject();
+    private String commentPrefix = "# ";
+    private String sectionSeparator = SectionSeparator.NONE;
+
+    public HjsonConfigurer() {
+    }
+
+    public HjsonConfigurer(String commentPrefix, String sectionSeparator) {
+        this.commentPrefix = commentPrefix;
+        this.sectionSeparator = sectionSeparator;
+    }
+
+    public HjsonConfigurer(String commentPrefix) {
+        this.commentPrefix = commentPrefix;
+    }
 
     @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
@@ -51,16 +66,11 @@ public class HjsonConfigurer extends Configurer {
         this.addComments(this.json, declaration, null);
 
         // header
-        if (declaration.getHeader() != null) {
-            this.json.setComment(String.join("\n", declaration.getHeader()));
-        }
+        String header = ConfigPostprocessor.createCommentOrEmpty(this.commentPrefix, declaration.getHeader());
+        this.json.setFullComment(CommentType.BOL, header.isEmpty() ? "" : (header + this.sectionSeparator));
 
-        // postprocess
-        ConfigPostprocessor.of(file, this.json.toString(Stringify.HJSON_COMMENTS))
-                // remove unecessary double comments
-                .updateLines((line) -> line.startsWith("# #") ? line.substring(2) : line)
-                // save
-                .write();
+        // save
+        ConfigPostprocessor.of(file, this.json.toString(Stringify.HJSON_COMMENTS)).write();
     }
 
     private void addComments(Object object, ConfigDeclaration declaration, String key) {
@@ -92,18 +102,18 @@ public class HjsonConfigurer extends Configurer {
             ((JsonArray) object).forEach(item -> this.addComments(item, configDeclaration, null));
         }
 
+        JsonValue value = (JsonValue) object;
         if (field == null) {
             return;
         }
 
         String[] comment = field.getComment();
-        JsonValue value = (JsonValue) object;
-
         if (comment == null) {
             return;
         }
 
-        value.setComment(String.join("\n", comment));
+        String commentOrEmpty = ConfigPostprocessor.createCommentOrEmpty(this.commentPrefix, comment);
+        value.setFullComment(CommentType.BOL, commentOrEmpty.isEmpty() ? "" : (this.sectionSeparator + commentOrEmpty));
     }
 
     @SuppressWarnings("unchecked")
