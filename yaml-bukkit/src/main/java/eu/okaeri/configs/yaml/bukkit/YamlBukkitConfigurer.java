@@ -12,8 +12,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -92,33 +90,21 @@ public class YamlBukkitConfigurer extends Configurer {
         // postprocess
         ConfigPostprocessor.of(file).read()
                 // remove all current commments
-                .removeLines((line) -> line.startsWith(this.commentPrefix))
+                .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
                 // add new comments
                 .updateLines((line) -> declaration.getFields().stream()
                         .filter(this.isFieldDeclaredForLine(line))
                         .findAny()
                         .map(FieldDeclaration::getComment)
-                        .map(comment -> this.sectionSeparator + this.buildComment(comment) + line)
+                        .map(comment -> this.sectionSeparator + ConfigPostprocessor.createComment(this.commentPrefix, comment) + line)
                         .orElse(line))
                 // add header if available
-                .updateContext(context -> (declaration.getHeader() != null)
-                        ? (this.buildComment(declaration.getHeader()) + this.sectionSeparator + context)
-                        : context)
+                .prependContextComment(this.commentPrefix, this.sectionSeparator, declaration.getHeader())
+                // save
                 .write();
     }
 
     private Predicate<FieldDeclaration> isFieldDeclaredForLine(String line) {
         return field -> line.startsWith(field.getName() + ":"); // key:
-    }
-
-    private String buildComment(String[] strings) {
-        if (strings == null) return null;
-        List<String> lines = new ArrayList<>();
-        for (String line : strings) {
-            String[] parts = line.split("\n");
-            String prefix = line.startsWith(this.commentPrefix.trim()) ? "" : this.commentPrefix;
-            lines.add((line.isEmpty() ? "" : prefix) + line);
-        }
-        return String.join("\n", lines) + "\n";
     }
 }

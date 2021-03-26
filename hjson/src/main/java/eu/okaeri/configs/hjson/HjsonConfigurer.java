@@ -46,8 +46,21 @@ public class HjsonConfigurer extends Configurer {
     @Override
     @SuppressWarnings("unchecked")
     public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
+
+        // add comments to nodes
         this.addComments(this.json, declaration, null);
-        ConfigPostprocessor.of(file, this.json.toString(Stringify.HJSON_COMMENTS)).write();
+
+        // header
+        if (declaration.getHeader() != null) {
+            this.json.setComment(String.join("\n", declaration.getHeader()));
+        }
+
+        // postprocess
+        ConfigPostprocessor.of(file, this.json.toString(Stringify.HJSON_COMMENTS))
+                // remove unecessary double comments
+                .updateLines((line) -> line.startsWith("# #") ? line.substring(2) : line)
+                // save
+                .write();
     }
 
     private void addComments(Object object, ConfigDeclaration declaration, String key) {

@@ -89,18 +89,17 @@ public class HoconLightbendConfigurer extends Configurer {
         // postprocess
         ConfigPostprocessor.of(file, buf.toString())
                 // remove all current commments
-                .removeLines((line) -> line.startsWith(this.commentPrefix))
+                .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
                 // add new comments
                 .updateLines((line) -> declaration.getFields().stream()
                         .filter(this.isFieldDeclaredForLine(line))
                         .findAny()
                         .map(FieldDeclaration::getComment)
-                        .map(comment -> this.sectionSeparator + this.buildComment(comment) + line)
+                        .map(comment -> this.sectionSeparator + ConfigPostprocessor.createComment(this.commentPrefix, comment) + line)
                         .orElse(line))
                 // add header if available
-                .updateContext(context -> (declaration.getHeader() != null)
-                        ? (this.buildComment(declaration.getHeader()) + this.sectionSeparator + context)
-                        : context)
+                .prependContextComment(this.commentPrefix, declaration.getHeader())
+                // save
                 .write();
     }
 
@@ -125,16 +124,5 @@ public class HoconLightbendConfigurer extends Configurer {
         }
 
         return map;
-    }
-
-    private String buildComment(String[] strings) {
-        if (strings == null) return null;
-        List<String> lines = new ArrayList<>();
-        for (String line : strings) {
-            String[] parts = line.split("\n");
-            String prefix = line.startsWith(this.commentPrefix.trim()) ? "" : this.commentPrefix;
-            lines.add((line.isEmpty() ? "" : prefix) + line);
-        }
-        return String.join("\n", lines) + "\n";
     }
 }
