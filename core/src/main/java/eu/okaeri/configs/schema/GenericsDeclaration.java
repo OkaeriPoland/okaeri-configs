@@ -102,7 +102,15 @@ public class GenericsDeclaration {
             return primitiveClass;
         }
 
-        return Class.forName(type);
+        try {
+            return Class.forName(type);
+        }
+        // generics, eg.:
+        // - ? super T
+        // - T
+        catch (ClassNotFoundException exception) {
+            return null;
+        }
     }
 
     private static List<String> separateTypes(String types) {

@@ -59,8 +59,10 @@ public class ConfigDeclaration {
                 .findAny();
     }
 
-    public GenericsDeclaration getFieldDeclarationOrNull(String key) {
-        return this.getField(key).map(FieldDeclaration::getType).orElse(null);
+    public GenericsDeclaration getGenericsOrNull(String key) {
+        return this.getField(key)
+                .map(FieldDeclaration::getType)
+                .orElse(null);
     }
 
     private Names nameStrategy;

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class BukkitConfigurer extends Configurer {
 
@@ -88,22 +89,26 @@ public class BukkitConfigurer extends Configurer {
         // bukkit's save
         this.config.save(file);
 
-        // add comments
+        // postprocess
         ConfigPostprocessor.of(file).read()
+                // remove all current commments
                 .removeLines((line) -> line.startsWith(this.commentPrefix))
-                .updateLines((line) -> declaration.getFields().stream().filter(field -> line.startsWith(field.getName() + ":"))
+                // add new comments
+                .updateLines((line) -> declaration.getFields().stream()
+                        .filter(this.isFieldDeclaredForLine(line))
                         .findAny()
                         .map(FieldDeclaration::getComment)
                         .map(comment -> this.sectionSeparator + this.buildComment(comment) + line)
                         .orElse(line))
-                .updateContext(context -> {
-                    // add header if available
-                    if (declaration.getHeader() == null) {
-                        return context;
-                    }
-                    return this.buildComment(declaration.getHeader()) + this.sectionSeparator + context;
-                })
+                // add header if available
+                .updateContext(context -> (declaration.getHeader() != null)
+                        ? (this.buildComment(declaration.getHeader()) + this.sectionSeparator + context)
+                        : context)
                 .write();
+    }
+
+    private Predicate<FieldDeclaration> isFieldDeclaredForLine(String line) {
+        return field -> line.startsWith(field.getName() + ":"); // key:
     }
 
     private String buildComment(String[] strings) {

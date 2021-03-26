@@ -12,6 +12,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class HoconConfigurer extends Configurer {
 
@@ -85,36 +86,30 @@ public class HoconConfigurer extends Configurer {
             buf.append(this.config.root().render(this.renderOpts));
         }
 
-        // add comments
+        // postprocess
         ConfigPostprocessor.of(file, buf.toString())
+                // remove all current commments
                 .removeLines((line) -> line.startsWith(this.commentPrefix))
-                .updateLines((line) -> {
-                    // find field declaration
-                    Optional<FieldDeclaration> fieldOptional = declaration.getFields().stream()
-                            .filter(field -> line.startsWith(field.getName() + "=")
-                                    || line.startsWith(field.getName() + " =")
-                                    || line.startsWith("\"" + field.getName() + "\"")
-                                    || line.startsWith(field.getName() + "{")
-                                    || line.startsWith(field.getName() + " {"))
-                            .findAny();
-                    if (!fieldOptional.isPresent()) {
-                        return line;
-                    }
-                    // prepend comment if declared
-                    FieldDeclaration field = fieldOptional.get();
-                    if (field.getComment() == null) {
-                        return line;
-                    }
-                    return this.sectionSeparator + this.buildComment(field.getComment()) + line;
-                })
-                .updateContext(context -> {
-                    // add header if available
-                    if (declaration.getHeader() == null) {
-                        return context;
-                    }
-                    return this.buildComment(declaration.getHeader()) + this.sectionSeparator + context;
-                })
+                // add new comments
+                .updateLines((line) -> declaration.getFields().stream()
+                        .filter(this.isFieldDeclaredForLine(line))
+                        .findAny()
+                        .map(FieldDeclaration::getComment)
+                        .map(comment -> this.sectionSeparator + this.buildComment(comment) + line)
+                        .orElse(line))
+                // add header if available
+                .updateContext(context -> (declaration.getHeader() != null)
+                        ? (this.buildComment(declaration.getHeader()) + this.sectionSeparator + context)
+                        : context)
                 .write();
+    }
+
+    private Predicate<FieldDeclaration> isFieldDeclaredForLine(String line) {
+        return field -> line.startsWith(field.getName() + "=") // key=
+                || line.startsWith(field.getName() + " =") // key =
+                || line.startsWith("\"" + field.getName() + "\"") // "key"
+                || line.startsWith(field.getName() + "{") // key{
+                || line.startsWith(field.getName() + " {"); // key {
     }
 
     private Map<String, Object> hoconToMap(Config config, ConfigDeclaration declaration) {
@@ -122,6 +117,9 @@ public class HoconConfigurer extends Configurer {
         Map<String, Object> map = new LinkedHashMap<>();
 
         for (FieldDeclaration field : declaration.getFields()) {
+            if (!config.hasPath(field.getName())) {
+                continue;
+            }
             Object value = config.getValue(field.getName()).unwrapped();
             map.put(field.getName(), value);
         }
