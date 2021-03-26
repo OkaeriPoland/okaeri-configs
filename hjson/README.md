@@ -35,4 +35,8 @@ Please use HjsonConfigurer as your configurer:
 ```java
 // default
 new HjsonConfigurer()
+// change comment prefix
+new HjsonConfigurer("// ")
+// change comment prefix and section separator (no space after # in comments, empty spaces between sections)
+new HjsonConfigurer("#", SectionSeparator.NEW_LINE)
 ```

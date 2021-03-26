@@ -93,14 +93,22 @@ public class ConfigPostprocessor {
         return this;
     }
 
+    public static String createCommentOrEmpty(String commentPrefix, String[] strings) {
+        return (strings == null) ? "" : createComment(commentPrefix, strings);
+    }
+
     public static String createComment(String commentPrefix, String[] strings) {
+
         if (strings == null) return null;
+        if (commentPrefix == null) commentPrefix = "";
         List<String> lines = new ArrayList<>();
+
         for (String line : strings) {
             String[] parts = line.split("\n");
             String prefix = line.startsWith(commentPrefix.trim()) ? "" : commentPrefix;
             lines.add((line.isEmpty() ? "" : prefix) + line);
         }
+
         return String.join("\n", lines) + "\n";
     }
 
