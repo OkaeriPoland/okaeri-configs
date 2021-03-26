@@ -1,4 +1,4 @@
-package eu.okaeri.configs.yaml.bukkit.serdes.impl;
+package eu.okaeri.configs.yaml.bukkit.serdes.serializer;
 
 //public class ShapedRecipeSerializer implements ObjectSerializer<ShapedRecipe> {
 //
