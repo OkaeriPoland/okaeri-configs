@@ -2,13 +2,13 @@ package eu.okaeri.configs.test;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
-import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.gson.GsonConfigurer;
 import eu.okaeri.configs.hjson.HjsonConfigurer;
 import eu.okaeri.configs.hocon.lightbend.HoconLightbendConfigurer;
+import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
+import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import lombok.SneakyThrows;
 
 import java.io.File;
@@ -24,9 +24,9 @@ public final class TestRunner {
         inline("inline.bukkit.yml", new YamlBukkitConfigurer());
 
         // gson
-        config("config.gson.json", new GsonConfigurer());
-        empty("empty.gson.json", new GsonConfigurer());
-        inline("inline.gson.json", new GsonConfigurer());
+        config("config.gson.json", new JsonGsonConfigurer());
+        empty("empty.gson.json", new JsonGsonConfigurer());
+        inline("inline.gson.json", new JsonGsonConfigurer());
 
         // json-simple
         config("config.json-simple.json", new JsonSimpleConfigurer());
@@ -42,6 +42,31 @@ public final class TestRunner {
         config("config.hjson.hjson", new HjsonConfigurer());
         empty("empty.hjson.hjson", new HjsonConfigurer());
         inline("inline.hjson.hjson", new HjsonConfigurer());
+
+        // convert test
+        convert();
+    }
+
+    private static void convert() {
+
+        System.out.println("#convert");
+        long start = System.currentTimeMillis();
+
+        TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
+            it.withConfigurer(new HoconLightbendConfigurer());
+            it.withSerdesPack(registry -> registry.register(new LocationSerializer()));
+            it.withBindFile("config.hocon.conf");
+            it.load();
+            it.withConfigurer(new HjsonConfigurer());
+            it.withBindFile("config.hjson-converted.hjson");
+            it.save();
+            it.load();
+        });
+
+        long took = System.currentTimeMillis() - start;
+        System.out.println(took + " ms");
+
+        System.out.println(config);
     }
 
     @SneakyThrows
