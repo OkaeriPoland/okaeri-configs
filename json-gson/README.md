@@ -1,6 +1,6 @@
-# Okaeri Configs | HJSON (hjson-java)
+# Okaeri Configs | JSON (gson)
 
-Based on [PersonTheCat/hjson-java](https://github.com/PersonTheCat/hjson-java), modification of official hjson implementation for java.
+Based on [google/gson](https://github.com/google/gson), a popular json library.
 
 ## Installation
 ### Maven
@@ -15,7 +15,7 @@ Add dependency to the `dependencies` section:
 ```xml
 <dependency>
   <groupId>eu.okaeri</groupId>
-  <artifactId>okaeri-configs-hjson</artifactId>
+  <artifactId>okaeri-configs-json-gson</artifactId>
   <version>1.6.4</version>
 </dependency>
 ```
@@ -26,13 +26,18 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-hjson:1.6.4'
+implementation 'eu.okaeri:okaeri-configs-json-gson:1.6.4'
 ```
+
+## Limitations
+- JSON does not support comments. All `@Header` and `@Comment` values would not be added to the output configuration file.
 
 ## Usage
 
 Please use GsonConfigurer as your configurer:
 ```java
 // default
-new HjsonConfigurer()
+new GsonConfigurer()
+// attach own Gson instance (eg. without pretty print)
+new GsonConfigurer(new Gson())
 ```

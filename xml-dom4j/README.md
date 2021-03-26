@@ -1,6 +1,6 @@
-# Okaeri Configs | HJSON (hjson-java)
+# Okaeri Configs | XML
 
-Based on [PersonTheCat/hjson-java](https://github.com/PersonTheCat/hjson-java), modification of official hjson implementation for java.
+Based on [dom4j/dom4j](https://github.com/dom4j/dom4j).
 
 ## Installation
 ### Maven
@@ -34,5 +34,5 @@ implementation 'eu.okaeri:okaeri-configs-hjson:1.6.4'
 Please use GsonConfigurer as your configurer:
 ```java
 // default
-new HjsonConfigurer()
+new XmlConfigurer()
 ```
