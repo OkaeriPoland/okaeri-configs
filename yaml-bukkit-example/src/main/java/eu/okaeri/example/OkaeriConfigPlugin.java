@@ -1,7 +1,7 @@
 package eu.okaeri.example;
 
 import eu.okaeri.configs.bukkit.YamlBukkitConfigurer;
-import eu.okaeri.configs.bukkit.serdes.BukkitSerdes;
+import eu.okaeri.configs.bukkit.serdes.SerdesBukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -21,7 +21,7 @@ public class OkaeriConfigPlugin extends JavaPlugin {
 
         try {
             this.config = (ExampleConfig) new ExampleConfig()
-                    .withConfigurer(new YamlBukkitConfigurer(), new BukkitSerdes())
+                    .withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit())
                     .withBindFile(new File(this.getDataFolder(), "config.yml"))
                     .saveDefaults()
                     .load(true);
