@@ -1,6 +1,6 @@
 # Okaeri Configs | Bukkit
 
-An example plugin is available in [bukkit-example](https://github.com/OkaeriPoland/okaeri-configs/tree/master/bukkit-example).
+An example plugin is available in [bukkit-example](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit-example).
 For more real-life usage examples see [okaeri-minecraft](https://github.com/OkaeriPoland/okaeri-minecraft) repository.
 
 ## Installation
