@@ -1,7 +1,7 @@
 package eu.okaeri.example;
 
-import eu.okaeri.configs.bukkit.YamlBukkitConfigurer;
-import eu.okaeri.configs.bukkit.serdes.SerdesBukkit;
+import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+import eu.okaeri.configs.yaml.bukkit.serdes.SerdesBukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 

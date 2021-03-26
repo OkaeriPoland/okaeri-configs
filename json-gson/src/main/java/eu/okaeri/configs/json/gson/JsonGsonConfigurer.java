@@ -1,12 +1,12 @@
-package eu.okaeri.configs.json_simple;
+package eu.okaeri.configs.json.gson;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,22 +14,24 @@ import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class JsonSimpleConfigurer extends Configurer {
+public class JsonGsonConfigurer extends Configurer {
 
     private Map<String, Object> map;
-    private JSONParser parser;
+    private Gson gson;
 
-    public JsonSimpleConfigurer() {
-        this.parser = new JSONParser();
+    public JsonGsonConfigurer() {
+        this.gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
         this.map = new LinkedHashMap<>();
     }
 
-    public JsonSimpleConfigurer(JSONParser parser) {
-        this(parser, new LinkedHashMap<>());
+    public JsonGsonConfigurer(Gson gson) {
+        this(gson, new LinkedHashMap<>());
     }
 
-    public JsonSimpleConfigurer(JSONParser parser, Map<String, Object> map) {
-        this.parser = parser;
+    public JsonGsonConfigurer(Gson gson, Map<String, Object> map) {
+        this.gson = gson;
         this.map = map;
     }
 
@@ -58,7 +60,7 @@ public class JsonSimpleConfigurer extends Configurer {
         }
 
         String data = ConfigPostprocessor.of(file).read().getContext();
-        this.map = (Map<String, Object>) this.parser.parse(data);
+        this.map = this.gson.fromJson(data, Map.class);
 
         if (this.map != null) {
             return;
@@ -70,8 +72,7 @@ public class JsonSimpleConfigurer extends Configurer {
     @Override
     public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
         try (Writer writer = new FileWriter(file)) {
-            JSONObject object = new JSONObject(this.map);
-            ConfigPostprocessor.of(file, object.toJSONString()).write();
+            this.gson.toJson(this.map, writer);
         }
     }
 }
