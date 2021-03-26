@@ -55,5 +55,5 @@ new YamlBukkitConfigurer("#", SectionSeparator.NONE)
 ```
 For [serializers/deserializers/transformers](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit) use:
 ```java
-new BukkitSerdes()
+new SerdesBukkit()
 ```
