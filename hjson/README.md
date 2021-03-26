@@ -1,4 +1,4 @@
-# Okaeri Configs | HJOSN
+# Okaeri Configs | HJSON
 
 Based on [PersonTheCat/hjson-java](https://github.com/PersonTheCat/hjson-java), modification of official hjson implementation for java.
 
