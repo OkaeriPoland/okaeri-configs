@@ -33,11 +33,13 @@ public abstract class OkaeriConfig {
     }
 
     public OkaeriConfig withConfigurer(Configurer configurer) {
+        if (this.configurer != null) configurer.setRegistry(this.configurer.getRegistry());
         this.setConfigurer(configurer);
         return this;
     }
 
     public OkaeriConfig withConfigurer(Configurer configurer, OkaeriSerdesPack... serdesPack) {
+        if (this.configurer != null) configurer.setRegistry(this.configurer.getRegistry());
         this.setConfigurer(configurer);
         Arrays.stream(serdesPack).forEach(this.configurer::register);
         return this;
