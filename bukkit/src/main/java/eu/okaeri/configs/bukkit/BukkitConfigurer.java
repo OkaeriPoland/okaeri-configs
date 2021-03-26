@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class BukkitConfigurer extends Configurer {
 
@@ -92,21 +91,11 @@ public class BukkitConfigurer extends Configurer {
         // add comments
         ConfigPostprocessor.of(file).read()
                 .removeLines((line) -> line.startsWith(this.commentPrefix))
-                .updateLines((line) -> {
-                    // find field declaration
-                    Optional<FieldDeclaration> fieldOptional = declaration.getFields().stream()
-                            .filter(field -> line.startsWith(field.getName() + ":"))
-                            .findAny();
-                    if (!fieldOptional.isPresent()) {
-                        return line;
-                    }
-                    // prepend comment if declared
-                    FieldDeclaration field = fieldOptional.get();
-                    if (field.getComment() == null) {
-                        return line;
-                    }
-                    return this.sectionSeparator + this.buildComment(field.getComment()) + line;
-                })
+                .updateLines((line) -> declaration.getFields().stream().filter(field -> line.startsWith(field.getName() + ":"))
+                        .findAny()
+                        .map(FieldDeclaration::getComment)
+                        .map(comment -> this.sectionSeparator + this.buildComment(comment) + line)
+                        .orElse(line))
                 .updateContext(context -> {
                     // add header if available
                     if (declaration.getHeader() == null) {
