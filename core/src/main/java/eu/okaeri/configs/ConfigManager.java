@@ -8,10 +8,9 @@ import java.lang.reflect.Method;
 public final class ConfigManager {
 
     @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public static <T extends OkaeriConfig> T create(Class<? extends OkaeriConfig> clazz) {
+    public static <T extends OkaeriConfig> T create(Class<T> clazz) {
 
-        OkaeriConfig config;
+        T config;
         try {
             config = clazz.newInstance();
         } catch (InstantiationException | IllegalAccessException exception) {
@@ -20,18 +19,18 @@ public final class ConfigManager {
             theUnsafeField.setAccessible(true);
             Object unsafeInstance = theUnsafeField.get(null);
             Method allocateInstance = unsafeClazz.getDeclaredMethod("allocateInstance", Class.class);
-            config = ((OkaeriConfig) allocateInstance.invoke(unsafeInstance, clazz));
+            //noinspection unchecked
+            config = (T) allocateInstance.invoke(unsafeInstance, clazz);
         }
 
-        return (T) initialize(config);
+        return initialize(config);
     }
 
     @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public static <T extends OkaeriConfig> T create(Class<? extends OkaeriConfig> clazz, OkaeriConfigInitializer initializer) {
-        OkaeriConfig config = create(clazz);
+    public static <T extends OkaeriConfig> T create(Class<T> clazz, OkaeriConfigInitializer initializer) {
+        T config = create(clazz);
         initializer.apply(config);
-        return (T) config;
+        return config;
     }
 
     @SneakyThrows
