@@ -2,12 +2,12 @@ package eu.okaeri.configs.test;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
-import eu.okaeri.configs.bukkit.YamlBukkitConfigurer;
+import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.gson.GsonConfigurer;
 import eu.okaeri.configs.hjson.HjsonConfigurer;
-import eu.okaeri.configs.hocon.HoconLightbendConfigurer;
-import eu.okaeri.configs.json_simple.JsonSimpleConfigurer;
+import eu.okaeri.configs.hocon.lightbend.HoconLightbendConfigurer;
+import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
 import lombok.SneakyThrows;
 

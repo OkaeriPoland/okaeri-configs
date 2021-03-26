@@ -1,4 +1,4 @@
-package eu.okaeri.configs.hocon;
+package eu.okaeri.configs.hocon.lightbend;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;

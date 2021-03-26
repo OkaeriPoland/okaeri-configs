@@ -6,7 +6,7 @@
 
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs</artifactId>
-    <version>1.6.4</version>
+    <version>2.0.0</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -26,9 +26,6 @@
         <!-- json modules -->
         <module>json-gson</module>
         <module>json-simple</module>
-
-        <!-- xml modules -->
-        <module>xml-dom4j</module>
 
         <!-- hocon modules -->
         <module>hocon-lightbend</module>

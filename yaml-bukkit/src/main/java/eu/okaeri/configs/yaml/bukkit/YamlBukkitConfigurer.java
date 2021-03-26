@@ -1,4 +1,4 @@
-package eu.okaeri.configs.bukkit;
+package eu.okaeri.configs.yaml.bukkit;
 
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;

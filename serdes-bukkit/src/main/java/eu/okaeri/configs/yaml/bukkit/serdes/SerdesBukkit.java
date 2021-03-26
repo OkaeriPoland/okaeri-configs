@@ -1,11 +1,11 @@
-package eu.okaeri.configs.bukkit.serdes;
+package eu.okaeri.configs.yaml.bukkit.serdes;
 
-import eu.okaeri.configs.bukkit.serdes.impl.ItemMetaSerializer;
-import eu.okaeri.configs.bukkit.serdes.impl.ItemStackSerializer;
-import eu.okaeri.configs.bukkit.serdes.impl.LocationSerializer;
-import eu.okaeri.configs.bukkit.serdes.impl.PotionEffectSerializer;
-import eu.okaeri.configs.bukkit.serdes.transformer.StringEnchantmentTransformer;
-import eu.okaeri.configs.bukkit.serdes.transformer.StringWorldTransformer;
+import eu.okaeri.configs.yaml.bukkit.serdes.impl.ItemMetaSerializer;
+import eu.okaeri.configs.yaml.bukkit.serdes.impl.ItemStackSerializer;
+import eu.okaeri.configs.yaml.bukkit.serdes.impl.LocationSerializer;
+import eu.okaeri.configs.yaml.bukkit.serdes.impl.PotionEffectSerializer;
+import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringEnchantmentTransformer;
+import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringWorldTransformer;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.TransformerRegistry;
 
