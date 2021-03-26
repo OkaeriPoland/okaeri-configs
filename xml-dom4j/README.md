@@ -1,4 +1,4 @@
-# Okaeri Configs | XML
+# Okaeri Configs | XML (dom4j)
 
 Based on [dom4j/dom4j](https://github.com/dom4j/dom4j).
 
@@ -15,7 +15,7 @@ Add dependency to the `dependencies` section:
 ```xml
 <dependency>
   <groupId>eu.okaeri</groupId>
-  <artifactId>okaeri-configs-hjson</artifactId>
+  <artifactId>okaeri-configs-xml-dom4j</artifactId>
   <version>1.6.4</version>
 </dependency>
 ```
@@ -26,13 +26,13 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-hjson:1.6.4'
+implementation 'eu.okaeri:okaeri-configs-xml-dom4j:1.6.4'
 ```
 
 ## Usage
 
-Please use GsonConfigurer as your configurer:
+Please use XmlDomConfigurer as your configurer:
 ```java
 // default
-new XmlConfigurer()
+new XmlDomConfigurer()
 ```
