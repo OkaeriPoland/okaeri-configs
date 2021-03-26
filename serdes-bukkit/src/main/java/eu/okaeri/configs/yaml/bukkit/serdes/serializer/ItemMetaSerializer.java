@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
 
@@ -30,11 +31,11 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     public void serialize(ItemMeta itemMeta, SerializationData data) {
 
         if (itemMeta.hasDisplayName()) {
-            data.add("display-name", StringUtils.replace(itemMeta.getDisplayName(), COLOR_CHAR + "", ALT_COLOR_CHAR + ""));
+            data.add("display-name", this.decolor(itemMeta.getDisplayName()));
         }
 
         if (itemMeta.hasLore()) {
-            data.add("lore", itemMeta.getLore());
+            data.add("lore", this.decolor(itemMeta.getLore()));
         }
 
         if (!itemMeta.getEnchants().isEmpty()) {
@@ -65,13 +66,30 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
 
         ItemMeta itemMeta = new ItemStack(Material.COBBLESTONE).getItemMeta();
         if (displayName != null) {
-            itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, displayName));
+            itemMeta.setDisplayName(this.color(displayName));
         }
 
-        itemMeta.setLore(lore);
+        itemMeta.setLore(this.color(lore));
+
         enchantments.forEach((enchantment, level) -> itemMeta.addEnchant(enchantment, level, true));
         itemMeta.addItemFlags(itemFlags.toArray(new ItemFlag[0]));
 
         return itemMeta;
+    }
+
+    private List<String> color(List<String> text) {
+        return text.stream().map(this::color).collect(Collectors.toList());
+    }
+
+    private String color(String text) {
+        return ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, text);
+    }
+
+    private List<String> decolor(List<String> text) {
+        return text.stream().map(this::decolor).collect(Collectors.toList());
+    }
+
+    private String decolor(String text) {
+        return StringUtils.replace(text, COLOR_CHAR + "", ALT_COLOR_CHAR + "");
     }
 }
