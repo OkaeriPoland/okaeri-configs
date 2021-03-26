@@ -40,7 +40,7 @@ Lightbend's config at the time of implementing has poor support for dynamically 
 
 ## Usage
 
-Please use HoconConfigurer as your configurer:
+Please use HoconLightbendConfigurer as your configurer:
 ```java
 // default ('# ', '\n')
 new HoconLightbendConfigurer()

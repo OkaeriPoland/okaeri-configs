@@ -44,7 +44,7 @@ implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:1.6.4'
 
 ## Usage
 
-Please use BukkitConfigurer as your configurer:
+Please use YamlBukkitConfigurer as your configurer:
 ```java
 // default ('# ', '\n')
 new YamlBukkitConfigurer()

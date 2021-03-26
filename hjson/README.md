@@ -31,7 +31,7 @@ implementation 'eu.okaeri:okaeri-configs-hjson:1.6.4'
 
 ## Usage
 
-Please use GsonConfigurer as your configurer:
+Please use HjsonConfigurer as your configurer:
 ```java
 // default
 new HjsonConfigurer()
