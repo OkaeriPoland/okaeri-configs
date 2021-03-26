@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.SneakyThrows;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 @Data
@@ -71,6 +73,35 @@ public class ConfigPostprocessor {
     public ConfigPostprocessor updateContext(ConfigContextManipulator manipulator) {
         this.context = manipulator.convert(this.context);
         return this;
+    }
+
+    public ConfigPostprocessor prependContextComment(String prefix, String[] strings) {
+        return this.prependContextComment(prefix, "", strings);
+    }
+
+    public ConfigPostprocessor prependContextComment(String prefix, String separator, String[] strings) {
+        if (strings != null) this.context = createComment(prefix, strings) + separator + this.context;
+        return this;
+    }
+
+    public ConfigPostprocessor appendContextComment(String prefix, String[] strings) {
+        return this.appendContextComment(prefix, "", strings);
+    }
+
+    public ConfigPostprocessor appendContextComment(String prefix, String separator, String[] strings) {
+        if (strings != null) this.context += separator + createComment(prefix, strings);
+        return this;
+    }
+
+    public static String createComment(String commentPrefix, String[] strings) {
+        if (strings == null) return null;
+        List<String> lines = new ArrayList<>();
+        for (String line : strings) {
+            String[] parts = line.split("\n");
+            String prefix = line.startsWith(commentPrefix.trim()) ? "" : commentPrefix;
+            lines.add((line.isEmpty() ? "" : prefix) + line);
+        }
+        return String.join("\n", lines) + "\n";
     }
 
     private String readFile(File file) throws IOException {
