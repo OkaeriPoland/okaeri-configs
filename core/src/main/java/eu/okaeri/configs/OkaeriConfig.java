@@ -77,7 +77,7 @@ public abstract class OkaeriConfig {
             throw new IllegalAccessException("configurer cannot be null");
         }
         FieldDeclaration field = this.declaration.getField(key).orElse(null);
-        GenericsDeclaration fieldGenerics = this.declaration.getFieldDeclarationOrNull(key);
+        GenericsDeclaration fieldGenerics = this.declaration.getGenericsOrNull(key);
         this.configurer.setValue(key, value, fieldGenerics, field);
     }
 
