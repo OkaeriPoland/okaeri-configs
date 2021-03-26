@@ -1,4 +1,4 @@
-# Okaeri Configs | json-simple
+# Okaeri Configs | JSON (json-simple)
 
 Based on [fangyidong/json-simple](https://github.com/fangyidong/json-simple). Not recommended as configuration file provider due to heavy limitations.
 

@@ -2,11 +2,11 @@ package eu.okaeri.configs.test;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
-import eu.okaeri.configs.bukkit.BukkitConfigurer;
+import eu.okaeri.configs.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.gson.GsonConfigurer;
 import eu.okaeri.configs.hjson.HjsonConfigurer;
-import eu.okaeri.configs.hocon.HoconConfigurer;
+import eu.okaeri.configs.hocon.HoconLightbendConfigurer;
 import eu.okaeri.configs.json_simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
 import lombok.SneakyThrows;
@@ -19,9 +19,9 @@ public final class TestRunner {
     public static void main(String[] args) {
 
         // bukkit
-        config("config.bukkit.yml", new BukkitConfigurer("# ", ""));
-        empty("empty.bukkit.yml", new BukkitConfigurer());
-        inline("inline.bukkit.yml", new BukkitConfigurer());
+        config("config.bukkit.yml", new YamlBukkitConfigurer("# ", ""));
+        empty("empty.bukkit.yml", new YamlBukkitConfigurer());
+        inline("inline.bukkit.yml", new YamlBukkitConfigurer());
 
         // gson
         config("config.gson.json", new GsonConfigurer());
@@ -34,9 +34,9 @@ public final class TestRunner {
         inline("inline.json-simple.json", new JsonSimpleConfigurer());
 
         // hocon
-        config("config.hocon.conf", new HoconConfigurer());
-        empty("empty.hocon.conf", new HoconConfigurer());
-        inline("inline.hocon.conf", new HoconConfigurer());
+        config("config.hocon.conf", new HoconLightbendConfigurer());
+        empty("empty.hocon.conf", new HoconLightbendConfigurer());
+        inline("inline.hocon.conf", new HoconLightbendConfigurer());
 
         // hocon
         config("config.hjson.hjson", new HjsonConfigurer());
