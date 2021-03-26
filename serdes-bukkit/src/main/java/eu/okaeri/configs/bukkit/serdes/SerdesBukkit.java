@@ -9,7 +9,7 @@ import eu.okaeri.configs.bukkit.serdes.transformer.StringWorldTransformer;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.TransformerRegistry;
 
-public class BukkitSerdes implements OkaeriSerdesPack {
+public class SerdesBukkit implements OkaeriSerdesPack {
 
     @Override
     public void register(TransformerRegistry registry) {

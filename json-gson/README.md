@@ -34,10 +34,10 @@ implementation 'eu.okaeri:okaeri-configs-json-gson:1.6.4'
 
 ## Usage
 
-Please use GsonConfigurer as your configurer:
+Please use JsonGsonConfigurer as your configurer:
 ```java
 // default
-new GsonConfigurer()
+new JsonGsonConfigurer()
 // attach own Gson instance (eg. without pretty print)
-new GsonConfigurer(new Gson())
+new JsonGsonConfigurer(new Gson())
 ```

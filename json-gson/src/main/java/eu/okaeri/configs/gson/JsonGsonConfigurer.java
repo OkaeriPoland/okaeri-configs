@@ -14,23 +14,23 @@ import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class GsonConfigurer extends Configurer {
+public class JsonGsonConfigurer extends Configurer {
 
     private Map<String, Object> map;
     private Gson gson;
 
-    public GsonConfigurer() {
+    public JsonGsonConfigurer() {
         this.gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .create();
         this.map = new LinkedHashMap<>();
     }
 
-    public GsonConfigurer(Gson gson) {
+    public JsonGsonConfigurer(Gson gson) {
         this(gson, new LinkedHashMap<>());
     }
 
-    public GsonConfigurer(Gson gson, Map<String, Object> map) {
+    public JsonGsonConfigurer(Gson gson, Map<String, Object> map) {
         this.gson = gson;
         this.map = map;
     }
