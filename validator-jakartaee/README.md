@@ -1,4 +1,4 @@
-# Okaeri Configs | core-validator
+# Okaeri Configs | validator-jakartaee
 
 Based on [hibernate/hibernate-validator](https://github.com/hibernate/hibernate-validator). 
 Jakarta Bean Validation 3.0 is a powerful tool and the ultimate validation solution, but comes at the cost of additional ~2MB in the final jar size.
@@ -12,18 +12,18 @@ Add dependency to the `dependencies` section:
 ```xml
 <dependency>
   <groupId>eu.okaeri</groupId>
-  <artifactId>okaeri-configs-core-validator</artifactId>
-  <version>2.1.0</version>
+  <artifactId>okaeri-configs-validator-jakartaee</artifactId>
+  <version>2.2.0</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-core-validator:2.1.0'
+implementation 'eu.okaeri:okaeri-configs-validator-jakartaee:2.2.0'
 ```
 
 ## Usage
 
-Please wrap your current Configurer with ValidatorConfigurer:
+Please wrap your current Configurer with JakartaValidator:
 ```java
-new ValidatorConfigurer(yourConfigurer)
+new JakartaValidator(yourConfigurer)
 ```
