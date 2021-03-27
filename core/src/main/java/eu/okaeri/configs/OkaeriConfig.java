@@ -109,6 +109,9 @@ public abstract class OkaeriConfig {
         }
 
         for (FieldDeclaration field : this.declaration.getFields()) {
+            if (!this.configurer.isValid(field)) {
+                throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+            }
             try {
                 this.configurer.setValue(field.getName(), field.getValue(), field.getType(), field);
             } catch (Exception exception) {
