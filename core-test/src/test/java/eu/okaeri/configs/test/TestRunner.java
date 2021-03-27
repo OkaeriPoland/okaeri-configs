@@ -8,7 +8,7 @@ import eu.okaeri.configs.hocon.lightbend.HoconLightbendConfigurer;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
-import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+import eu.okaeri.configs.validator.ValidatorConfigurer;
 
 import java.io.File;
 
@@ -17,9 +17,9 @@ public final class TestRunner {
     public static void main(String[] args) {
 
         // bukkit
-        config("config.bukkit.yml", new YamlBukkitConfigurer("# ", ""));
-        empty("empty.bukkit.yml", new YamlBukkitConfigurer());
-        inline("inline.bukkit.yml", new YamlBukkitConfigurer());
+//        config("config.bukkit.yml", new YamlBukkitConfigurer("# ", ""));
+//        empty("empty.bukkit.yml", new YamlBukkitConfigurer());
+//        inline("inline.bukkit.yml", new YamlBukkitConfigurer());
 
         // gson
         config("config.gson.json", new JsonGsonConfigurer());
@@ -36,8 +36,8 @@ public final class TestRunner {
         empty("empty.hocon.conf", new HoconLightbendConfigurer());
         inline("inline.hocon.conf", new HoconLightbendConfigurer());
 
-        // hocon
-        config("config.hjson.hjson", new HjsonConfigurer());
+        // hjson
+        config("config.hjson.hjson", new ValidatorConfigurer(new HjsonConfigurer()));
         empty("empty.hjson.hjson", new HjsonConfigurer());
         inline("inline.hjson.hjson", new HjsonConfigurer());
 

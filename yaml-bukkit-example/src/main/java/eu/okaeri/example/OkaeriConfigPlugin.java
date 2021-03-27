@@ -30,6 +30,7 @@ public class OkaeriConfigPlugin extends JavaPlugin {
         } catch (Exception exception) {
             this.getLogger().log(Level.SEVERE, "Error loading config.yml", exception);
             this.getPluginLoader().disablePlugin(this);
+            return;
         }
 
         Location spawn = this.config.getSpawn();
