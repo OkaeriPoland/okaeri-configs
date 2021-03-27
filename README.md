@@ -141,3 +141,8 @@ TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
     - Any type assignable from Map or Collection if non-interface type is used and default constructor is available
 - Enum types: any enum is automatically transformed using `valueOf()` and `name()`
 - Custom types using `ObjectSerializer`/`ObjectTransformer` (see in supported platforms)
+
+## Validation
+
+Currently available validators:
+- [core-validator](https://github.com/OkaeriPoland/okaeri-configs/core-validator): hibernate-validator based with full Jakarta Bean Validation 3.0 support

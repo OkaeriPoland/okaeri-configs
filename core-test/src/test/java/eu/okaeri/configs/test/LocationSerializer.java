@@ -4,8 +4,8 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import org.bukkit.Location;
-import org.bukkit.World;
+import eu.okaeri.configs.test.obj.Location;
+import eu.okaeri.configs.test.obj.World;
 
 public class LocationSerializer implements ObjectSerializer<Location> {
 

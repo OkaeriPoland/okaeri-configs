@@ -3,9 +3,10 @@ package eu.okaeri.configs.test.impl;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.*;
+import eu.okaeri.configs.test.obj.Location;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.bukkit.Location;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -27,6 +28,7 @@ import java.util.*;
 @Names(strategy = NameStrategy.SNAKE_CASE, modifier = NameModifier.TO_LOWER_CASE)
 public class TestConfig extends OkaeriConfig {
 
+    @Size(min = 1, max = 3)
     @Variable("APP_TOKEN")
     @Comment({"Klucz prywatny API", "API secret"})
     private String token = "";
