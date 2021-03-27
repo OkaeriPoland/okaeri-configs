@@ -18,8 +18,8 @@
 ### HOCON
 - [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): use Human-Optimized Config Object Notation for your configs, but beware of limitations
 
-## Validation
-- [validator-jakartaee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): hibernate-validator based with full Jakarta Bean Validation 3.0 support
+## Validation extensions
+- [Hibernate Validator (Jakarta EE)](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): hibernate-validator based with full Jakarta Bean Validation 3.0 support
 
 ## Genesis
 
