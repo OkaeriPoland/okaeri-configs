@@ -14,19 +14,19 @@ import java.util.stream.Collectors;
 
 public class JakartaValidator extends WrappedConfigurer {
 
+    private final Validator validator;
+
     public JakartaValidator(Configurer wrapped) {
         super(wrapped);
+        this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     @Override
     public boolean isValid(FieldDeclaration declaration) {
 
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        Validator validator = validatorFactory.getValidator();
-
         Object parentObject = declaration.getObject();
         String realFieldName = declaration.getField().getName();
-        Set<ConstraintViolation<Object>> violations = validator.validateProperty(parentObject, realFieldName);
+        Set<ConstraintViolation<Object>> violations = this.validator.validateProperty(parentObject, realFieldName);
 
         if (!violations.isEmpty()) {
             String reason = violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", "));
