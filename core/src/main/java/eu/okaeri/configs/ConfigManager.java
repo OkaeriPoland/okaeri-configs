@@ -1,41 +1,50 @@
 package eu.okaeri.configs;
 
-import lombok.SneakyThrows;
+import eu.okaeri.configs.exception.OkaeriException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public final class ConfigManager {
 
-    @SneakyThrows
-    public static <T extends OkaeriConfig> T create(Class<T> clazz) {
+    public static <T extends OkaeriConfig> T create(Class<T> clazz) throws OkaeriException {
 
         T config;
         try {
             config = clazz.newInstance();
         } catch (InstantiationException | IllegalAccessException exception) {
-            Class<?> unsafeClazz = Class.forName("sun.misc.Unsafe");
-            Field theUnsafeField = unsafeClazz.getDeclaredField("theUnsafe");
-            theUnsafeField.setAccessible(true);
-            Object unsafeInstance = theUnsafeField.get(null);
-            Method allocateInstance = unsafeClazz.getDeclaredMethod("allocateInstance", Class.class);
-            //noinspection unchecked
-            config = (T) allocateInstance.invoke(unsafeInstance, clazz);
+            try {
+                //noinspection unchecked
+                config = (T) allocateInstance(clazz);
+            } catch (Exception exception1) {
+                throw new OkaeriException("failed to create " + clazz + " instance, neither default constructor available, nor unsafe succeeded");
+            }
         }
 
         return initialize(config);
     }
 
-    @SneakyThrows
-    public static <T extends OkaeriConfig> T create(Class<T> clazz, OkaeriConfigInitializer initializer) {
+    public static <T extends OkaeriConfig> T create(Class<T> clazz, OkaeriConfigInitializer initializer) throws OkaeriException {
         T config = create(clazz);
-        initializer.apply(config);
+        try {
+            initializer.apply(config);
+        } catch (Exception exception) {
+            throw new OkaeriException("failed to initialize " + clazz.getName(), exception);
+        }
         return config;
     }
 
-    @SneakyThrows
     public static <T extends OkaeriConfig> T initialize(T config) {
         config.updateDeclaration();
         return config;
+    }
+
+    private static Object allocateInstance(Class<?> clazz) throws Exception {
+        Class<?> unsafeClazz = Class.forName("sun.misc.Unsafe");
+        Field theUnsafeField = unsafeClazz.getDeclaredField("theUnsafe");
+        theUnsafeField.setAccessible(true);
+        Object unsafeInstance = theUnsafeField.get(null);
+        Method allocateInstance = unsafeClazz.getDeclaredMethod("allocateInstance", Class.class);
+        return allocateInstance.invoke(unsafeInstance, clazz);
     }
 }

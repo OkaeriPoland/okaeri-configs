@@ -88,6 +88,11 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
+    public boolean isValid(FieldDeclaration declaration) {
+        return this.wrapped.isValid(declaration);
+    }
+
+    @Override
     public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
         this.wrapped.writeToFile(file, declaration);
     }

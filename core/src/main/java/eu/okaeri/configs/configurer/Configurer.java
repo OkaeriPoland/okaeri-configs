@@ -2,15 +2,16 @@ package eu.okaeri.configs.configurer;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -48,7 +49,7 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType) {
+    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType) throws OkaeriException {
 
         List collection = new ArrayList();
         GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtype().get(0);
@@ -61,7 +62,7 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType) {
+    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtype().get(0);
@@ -76,9 +77,8 @@ public abstract class Configurer {
         return map;
     }
 
-    @SneakyThrows
     @SuppressWarnings("unchecked")
-    public Object simplify(Object value, GenericsDeclaration genericType) {
+    public Object simplify(Object value, GenericsDeclaration genericType) throws OkaeriException {
 
         if (value == null) {
             return null;
@@ -111,8 +111,7 @@ public abstract class Configurer {
                 return this.simplifyMap((Map<Object, Object>) value, genericType);
             }
 
-            throw new IllegalArgumentException("cannot simplify type " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
-            // return value; // - disallow unprocessed fallback (strict mode)
+            throw new OkaeriException("cannot simplify type " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
         }
 
         SerializationData serializationData = new SerializationData(this);
@@ -127,9 +126,8 @@ public abstract class Configurer {
         return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType);
     }
 
-    @SneakyThrows
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) throws OkaeriException {
 
         if (object == null) {
             return null;
@@ -144,16 +142,19 @@ public abstract class Configurer {
         }
 
         // enums
-        if ((object instanceof String) && targetClazz.isEnum()) {
-            String strObject = (String) object;
-            Method enumMethod = targetClazz.getMethod("valueOf", String.class);
-            return targetClazz.cast(enumMethod.invoke(null, strObject));
-        }
-
         Class<?> objectClazz = object.getClass();
-        if (objectClazz.isEnum() && (targetClazz == String.class)) {
-            Method enumMethod = objectClazz.getMethod("name");
-            return targetClazz.cast(enumMethod.invoke(object));
+        try {
+            if ((object instanceof String) && targetClazz.isEnum()) {
+                String strObject = (String) object;
+                Method enumMethod = targetClazz.getMethod("valueOf", String.class);
+                return targetClazz.cast(enumMethod.invoke(null, strObject));
+            }
+            if (objectClazz.isEnum() && (targetClazz == String.class)) {
+                Method enumMethod = objectClazz.getMethod("name");
+                return targetClazz.cast(enumMethod.invoke(object));
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
+            throw new OkaeriException("failed to resolve enum " + object.getClass() + " <> " + targetClazz, exception);
         }
 
         // subconfig
@@ -236,7 +237,7 @@ public abstract class Configurer {
         return targetClazz.cast(transformer.transform(object));
     }
 
-    public Object createInstance(Class<?> clazz) {
+    public Object createInstance(Class<?> clazz) throws OkaeriException {
         try {
             if (Collection.class.isAssignableFrom(clazz)) {
                 if (clazz == Set.class) return new HashSet<>();
@@ -249,15 +250,19 @@ public abstract class Configurer {
                 return clazz.newInstance();
             }
 
-            throw new IllegalArgumentException("cannot create instance of " + clazz);
+            throw new OkaeriException("cannot create instance of " + clazz);
         }
         catch (Exception exception) {
-            throw new IllegalArgumentException("failed to create instance of " + clazz, exception);
+            throw new OkaeriException("failed to create instance of " + clazz, exception);
         }
     }
 
     public boolean keyExists(String key) {
         return this.getValue(key) != null;
+    }
+
+    public boolean isValid(FieldDeclaration declaration) {
+        return true;
     }
 
     public abstract void writeToFile(File file, ConfigDeclaration declaration) throws Exception;

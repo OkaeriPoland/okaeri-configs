@@ -9,13 +9,11 @@ import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
-import lombok.SneakyThrows;
 
 import java.io.File;
 
 public final class TestRunner {
 
-    @SneakyThrows
     public static void main(String[] args) {
 
         // bukkit
@@ -69,7 +67,6 @@ public final class TestRunner {
         System.out.println(config);
     }
 
-    @SneakyThrows
     private static void inline(String pathname, Configurer configurer) {
 
         System.out.println("#inline " + pathname);
@@ -88,7 +85,6 @@ public final class TestRunner {
 //        System.out.println(inline);
     }
 
-    @SneakyThrows
     private static void empty(String pathname, Configurer configurer) {
 
         System.out.println("#empty " + pathname);
@@ -109,7 +105,6 @@ public final class TestRunner {
 //        System.out.println(empty.get("elon-musk-2"));
     }
 
-    @SneakyThrows
     private static void config(String pathname, Configurer configurer) {
 
         System.out.println("#config " + pathname);
