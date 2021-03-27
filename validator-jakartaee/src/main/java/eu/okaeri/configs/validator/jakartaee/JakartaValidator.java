@@ -1,4 +1,4 @@
-package eu.okaeri.configs.validator;
+package eu.okaeri.configs.validator.jakartaee;
 
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.configurer.WrappedConfigurer;
@@ -12,9 +12,9 @@ import jakarta.validation.ValidatorFactory;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ValidatorConfigurer extends WrappedConfigurer {
+public class JakartaValidator extends WrappedConfigurer {
 
-    public ValidatorConfigurer(Configurer wrapped) {
+    public JakartaValidator(Configurer wrapped) {
         super(wrapped);
     }
 

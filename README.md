@@ -144,4 +144,4 @@ TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
 
 ## Validation
 
-- [core-validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/core-validator): hibernate-validator based with full Jakarta Bean Validation 3.0 support
+- [validator-jakartaee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): hibernate-validator based with full Jakarta Bean Validation 3.0 support
