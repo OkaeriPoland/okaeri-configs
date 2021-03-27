@@ -3,7 +3,6 @@ package eu.okaeri.configs.schema;
 import eu.okaeri.configs.OkaeriConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.SneakyThrows;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -70,7 +69,6 @@ public class GenericsDeclaration {
         return new GenericsDeclaration(object.getClass());
     }
 
-    @SneakyThrows
     public static GenericsDeclaration from(String typeName) {
 
         GenericsDeclaration declaration = new GenericsDeclaration();
@@ -95,7 +93,7 @@ public class GenericsDeclaration {
         return declaration;
     }
 
-    private static Class<?> resolvePrimitiveOrClass(String type) throws ClassNotFoundException {
+    private static Class<?> resolvePrimitiveOrClass(String type) {
 
         Class<?> primitiveClass = PRIMITIVES.get(type);
         if (primitiveClass != null) {

@@ -1,6 +1,7 @@
 package eu.okaeri.configs.schema;
 
 import eu.okaeri.configs.annotation.*;
+import eu.okaeri.configs.exception.OkaeriException;
 import lombok.Data;
 import lombok.SneakyThrows;
 
@@ -79,25 +80,34 @@ public class FieldDeclaration {
         return null;
     }
 
-    public void updateValue(Object value) throws IllegalAccessException {
-        boolean accessible = this.field.isAccessible();
-        this.field.setAccessible(true);
-        this.field.set(this.object, value);
-        this.field.setAccessible(accessible);
+    public void updateValue(Object value) throws OkaeriException {
+        try {
+            boolean accessible = this.field.isAccessible();
+            this.field.setAccessible(true);
+            this.field.set(this.object, value);
+            this.field.setAccessible(accessible);
+        }
+        catch (IllegalAccessException exception) {
+            throw new OkaeriException("failed to #updateValue", exception);
+        }
     }
 
-    public Object getValue() throws IllegalAccessException {
+    public Object getValue() throws OkaeriException {
 
         if ((this.variable != null) && (this.variable.mode() == VariableMode.RUNTIME)) {
             return this.startingValue;
         }
 
-        boolean accessible = this.field.isAccessible();
-        this.field.setAccessible(true);
-        Object value = this.field.get(this.object);
-        this.field.setAccessible(accessible);
-
-        return value;
+        try {
+            boolean accessible = this.field.isAccessible();
+            this.field.setAccessible(true);
+            Object value = this.field.get(this.object);
+            this.field.setAccessible(accessible);
+            return value;
+        }
+        catch (IllegalAccessException exception) {
+            throw new OkaeriException("failed to #getValue", exception);
+        }
     }
 
     private Object startingValue;

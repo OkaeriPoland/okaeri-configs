@@ -2,13 +2,15 @@ package eu.okaeri.configs;
 
 import eu.okaeri.configs.annotation.Variable;
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.exception.InitializationException;
+import eu.okaeri.configs.exception.OkaeriException;
+import eu.okaeri.configs.exception.ValidationException;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 
 import java.io.File;
 import java.util.Arrays;
@@ -60,10 +62,10 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig saveDefaults() throws Exception {
+    public OkaeriConfig saveDefaults() throws OkaeriException {
 
         if (this.bindFile == null) {
-            throw new IllegalAccessException("bindFile cannot be null");
+            throw new InitializationException("bindFile cannot be null");
         }
 
         if (this.bindFile.exists()) {
@@ -73,51 +75,57 @@ public abstract class OkaeriConfig {
         return this.save();
     }
 
-    @SneakyThrows
     public void set(String key, Object value) {
         if (this.configurer == null) {
-            throw new IllegalAccessException("configurer cannot be null");
+            throw new InitializationException("configurer cannot be null");
         }
         FieldDeclaration field = this.declaration.getField(key).orElse(null);
         GenericsDeclaration fieldGenerics = this.declaration.getGenericsOrNull(key);
         this.configurer.setValue(key, value, fieldGenerics, field);
     }
 
-    @SneakyThrows
     public Object get(String key) {
         if (this.configurer == null) {
-            throw new IllegalAccessException("configurer cannot be null");
+            throw new InitializationException("configurer cannot be null");
         }
         return this.configurer.getValue(key);
     }
 
-    @SneakyThrows
     public <T> T get(String key, Class<T> clazz) {
         if (this.configurer == null) {
-            throw new IllegalAccessException("configurer cannot be null");
+            throw new InitializationException("configurer cannot be null");
         }
         return this.configurer.getValue(key, clazz, null);
     }
 
-    public OkaeriConfig save() throws Exception {
+    public OkaeriConfig save() throws OkaeriException {
 
         if (this.bindFile == null) {
-            throw new IllegalAccessException("bindFile cannot be null");
+            throw new InitializationException("bindFile cannot be null");
         }
 
         if (this.configurer == null) {
-            throw new IllegalAccessException("configurer cannot be null");
+            throw new InitializationException("configurer cannot be null");
         }
 
         for (FieldDeclaration field : this.declaration.getFields()) {
-            this.configurer.setValue(field.getName(), field.getValue(), field.getType(), field);
+            try {
+                this.configurer.setValue(field.getName(), field.getValue(), field.getType(), field);
+            } catch (Exception exception) {
+                throw new OkaeriException("failed to #setValue for " + field.getName(), exception);
+            }
         }
 
-        this.configurer.writeToFile(this.bindFile, this.declaration);
+        try {
+            this.configurer.writeToFile(this.bindFile, this.declaration);
+        } catch (Exception exception) {
+            throw new OkaeriException("failed #writeToFile {" + this.bindFile + ", ... }", exception);
+        }
+
         return this;
     }
 
-    public Map<String, Object> asMap(Configurer configurer) throws Exception {
+    public Map<String, Object> asMap(Configurer configurer) throws OkaeriException {
 
         Map<String, Object> map = new LinkedHashMap<>();
         for (FieldDeclaration field : this.declaration.getFields()) {
@@ -128,7 +136,7 @@ public abstract class OkaeriConfig {
         return map;
     }
 
-    public OkaeriConfig load(boolean update) throws Exception {
+    public OkaeriConfig load(boolean update) throws OkaeriException {
         this.load();
         if (update) {
             this.save();
@@ -136,24 +144,29 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig load() throws Exception {
+    public OkaeriConfig load() throws OkaeriException {
 
         if (this.bindFile == null) {
-            throw new IllegalAccessException("bindFile cannot be null");
+            throw new InitializationException("bindFile cannot be null");
         }
 
         if (this.configurer == null) {
-            throw new IllegalAccessException("configurer cannot be null");
+            throw new InitializationException("configurer cannot be null");
         }
 
-        this.configurer.loadFromFile(this.bindFile, this.declaration);
+        try {
+            this.configurer.loadFromFile(this.bindFile, this.declaration);
+        } catch (Exception exception) {
+            throw new OkaeriException("failed #loadFromFile {" + this.bindFile + ", ... }", exception);
+        }
+
         return this.update();
     }
 
-    public OkaeriConfig update() throws Exception {
+    public OkaeriConfig update() throws OkaeriException {
 
         if (this.declaration == null) {
-            throw new IllegalAccessException("declaration cannot be null: config not initialized");
+            throw new InitializationException("declaration cannot be null: config not initialized");
         }
 
         for (FieldDeclaration field : this.declaration.getFields()) {
@@ -167,7 +180,12 @@ public abstract class OkaeriConfig {
             if (variable != null) {
                 String property = this.getPropertyOrEnv(variable.value());
                 if (property != null) {
-                    Object value = this.configurer.resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType);
+                    Object value;
+                    try {
+                        value = this.configurer.resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType);
+                    } catch (Exception exception) {
+                        throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
+                    }
                     field.updateValue(value);
                     updateValue = false;
                 }
@@ -177,7 +195,17 @@ public abstract class OkaeriConfig {
                 continue;
             }
 
-            Object value = this.configurer.getValue(fieldName, type, genericType);
+            if (!this.configurer.isValid(field)) {
+                throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+            }
+
+            Object value;
+            try {
+                value = this.configurer.getValue(fieldName, type, genericType);
+            } catch (Exception exception) {
+                throw new OkaeriException("failed to #getValue for " + fieldName, exception);
+            }
+
             if (updateValue) field.updateValue(value);
             field.setStartingValue(value);
         }
