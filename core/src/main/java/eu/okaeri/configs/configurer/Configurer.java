@@ -261,7 +261,7 @@ public abstract class Configurer {
         return this.getValue(key) != null;
     }
 
-    public boolean isValid(FieldDeclaration declaration) {
+    public boolean isValid(FieldDeclaration declaration, Object value) {
         return true;
     }
 
