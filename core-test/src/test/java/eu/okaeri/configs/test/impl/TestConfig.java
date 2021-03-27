@@ -31,7 +31,7 @@ public class TestConfig extends OkaeriConfig {
     @Size(min = 1, max = 3)
     @Variable("APP_TOKEN")
     @Comment({"Klucz prywatny API", "API secret"})
-    private String token = "";
+    private String token = "a";
 
     @CustomKey("white-list")
     @Comment({"", "Biala lista (wpisane nicki lub ip nie beda blokowane)", "Whitelist (nicknames or ips)"})

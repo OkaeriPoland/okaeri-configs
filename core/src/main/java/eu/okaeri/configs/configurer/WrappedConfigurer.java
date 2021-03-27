@@ -88,8 +88,8 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public boolean isValid(FieldDeclaration declaration) {
-        return this.wrapped.isValid(declaration);
+    public boolean isValid(FieldDeclaration declaration, Object value) {
+        return this.wrapped.isValid(declaration, value);
     }
 
     @Override

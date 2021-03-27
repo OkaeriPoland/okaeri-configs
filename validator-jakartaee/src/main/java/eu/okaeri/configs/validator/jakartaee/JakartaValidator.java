@@ -7,7 +7,6 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,17 +21,18 @@ public class JakartaValidator extends WrappedConfigurer {
     }
 
     @Override
-    public boolean isValid(FieldDeclaration declaration) {
+    @SuppressWarnings("unchecked")
+    public boolean isValid(FieldDeclaration declaration, Object value) {
 
-        Object parentObject = declaration.getObject();
+        Class<Object> parent = (Class<Object>) declaration.getObject().getClass();
         String realFieldName = declaration.getField().getName();
-        Set<ConstraintViolation<Object>> violations = this.validator.validateProperty(parentObject, realFieldName);
+        Set<ConstraintViolation<Object>> violations = this.validator.validateValue(parent, realFieldName, value);
 
         if (!violations.isEmpty()) {
             String reason = violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", "));
-            throw new ValidationException(declaration.getName() + " is invalid: " + reason);
+            throw new ValidationException(declaration.getName() + " (" + value + ") is invalid: " + reason);
         }
 
-        return super.isValid(declaration);
+        return super.isValid(declaration, value);
     }
 }

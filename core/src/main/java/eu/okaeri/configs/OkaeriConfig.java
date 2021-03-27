@@ -109,7 +109,7 @@ public abstract class OkaeriConfig {
         }
 
         for (FieldDeclaration field : this.declaration.getFields()) {
-            if (!this.configurer.isValid(field)) {
+            if (!this.configurer.isValid(field, field.getValue())) {
                 throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
             }
             try {
@@ -189,6 +189,9 @@ public abstract class OkaeriConfig {
                     } catch (Exception exception) {
                         throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
                     }
+                    if (!this.configurer.isValid(field, value)) {
+                        throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+                    }
                     field.updateValue(value);
                     updateValue = false;
                 }
@@ -198,10 +201,6 @@ public abstract class OkaeriConfig {
                 continue;
             }
 
-            if (!this.configurer.isValid(field)) {
-                throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
-            }
-
             Object value;
             try {
                 value = this.configurer.getValue(fieldName, type, genericType);
@@ -209,7 +208,13 @@ public abstract class OkaeriConfig {
                 throw new OkaeriException("failed to #getValue for " + fieldName, exception);
             }
 
-            if (updateValue) field.updateValue(value);
+            if (updateValue) {
+                if (!this.configurer.isValid(field, value)) {
+                    throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+                }
+                field.updateValue(value);
+            }
+
             field.setStartingValue(value);
         }
 
