@@ -30,6 +30,9 @@ Add dependency to the `maven` section:
 implementation 'eu.okaeri:okaeri-configs-binary-obdf:2.3.2'
 ```
 
+## Limitations
+- OBDF is a binary format, and thus does not support comments.
+
 ## Usage
 
 Please use ObdfConfigurer as your configurer:
