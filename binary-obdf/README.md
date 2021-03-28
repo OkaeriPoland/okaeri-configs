@@ -31,7 +31,7 @@ implementation 'eu.okaeri:okaeri-configs-binary-obdf:2.3.2'
 ```
 
 ## Limitations
-- OBDF is a binary format, and thus does not support comments.
+- OBDF is a binary format, and thus does not support comments. All `@Header` and `@Comment` values would not be added to the output configuration file.
 
 ## Usage
 
