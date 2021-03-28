@@ -11,10 +11,12 @@
 ### YAML
 - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Minecraft plugins
 ### HJSON
-- 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON is the best choice for your JSON configuration
+- 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON is the best choice for your JSON configuration, small (core+55kB) but yet powerful
 ### JSON
 - 🌟 [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): ideal for GSON lovers, best suited for in-app storage or advanced user configurations
 - [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): fairly limited but still working, no pretty print, probably best suited for simple in-app storage
+### Binary
+- [OBDF (Okaeri Binary Data Format)](https://github.com/OkaeriPoland/okaeri-configs/tree/master/binary-obdf): smallest standalone platform yet (core+15kB), experimental format suited for in-app storage only
 ### HOCON
 - [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): use Human-Optimized Config Object Notation for your configs, but beware of limitations
 
