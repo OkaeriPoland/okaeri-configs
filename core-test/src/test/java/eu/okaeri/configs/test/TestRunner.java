@@ -2,6 +2,7 @@ package eu.okaeri.configs.test;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.binary.obdf.ObdfConfigurer;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.hjson.HjsonConfigurer;
 import eu.okaeri.configs.hocon.lightbend.HoconLightbendConfigurer;
@@ -30,6 +31,11 @@ public final class TestRunner {
         config("config.json-simple.json", new JsonSimpleConfigurer());
         empty("empty.json-simple.json", new JsonSimpleConfigurer());
         inline("inline.json-simple.json", new JsonSimpleConfigurer());
+
+        // obdf
+        config("config.okaeri-bin.obdf", new ObdfConfigurer());
+        empty("empty.okaeri-bin.obdf", new ObdfConfigurer());
+        inline("inline.okaeri-bin.obdf", new ObdfConfigurer());
 
         // hocon
         config("config.hocon.conf", new HoconLightbendConfigurer());

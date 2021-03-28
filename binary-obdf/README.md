@@ -1,6 +1,7 @@
-# Okaeri Configs | JSON (gson)
+# Okaeri Configs | Binary (okaeri-bin)
 
-Based on [google/gson](https://github.com/google/gson), a popular json library.
+Based on [OkaeriPoland/okaeri-bin](https://github.com/OkaeriPoland/okaeri-bin), simple binary-like data format with built-in data deduplication. 
+Provides ability to save and read configs from disk with minimal source code size increase (`60kB core library + 15kB okaeri-bin = 75kB`).
 
 ## Installation
 ### Maven
@@ -15,7 +16,7 @@ Add dependency to the `dependencies` section:
 ```xml
 <dependency>
   <groupId>eu.okaeri</groupId>
-  <artifactId>okaeri-configs-json-gson</artifactId>
+  <artifactId>okaeri-configs-binary-obdf</artifactId>
   <version>2.3.1</version>
 </dependency>
 ```
@@ -26,18 +27,12 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-json-gson:2.3.1'
+implementation 'eu.okaeri:okaeri-configs-binary-obdf:2.3.1'
 ```
-
-## Limitations
-- JSON does not support comments. All `@Header` and `@Comment` values would not be added to the output configuration file.
 
 ## Usage
 
-Please use JsonGsonConfigurer as your configurer:
+Please use ObdfConfigurer as your configurer:
 ```java
-// default
-new JsonGsonConfigurer()
-// attach own Gson instance (eg. without pretty print)
-new JsonGsonConfigurer(new Gson())
+new ObdfConfigurer()
 ```
