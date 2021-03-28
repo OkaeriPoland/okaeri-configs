@@ -31,9 +31,10 @@ public class ObdfConfigurer extends Configurer {
 
     @Override
     public void loadFromFile(File file, ConfigDeclaration declaration) throws Exception {
-        if (!file.exists()) return;
-        String data = ConfigPostprocessor.of(file).read().getContext();
-        this.bin.load(data);
+        if (!file.exists()) {
+            return;
+        }
+        this.bin.load(ConfigPostprocessor.of(file).read().getContext());
     }
 
     @Override
