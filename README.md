@@ -144,5 +144,5 @@ TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
     - `Set<T>`: results in HashSet
     - `List<T>`: results in ArrayList
     - Any type assignable from Map or Collection if non-interface type is used and default constructor is available
-- Enum types: any enum is automatically transformed using `valueOf()` and `name()`
+- Enum types: any enum is automatically transformed using `valueOf()` (with case-insensitive fallback) and `name()`
 - Custom types using `ObjectSerializer`/`ObjectTransformer` (see in supported platforms)

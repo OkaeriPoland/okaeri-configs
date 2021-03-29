@@ -146,8 +146,27 @@ public abstract class Configurer {
         try {
             if ((object instanceof String) && targetClazz.isEnum()) {
                 String strObject = (String) object;
-                Method enumMethod = targetClazz.getMethod("valueOf", String.class);
-                return targetClazz.cast(enumMethod.invoke(null, strObject));
+                // 1:1 match ONE=ONE
+                try {
+                    Method enumMethod = targetClazz.getMethod("valueOf", String.class);
+                    Object enumValue = enumMethod.invoke(null, strObject);
+                    if (enumValue != null) {
+                        return targetClazz.cast(enumValue);
+                    }
+                }
+                // match first case-insensitive
+                catch (InvocationTargetException ignored) {
+                    Method valuesMethod = targetClazz.getMethod("values");
+                    Enum[] enumValues = (Enum[]) valuesMethod.invoke(null);
+                    for (Enum value : enumValues) {
+                        if (!strObject.equalsIgnoreCase(value.name())) {
+                            continue;
+                        }
+                        return targetClazz.cast(value);
+                    }
+                }
+                // match fail
+                throw new IllegalArgumentException("no enum value for name " + strObject);
             }
             if (objectClazz.isEnum() && (targetClazz == String.class)) {
                 Method enumMethod = objectClazz.getMethod("name");
