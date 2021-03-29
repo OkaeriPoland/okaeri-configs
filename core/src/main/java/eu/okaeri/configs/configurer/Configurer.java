@@ -14,6 +14,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class Configurer {
 
@@ -168,7 +169,8 @@ public abstract class Configurer {
                     }
                 }
                 // match fail
-                throw new IllegalArgumentException("no enum value for name " + strObject);
+                String enumValuesStr = Arrays.stream(targetClazz.getEnumConstants()).map(item -> ((Enum) item).name()).collect(Collectors.joining(", "));
+                throw new IllegalArgumentException("no enum value for name " + strObject + " (available: " + enumValuesStr + ")");
             }
             if (objectClazz.isEnum() && (targetClazz == String.class)) {
                 Method enumMethod = objectClazz.getMethod("name");
