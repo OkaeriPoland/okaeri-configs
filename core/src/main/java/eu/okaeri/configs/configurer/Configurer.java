@@ -17,10 +17,13 @@ import java.util.*;
 
 public abstract class Configurer {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private OkaeriConfig parent;
 
-    private TransformerRegistry registry = new TransformerRegistry(); {
+    private TransformerRegistry registry = new TransformerRegistry();
+
+    {
         this.registry.register(new DefaultSerdes());
     }
 
@@ -156,8 +159,7 @@ public abstract class Configurer {
                 }
                 // match first case-insensitive
                 catch (InvocationTargetException ignored) {
-                    Method valuesMethod = targetClazz.getMethod("values");
-                    Enum[] enumValues = (Enum[]) valuesMethod.invoke(null);
+                    Enum[] enumValues = (Enum[]) targetClazz.getEnumConstants();
                     for (Enum value : enumValues) {
                         if (!strObject.equalsIgnoreCase(value.name())) {
                             continue;
@@ -270,8 +272,7 @@ public abstract class Configurer {
             }
 
             throw new OkaeriException("cannot create instance of " + clazz);
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             throw new OkaeriException("failed to create instance of " + clazz, exception);
         }
     }
