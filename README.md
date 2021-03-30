@@ -24,6 +24,15 @@
 - 🌟 [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri): simple validator with jakrataee-like annotations but much less code (+15kB)
 - [Jakarta EE](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): hibernate-validator based with full Jakarta Bean Validation 3.0 support
 
+## Recommendations
+
+For `standalone platforms` [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson) module is the best choice, it supports all the features, eg. full comment support.
+Combine it with [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) for the best config experience. 
+Total of only ~135kB, less than half of just the latest snakeyaml 1.28 which is 319kB!
+
+For `any platform` if some form of config validation is applicable (eg. requiring that integer is positive) it is recommended to use [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) when possible.
+Only few kilobytes but makes for a lot better experience for the end-user and developer too.
+
 ## Genesis
 
 Okaeri's configuration library is an easy way to use java classes as config adapters:
