@@ -24,5 +24,8 @@ implementation 'eu.okaeri:okaeri-configs-validator-okaeri:2.4.0'
 
 Please wrap your current Configurer with OkaeriValidator:
 ```java
+# simple
 new OkaeriValidator(yourConfigurer)
+# force @NotNull policy by default (can be bypassed for single fields using @Nullable)
+new OkaeriValidator(yourConfigurer, true)
 ```
