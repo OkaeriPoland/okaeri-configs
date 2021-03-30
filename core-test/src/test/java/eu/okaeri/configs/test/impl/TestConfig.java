@@ -4,7 +4,7 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.*;
 import eu.okaeri.configs.test.obj.Location;
-import jakarta.validation.constraints.Size;
+import eu.okaeri.validator.annotation.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

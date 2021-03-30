@@ -6,7 +6,7 @@
 
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs</artifactId>
-    <version>2.3.4</version>
+    <version>2.4.0</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -19,6 +19,7 @@
 
         <!-- validators -->
         <module>validator-jakartaee</module>
+        <module>validator-okaeri</module>
 
         <!-- yaml modules -->
         <module>yaml-bukkit</module>

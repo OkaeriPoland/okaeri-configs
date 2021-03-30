@@ -5,6 +5,9 @@ Jakarta Bean Validation 3.0 is a powerful tool and the ultimate validation solut
 All supported annotations (`@NotNull`, `@Size`, `@Min`, `@Max`, `@Pattern`, etc.) are expected to be working.
 See more at [eclipse-ee4j/jakartaee-tutorial](https://github.com/eclipse-ee4j/jakartaee-tutorial/blob/569bf35a26f8965936ebd02cde84a2dcc11291f7/src/main/asciidoc/bean-validation/bean-validation002.adoc).
 
+It is highly recommended to use [validator-okaeri](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri)
+instead if no hibernate-validator 7.x is present in the current environment (eg. Minecraft plugins, other small apps).
+
 ## Installation
 Note: One of okaeri-configs configurers (yaml-bukkit, json-gson, etc.) is required.
 ### Maven
@@ -13,12 +16,12 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-validator-jakartaee</artifactId>
-  <version>2.3.4</version>
+  <version>2.4.0</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-validator-jakartaee:2.3.4'
+implementation 'eu.okaeri:okaeri-configs-validator-jakartaee:2.4.0'
 ```
 
 ## Usage
