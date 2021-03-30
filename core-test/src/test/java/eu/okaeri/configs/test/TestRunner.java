@@ -9,7 +9,7 @@ import eu.okaeri.configs.hocon.lightbend.HoconLightbendConfigurer;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
-import eu.okaeri.configs.validator.jakartaee.JakartaValidator;
+import eu.okaeri.configs.validator.okaeri.OkaeriValidator;
 
 import java.io.File;
 
@@ -43,7 +43,7 @@ public final class TestRunner {
         inline("inline.hocon.conf", new HoconLightbendConfigurer());
 
         // hjson
-        config("config.hjson.hjson", new JakartaValidator(new HjsonConfigurer()));
+        config("config.hjson.hjson", new OkaeriValidator(new HjsonConfigurer()));
         empty("empty.hjson.hjson", new HjsonConfigurer());
         inline("inline.hjson.hjson", new HjsonConfigurer());
 
