@@ -7,7 +7,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
@@ -19,12 +19,12 @@ public class SnakeYamlConfigurer extends Configurer {
 
     public SnakeYamlConfigurer() {
         this.yaml = new Yaml();
-        this.data = new HashMap<>();
+        this.data = new LinkedHashMap<>();
     }
 
     public SnakeYamlConfigurer(Yaml yaml) {
         this.yaml = yaml;
-        this.data = new HashMap<>();
+        this.data = new LinkedHashMap<>();
     }
 
     @Override
@@ -40,11 +40,11 @@ public class SnakeYamlConfigurer extends Configurer {
 
     @Override
     public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
-        yaml.dump(this.data, Files.newBufferedWriter(file.toPath()));
+        this.yaml.dump(this.data, Files.newBufferedWriter(file.toPath()));
     }
 
     @Override
     public void loadFromFile(File file, ConfigDeclaration declaration) throws Exception {
-        this.data = yaml.load(Files.newBufferedReader(file.toPath()));
+        this.data = this.yaml.load(Files.newBufferedReader(file.toPath()));
     }
 }
