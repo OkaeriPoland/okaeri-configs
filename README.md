@@ -9,22 +9,25 @@
 
 ## Supported platforms (general use)
 General implementations based on standard format libraries directly.
-### HJSON
-- 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON is the best choice for your JSON configuration, small (core+55kB) but yet powerful
-### JSON
-- 🌟 [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): ideal for GSON lovers, best suited for in-app storage or advanced user configurations
-- [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): fairly limited but still working, no pretty print, probably best suited for simple in-app storage
-### Binary
-- [OBDF (Okaeri Binary Data Format)](https://github.com/OkaeriPoland/okaeri-configs/tree/master/binary-obdf): smallest standalone platform yet (core+17kB), experimental format suited for in-app storage only
-### HOCON
-- [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): use Human-Optimized Config Object Notation for your configs, but beware of limitations
+- **HJSON**
+  - 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON is the best choice for your JSON configuration, small (core+55kB) but yet powerful
+- **JSON**
+  - 🌟 [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): ideal for GSON lovers, best suited for in-app storage or advanced user configurations
+  - [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): fairly limited but still working, no pretty print, probably best suited for simple in-app storage
+- **Binary**
+  - [OBDF (Okaeri Binary Data Format)](https://github.com/OkaeriPoland/okaeri-configs/tree/master/binary-obdf): smallest standalone platform yet (core+17kB), experimental format suited for in-app storage only
+- **HOCON**
+  - [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): use Human-Optimized Config Object Notation for your configs, but beware of limitations
 
 
 ## Supported platforms (environment dependant)
 Special implementations for safe use in specific environment, eg. gameservers.
-### Bukkit/Spigot/PaperSpigot
-- 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Minecraft plugins
-
+- **Bukkit/Spigot/PaperSpigot (Minecraft server)**
+  - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Minecraft plugins
+- **Velocity (Minecraft proxy), Sponge (Minecraft server)**
+  - currently no ready adapters, but use with [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson), 
+    [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend) is possible (remember to exclude format specific dependencies (eg. gson) when shading, 
+    these should be provided by the environment directly).
 
 ## Validation extensions
 - 🌟 [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri): simple validator with jakrataee-like annotations but much less code (+15kB)
