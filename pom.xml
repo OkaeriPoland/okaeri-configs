@@ -23,6 +23,7 @@
 
         <!-- yaml modules -->
         <module>yaml-bukkit</module>
+        <module>yaml-snakeyaml</module>
 
         <!-- hjson modules -->
         <module>hjson</module>
