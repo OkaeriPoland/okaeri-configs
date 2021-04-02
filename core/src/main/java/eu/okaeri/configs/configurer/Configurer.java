@@ -53,28 +53,28 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType) throws OkaeriException {
+    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         List collection = new ArrayList();
         GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtype().get(0);
 
         for (Object collectionElement : value) {
-            collection.add(this.simplify(collectionElement, collectionSubtype));
+            collection.add(this.simplify(collectionElement, collectionSubtype, conservative));
         }
 
         return collection;
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType) throws OkaeriException {
+    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtype().get(0);
         GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtype().get(1);
 
         for (Map.Entry<Object, Object> entry : value.entrySet()) {
-            Object key = this.simplify(entry.getKey(), keyDeclaration);
-            Object kValue = this.simplify(entry.getValue(), valueDeclaration);
+            Object key = this.simplify(entry.getKey(), keyDeclaration, conservative);
+            Object kValue = this.simplify(entry.getValue(), valueDeclaration, conservative);
             map.put(key, kValue);
         }
 
@@ -82,7 +82,7 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplify(Object value, GenericsDeclaration genericType) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         if (value == null) {
             return null;
@@ -90,7 +90,7 @@ public abstract class Configurer {
 
         if (OkaeriConfig.class.isAssignableFrom(value.getClass())) {
             OkaeriConfig config = (OkaeriConfig) value;
-            return config.asMap(this);
+            return config.asMap(this, conservative);
         }
 
         Class<?> serializerType = (genericType != null) ? genericType.getType() : value.getClass();
@@ -98,9 +98,13 @@ public abstract class Configurer {
 
         if (serializer == null) {
 
+            if (conservative && (serializerType.isPrimitive() || GenericsDeclaration.of(serializerType).isPrimitiveWrapper())) {
+                return value;
+            }
+
             if (serializerType.isPrimitive()) {
                 Class<?> wrappedPrimitive = GenericsDeclaration.of(serializerType).wrap();
-                return this.simplify(wrappedPrimitive.cast(value), GenericsDeclaration.of(wrappedPrimitive));
+                return this.simplify(wrappedPrimitive.cast(value), GenericsDeclaration.of(wrappedPrimitive), conservative);
             }
 
             if (this.isToStringObject(serializerType)) {
@@ -108,11 +112,11 @@ public abstract class Configurer {
             }
 
             if (value instanceof Collection) {
-                return this.simplifyCollection((Collection<?>) value, genericType);
+                return this.simplifyCollection((Collection<?>) value, genericType, conservative);
             }
 
             if (value instanceof Map) {
-                return this.simplifyMap((Map<Object, Object>) value, genericType);
+                return this.simplifyMap((Map<Object, Object>) value, genericType, conservative);
             }
 
             throw new OkaeriException("cannot simplify type " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
@@ -120,8 +124,15 @@ public abstract class Configurer {
 
         SerializationData serializationData = new SerializationData(this);
         serializer.serialize(value, serializationData);
+        Map<String, Object> serializationMap = serializationData.asMap();
 
-        return serializationData.asMap();
+        if (!conservative) {
+            Map<String, Object> newSerializationMap = new LinkedHashMap<>();
+            serializationMap.forEach((mKey, mValue) -> newSerializationMap.put(mKey, this.simplify(mValue, GenericsDeclaration.of(mValue), false)));
+            return newSerializationMap;
+        }
+
+        return serializationMap;
     }
 
     public <T> T getValue(String key, Class<T> clazz, GenericsDeclaration genericType) {
@@ -242,9 +253,9 @@ public abstract class Configurer {
                 return (T) primitiveDeclaration.unwrapValue(object);
             }
 
-            // transform primitives through String (int -> long)
-            if (targetClazz.isPrimitive()) {
-                Object simplified = this.simplify(object, GenericsDeclaration.of(objectClazz));
+            // transform primitives/primitive wrappers through String (int -> long)
+            if (targetClazz.isPrimitive() || GenericsDeclaration.of(targetClazz).isPrimitiveWrapper()) {
+                Object simplified = this.simplify(object, GenericsDeclaration.of(objectClazz), false);
                 return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz));
             }
 

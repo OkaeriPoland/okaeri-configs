@@ -128,11 +128,11 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public Map<String, Object> asMap(Configurer configurer) throws OkaeriException {
+    public Map<String, Object> asMap(Configurer configurer, boolean conservative) throws OkaeriException {
 
         Map<String, Object> map = new LinkedHashMap<>();
         for (FieldDeclaration field : this.declaration.getFields()) {
-            Object simplified = configurer.simplify(field.getValue(), field.getType());
+            Object simplified = configurer.simplify(field.getValue(), field.getType(), conservative);
             map.put(field.getName(), simplified);
         }
 

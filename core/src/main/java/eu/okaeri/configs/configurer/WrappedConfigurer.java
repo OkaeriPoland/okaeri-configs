@@ -53,18 +53,18 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType) {
-        return this.wrapped.simplifyCollection(value, genericType);
+    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType, boolean conservative) {
+        return this.wrapped.simplifyCollection(value, genericType, conservative);
     }
 
     @Override
-    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType) {
-        return this.wrapped.simplifyMap(value, genericType);
+    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) {
+        return this.wrapped.simplifyMap(value, genericType, conservative);
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType) {
-        return this.wrapped.simplify(value, genericType);
+    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) {
+        return this.wrapped.simplify(value, genericType, conservative);
     }
 
     @Override

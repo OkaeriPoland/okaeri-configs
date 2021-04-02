@@ -3,6 +3,8 @@ package eu.okaeri.configs.serdes.impl;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.ObjectTransformer;
 
+import java.math.BigDecimal;
+
 public class StringToIntegerTransformer extends ObjectTransformer<String, Integer> {
 
     @Override
@@ -12,6 +14,6 @@ public class StringToIntegerTransformer extends ObjectTransformer<String, Intege
 
     @Override
     public Integer transform(String data) {
-        return Integer.parseInt(data);
+        return new BigDecimal(data).intValueExact();
     }
 }

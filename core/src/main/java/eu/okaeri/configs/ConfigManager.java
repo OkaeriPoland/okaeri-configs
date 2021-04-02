@@ -29,6 +29,9 @@ public final class ConfigManager {
         try {
             initializer.apply(config);
         } catch (Exception exception) {
+            if (config.getConfigurer() != null) {
+                throw new OkaeriException("failed to initialize " + clazz.getName() + " [" + config.getConfigurer().getClass() + "]", exception);
+            }
             throw new OkaeriException("failed to initialize " + clazz.getName(), exception);
         }
         return config;

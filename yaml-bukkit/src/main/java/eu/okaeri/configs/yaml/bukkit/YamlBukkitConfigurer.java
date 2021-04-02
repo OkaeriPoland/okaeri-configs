@@ -46,7 +46,7 @@ public class YamlBukkitConfigurer extends Configurer {
 
     @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type);
+        Object simplified = this.simplify(value, type, true);
         this.config.set(key, simplified);
     }
 
