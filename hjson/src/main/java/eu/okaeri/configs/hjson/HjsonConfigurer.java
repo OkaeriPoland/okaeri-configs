@@ -1,6 +1,7 @@
 package eu.okaeri.configs.hjson;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
@@ -30,8 +31,39 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
+    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+
+        if (value == null) {
+            return null;
+        }
+
+        GenericsDeclaration genericsDeclaration = GenericsDeclaration.of(value);
+        if ((genericsDeclaration.getType() == char.class) || (genericsDeclaration.getType() == Character.class)) {
+            return super.simplify(value, genericType, false);
+        }
+
+        return super.simplify(value, genericType, conservative);
+    }
+
+    @Override
+    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+
+        Map<Object, Object> map = new LinkedHashMap<>();
+        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtype().get(0);
+        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtype().get(1);
+
+        for (Map.Entry<Object, Object> entry : value.entrySet()) {
+            Object key = this.simplify(entry.getKey(), keyDeclaration, false);
+            Object kValue = this.simplify(entry.getValue(), valueDeclaration, conservative);
+            map.put(key, kValue);
+        }
+
+        return map;
+    }
+
+    @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type);
+        Object simplified = this.simplify(value, type, true);
         JsonValue jsonValue = this.toJsonValue(simplified);
         this.json.set(key, jsonValue);
     }
@@ -123,6 +155,10 @@ public class HjsonConfigurer extends Configurer {
             return JsonValue.valueOf(null);
         }
 
+        if (object instanceof String) {
+            return JsonValue.valueOf((String) object);
+        }
+
         if (object instanceof Collection) {
             JsonArray array = new JsonArray();
             ((Collection<?>) object).forEach(item -> array.add(this.toJsonValue(item)));
@@ -135,11 +171,11 @@ public class HjsonConfigurer extends Configurer {
             return map;
         }
 
-        if (!(object instanceof String)) {
-            throw new IllegalArgumentException("cannot transform non-string element: " + object + " [" + object.getClass() + "]");
+        if ((object instanceof Number) || (object instanceof Boolean)) {
+            return JsonValue.valueOf(object);
         }
 
-        return JsonValue.valueOf((String) object);
+        throw new IllegalArgumentException("cannot transform element: " + object + " [" + object.getClass() + "]");
     }
 
     private Object fromJsonValue(JsonValue value) {
@@ -162,6 +198,6 @@ public class HjsonConfigurer extends Configurer {
             return map;
         }
 
-        return value.asString();
+        return value.asRaw();
     }
 }

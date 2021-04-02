@@ -1,6 +1,7 @@
 package eu.okaeri.configs.json.simple;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
@@ -34,8 +35,23 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
+    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+
+        if (value == null) {
+            return null;
+        }
+
+        GenericsDeclaration genericsDeclaration = GenericsDeclaration.of(value);
+        if ((genericsDeclaration.getType() == char.class) || (genericsDeclaration.getType() == Character.class)) {
+            return super.simplify(value, genericType, false);
+        }
+
+        return super.simplify(value, genericType, conservative);
+    }
+
+    @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type);
+        Object simplified = this.simplify(value, type, true);
         this.map.put(key, simplified);
     }
 

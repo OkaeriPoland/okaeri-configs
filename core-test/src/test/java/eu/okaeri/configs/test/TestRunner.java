@@ -10,6 +10,7 @@ import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
 import eu.okaeri.configs.validator.okaeri.OkaeriValidator;
+import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 
 import java.io.File;
 
@@ -18,9 +19,9 @@ public final class TestRunner {
     public static void main(String[] args) {
 
         // bukkit
-//        config("config.bukkit.yml", new YamlBukkitConfigurer("# ", ""));
-//        empty("empty.bukkit.yml", new YamlBukkitConfigurer());
-//        inline("inline.bukkit.yml", new YamlBukkitConfigurer());
+        config("config.bukkit.yml", new YamlBukkitConfigurer("# ", ""));
+        empty("empty.bukkit.yml", new YamlBukkitConfigurer());
+        inline("inline.bukkit.yml", new YamlBukkitConfigurer());
 
         // gson
         config("config.gson.json", new JsonGsonConfigurer());

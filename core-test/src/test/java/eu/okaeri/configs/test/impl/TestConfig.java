@@ -108,8 +108,44 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Test boolean")
     private boolean testBoolean = true;
 
+    @Comment("Test boolean wrapper")
+    private Boolean testBooleanWrapper = true;
+
     @Comment("Test long")
     private long testLong = 100000000L;
+
+    @Comment("Test long wrapper")
+    private Long testLongWrapper = 100000000L;
+
+    @Comment("Test float")
+    private float testFloat = 1.2323f;
+
+    @Comment("Test float wrapper")
+    private Float testFloatWrapper = 1.2323f;
+
+    @Comment("Test char")
+    private char testChar = 'a';
+
+    @Comment("Test char wrapper")
+    private Character testCharWrapper = 'a';
+
+    @Comment("Test int")
+    private int testInt = 123;
+
+    @Comment("Test int wrapper")
+    private int testIntWrapper = 123;
+
+    @Comment("Test short")
+    private short testShort = 2;
+
+    @Comment("Test short wrapper")
+    private Short testShortWrapper = 2;
+
+    @Comment("Test byte")
+    private byte testByte = 2;
+
+    @Comment("Test byte wrapper")
+    private Byte testByteWrapper = 2;
 
     @Comment("Test multiline string")
     private String multiline = "WELCOME\nMULTIPLIE\n\nLINES\n!!!!!!!!!!!11111";

@@ -15,7 +15,7 @@ public class ObdfConfigurer extends Configurer {
 
     @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type);
+        Object simplified = this.simplify(value, type, false);
         this.bin.putUnsafe(key, simplified);
     }
 

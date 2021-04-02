@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
@@ -40,8 +41,39 @@ public class HoconLightbendConfigurer extends Configurer {
     }
 
     @Override
+    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+
+        if (value == null) {
+            return null;
+        }
+
+        GenericsDeclaration genericsDeclaration = GenericsDeclaration.of(value);
+        if ((genericsDeclaration.getType() == char.class) || (genericsDeclaration.getType() == Character.class)) {
+            return super.simplify(value, genericType, false);
+        }
+
+        return super.simplify(value, genericType, conservative);
+    }
+
+    @Override
+    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+
+        Map<Object, Object> map = new LinkedHashMap<>();
+        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtype().get(0);
+        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtype().get(1);
+
+        for (Map.Entry<Object, Object> entry : value.entrySet()) {
+            Object key = this.simplify(entry.getKey(), keyDeclaration, false);
+            Object kValue = this.simplify(entry.getValue(), valueDeclaration, conservative);
+            map.put(key, kValue);
+        }
+
+        return map;
+    }
+
+    @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type);
+        Object simplified = this.simplify(value, type, true);
         this.map.put(key, simplified);
     }
 

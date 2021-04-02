@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -16,10 +13,11 @@ import java.util.stream.Collectors;
 public class GenericsDeclaration {
 
     private static final Map<String, Class<?>> PRIMITIVES = new HashMap<>();
-    private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<>();
+    private static final Set<Class<?>> PRIMITIVE_WRAPPERS = new HashSet<>();
 
     public static boolean isUnboxedCompatibleWithBoxed(Class<?> unboxedClazz, Class<?> boxedClazz) {
-        Class<?> primitiveWrapper = PRIMITIVE_WRAPPERS.get(unboxedClazz);
+        Class<?> primitiveWrapper = PRIMITIVE_TO_WRAPPER.get(unboxedClazz);
         return primitiveWrapper == boxedClazz;
     }
 
@@ -36,14 +34,22 @@ public class GenericsDeclaration {
         PRIMITIVES.put(int.class.getName(), int.class);
         PRIMITIVES.put(long.class.getName(), long.class);
         PRIMITIVES.put(short.class.getName(), short.class);
-        PRIMITIVE_WRAPPERS.put(boolean.class, Boolean.class);
-        PRIMITIVE_WRAPPERS.put(byte.class, Byte.class);
-        PRIMITIVE_WRAPPERS.put(char.class, Character.class);
-        PRIMITIVE_WRAPPERS.put(double.class, Double.class);
-        PRIMITIVE_WRAPPERS.put(float.class, Float.class);
-        PRIMITIVE_WRAPPERS.put(int.class, Integer.class);
-        PRIMITIVE_WRAPPERS.put(long.class, Long.class);
-        PRIMITIVE_WRAPPERS.put(short.class, Short.class);
+        PRIMITIVE_TO_WRAPPER.put(boolean.class, Boolean.class);
+        PRIMITIVE_TO_WRAPPER.put(byte.class, Byte.class);
+        PRIMITIVE_TO_WRAPPER.put(char.class, Character.class);
+        PRIMITIVE_TO_WRAPPER.put(double.class, Double.class);
+        PRIMITIVE_TO_WRAPPER.put(float.class, Float.class);
+        PRIMITIVE_TO_WRAPPER.put(int.class, Integer.class);
+        PRIMITIVE_TO_WRAPPER.put(long.class, Long.class);
+        PRIMITIVE_TO_WRAPPER.put(short.class, Short.class);
+        PRIMITIVE_WRAPPERS.add(Boolean.class);
+        PRIMITIVE_WRAPPERS.add(Byte.class);
+        PRIMITIVE_WRAPPERS.add(Character.class);
+        PRIMITIVE_WRAPPERS.add(Double.class);
+        PRIMITIVE_WRAPPERS.add(Float.class);
+        PRIMITIVE_WRAPPERS.add(Integer.class);
+        PRIMITIVE_WRAPPERS.add(Long.class);
+        PRIMITIVE_WRAPPERS.add(Short.class);
     }
 
     public static GenericsDeclaration of(Object type, List<Object> subtypes) {
@@ -160,7 +166,7 @@ public class GenericsDeclaration {
     private List<GenericsDeclaration> subtype;
 
     public Class<?> wrap() {
-        return PRIMITIVE_WRAPPERS.get(this.type);
+        return PRIMITIVE_TO_WRAPPER.get(this.type);
     }
 
     @SuppressWarnings("UnnecessaryUnboxing")
@@ -178,6 +184,10 @@ public class GenericsDeclaration {
 
     public boolean isPrimitive() {
         return this.type.isPrimitive();
+    }
+
+    public boolean isPrimitiveWrapper() {
+        return PRIMITIVE_WRAPPERS.contains(this.type);
     }
 
     public boolean isConfig() {
