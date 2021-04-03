@@ -17,7 +17,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-yaml-bukkit</artifactId>
-  <version>2.5.0</version>
+  <version>2.5.1</version>
 </dependency>
 ```
 Additionally if you want to serialize/deserialize [supported bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit):
@@ -25,7 +25,7 @@ Additionally if you want to serialize/deserialize [supported bukkit objects](htt
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-  <version>2.5.0</version>
+  <version>2.5.1</version>
 </dependency>
 ```
 ### Gradle
@@ -35,12 +35,11 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:2.5.0'
+implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:2.5.1'
 ```
 
 ## Limitations
-- Bukkit's YamlConfiguration does not have an easy way to inject property comments. 
-  Only top level comments are supported at the moment.
+- Comments do not work on the elements of Collection or Map.
 
 ## Usage
 

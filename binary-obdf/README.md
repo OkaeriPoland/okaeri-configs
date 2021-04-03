@@ -17,7 +17,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-binary-obdf</artifactId>
-  <version>2.5.0</version>
+  <version>2.5.1</version>
 </dependency>
 ```
 ### Gradle
@@ -27,7 +27,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-binary-obdf:2.5.0'
+implementation 'eu.okaeri:okaeri-configs-binary-obdf:2.5.1'
 ```
 
 ## Limitations
