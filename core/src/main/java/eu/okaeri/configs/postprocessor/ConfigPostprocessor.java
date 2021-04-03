@@ -70,6 +70,84 @@ public class ConfigPostprocessor {
         return this;
     }
 
+    public ConfigPostprocessor updateLinesKeys(ConfigSectionWalker walker) {
+
+        String[] lines = this.context.split("\n");
+        List<ConfigLineInfo> currentPath = new ArrayList<>();
+        int lastIndent = 0;
+        int level = 0;
+        StringBuilder newContext = new StringBuilder();
+        boolean multilineSkip = false;
+
+        for (String line : lines) {
+
+            int indent = countIndent(line);
+            int change = indent - lastIndent;
+            String key = walker.readName(line);
+
+            // skip non-keys
+            if (!walker.isKey(line)) {
+                newContext.append(line).append("\n");
+                continue;
+            }
+
+            if (currentPath.isEmpty()) {
+                currentPath.add(ConfigLineInfo.of(indent, change, key));
+            }
+
+            if (change > 0) {
+                if (!multilineSkip) {
+                    level++;
+                    currentPath.add(ConfigLineInfo.of(indent, change, key));
+                }
+            } else {
+                if (change != 0) {
+                    ConfigLineInfo lastLineInfo = currentPath.get(currentPath.size() - 1);
+                    int step = lastLineInfo.getIndent() / level;
+                    level -= ((change * -1) / step);
+                    currentPath = currentPath.subList(0, level + 1);
+                    multilineSkip = false;
+                }
+                if (!multilineSkip) {
+                    currentPath.set(currentPath.size() - 1, ConfigLineInfo.of(indent, change, key));
+                }
+            }
+
+            if (multilineSkip) {
+                newContext.append(line).append("\n");
+                continue;
+            } else if (walker.isKeyMultilineStart(line)) {
+                multilineSkip = true;
+            }
+
+            lastIndent = indent;
+            String updatedLine = walker.update(line, currentPath.get(currentPath.size() - 1), currentPath);
+            newContext.append(updatedLine).append("\n");
+        }
+
+        this.context = newContext.toString();
+        return this;
+    }
+
+    public static int countIndent(String line) {
+        int whitespaces = 0;
+        for (char c : line.toCharArray()) {
+            if (!Character.isWhitespace(c)) {
+                return whitespaces;
+            }
+            whitespaces++;
+        }
+        return whitespaces;
+    }
+
+    public static String addIndent(String line, int size) {
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            buf.append(" ");
+        }
+        return buf.append(line).toString();
+    }
+
     public ConfigPostprocessor updateContext(ConfigContextManipulator manipulator) {
         this.context = manipulator.convert(this.context);
         return this;
