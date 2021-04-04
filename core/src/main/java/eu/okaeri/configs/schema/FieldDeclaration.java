@@ -18,7 +18,6 @@ public class FieldDeclaration {
     public static FieldDeclaration of(ConfigDeclaration config, Field field, Object object) {
 
         FieldDeclaration declaration = new FieldDeclaration();
-        boolean accessible = field.isAccessible();
         field.setAccessible(true);
 
         if (field.getAnnotation(Exclude.class) != null) {
@@ -56,7 +55,6 @@ public class FieldDeclaration {
         declaration.setField(field);
         declaration.setObject(object);
         declaration.setType(GenericsDeclaration.of(field.getGenericType()));
-        field.setAccessible(accessible);
 
         return declaration;
     }
@@ -82,10 +80,8 @@ public class FieldDeclaration {
 
     public void updateValue(Object value) throws OkaeriException {
         try {
-            boolean accessible = this.field.isAccessible();
             this.field.setAccessible(true);
             this.field.set(this.object, value);
-            this.field.setAccessible(accessible);
         }
         catch (IllegalAccessException exception) {
             throw new OkaeriException("failed to #updateValue", exception);
@@ -99,11 +95,8 @@ public class FieldDeclaration {
         }
 
         try {
-            boolean accessible = this.field.isAccessible();
             this.field.setAccessible(true);
-            Object value = this.field.get(this.object);
-            this.field.setAccessible(accessible);
-            return value;
+            return this.field.get(this.object);
         }
         catch (IllegalAccessException exception) {
             throw new OkaeriException("failed to #getValue", exception);
