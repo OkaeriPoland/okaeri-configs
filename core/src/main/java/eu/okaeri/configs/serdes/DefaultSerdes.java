@@ -20,5 +20,6 @@ public class DefaultSerdes implements OkaeriSerdesPack {
         registry.registerWithReversedToString(new StringToIntegerTransformer());
         registry.registerWithReversedToString(new StringToLongTransformer());
         registry.registerWithReversedToString(new StringToShortTransformer());
+        registry.registerWithReversedToString(new StringToUuidTransformer());
     }
 }
