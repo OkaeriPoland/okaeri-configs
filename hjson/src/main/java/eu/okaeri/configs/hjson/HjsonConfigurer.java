@@ -9,7 +9,8 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import org.hjson.*;
 
-import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 public class HjsonConfigurer extends Configurer {
@@ -79,20 +80,13 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void loadFromFile(File file, ConfigDeclaration declaration) throws Exception {
-
-        if (!file.exists()) {
-            return;
-        }
-
-        String data = ConfigPostprocessor.of(file).read().getContext();
+    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+        String data = ConfigPostprocessor.of(inputStream).getContext();
         this.json = JsonValue.readHjson(data).asObject();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
+    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
 
         // add comments to nodes
         this.addComments(this.json, declaration, null);
@@ -102,7 +96,7 @@ public class HjsonConfigurer extends Configurer {
         this.json.setFullComment(CommentType.BOL, header.isEmpty() ? "" : (header + this.sectionSeparator));
 
         // save
-        ConfigPostprocessor.of(file, this.json.toString(Stringify.HJSON_COMMENTS)).write();
+        ConfigPostprocessor.of(this.json.toString(Stringify.HJSON_COMMENTS)).write(outputStream);
     }
 
     private void addComments(Object object, ConfigDeclaration declaration, String key) {

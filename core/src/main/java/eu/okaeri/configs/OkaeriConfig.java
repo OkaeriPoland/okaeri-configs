@@ -12,7 +12,8 @@ import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -101,8 +102,23 @@ public abstract class OkaeriConfig {
     public OkaeriConfig save() throws OkaeriException {
 
         if (this.bindFile == null) {
-            throw new InitializationException("bindFile cannot be null");
+            throw new OkaeriException("cannot use #save() without bindFile specified");
         }
+
+        try {
+            return this.save(new FileOutputStream(this.bindFile, false));
+        } catch (FileNotFoundException exception) {
+            throw new OkaeriException("failed #save using file " + this.bindFile, exception);
+        }
+    }
+
+    public String saveToString() throws OkaeriException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        this.save(outputStream);
+        return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    public OkaeriConfig save(OutputStream outputStream) throws OkaeriException {
 
         if (this.configurer == null) {
             throw new InitializationException("configurer cannot be null");
@@ -120,9 +136,9 @@ public abstract class OkaeriConfig {
         }
 
         try {
-            this.configurer.writeToFile(this.bindFile, this.declaration);
+            this.configurer.write(outputStream, this.declaration);
         } catch (Exception exception) {
-            throw new OkaeriException("failed #writeToFile {" + this.bindFile + ", ... }", exception);
+            throw new OkaeriException("failed #write", exception);
         }
 
         return this;
@@ -147,23 +163,42 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig load() throws OkaeriException {
+    public OkaeriConfig load(String data) {
 
-        if (this.bindFile == null) {
-            throw new InitializationException("bindFile cannot be null");
+        if (this.configurer == null) {
+            throw new InitializationException("configurer cannot be null");
         }
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+        return this.load(inputStream);
+    }
+
+    public OkaeriConfig load(InputStream inputStream) {
 
         if (this.configurer == null) {
             throw new InitializationException("configurer cannot be null");
         }
 
         try {
-            this.configurer.loadFromFile(this.bindFile, this.declaration);
+            this.configurer.load(inputStream, this.declaration);
         } catch (Exception exception) {
-            throw new OkaeriException("failed #loadFromFile {" + this.bindFile + ", ... }", exception);
+            throw new OkaeriException("failed #load", exception);
         }
 
         return this.update();
+    }
+
+    public OkaeriConfig load() throws OkaeriException {
+
+        if (this.bindFile == null) {
+            throw new OkaeriException("cannot use #load() without bindFile specified");
+        }
+
+        try {
+            return this.load(new FileInputStream(this.bindFile));
+        } catch (FileNotFoundException exception) {
+            throw new OkaeriException("failed #load using file " + this.bindFile, exception);
+        }
     }
 
     public OkaeriConfig update() throws OkaeriException {

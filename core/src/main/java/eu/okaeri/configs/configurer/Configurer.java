@@ -10,7 +10,8 @@ import eu.okaeri.configs.serdes.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -23,7 +24,6 @@ public abstract class Configurer {
     private OkaeriConfig parent;
 
     private TransformerRegistry registry = new TransformerRegistry();
-
     {
         this.registry.register(new DefaultSerdes());
     }
@@ -298,7 +298,7 @@ public abstract class Configurer {
         return true;
     }
 
-    public abstract void writeToFile(File file, ConfigDeclaration declaration) throws Exception;
+    public abstract void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception;
 
-    public abstract void loadFromFile(File file, ConfigDeclaration declaration) throws Exception;
+    public abstract void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception;
 }
