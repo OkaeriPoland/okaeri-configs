@@ -8,9 +8,7 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -51,15 +49,12 @@ public class JsonGsonConfigurer extends Configurer {
         return this.map.containsKey(key);
     }
 
+
     @Override
     @SuppressWarnings("unchecked")
-    public void loadFromFile(File file, ConfigDeclaration declaration) throws Exception {
+    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
 
-        if (!file.exists()) {
-            return;
-        }
-
-        String data = ConfigPostprocessor.of(file).read().getContext();
+        String data = ConfigPostprocessor.of(inputStream).getContext();
         this.map = this.gson.fromJson(data, Map.class);
 
         if (this.map != null) {
@@ -70,9 +65,7 @@ public class JsonGsonConfigurer extends Configurer {
     }
 
     @Override
-    public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
-        try (Writer writer = new FileWriter(file)) {
-            this.gson.toJson(this.map, writer);
-        }
+    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
+        this.gson.toJson(this.map, new OutputStreamWriter(outputStream));
     }
 }

@@ -8,12 +8,11 @@ import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,22 +75,18 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
-    public void loadFromFile(File file, ConfigDeclaration declaration) throws IOException {
-        try {
-            this.config.load(file);
-        } catch (InvalidConfigurationException exception) {
-            throw new IOException(exception);
-        }
+    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+        this.config.loadFromString(ConfigPostprocessor.of(inputStream).getContext());
     }
 
     @Override
-    public void writeToFile(File file, ConfigDeclaration declaration) throws IOException {
+    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
 
         // bukkit's save
-        this.config.save(file);
+        String contents = this.config.saveToString();
 
         // postprocess
-        ConfigPostprocessor.of(file).read()
+        ConfigPostprocessor.of(contents)
                 // remove all current top-level commments (bukkit may preserve header)
                 .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
                 // add new comments
@@ -130,6 +125,6 @@ public class YamlBukkitConfigurer extends Configurer {
                 // add header if available
                 .prependContextComment(this.commentPrefix, this.sectionSeparator, declaration.getHeader())
                 // save
-                .write();
+                .write(outputStream);
     }
 }

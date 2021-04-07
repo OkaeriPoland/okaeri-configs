@@ -9,9 +9,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -67,13 +65,9 @@ public class JsonSimpleConfigurer extends Configurer {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadFromFile(File file, ConfigDeclaration declaration) throws Exception {
+    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
 
-        if (!file.exists()) {
-            return;
-        }
-
-        String data = ConfigPostprocessor.of(file).read().getContext();
+        String data = ConfigPostprocessor.of(inputStream).getContext();
         this.map = (Map<String, Object>) this.parser.parse(data);
 
         if (this.map != null) {
@@ -84,10 +78,8 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
-    public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
-        try (Writer writer = new FileWriter(file)) {
-            JSONObject object = new JSONObject(this.map);
-            ConfigPostprocessor.of(file, object.toJSONString()).write();
-        }
+    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
+        JSONObject object = new JSONObject(this.map);
+        ConfigPostprocessor.of(object.toJSONString()).write(outputStream);
     }
 }

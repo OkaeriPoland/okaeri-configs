@@ -11,8 +11,11 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 
-import java.io.File;
-import java.util.*;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public class HoconLightbendConfigurer extends Configurer {
@@ -88,19 +91,13 @@ public class HoconLightbendConfigurer extends Configurer {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void loadFromFile(File file, ConfigDeclaration declaration) throws Exception {
-
-        if (!file.exists()) {
-            return;
-        }
-
-        this.config = ConfigFactory.parseFile(file);
+    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+        this.config = ConfigFactory.parseString(ConfigPostprocessor.of(inputStream).getContext());
         this.map = this.hoconToMap(this.config, declaration);
     }
 
     @Override
-    public void writeToFile(File file, ConfigDeclaration declaration) throws Exception {
+    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
 
         this.config = ConfigFactory.parseMap(this.map);
         StringBuilder buf = new StringBuilder();
@@ -119,7 +116,7 @@ public class HoconLightbendConfigurer extends Configurer {
         }
 
         // postprocess
-        ConfigPostprocessor.of(file, buf.toString())
+        ConfigPostprocessor.of(buf.toString())
                 // remove all current commments
                 .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
                 // add new comments
@@ -132,7 +129,7 @@ public class HoconLightbendConfigurer extends Configurer {
                 // add header if available
                 .prependContextComment(this.commentPrefix, declaration.getHeader())
                 // save
-                .write();
+                .write(outputStream);
     }
 
     private Predicate<FieldDeclaration> isFieldDeclaredForLine(String line) {
