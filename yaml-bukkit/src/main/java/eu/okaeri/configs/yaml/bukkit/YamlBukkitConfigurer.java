@@ -21,7 +21,7 @@ public class YamlBukkitConfigurer extends Configurer {
 
     private YamlConfiguration config;
     private String commentPrefix = "# ";
-    private String sectionSeparator = SectionSeparator.NEW_LINE;
+    private String sectionSeparator = SectionSeparator.NONE;
 
     public YamlBukkitConfigurer(YamlConfiguration config, String commentPrefix, String sectionSeparator) {
         this(commentPrefix, sectionSeparator);
