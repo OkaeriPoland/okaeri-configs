@@ -16,7 +16,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-hocon-lightbend</artifactId>
-  <version>2.6.0</version>
+  <version>2.6.1</version>
 </dependency>
 ```
 ### Gradle
@@ -26,7 +26,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-hocon-lightbend:2.6.0'
+implementation 'eu.okaeri:okaeri-configs-hocon-lightbend:2.6.1'
 ```
 
 ## Limitations

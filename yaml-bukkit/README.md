@@ -17,7 +17,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-yaml-bukkit</artifactId>
-  <version>2.6.0</version>
+  <version>2.6.1</version>
 </dependency>
 ```
 Additionally if you want to serialize/deserialize [supported bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit):
@@ -25,7 +25,7 @@ Additionally if you want to serialize/deserialize [supported bukkit objects](htt
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-  <version>2.6.0</version>
+  <version>2.6.1</version>
 </dependency>
 ```
 ### Gradle
@@ -35,7 +35,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:2.6.0'
+implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:2.6.1'
 ```
 
 ## Limitations
@@ -45,12 +45,12 @@ implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:2.6.0'
 
 Please use YamlBukkitConfigurer as your configurer:
 ```java
-// default ('# ', '\n')
+// default ('# ', '')
 new YamlBukkitConfigurer()
-// remove empty spaces between sections (no empty newlines)
-new YamlBukkitConfigurer(SectionSeparator.NONE)
-// change comment character and section separator (no space after # in comments, no empty newlines)
-new YamlBukkitConfigurer("#", SectionSeparator.NONE)
+// add empty spaces between sections
+new YamlBukkitConfigurer(SectionSeparator.NEW_WLINE)
+// change comment character and section separator (no space after # in comments, empty newlines)
+new YamlBukkitConfigurer("#", SectionSeparator.NEW_WLINE)
 ```
 For [serializers/deserializers/transformers](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit) use:
 ```java
