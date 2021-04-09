@@ -23,7 +23,8 @@ General implementations based on standard format libraries directly.
 ## Supported platforms (environment dependant)
 Special implementations for safe use in specific environment, eg. gameservers.
 - **Bukkit/Spigot/PaperSpigot (Minecraft server)**
-  - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Minecraft plugins
+  - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Minecraft plugins 
+    (best used with [okaeri-platform](https://github.com/OkaeriPoland/okaeri-platform))
 - **Velocity (Minecraft proxy), Sponge (Minecraft server)**
   - currently no ready adapters, but use with [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson), 
     [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend) is possible (remember to exclude format specific dependencies (eg. gson) when shading, 
@@ -42,6 +43,8 @@ Total of only ~135kB, less than half of just the latest snakeyaml 1.28 which is 
 
 For `any platform` if some form of config validation is applicable (eg. requiring that integer is positive) it is recommended to use [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) when possible.
 Only few kilobytes but makes for a lot better experience for the end-user and developer too.
+
+For `any platform` if some form of the i18n/translation is needed, you may be interested in [okaeri-i18n](https://github.com/OkaeriPoland/okaeri-i18n) which can use okaeri-configs as a translation source.
 
 ## Genesis
 
