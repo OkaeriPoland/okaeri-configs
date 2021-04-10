@@ -19,6 +19,7 @@ public class ConfigDeclaration {
         declaration.setHeader(readHeader(clazz));
         declaration.setReal(OkaeriConfig.class.isAssignableFrom(clazz));
         declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
+                .filter(field -> !"this$0".equals(field.getName()))
                 .map(field -> FieldDeclaration.of(declaration, field, config))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
