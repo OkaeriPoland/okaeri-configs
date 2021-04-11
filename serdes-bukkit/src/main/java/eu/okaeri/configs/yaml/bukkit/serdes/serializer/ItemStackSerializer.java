@@ -12,7 +12,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
 
     @Override
     public boolean supports(Class<? super ItemStack> type) {
-        return type.isAssignableFrom(ItemStack.class);
+        return ItemStack.class.isAssignableFrom(type);
     }
 
     @Override

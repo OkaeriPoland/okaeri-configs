@@ -49,8 +49,8 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public boolean isToStringObject(Object object) {
-        return this.wrapped.isToStringObject(object);
+    public boolean isToStringObject(Object object, GenericsDeclaration genericsDeclaration) {
+        return this.wrapped.isToStringObject(object, genericsDeclaration);
     }
 
     @Override

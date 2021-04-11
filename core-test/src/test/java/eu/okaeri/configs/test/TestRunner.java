@@ -9,6 +9,8 @@ import eu.okaeri.configs.hocon.lightbend.HoconLightbendConfigurer;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.impl.TestConfig;
+import eu.okaeri.configs.test.serdes.LocationSerializer;
+import eu.okaeri.configs.test.serdes.StringWorldTransformer;
 import eu.okaeri.configs.validator.okaeri.OkaeriValidator;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 
@@ -59,7 +61,10 @@ public final class TestRunner {
 
         TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
             it.withConfigurer(new HoconLightbendConfigurer());
-            it.withSerdesPack(registry -> registry.register(new LocationSerializer()));
+            it.withSerdesPack(registry -> {
+                registry.register(new LocationSerializer());
+                registry.register(new StringWorldTransformer());
+            });
             it.withBindFile("config.hocon.conf");
             it.load();
             it.withConfigurer(new HjsonConfigurer());
@@ -119,7 +124,10 @@ public final class TestRunner {
 
         TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
             it.withConfigurer(configurer);
-            it.withSerdesPack(registry -> registry.register(new LocationSerializer()));
+            it.withSerdesPack(registry -> {
+                registry.register(new LocationSerializer());
+                registry.register(new StringWorldTransformer());
+            });
             it.withBindFile(pathname);
             it.saveDefaults();
             it.load(true);
