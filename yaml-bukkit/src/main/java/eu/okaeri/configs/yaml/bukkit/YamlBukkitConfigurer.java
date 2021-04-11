@@ -71,7 +71,7 @@ public class YamlBukkitConfigurer extends Configurer {
             return super.resolveType(values, GenericsDeclaration.of(values), targetClazz, genericTarget);
         }
 
-        return super.resolveType(object, GenericsDeclaration.of(object), targetClazz, genericTarget);
+        return super.resolveType(object, genericSource, targetClazz, genericTarget);
     }
 
     @Override

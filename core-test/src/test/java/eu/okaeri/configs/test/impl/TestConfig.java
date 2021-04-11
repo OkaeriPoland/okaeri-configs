@@ -3,6 +3,8 @@ package eu.okaeri.configs.test.impl;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.*;
+import eu.okaeri.configs.test.obj.CraftLocation;
+import eu.okaeri.configs.test.obj.CraftWorld;
 import eu.okaeri.configs.test.obj.Location;
 import eu.okaeri.validator.annotation.Size;
 import lombok.Data;
@@ -47,7 +49,7 @@ public class TestConfig extends OkaeriConfig {
     private Map<String, Map<Integer, String>> complexMap2 = Collections.singletonMap("bb", Collections.singletonMap(232, "aadda"));
 
     @Comment("Spawn")
-    private Location spawnLOC = new Location(null, 1, 2, 3, 4, 5);
+    private Location spawnLOC = new CraftLocation(new CraftWorld("world_nether"), 1, 2, 3, 4, 5);
 
     @Comment({"Poziomy", "levels"})
     private Map<Integer, String> levels = Collections.singletonMap(1, "aaaaaa");
@@ -78,7 +80,7 @@ public class TestConfig extends OkaeriConfig {
     private TreeMap<TestEnum, Location> enumToLocationTreeMap = new TreeMap<>(Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5)));
 
     @Comment("Uber-complex-map test non-generic")
-    private HashMap<TestEnum, Location> enumToLocationMapNonGeneric = new HashMap<>(Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5)));
+    private HashMap<TestEnum, Location> enumToLocationMapNonGeneric = new HashMap<>(Collections.singletonMap(TestEnum.THREE, new Location(new CraftWorld("world_the_end"), 1, 2, 3, 4, 5)));
 
     @CustomKey("list-to-uber-complex-map")
     @Comment("List-to-Uber-complex-map test")

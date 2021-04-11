@@ -1,4 +1,4 @@
-package eu.okaeri.configs.test;
+package eu.okaeri.configs.test.serdes;
 
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
@@ -11,7 +11,7 @@ public class LocationSerializer implements ObjectSerializer<Location> {
 
     @Override
     public boolean supports(Class<? super Location> type) {
-        return type.isAssignableFrom(Location.class);
+        return Location.class.isAssignableFrom(type);
     }
 
     @Override

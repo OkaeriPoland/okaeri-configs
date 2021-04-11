@@ -11,7 +11,7 @@ public class PotionEffectSerializer implements ObjectSerializer<PotionEffect> {
 
     @Override
     public boolean supports(Class<? super PotionEffect> type) {
-        return type.isAssignableFrom(PotionEffect.class);
+        return PotionEffect.class.isAssignableFrom(type);
     }
 
     @Override

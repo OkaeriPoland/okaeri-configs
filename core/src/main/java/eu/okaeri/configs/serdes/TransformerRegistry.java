@@ -56,17 +56,12 @@ public class TransformerRegistry {
         this.serializerSet.add(serializer);
     }
 
-    public ObjectTransformer getTransformer(Class<?> from, Class<?> to) {
-        GenericsPair pair = new GenericsPair(GenericsDeclaration.of(from), GenericsDeclaration.of(to));
-        return this.transformerMap.get(pair);
-    }
-
     public ObjectTransformer getTransformer(GenericsDeclaration from, GenericsDeclaration to) {
         GenericsPair pair = new GenericsPair(from, to);
         return this.transformerMap.get(pair);
     }
 
-    public boolean canTransform(Class<?> from, Class<?> to) {
+    public boolean canTransform(GenericsDeclaration from, GenericsDeclaration to) {
         return this.getTransformer(from, to) != null;
     }
 

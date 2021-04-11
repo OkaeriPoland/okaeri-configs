@@ -24,7 +24,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
 
     @Override
     public boolean supports(Class<? super ItemMeta> type) {
-        return type.isAssignableFrom(ItemMeta.class);
+        return ItemMeta.class.isAssignableFrom(type);
     }
 
     @Override
