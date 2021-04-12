@@ -7,7 +7,7 @@ import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import org.hjson.*;
+import eu.okaeri.hjson.*;
 
 import java.io.InputStream;
 import java.io.OutputStream;
