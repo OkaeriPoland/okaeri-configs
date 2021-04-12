@@ -1,6 +1,6 @@
 # Okaeri Configs | HJSON (hjson-java)
 
-Based on [PersonTheCat/hjson-java](https://github.com/PersonTheCat/hjson-java), modification of official hjson implementation for java.
+Based on [OkaeriPoland/okaeri-hjson](https://github.com/PersonTheCat/hjson-java), modification of official hjson implementation for java.
 
 ## Installation
 ### Maven
