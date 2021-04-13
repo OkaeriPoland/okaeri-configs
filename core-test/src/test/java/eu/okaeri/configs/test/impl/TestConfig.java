@@ -93,12 +93,12 @@ public class TestConfig extends OkaeriConfig {
     private BigInteger bigInteger = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999876543210");
 
     @Comment("Serializable test")
-    private SerializableSubconfig elo = ConfigManager.initialize(new SerializableSubconfig("testString0", true, Arrays.asList("abchehe", "dfghe")));
+    private SerializableSubconfig elo = ConfigManager.initialize(new SerializableSubconfig("testString0", true, Arrays.asList("abchehe", "dfghe"), TestEnum.ONE));
 
     @Comment("Test serializable list")
     private List<SerializableSubconfig> serializableList = Arrays.asList(
-            ConfigManager.initialize(new SerializableSubconfig("testString1", true, Arrays.asList("abc", "dfg"))),
-            ConfigManager.initialize(new SerializableSubconfig("testString2", true, Arrays.asList("axxbc", "dfddg")))
+            ConfigManager.initialize(new SerializableSubconfig("testString1", true, Arrays.asList("abc", "dfg"), TestEnum.TWO)),
+            ConfigManager.initialize(new SerializableSubconfig("testString2", true, Arrays.asList("axxbc", "dfddg"), TestEnum.THREE))
     );
 
     @Comment("Test primitive int")
