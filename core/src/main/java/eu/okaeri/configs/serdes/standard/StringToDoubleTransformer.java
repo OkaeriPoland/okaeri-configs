@@ -1,4 +1,4 @@
-package eu.okaeri.configs.serdes.impl;
+package eu.okaeri.configs.serdes.standard;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.ObjectTransformer;

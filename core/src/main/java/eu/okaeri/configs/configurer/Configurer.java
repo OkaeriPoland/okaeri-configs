@@ -7,6 +7,7 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.*;
+import eu.okaeri.configs.serdes.standard.StandardSerdes;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,7 +26,7 @@ public abstract class Configurer {
 
     private TransformerRegistry registry = new TransformerRegistry();
     {
-        this.registry.register(new DefaultSerdes());
+        this.registry.register(new StandardSerdes());
     }
 
     public void setRegistry(TransformerRegistry registry) {

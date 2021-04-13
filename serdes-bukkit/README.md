@@ -2,6 +2,22 @@
 
 Serializers/Deserializers/Transformers for Bukkit types. See [yaml-bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit).
 
+## Installation
+### Maven
+Add dependency to the `dependencies` section:
+```xml
+<dependency>
+  <groupId>eu.okaeri</groupId>
+  <artifactId>okaeri-configs-serdes-bukkit</artifactId>
+  <version>2.6.5</version>
+</dependency>
+```
+### Gradle
+Add dependency to the `maven` section:
+```groovy
+implementation 'eu.okaeri:okaeri-configs-serdes-bukkit:2.6.5'
+```
+
 ## Supported types
 
 ### Serializers

@@ -6,7 +6,7 @@
 
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs</artifactId>
-    <version>2.6.4</version>
+    <version>2.6.5</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -38,6 +38,7 @@
         <module>hocon-lightbend</module>
 
         <!-- additional serdes modules -->
+        <module>serdes-commons</module>
         <module>serdes-bukkit</module>
     </modules>
 
