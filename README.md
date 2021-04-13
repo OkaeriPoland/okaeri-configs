@@ -23,8 +23,9 @@ General implementations based on standard format libraries directly.
 ## Supported platforms (environment dependant)
 Special implementations for safe use in specific environment, eg. gameservers.
 - **Bukkit/Spigot/PaperSpigot (Minecraft server)**
-  - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Minecraft plugins 
+  - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Spigot/Paper plugins 
     (best used with [okaeri-platform](https://github.com/OkaeriPoland/okaeri-platform))
+  - 🌟 [Minecraft (Bungee) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee): no need for additional dependencies when writing BungeeCord plugins
 - **Velocity (Minecraft proxy), Sponge (Minecraft server)**
   - currently no ready adapters, but use with [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson), 
     [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend) is possible (remember to exclude format specific dependencies (eg. gson) when shading, 
