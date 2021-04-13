@@ -1,15 +1,18 @@
-package eu.okaeri.configs.serdes;
+package eu.okaeri.configs.serdes.standard;
 
-import eu.okaeri.configs.serdes.impl.*;
+import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.TransformerRegistry;
 
-public class DefaultSerdes implements OkaeriSerdesPack {
+public class StandardSerdes implements OkaeriSerdesPack {
 
     @Override
     public void register(TransformerRegistry registry) {
 
+        // some magic
         registry.register(new ObjectToStringTransformer());
         registry.register(new StringToStringTransformer());
 
+        // standard types
         registry.registerWithReversedToString(new StringToBigDecimalTransformer());
         registry.registerWithReversedToString(new StringToBigIntegerTransformer());
         registry.registerWithReversedToString(new StringToBooleanTransformer());

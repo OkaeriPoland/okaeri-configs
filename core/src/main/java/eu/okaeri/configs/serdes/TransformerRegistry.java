@@ -2,7 +2,7 @@ package eu.okaeri.configs.serdes;
 
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.impl.ObjectToStringTransformer;
+import eu.okaeri.configs.serdes.standard.ObjectToStringTransformer;
 
 import java.util.Map;
 import java.util.Set;
