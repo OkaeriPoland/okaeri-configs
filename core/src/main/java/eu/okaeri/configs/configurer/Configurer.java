@@ -167,7 +167,7 @@ public abstract class Configurer {
         // enums
         Class<?> objectClazz = object.getClass();
         try {
-            if ((object instanceof String) && targetClazz.isEnum()) {
+            if ((object instanceof String) && target.isEnum()) {
                 String strObject = (String) object;
                 // 1:1 match ONE=ONE
                 try {
@@ -191,7 +191,7 @@ public abstract class Configurer {
                 String enumValuesStr = Arrays.stream(targetClazz.getEnumConstants()).map(item -> ((Enum) item).name()).collect(Collectors.joining(", "));
                 throw new IllegalArgumentException("no enum value for name " + strObject + " (available: " + enumValuesStr + ")");
             }
-            if (objectClazz.isEnum() && (targetClazz == String.class)) {
+            if (source.isEnum() && (targetClazz == String.class)) {
                 Method enumMethod = objectClazz.getMethod("name");
                 return targetClazz.cast(enumMethod.invoke(object));
             }
@@ -267,7 +267,12 @@ public abstract class Configurer {
                 return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz));
             }
 
-            return targetClazz.cast(object);
+            try {
+                return targetClazz.cast(object);
+            }
+            catch (ClassCastException exception) {
+                throw new OkaeriException("cannot resolve " + object.getClass() + " to " + targetClazz + " (" + source + " => " + target + "): " + object, exception);
+            }
         }
 
         // primitives transformer

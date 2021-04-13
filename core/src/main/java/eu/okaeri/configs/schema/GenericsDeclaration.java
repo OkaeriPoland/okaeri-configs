@@ -160,10 +160,12 @@ public class GenericsDeclaration {
 
     public GenericsDeclaration(Class<?> type) {
         this.type = type;
+        this.isEnum = type.isEnum();
     }
 
     private Class<?> type;
     private List<GenericsDeclaration> subtype;
+    private boolean isEnum;
 
     public Class<?> wrap() {
         return PRIMITIVE_TO_WRAPPER.get(this.type);

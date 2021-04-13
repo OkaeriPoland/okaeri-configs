@@ -19,4 +19,6 @@ public class SerializableSubconfig extends OkaeriConfig {
     private Boolean testBool;
     @Comment("lista bk")
     private List<String> listOfStrings;
+    @Comment("hmmm enum")
+    private TestEnum testEnum;
 }
