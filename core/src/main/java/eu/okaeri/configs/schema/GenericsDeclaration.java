@@ -95,7 +95,10 @@ public class GenericsDeclaration {
             buf.append(c);
         }
 
-        declaration.setType(resolvePrimitiveOrClass(buf.toString()));
+        Class<?> type = resolvePrimitiveOrClass(buf.toString());
+        declaration.setType(type);
+        if (type != null) declaration.setEnum(type.isEnum());
+
         return declaration;
     }
 

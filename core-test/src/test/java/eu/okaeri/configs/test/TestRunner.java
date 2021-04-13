@@ -13,6 +13,7 @@ import eu.okaeri.configs.test.serdes.LocationSerializer;
 import eu.okaeri.configs.test.serdes.StringWorldTransformer;
 import eu.okaeri.configs.validator.okaeri.OkaeriValidator;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
 
 import java.io.File;
 
@@ -24,6 +25,11 @@ public final class TestRunner {
         config("config.bukkit.yml", new YamlBukkitConfigurer("# ", ""));
         empty("empty.bukkit.yml", new YamlBukkitConfigurer());
         inline("inline.bukkit.yml", new YamlBukkitConfigurer());
+
+        // bungee
+        config("config.bungee.yml", new YamlBungeeConfigurer());
+        empty("empty.bungee.yml", new YamlBungeeConfigurer());
+        inline("inline.bungee.yml", new YamlBungeeConfigurer());
 
         // gson
         config("config.gson.json", new JsonGsonConfigurer());
