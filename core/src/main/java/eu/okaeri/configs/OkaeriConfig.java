@@ -106,6 +106,7 @@ public abstract class OkaeriConfig {
         }
 
         try {
+            this.bindFile.mkdirs();
             return this.save(new FileOutputStream(this.bindFile, false));
         } catch (FileNotFoundException exception) {
             throw new OkaeriException("failed #save using file " + this.bindFile, exception);
