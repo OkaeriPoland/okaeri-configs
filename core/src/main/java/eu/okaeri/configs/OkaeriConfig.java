@@ -106,7 +106,8 @@ public abstract class OkaeriConfig {
         }
 
         try {
-            this.bindFile.getParentFile().mkdirs();
+            File parentFile = this.bindFile.getParentFile();
+            if (parentFile != null) parentFile.mkdirs();
             return this.save(new FileOutputStream(this.bindFile, false));
         } catch (FileNotFoundException exception) {
             throw new OkaeriException("failed #save using file " + this.bindFile, exception);
