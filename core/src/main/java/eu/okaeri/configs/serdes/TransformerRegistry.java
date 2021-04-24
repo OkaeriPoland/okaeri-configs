@@ -72,4 +72,11 @@ public class TransformerRegistry {
                 .findFirst()
                 .orElse(null);
     }
+
+    public OkaeriSerdesPack allSerdes() {
+        return registry -> {
+            this.transformerMap.values().forEach(registry::register);
+            this.serializerSet.forEach(registry::register);
+        };
+    }
 }
