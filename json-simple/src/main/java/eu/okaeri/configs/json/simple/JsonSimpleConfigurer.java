@@ -9,9 +9,9 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.*;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.*;
 
 public class JsonSimpleConfigurer extends Configurer {
 
@@ -61,6 +61,11 @@ public class JsonSimpleConfigurer extends Configurer {
     @Override
     public boolean keyExists(String key) {
         return this.map.containsKey(key);
+    }
+
+    @Override
+    public List<String> getAllKeys() {
+        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
     }
 
     @Override

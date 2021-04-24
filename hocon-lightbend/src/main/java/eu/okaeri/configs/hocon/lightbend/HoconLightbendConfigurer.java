@@ -13,9 +13,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class HoconLightbendConfigurer extends Configurer {
@@ -88,6 +86,11 @@ public class HoconLightbendConfigurer extends Configurer {
     @Override
     public boolean keyExists(String key) {
         return this.map.containsKey(key);
+    }
+
+    @Override
+    public List<String> getAllKeys() {
+        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
     }
 
     @Override

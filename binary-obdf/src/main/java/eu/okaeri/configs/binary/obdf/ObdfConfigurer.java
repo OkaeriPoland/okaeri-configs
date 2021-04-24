@@ -10,6 +10,9 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ObdfConfigurer extends Configurer {
 
@@ -29,6 +32,11 @@ public class ObdfConfigurer extends Configurer {
     @Override
     public boolean keyExists(String key) {
         return this.bin.containsKey(key);
+    }
+
+    @Override
+    public List<String> getAllKeys() {
+        return Collections.unmodifiableList(new ArrayList<>(this.bin.getData().keySet()));
     }
 
     @Override

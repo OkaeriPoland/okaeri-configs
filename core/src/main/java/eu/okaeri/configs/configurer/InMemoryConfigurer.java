@@ -6,8 +6,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryConfigurer extends Configurer {
 
@@ -26,6 +25,11 @@ public class InMemoryConfigurer extends Configurer {
     @Override
     public boolean keyExists(String key) {
         return this.map.containsKey(key);
+    }
+
+    @Override
+    public List<String> getAllKeys() {
+        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
     }
 
     @Override
