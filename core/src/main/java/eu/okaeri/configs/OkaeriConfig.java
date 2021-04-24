@@ -36,40 +36,40 @@ public abstract class OkaeriConfig {
     }
 
     public OkaeriConfig withConfigurer(Configurer configurer) {
-        if (this.configurer != null) configurer.setRegistry(this.configurer.getRegistry());
+        if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
         return this;
     }
 
     public OkaeriConfig withConfigurer(Configurer configurer, OkaeriSerdesPack... serdesPack) {
-        if (this.configurer != null) configurer.setRegistry(this.configurer.getRegistry());
+        if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
-        Arrays.stream(serdesPack).forEach(this.configurer::register);
+        Arrays.stream(serdesPack).forEach(this.getConfigurer()::register);
         return this;
     }
 
     public OkaeriConfig withSerdesPack(OkaeriSerdesPack serdesPack) {
-        this.configurer.register(serdesPack);
+        this.getConfigurer().register(serdesPack);
         return this;
     }
 
     public OkaeriConfig withBindFile(File bindFile) {
-        this.bindFile = bindFile;
+        this.setBindFile(bindFile);
         return this;
     }
 
     public OkaeriConfig withBindFile(String pathname) {
-        this.bindFile = new File(pathname);
+        this.setBindFile(new File(pathname));
         return this;
     }
 
     public OkaeriConfig saveDefaults() throws OkaeriException {
 
-        if (this.bindFile == null) {
+        if (this.getBindFile() == null) {
             throw new InitializationException("bindFile cannot be null");
         }
 
-        if (this.bindFile.exists()) {
+        if (this.getBindFile().exists()) {
             return this;
         }
 
@@ -78,60 +78,65 @@ public abstract class OkaeriConfig {
 
     public void set(String key, Object value) {
 
-        if (this.configurer == null) {
+        if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
         }
 
-        FieldDeclaration field = this.declaration.getField(key).orElse(null);
+        FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            Object resolved = this.configurer.resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
+            Object resolved = this.getConfigurer().resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
             field.updateValue(resolved);
         }
 
-        GenericsDeclaration fieldGenerics = this.declaration.getGenericsOrNull(key);
-        this.configurer.setValue(key, value, fieldGenerics, field);
+        GenericsDeclaration fieldGenerics = this.getDeclaration().getGenericsOrNull(key);
+        this.getConfigurer().setValue(key, value, fieldGenerics, field);
     }
 
     public Object get(String key) {
 
-        if (this.configurer == null) {
+        if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
         }
 
-        FieldDeclaration field = this.declaration.getField(key).orElse(null);
+        FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
             return field.getValue();
         }
 
-        return this.configurer.getValue(key);
+        return this.getConfigurer().getValue(key);
     }
 
     public <T> T get(String key, Class<T> clazz) {
 
-        if (this.configurer == null) {
+        if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
         }
 
-        FieldDeclaration field = this.declaration.getField(key).orElse(null);
+        FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            return this.configurer.resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz));
+            return this.getConfigurer().resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz));
         }
 
-        return this.configurer.getValue(key, clazz, null);
+        return this.getConfigurer().getValue(key, clazz, null);
     }
 
     public OkaeriConfig save() throws OkaeriException {
+        return this.save(this.getBindFile());
+    }
 
-        if (this.bindFile == null) {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public OkaeriConfig save(File file) throws OkaeriException {
+
+        if (this.getBindFile() == null) {
             throw new OkaeriException("cannot use #save() without bindFile specified");
         }
 
         try {
-            File parentFile = this.bindFile.getParentFile();
+            File parentFile = file.getParentFile();
             if (parentFile != null) parentFile.mkdirs();
-            return this.save(new FileOutputStream(this.bindFile, false));
+            return this.save(new FileOutputStream(file, false));
         } catch (FileNotFoundException exception) {
-            throw new OkaeriException("failed #save using file " + this.bindFile, exception);
+            throw new OkaeriException("failed #save using file " + file, exception);
         }
     }
 
@@ -143,23 +148,23 @@ public abstract class OkaeriConfig {
 
     public OkaeriConfig save(OutputStream outputStream) throws OkaeriException {
 
-        if (this.configurer == null) {
+        if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
         }
 
-        for (FieldDeclaration field : this.declaration.getFields()) {
-            if (!this.configurer.isValid(field, field.getValue())) {
-                throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+        for (FieldDeclaration field : this.getDeclaration().getFields()) {
+            if (!this.getConfigurer().isValid(field, field.getValue())) {
+                throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
             }
             try {
-                this.configurer.setValue(field.getName(), field.getValue(), field.getType(), field);
+                this.getConfigurer().setValue(field.getName(), field.getValue(), field.getType(), field);
             } catch (Exception exception) {
                 throw new OkaeriException("failed to #setValue for " + field.getName(), exception);
             }
         }
 
         try {
-            this.configurer.write(outputStream, this.declaration);
+            this.getConfigurer().write(outputStream, this.getDeclaration());
         } catch (Exception exception) {
             throw new OkaeriException("failed #write", exception);
         }
@@ -172,19 +177,19 @@ public abstract class OkaeriConfig {
         Map<String, Object> map = new LinkedHashMap<>();
 
         // fetch by declaration
-        for (FieldDeclaration field : this.declaration.getFields()) {
+        for (FieldDeclaration field : this.getDeclaration().getFields()) {
             Object simplified = configurer.simplify(field.getValue(), field.getType(), conservative);
             map.put(field.getName(), simplified);
         }
 
         // fetch remaining, non-declared
-        for (String keyName : this.configurer.getAllKeys()) {
+        for (String keyName : this.getConfigurer().getAllKeys()) {
 
             if (map.containsKey(keyName)) {
                 continue;
             }
 
-            Object value = this.configurer.getValue(keyName);
+            Object value = this.getConfigurer().getValue(keyName);
             Object simplified = configurer.simplify(value, GenericsDeclaration.of(value), conservative);
             map.put(keyName, simplified);
         }
@@ -202,7 +207,7 @@ public abstract class OkaeriConfig {
 
     public OkaeriConfig load(String data) {
 
-        if (this.configurer == null) {
+        if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
         }
 
@@ -212,12 +217,12 @@ public abstract class OkaeriConfig {
 
     public OkaeriConfig load(InputStream inputStream) {
 
-        if (this.configurer == null) {
+        if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
         }
 
         try {
-            this.configurer.load(inputStream, this.declaration);
+            this.getConfigurer().load(inputStream, this.getDeclaration());
         } catch (Exception exception) {
             throw new OkaeriException("failed #load", exception);
         }
@@ -227,24 +232,24 @@ public abstract class OkaeriConfig {
 
     public OkaeriConfig load() throws OkaeriException {
 
-        if (this.bindFile == null) {
+        if (this.getBindFile() == null) {
             throw new OkaeriException("cannot use #load() without bindFile specified");
         }
 
         try {
-            return this.load(new FileInputStream(this.bindFile));
+            return this.load(new FileInputStream(this.getBindFile()));
         } catch (FileNotFoundException exception) {
-            throw new OkaeriException("failed #load using file " + this.bindFile, exception);
+            throw new OkaeriException("failed #load using file " + this.getBindFile(), exception);
         }
     }
 
     public OkaeriConfig update() throws OkaeriException {
 
-        if (this.declaration == null) {
+        if (this.getDeclaration() == null) {
             throw new InitializationException("declaration cannot be null: config not initialized");
         }
 
-        for (FieldDeclaration field : this.declaration.getFields()) {
+        for (FieldDeclaration field : this.getDeclaration().getFields()) {
 
             String fieldName = field.getName();
             GenericsDeclaration genericType = field.getType();
@@ -257,32 +262,32 @@ public abstract class OkaeriConfig {
                 if (property != null) {
                     Object value;
                     try {
-                        value = this.configurer.resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType);
+                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType);
                     } catch (Exception exception) {
                         throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
                     }
-                    if (!this.configurer.isValid(field, value)) {
-                        throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+                    if (!this.getConfigurer().isValid(field, value)) {
+                        throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
                     }
                     field.updateValue(value);
                     updateValue = false;
                 }
             }
 
-            if (!this.configurer.keyExists(fieldName)) {
+            if (!this.getConfigurer().keyExists(fieldName)) {
                 continue;
             }
 
             Object value;
             try {
-                value = this.configurer.getValue(fieldName, type, genericType);
+                value = this.getConfigurer().getValue(fieldName, type, genericType);
             } catch (Exception exception) {
                 throw new OkaeriException("failed to #getValue for " + fieldName, exception);
             }
 
             if (updateValue) {
-                if (!this.configurer.isValid(field, value)) {
-                    throw new ValidationException(this.configurer.getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+                if (!this.getConfigurer().isValid(field, value)) {
+                    throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
                 }
                 field.updateValue(value);
             }
@@ -299,7 +304,7 @@ public abstract class OkaeriConfig {
     }
 
     public OkaeriConfig updateDeclaration() {
-        this.declaration = ConfigDeclaration.of(this);
+        this.setDeclaration(ConfigDeclaration.of(this));
         return this;
     }
 }

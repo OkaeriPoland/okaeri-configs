@@ -45,6 +45,14 @@ public final class ConfigManager {
         return copy;
     }
 
+    public static <T extends OkaeriConfig> T deepCopy(OkaeriConfig config, Class<T> into) throws OkaeriException {
+        T copy = ConfigManager.create(into);
+        copy.withConfigurer(config.getConfigurer(), config.getConfigurer().getRegistry().allSerdes());
+        copy.withBindFile(config.getBindFile());
+        copy.load(config.saveToString());
+        return copy;
+    }
+
     public static <T extends OkaeriConfig> T initialize(T config) {
         config.updateDeclaration();
         return config;
