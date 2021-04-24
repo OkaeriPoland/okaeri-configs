@@ -1,10 +1,13 @@
 package eu.okaeri.configs;
 
 import eu.okaeri.configs.exception.OkaeriException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigManager {
 
     public static <T extends OkaeriConfig> T create(Class<T> clazz) throws OkaeriException {
