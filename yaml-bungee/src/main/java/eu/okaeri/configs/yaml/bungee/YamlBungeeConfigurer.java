@@ -49,6 +49,20 @@ public class YamlBungeeConfigurer extends Configurer {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
+
+        if (object instanceof Configuration) {
+            Configuration configuration = (Configuration) object;
+            Map<String, Object> values = new LinkedHashMap<>();
+            configuration.getKeys().forEach(key -> values.put(key, configuration.get(key)));
+            return super.resolveType(values, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), targetClazz, genericTarget);
+        }
+
+        return super.resolveType(object, genericSource, targetClazz, genericTarget);
+    }
+
+    @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, true);
         this.config.set(key, simplified);
@@ -65,17 +79,8 @@ public class YamlBungeeConfigurer extends Configurer {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
-
-        if (object instanceof Configuration) {
-            Configuration configuration = (Configuration) object;
-            Map<String, Object> values = new LinkedHashMap<>();
-            configuration.getKeys().forEach(key -> values.put(key, configuration.get(key)));
-            return super.resolveType(values, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), targetClazz, genericTarget);
-        }
-
-        return super.resolveType(object, genericSource, targetClazz, genericTarget);
+    public List<String> getAllKeys() {
+        return Collections.unmodifiableList(new ArrayList<>(this.config.getKeys()));
     }
 
     @Override

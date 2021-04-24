@@ -9,6 +9,7 @@ import eu.okaeri.configs.serdes.TransformerRegistry;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class WrappedConfigurer extends Configurer {
@@ -91,6 +92,11 @@ public class WrappedConfigurer extends Configurer {
     @Override
     public boolean isValid(FieldDeclaration declaration, Object value) {
         return this.wrapped.isValid(declaration, value);
+    }
+
+    @Override
+    public List<String> getAllKeys() {
+        return this.wrapped.getAllKeys();
     }
 
     @Override

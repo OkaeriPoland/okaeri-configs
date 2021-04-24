@@ -13,9 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class YamlBukkitConfigurer extends Configurer {
 
@@ -47,6 +45,18 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
+
+        if (object instanceof MemorySection) {
+            Map<String, Object> values = ((MemorySection) object).getValues(false);
+            return super.resolveType(values, GenericsDeclaration.of(values), targetClazz, genericTarget);
+        }
+
+        return super.resolveType(object, genericSource, targetClazz, genericTarget);
+    }
+
+    @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, true);
         this.config.set(key, simplified);
@@ -63,15 +73,8 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
-
-        if (object instanceof MemorySection) {
-            Map<String, Object> values = ((MemorySection) object).getValues(false);
-            return super.resolveType(values, GenericsDeclaration.of(values), targetClazz, genericTarget);
-        }
-
-        return super.resolveType(object, genericSource, targetClazz, genericTarget);
+    public List<String> getAllKeys() {
+        return Collections.unmodifiableList(new ArrayList<>(this.config.getKeys(false)));
     }
 
     @Override

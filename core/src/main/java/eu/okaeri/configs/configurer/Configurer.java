@@ -311,6 +311,12 @@ public abstract class Configurer {
         return true;
     }
 
+    public List<String> getAllKeys() {
+        return this.getParent().getDeclaration().getFields().stream()
+                .map(FieldDeclaration::getName)
+                .collect(Collectors.toList());
+    }
+
     public abstract void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception;
 
     public abstract void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception;

@@ -80,6 +80,15 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
+    public List<String> getAllKeys() {
+        List<String> keys = new ArrayList<>();
+        for (JsonObject.Member member : this.json) {
+            keys.add(member.getName());
+        }
+        return Collections.unmodifiableList(keys);
+    }
+
+    @Override
     public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
         String data = ConfigPostprocessor.of(inputStream).getContext();
         this.json = JsonValue.readHjson(data).asObject();

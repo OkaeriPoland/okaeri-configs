@@ -77,25 +77,46 @@ public abstract class OkaeriConfig {
     }
 
     public void set(String key, Object value) {
+
         if (this.configurer == null) {
             throw new InitializationException("configurer cannot be null");
         }
+
         FieldDeclaration field = this.declaration.getField(key).orElse(null);
+        if (field != null) {
+            Object resolved = this.configurer.resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
+            field.updateValue(resolved);
+        }
+
         GenericsDeclaration fieldGenerics = this.declaration.getGenericsOrNull(key);
         this.configurer.setValue(key, value, fieldGenerics, field);
     }
 
     public Object get(String key) {
+
         if (this.configurer == null) {
             throw new InitializationException("configurer cannot be null");
         }
+
+        FieldDeclaration field = this.declaration.getField(key).orElse(null);
+        if (field != null) {
+            return field.getValue();
+        }
+
         return this.configurer.getValue(key);
     }
 
     public <T> T get(String key, Class<T> clazz) {
+
         if (this.configurer == null) {
             throw new InitializationException("configurer cannot be null");
         }
+
+        FieldDeclaration field = this.declaration.getField(key).orElse(null);
+        if (field != null) {
+            return this.configurer.resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz));
+        }
+
         return this.configurer.getValue(key, clazz, null);
     }
 
@@ -149,9 +170,23 @@ public abstract class OkaeriConfig {
     public Map<String, Object> asMap(Configurer configurer, boolean conservative) throws OkaeriException {
 
         Map<String, Object> map = new LinkedHashMap<>();
+
+        // fetch by declaration
         for (FieldDeclaration field : this.declaration.getFields()) {
             Object simplified = configurer.simplify(field.getValue(), field.getType(), conservative);
             map.put(field.getName(), simplified);
+        }
+
+        // fetch remaining, non-declared
+        for (String keyName : this.configurer.getAllKeys()) {
+
+            if (map.containsKey(keyName)) {
+                continue;
+            }
+
+            Object value = this.configurer.getValue(keyName);
+            Object simplified = configurer.simplify(value, GenericsDeclaration.of(value), conservative);
+            map.put(keyName, simplified);
         }
 
         return map;
