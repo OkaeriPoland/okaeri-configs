@@ -16,6 +16,19 @@ public final class ConfigManager {
         try {
             config = clazz.newInstance();
         } catch (InstantiationException | IllegalAccessException exception) {
+            throw new OkaeriException("cannot create " + clazz.getSimpleName() + " instance: " +
+                    "make sure default constructor is available or if subconfig use new instead");
+        }
+
+        return initialize(config);
+    }
+
+    public static <T extends OkaeriConfig> T createUnsafe(Class<T> clazz) throws OkaeriException {
+
+        T config;
+        try {
+            config = clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException exception) {
             try {
                 //noinspection unchecked
                 config = (T) allocateInstance(clazz);
@@ -41,7 +54,7 @@ public final class ConfigManager {
     }
 
     public static <T extends OkaeriConfig> T copy(OkaeriConfig config, Class<T> into) throws OkaeriException {
-        T copy = ConfigManager.create(into);
+        T copy = ConfigManager.createUnsafe(into);
         copy.withConfigurer(config.getConfigurer(), config.getConfigurer().getRegistry().allSerdes());
         copy.withBindFile(config.getBindFile());
         config.getConfigurer().getAllKeys().forEach(key -> copy.set(key, config.get(key)));
@@ -49,7 +62,7 @@ public final class ConfigManager {
     }
 
     public static <T extends OkaeriConfig> T deepCopy(OkaeriConfig config, Class<T> into) throws OkaeriException {
-        T copy = ConfigManager.create(into);
+        T copy = ConfigManager.createUnsafe(into);
         copy.withConfigurer(config.getConfigurer(), config.getConfigurer().getRegistry().allSerdes());
         copy.withBindFile(config.getBindFile());
         copy.load(config.saveToString());

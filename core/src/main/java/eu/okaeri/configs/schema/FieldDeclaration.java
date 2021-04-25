@@ -90,7 +90,7 @@ public class FieldDeclaration {
 
     public Object getValue() throws OkaeriException {
 
-        if ((this.variable != null) && (this.variable.mode() == VariableMode.RUNTIME)) {
+        if (this.variableHide) {
             return this.startingValue;
         }
 
@@ -108,6 +108,7 @@ public class FieldDeclaration {
     private String[] comment;
     private GenericsDeclaration type;
     private Variable variable;
+    private boolean variableHide;
 
     private Field field;
     private Object object;

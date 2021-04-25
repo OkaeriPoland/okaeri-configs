@@ -277,6 +277,7 @@ public abstract class OkaeriConfig {
                         throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
                     }
                     field.updateValue(value);
+                    field.setVariableHide(true);
                     updateValue = false;
                 }
             }
