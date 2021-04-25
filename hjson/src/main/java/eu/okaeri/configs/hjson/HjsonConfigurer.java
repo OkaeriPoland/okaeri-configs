@@ -50,8 +50,8 @@ public class HjsonConfigurer extends Configurer {
     public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
-        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtype().get(0);
-        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtype().get(1);
+        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
+        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(1);
 
         for (Map.Entry<Object, Object> entry : value.entrySet()) {
             Object key = this.simplify(entry.getKey(), keyDeclaration, false);
@@ -132,7 +132,7 @@ public class HjsonConfigurer extends Configurer {
         }
 
         if ((object instanceof JsonArray) && (field != null)) {
-            GenericsDeclaration arrayType = field.getType().getSubtype().get(0);
+            GenericsDeclaration arrayType = field.getType().getSubtypeAtOrNull(0);
             ConfigDeclaration configDeclaration = ConfigDeclaration.of(arrayType.getType());
             ((JsonArray) object).forEach(item -> this.addComments(item, configDeclaration, null));
         }

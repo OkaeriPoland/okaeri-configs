@@ -3,6 +3,9 @@ package eu.okaeri.configs.configurer;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class InMemoryWrappedConfigurer extends WrappedConfigurer {
@@ -12,6 +15,11 @@ public class InMemoryWrappedConfigurer extends WrappedConfigurer {
     public InMemoryWrappedConfigurer(Configurer configurer, Map<String, Object> map) {
         super(configurer);
         this.map = map;
+    }
+
+    @Override
+    public List<String> getAllKeys() {
+        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
     }
 
     @Override

@@ -60,8 +60,8 @@ public class HoconLightbendConfigurer extends Configurer {
     public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
-        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtype().get(0);
-        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtype().get(1);
+        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
+        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(1);
 
         for (Map.Entry<Object, Object> entry : value.entrySet()) {
             Object key = this.simplify(entry.getKey(), keyDeclaration, false);

@@ -14,9 +14,7 @@ import lombok.Setter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 @Setter
@@ -180,6 +178,11 @@ public abstract class OkaeriConfig {
         for (FieldDeclaration field : this.getDeclaration().getFields()) {
             Object simplified = configurer.simplify(field.getValue(), field.getType(), conservative);
             map.put(field.getName(), simplified);
+        }
+
+        // no configurer, no additional properties possible
+        if (this.getConfigurer() == null) {
+            return map;
         }
 
         // fetch remaining, non-declared

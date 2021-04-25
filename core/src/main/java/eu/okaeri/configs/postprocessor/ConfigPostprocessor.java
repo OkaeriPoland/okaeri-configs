@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -129,11 +130,15 @@ public class ConfigPostprocessor {
     }
 
     public static String addIndent(String line, int size) {
+
         StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < size; i++) {
-            buf.append(" ");
-        }
-        return buf.append(line).toString();
+        for (int i = 0; i < size; i++) buf.append(" ");
+        String indent = buf.toString();
+
+        return Arrays.stream(line.split("\n"))
+                .map(part -> indent + part)
+                .collect(Collectors.joining("\n"))
+                + "\n";
     }
 
     public ConfigPostprocessor updateContext(ConfigContextManipulator manipulator) {
