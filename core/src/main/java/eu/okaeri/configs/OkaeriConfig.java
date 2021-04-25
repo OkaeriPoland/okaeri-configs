@@ -82,11 +82,11 @@ public abstract class OkaeriConfig {
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            Object resolved = this.getConfigurer().resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
-            field.updateValue(resolved);
+            value = this.getConfigurer().resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
+            field.updateValue(value);
         }
 
-        GenericsDeclaration fieldGenerics = this.getDeclaration().getGenericsOrNull(key);
+        GenericsDeclaration fieldGenerics = (field == null) ? null : field.getType();
         this.getConfigurer().setValue(key, value, fieldGenerics, field);
     }
 
