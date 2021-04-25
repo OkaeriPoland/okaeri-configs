@@ -127,8 +127,8 @@ public abstract class OkaeriConfig {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public OkaeriConfig save(File file) throws OkaeriException {
 
-        if (this.getBindFile() == null) {
-            throw new OkaeriException("cannot use #save() without bindFile specified");
+        if (file == null) {
+            throw new OkaeriException("cannot use #save(File) with null file");
         }
 
         try {
@@ -231,15 +231,19 @@ public abstract class OkaeriConfig {
     }
 
     public OkaeriConfig load() throws OkaeriException {
+        return this.load(this.getBindFile());
+    }
 
-        if (this.getBindFile() == null) {
-            throw new OkaeriException("cannot use #load() without bindFile specified");
+    public OkaeriConfig load(File file) throws OkaeriException {
+
+        if (file == null) {
+            throw new OkaeriException("cannot use #load(File) with null file");
         }
 
         try {
-            return this.load(new FileInputStream(this.getBindFile()));
+            return this.load(new FileInputStream(file));
         } catch (FileNotFoundException exception) {
-            throw new OkaeriException("failed #load using file " + this.getBindFile(), exception);
+            throw new OkaeriException("failed #load using file " + file, exception);
         }
     }
 
