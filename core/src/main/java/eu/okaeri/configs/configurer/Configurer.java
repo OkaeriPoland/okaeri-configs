@@ -57,7 +57,7 @@ public abstract class Configurer {
     public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         List collection = new ArrayList();
-        GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtype().get(0);
+        GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
 
         for (Object collectionElement : value) {
             collection.add(this.simplify(collectionElement, collectionSubtype, conservative));
@@ -70,8 +70,8 @@ public abstract class Configurer {
     public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
-        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtype().get(0);
-        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtype().get(1);
+        GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
+        GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(1);
 
         for (Map.Entry<Object, Object> entry : value.entrySet()) {
             Object key = this.simplify(entry.getKey(), keyDeclaration, conservative);
@@ -223,7 +223,7 @@ public abstract class Configurer {
 
                 Collection<?> sourceList = (Collection<?>) object;
                 Collection<Object> targetList = (Collection<Object>) this.createInstance(targetClazz);
-                GenericsDeclaration listDeclaration = genericTarget.getSubtype().get(0);
+                GenericsDeclaration listDeclaration = genericTarget.getSubtypeAtOrNull(0);
 
                 for (Object item : sourceList) {
                     Object converted = this.resolveType(item, GenericsDeclaration.of(item), listDeclaration.getType(), listDeclaration);
@@ -237,8 +237,8 @@ public abstract class Configurer {
             if ((object instanceof Map) && Map.class.isAssignableFrom(targetClazz)) {
 
                 Map<Object, Object> values = ((Map<Object, Object>) object);
-                GenericsDeclaration keyDeclaration = genericTarget.getSubtype().get(0);
-                GenericsDeclaration valueDeclaration = genericTarget.getSubtype().get(1);
+                GenericsDeclaration keyDeclaration = genericTarget.getSubtypeAtOrNull(0);
+                GenericsDeclaration valueDeclaration = genericTarget.getSubtypeAtOrNull(1);
                 Map<Object, Object> map = (Map<Object, Object>) this.createInstance(targetClazz);
 
                 for (Map.Entry<Object, Object> entry : values.entrySet()) {

@@ -170,6 +170,10 @@ public class GenericsDeclaration {
     private List<GenericsDeclaration> subtype;
     private boolean isEnum;
 
+    public GenericsDeclaration getSubtypeAtOrNull(int index) {
+        return (this.subtype == null) ? null : ((index >= this.subtype.size()) ? null : this.subtype.get(index));
+    }
+
     public Class<?> wrap() {
         return PRIMITIVE_TO_WRAPPER.get(this.type);
     }
