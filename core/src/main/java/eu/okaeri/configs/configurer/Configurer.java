@@ -201,7 +201,7 @@ public abstract class Configurer {
 
         // subconfig
         if (OkaeriConfig.class.isAssignableFrom(targetClazz)) {
-            OkaeriConfig config = ConfigManager.create((Class<? extends OkaeriConfig>) targetClazz);
+            OkaeriConfig config = ConfigManager.createUnsafe((Class<? extends OkaeriConfig>) targetClazz);
             Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)));
             config.setConfigurer(new InMemoryWrappedConfigurer(this, configMap));
             return (T) config.update();

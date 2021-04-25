@@ -7,8 +7,7 @@ import eu.okaeri.configs.test.obj.CraftLocation;
 import eu.okaeri.configs.test.obj.CraftWorld;
 import eu.okaeri.configs.test.obj.Location;
 import eu.okaeri.validator.annotation.Size;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -148,6 +147,40 @@ public class TestConfig extends OkaeriConfig {
 
     @Comment("Test byte wrapper")
     private Byte testByteWrapper = 2;
+
+    @Comment("Storage settings")
+    private StorageConfig testInner = new StorageConfig();
+
+    @Getter
+    @Setter
+    @ToString
+    public class StorageConfig extends OkaeriConfig {
+
+        @Variable("OPE_STORAGE_PREFIX")
+        @Comment("Prefix for the storage: allows to have multiple instances using same database")
+        @Comment("FLAT  : no effect due to local nature")
+        @Comment("REDIS : {storagePrefix}:{collection} -> OkaeriPlatformBukkitExample:player")
+        @Comment("MYSQL : {storagePrefix}:{collection} -> ope_storage_player (recommended shortened [here 'ope:storage'] due to database limitations)")
+        private String prefix = "OkaeriPlatformBukkitExample:storage";
+
+        @Variable("OPE_STORAGE_URI")
+        @Comment("FLAT  : not applicable, plugin controlled")
+        @Comment("REDIS : redis://localhost")
+        @Comment("MYSQL : jdbc:mysql://localhost:3306/db")
+        private String uri = "redis://localhost";
+
+        @Variable("OPE_STORAGE_USERNAME")
+        @Comment("FLAT  : N/A")
+        @Comment("REDIS : N/A")
+        @Comment("MYSQL : used")
+        private String username = "root";
+
+        @Variable("OPE_STORAGE_PASSWORD")
+        @Comment("FLAT  : N/A")
+        @Comment("REDIS : optional")
+        @Comment("MYSQL : optional")
+        private String password = "1234";
+    }
 
     @Comment("Test multiline string")
     private String multiline = "WELCOME\nMULTIPLIE\n\nLINES\n!!!!!!!!!!!11111";
