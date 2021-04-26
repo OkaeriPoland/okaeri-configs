@@ -7,22 +7,36 @@ import eu.okaeri.configs.annotation.Names;
 import lombok.Data;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Data
 public class ConfigDeclaration {
 
+    private static final Map<Class<?>, ConfigDeclaration> DECLARATION_CACHE = new ConcurrentHashMap<>();
+
     public static ConfigDeclaration of(Class<?> clazz, OkaeriConfig config) {
 
+        ConfigDeclaration template = DECLARATION_CACHE.computeIfAbsent(clazz, (klass) -> {
+            ConfigDeclaration declaration = new ConfigDeclaration();
+            declaration.setNameStrategy(klass.getAnnotation(Names.class));
+            declaration.setHeader(readHeader(klass));
+            declaration.setReal(OkaeriConfig.class.isAssignableFrom(klass));
+            declaration.setType(klass);
+            return declaration;
+        });
+
         ConfigDeclaration declaration = new ConfigDeclaration();
-        declaration.setNameStrategy(clazz.getAnnotation(Names.class));
-        declaration.setHeader(readHeader(clazz));
-        declaration.setReal(OkaeriConfig.class.isAssignableFrom(clazz));
-        declaration.setFields(Arrays.stream(clazz.getDeclaredFields())
+        declaration.setNameStrategy(template.getNameStrategy());
+        declaration.setHeader(template.getHeader());
+        declaration.setReal(template.isReal());
+        declaration.setType(template.getType());
+
+        declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
                 .filter(field -> !"this$0".equals(field.getName()))
                 .map(field -> FieldDeclaration.of(declaration, field, config))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toMap(FieldDeclaration::getName, field -> field)));
 
         return declaration;
     }
@@ -55,9 +69,7 @@ public class ConfigDeclaration {
     }
 
     public Optional<FieldDeclaration> getField(String key) {
-        return this.fields.stream()
-                .filter(field -> field.getName().equals(key))
-                .findAny();
+        return Optional.ofNullable(this.fieldMap.get(key));
     }
 
     public GenericsDeclaration getGenericsOrNull(String key) {
@@ -66,8 +78,13 @@ public class ConfigDeclaration {
                 .orElse(null);
     }
 
+    public Collection<FieldDeclaration> getFields() {
+        return this.fieldMap.values();
+    }
+
     private Names nameStrategy;
     private String[] header;
-    private List<FieldDeclaration> fields;
+    private Map<String, FieldDeclaration> fieldMap;
     private boolean real;
+    private Class<?> type;
 }
