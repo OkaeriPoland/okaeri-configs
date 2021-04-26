@@ -1,6 +1,7 @@
 package eu.okaeri.configs.yaml.bukkit;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigLineInfo;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.postprocessor.SectionSeparator;
@@ -42,6 +43,16 @@ public class YamlBukkitConfigurer extends Configurer {
 
     public YamlBukkitConfigurer() {
         this(new YamlConfiguration());
+    }
+
+    @Override
+    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+
+        if (value instanceof MemorySection) {
+            return ((MemorySection) value).getValues(false);
+        }
+
+        return super.simplify(value, genericType, conservative);
     }
 
     @Override
