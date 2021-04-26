@@ -1,8 +1,10 @@
 package eu.okaeri.configs.postprocessor;
 
 import lombok.Data;
+import lombok.SneakyThrows;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -184,12 +186,13 @@ public class ConfigPostprocessor {
     }
 
     private static String readInput(InputStream inputStream) {
-        return new BufferedReader(new InputStreamReader(inputStream)).lines()
+        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines()
                 .collect(Collectors.joining("\n"));
     }
 
+    @SneakyThrows
     private static void writeOutput(OutputStream outputStream, String text) {
-        try (PrintStream out = new PrintStream(outputStream)) {
+        try (PrintStream out = new PrintStream(outputStream, true, StandardCharsets.UTF_8.name())) {
             out.print(text);
         }
     }
