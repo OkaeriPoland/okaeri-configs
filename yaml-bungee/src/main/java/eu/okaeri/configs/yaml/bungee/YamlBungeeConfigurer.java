@@ -85,7 +85,8 @@ public class YamlBungeeConfigurer extends Configurer {
 
     @Override
     public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
-        this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(inputStream);
+        String data = ConfigPostprocessor.of(inputStream).getContext();
+        this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(data);
     }
 
     @Override
