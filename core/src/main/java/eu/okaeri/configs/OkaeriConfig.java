@@ -132,8 +132,8 @@ public abstract class OkaeriConfig {
         try {
             File parentFile = file.getParentFile();
             if (parentFile != null) parentFile.mkdirs();
-            return this.save(new FileOutputStream(file, false));
-        } catch (FileNotFoundException exception) {
+            return this.save(new PrintStream(new FileOutputStream(file, false), true, StandardCharsets.UTF_8.name()));
+        } catch (FileNotFoundException | UnsupportedEncodingException exception) {
             throw new OkaeriException("failed #save using file " + file, exception);
         }
     }
