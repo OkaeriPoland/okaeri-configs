@@ -1,11 +1,15 @@
 package eu.okaeri.configs;
 
+import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
+import eu.okaeri.configs.schema.ConfigDeclaration;
+import eu.okaeri.configs.schema.GenericsDeclaration;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigManager {
@@ -53,17 +57,33 @@ public final class ConfigManager {
         return config;
     }
 
-    public static <T extends OkaeriConfig> T copy(OkaeriConfig config, Class<T> into) throws OkaeriException {
+    public static <T extends OkaeriConfig> T transformCopy(OkaeriConfig config, Class<T> into) throws OkaeriException {
+
         T copy = ConfigManager.createUnsafe(into);
-        copy.withConfigurer(config.getConfigurer(), config.getConfigurer().getRegistry().allSerdes());
+        Configurer configurer = config.getConfigurer();
+
+        copy.withConfigurer(configurer);
         copy.withBindFile(config.getBindFile());
-        config.getConfigurer().getAllKeys().forEach(key -> copy.set(key, config.get(key)));
+        ConfigDeclaration copyDeclaration = copy.getDeclaration();
+
+        configurer.getAllKeys().stream()
+                .map(copyDeclaration::getField)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(field -> {
+                    Object value = configurer.getValue(field.getName());
+                    if (!field.getType().getType().isInstance(value)) {
+                        value = configurer.resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
+                    }
+                    field.updateValue(value);
+                });
+
         return copy;
     }
 
-    public static <T extends OkaeriConfig> T deepCopy(OkaeriConfig config, Class<T> into) throws OkaeriException {
+    public static <T extends OkaeriConfig> T deepCopy(OkaeriConfig config, Configurer newConfigurer, Class<T> into) throws OkaeriException {
         T copy = ConfigManager.createUnsafe(into);
-        copy.withConfigurer(config.getConfigurer(), config.getConfigurer().getRegistry().allSerdes());
+        copy.withConfigurer(newConfigurer, config.getConfigurer().getRegistry().allSerdes());
         copy.withBindFile(config.getBindFile());
         copy.load(config.saveToString());
         return copy;

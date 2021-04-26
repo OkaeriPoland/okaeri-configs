@@ -3,58 +3,82 @@ package eu.okaeri.configs.schema;
 import eu.okaeri.configs.annotation.*;
 import eu.okaeri.configs.exception.OkaeriException;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 public class FieldDeclaration {
 
+    private static final Map<CacheEntry, FieldDeclaration> DECLARATION_CACHE = new ConcurrentHashMap<>();
+
+    @Data
+    @RequiredArgsConstructor
+    private static class CacheEntry {
+        private final Class<?> type;
+        private final String fieldName;
+    }
+
     @SneakyThrows
     public static FieldDeclaration of(ConfigDeclaration config, Field field, Object object) {
 
-        FieldDeclaration declaration = new FieldDeclaration();
-        field.setAccessible(true);
+        CacheEntry cache = new CacheEntry(config.getType(), field.getName());
+        FieldDeclaration template = DECLARATION_CACHE.computeIfAbsent(cache, (entry) -> {
 
-        if (field.getAnnotation(Exclude.class) != null) {
+            FieldDeclaration declaration = new FieldDeclaration();
+            field.setAccessible(true);
+
+            if (field.getAnnotation(Exclude.class) != null) {
+                return null;
+            }
+
+            CustomKey customKey = field.getAnnotation(CustomKey.class);
+            if (customKey != null) {
+                declaration.setName("".equals(customKey.value()) ? field.getName() : customKey.value());
+            } else if (config.getNameStrategy() != null) {
+
+                Names nameStrategy = config.getNameStrategy();
+                NameStrategy strategy = nameStrategy.strategy();
+                NameModifier modifier = nameStrategy.modifier();
+
+                String name = strategy.getRegex().matcher(field.getName()).replaceAll(strategy.getReplacement());
+                if (modifier == NameModifier.TO_UPPER_CASE) {
+                    name = name.toUpperCase(Locale.ROOT);
+                } else if (modifier == NameModifier.TO_LOWER_CASE) {
+                    name = name.toLowerCase(Locale.ROOT);
+                }
+
+                declaration.setName(name);
+            } else {
+                declaration.setName(field.getName());
+            }
+
+            Variable variable = field.getAnnotation(Variable.class);
+            declaration.setVariable(variable);
+            declaration.setComment(readComments(field));
+            declaration.setType(GenericsDeclaration.of(field.getGenericType()));
+            declaration.setField(field);
+
+            return declaration;
+        });
+
+        if (template == null) {
             return null;
         }
 
-        Object startingValue = (object == null) ? null : field.get(object);
+        FieldDeclaration declaration = new FieldDeclaration();
+        Object startingValue = (object == null) ? null : template.getField().get(object);
         declaration.setStartingValue(startingValue);
 
-        CustomKey customKey = field.getAnnotation(CustomKey.class);
-        if (customKey != null) {
-            declaration.setName("".equals(customKey.value()) ? field.getName() : customKey.value());
-        } else if (config.getNameStrategy() != null) {
-
-            Names nameStrategy = config.getNameStrategy();
-            NameStrategy strategy = nameStrategy.strategy();
-            NameModifier modifier = nameStrategy.modifier();
-
-            String name = strategy.getRegex().matcher(field.getName()).replaceAll(strategy.getReplacement());
-            if (modifier == NameModifier.TO_UPPER_CASE) {
-                name = name.toUpperCase(Locale.ROOT);
-            } else if (modifier == NameModifier.TO_LOWER_CASE){
-                name = name.toLowerCase(Locale.ROOT);
-            }
-
-            declaration.setName(name);
-        } else {
-            declaration.setName(field.getName());
-        }
-
-        Variable variable = field.getAnnotation(Variable.class);
-        declaration.setVariable(variable);
-
-        declaration.setComment(readComments(field));
-        declaration.setField(field);
+        declaration.setName(template.getName());
+        declaration.setComment(template.getComment());
+        declaration.setType(template.getType());
+        declaration.setVariable(template.getVariable());
+        declaration.setField(template.getField());
         declaration.setObject(object);
-        declaration.setType(GenericsDeclaration.of(field.getGenericType()));
 
         return declaration;
     }
