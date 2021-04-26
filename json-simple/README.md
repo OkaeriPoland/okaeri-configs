@@ -16,7 +16,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-json-simple</artifactId>
-  <version>2.7.13</version>
+  <version>2.7.14</version>
 </dependency>
 ```
 ### Gradle
@@ -26,7 +26,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 ```
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-json-simple:2.7.13'
+implementation 'eu.okaeri:okaeri-configs-json-simple:2.7.14'
 ```
 
 ## Limitations
