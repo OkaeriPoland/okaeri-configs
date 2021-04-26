@@ -1,6 +1,7 @@
 package eu.okaeri.configs.yaml.bungee;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigLineInfo;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.postprocessor.SectionSeparator;
@@ -46,6 +47,19 @@ public class YamlBungeeConfigurer extends Configurer {
 
     public YamlBungeeConfigurer() {
         this(new Configuration());
+    }
+
+    @Override
+    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+
+        if (value instanceof Configuration) {
+            Configuration configuration = (Configuration) value;
+            Map<String, Object> values = new LinkedHashMap<>();
+            configuration.getKeys().forEach(key -> values.put(key, configuration.get(key)));
+            return values;
+        }
+
+        return super.simplify(value, genericType, conservative);
     }
 
     @Override
