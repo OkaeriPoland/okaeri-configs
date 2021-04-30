@@ -71,10 +71,14 @@ public final class ConfigManager {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(field -> {
+
                     Object value = configurer.getValue(field.getName());
-                    if (!field.getType().getType().isInstance(value)) {
-                        value = configurer.resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
+                    GenericsDeclaration generics = GenericsDeclaration.of(value);
+
+                    if ((value != null) && ((field.getType().getType() != value.getClass()) || (!generics.isPrimitiveWrapper() && !generics.isPrimitive()))) {
+                        value = configurer.resolveType(value, generics, field.getType().getType(), field.getType());
                     }
+
                     field.updateValue(value);
                 });
 
