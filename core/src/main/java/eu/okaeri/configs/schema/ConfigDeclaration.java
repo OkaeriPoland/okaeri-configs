@@ -19,7 +19,7 @@ public class ConfigDeclaration {
 
         ConfigDeclaration template = DECLARATION_CACHE.computeIfAbsent(clazz, (klass) -> {
             ConfigDeclaration declaration = new ConfigDeclaration();
-            declaration.setNameStrategy(klass.getAnnotation(Names.class));
+            declaration.setNameStrategy(readNames(klass));
             declaration.setHeader(readHeader(klass));
             declaration.setReal(OkaeriConfig.class.isAssignableFrom(klass));
             declaration.setType(klass);
@@ -33,10 +33,12 @@ public class ConfigDeclaration {
         declaration.setType(template.getType());
 
         declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
-                .filter(field -> !"this$0".equals(field.getName()))
+                .filter(field -> !field.getName().startsWith("this$"))
                 .map(field -> FieldDeclaration.of(declaration, field, config))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(FieldDeclaration::getName, field -> field)));
+                .collect(Collectors.toMap(FieldDeclaration::getName, field -> field, (u, v) -> {
+                    throw new IllegalStateException("duplicate key " + u);
+                }, LinkedHashMap::new)));
 
         return declaration;
     }
@@ -66,6 +68,18 @@ public class ConfigDeclaration {
         }
 
         return null;
+    }
+
+    private static Names readNames(Class<?> clazz) {
+        Names names = clazz.getAnnotation(Names.class);
+        while (names == null) {
+            clazz = clazz.getEnclosingClass();
+            if (clazz == null) {
+                return null;
+            }
+            names = clazz.getAnnotation(Names.class);
+        }
+        return names;
     }
 
     public Optional<FieldDeclaration> getField(String key) {

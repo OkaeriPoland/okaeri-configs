@@ -180,6 +180,9 @@ public class TestConfig extends OkaeriConfig {
         @Comment("REDIS : optional")
         @Comment("MYSQL : optional")
         private String password = "1234";
+
+        @Comment("example @Names inheritance")
+        private String someStringHere = "huh";
     }
 
     @Comment("Test multiline string")
