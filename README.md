@@ -41,7 +41,7 @@ Special implementations for safe use in specific environment, eg. gameservers.
 
 For `standalone platforms` [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson) module is the best choice, it supports all the features, eg. full comment support.
 Combine it with [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) for the best config experience. 
-Total of only ~135kB, less than half of just the latest snakeyaml 1.28 which is 319kB!
+Total of only ~155kB, less than half of just the latest snakeyaml 1.28 which is 319kB!
 
 For `any platform` if some form of config validation is applicable (eg. requiring that integer is positive) it is recommended to use [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) when possible.
 Only few kilobytes but makes for a lot better experience for the end-user and developer too.
@@ -56,7 +56,7 @@ Okaeri's configuration library is an easy way to use java classes as config adap
 - Allows for even complex types to be serialized/deserialized
 - Enhances your configs with durable comments and strongly-typed fields
 - Provides ability to access typed fields with the classic getters and setters
-- Core library is just ~60kB in size, most of the adapters require only ~100 lines of code
+- Core library is just ~75kB in size, most of the adapters require only ~100 lines of code
 
 ## Example
 
