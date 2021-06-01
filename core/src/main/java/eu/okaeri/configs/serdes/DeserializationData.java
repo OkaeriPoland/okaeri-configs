@@ -3,6 +3,7 @@ package eu.okaeri.configs.serdes;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,7 +14,7 @@ import java.util.Map;
 public class DeserializationData {
 
     private Map<String, Object> data;
-    private Configurer configurer;
+    @Getter private Configurer configurer;
 
     public Map<String, Object> asMap() {
         return this.data;
