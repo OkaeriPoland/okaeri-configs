@@ -74,7 +74,7 @@ public abstract class OkaeriConfig {
         return this.save();
     }
 
-    public void set(String key, Object value) {
+    public void set(String key, Object value) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -90,7 +90,7 @@ public abstract class OkaeriConfig {
         this.getConfigurer().setValue(key, value, fieldGenerics, field);
     }
 
-    public Object get(String key) {
+    public Object get(String key) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -104,7 +104,7 @@ public abstract class OkaeriConfig {
         return this.getConfigurer().getValue(key);
     }
 
-    public <T> T get(String key, Class<T> clazz) {
+    public <T> T get(String key, Class<T> clazz) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -208,7 +208,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig load(String data) {
+    public OkaeriConfig load(String data) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -218,7 +218,7 @@ public abstract class OkaeriConfig {
         return this.load(inputStream);
     }
 
-    public OkaeriConfig load(InputStream inputStream) {
+    public OkaeriConfig load(InputStream inputStream) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -248,6 +248,25 @@ public abstract class OkaeriConfig {
         } catch (FileNotFoundException exception) {
             throw new OkaeriException("failed #load using file " + file, exception);
         }
+    }
+
+    public OkaeriConfig load(Map<String, Object> map) throws OkaeriException {
+
+        if (this.getConfigurer() == null) {
+            throw new InitializationException("configurer cannot be null");
+        }
+
+        map.forEach(this::set);
+        return this;
+    }
+
+    public OkaeriConfig load(OkaeriConfig otherConfig) throws OkaeriException {
+
+        if (this.getConfigurer() == null) {
+            throw new InitializationException("configurer cannot be null");
+        }
+
+        return this.load(otherConfig.asMap(this.getConfigurer(), true));
     }
 
     public OkaeriConfig update() throws OkaeriException {

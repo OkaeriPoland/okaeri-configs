@@ -7,6 +7,7 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
 
 import java.io.InputStream;
@@ -14,6 +15,19 @@ import java.io.OutputStream;
 import java.util.*;
 
 public class JsonSimpleConfigurer extends Configurer {
+
+    private static final ContainerFactory CONTAINER_FACTORY = new ContainerFactory() {
+
+        @Override
+        public Map createObjectContainer() {
+            return new LinkedHashMap<>();
+        }
+
+        @Override
+        public List creatArrayContainer() {
+            return new ArrayList<>();
+        }
+    };
 
     private Map<String, Object> map;
     private JSONParser parser;
@@ -73,7 +87,7 @@ public class JsonSimpleConfigurer extends Configurer {
     public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
 
         String data = ConfigPostprocessor.of(inputStream).getContext();
-        this.map = (Map<String, Object>) this.parser.parse(data);
+        this.map = (Map<String, Object>) this.parser.parse(data, CONTAINER_FACTORY);
 
         if (this.map != null) {
             return;
