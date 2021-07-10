@@ -64,8 +64,11 @@ public final class ConfigManager {
         Configurer configurer = config.getConfigurer();
 
         copy.withConfigurer(configurer);
-        copy.withBindFile(config.getBindFile());
         ConfigDeclaration copyDeclaration = copy.getDeclaration();
+
+        if (config.getBindFile() != null) {
+            copy.withBindFile(config.getBindFile());
+        }
 
         configurer.getAllKeys().stream()
                 .map(copyDeclaration::getField)
