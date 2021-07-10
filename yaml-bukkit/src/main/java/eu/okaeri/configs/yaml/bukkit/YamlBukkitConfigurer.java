@@ -9,6 +9,7 @@ import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import lombok.NonNull;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -22,22 +23,22 @@ public class YamlBukkitConfigurer extends Configurer {
     private String commentPrefix = "# ";
     private String sectionSeparator = SectionSeparator.NONE;
 
-    public YamlBukkitConfigurer(YamlConfiguration config, String commentPrefix, String sectionSeparator) {
+    public YamlBukkitConfigurer(@NonNull YamlConfiguration config, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this(commentPrefix, sectionSeparator);
     }
 
-    public YamlBukkitConfigurer(String commentPrefix, String sectionSeparator) {
+    public YamlBukkitConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this();
         this.commentPrefix = commentPrefix;
         this.sectionSeparator = sectionSeparator;
     }
 
-    public YamlBukkitConfigurer(String sectionSeparator) {
+    public YamlBukkitConfigurer(@NonNull String sectionSeparator) {
         this();
         this.sectionSeparator = sectionSeparator;
     }
 
-    public YamlBukkitConfigurer(YamlConfiguration config) {
+    public YamlBukkitConfigurer(@NonNull YamlConfiguration config) {
         this.config = config;
     }
 
@@ -57,7 +58,7 @@ public class YamlBukkitConfigurer extends Configurer {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget) {
 
         if (object instanceof MemorySection) {
             Map<String, Object> values = ((MemorySection) object).getValues(false);
@@ -74,12 +75,12 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.config.get(key);
     }
 
     @Override
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.config.getKeys(false).contains(key);
     }
 
@@ -89,12 +90,12 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
-    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         this.config.loadFromString(ConfigPostprocessor.of(inputStream).getContext());
     }
 
     @Override
-    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
 
         // bukkit's save
         String contents = this.config.saveToString();

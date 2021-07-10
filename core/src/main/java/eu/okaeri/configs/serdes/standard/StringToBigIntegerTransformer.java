@@ -2,6 +2,7 @@ package eu.okaeri.configs.serdes.standard;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.ObjectTransformer;
+import lombok.NonNull;
 
 import java.math.BigInteger;
 
@@ -13,7 +14,7 @@ public class StringToBigIntegerTransformer extends ObjectTransformer<String, Big
     }
 
     @Override
-    public BigInteger transform(String data) {
+    public BigInteger transform(@NonNull String data) {
         return new BigInteger(data);
     }
 }

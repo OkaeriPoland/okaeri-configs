@@ -2,6 +2,7 @@ package eu.okaeri.configs.serdes.standard;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.ObjectTransformer;
+import lombok.NonNull;
 
 import java.math.BigDecimal;
 
@@ -13,7 +14,7 @@ public class StringToLongTransformer extends ObjectTransformer<String, Long> {
     }
 
     @Override
-    public Long transform(String data) {
+    public Long transform(@NonNull String data) {
         return new BigDecimal(data).longValueExact();
     }
 }

@@ -1,11 +1,12 @@
 package eu.okaeri.configs.postprocessor;
 
 import lombok.Data;
+import lombok.NonNull;
 
 @Data
 public class ConfigLineInfo {
 
-    public static ConfigLineInfo of(int indent, int change, String name) {
+    public static ConfigLineInfo of(int indent, int change, @NonNull String name) {
         ConfigLineInfo info = new ConfigLineInfo();
         info.indent = indent;
         info.change = change;

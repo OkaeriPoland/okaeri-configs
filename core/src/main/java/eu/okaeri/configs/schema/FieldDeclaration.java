@@ -3,6 +3,7 @@ package eu.okaeri.configs.schema;
 import eu.okaeri.configs.annotation.*;
 import eu.okaeri.configs.exception.OkaeriException;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -23,7 +24,7 @@ public class FieldDeclaration {
     }
 
     @SneakyThrows
-    public static FieldDeclaration of(ConfigDeclaration config, Field field, Object object) {
+    public static FieldDeclaration of(@NonNull ConfigDeclaration config, @NonNull Field field, Object object) {
 
         CacheEntry cache = new CacheEntry(config.getType(), field.getName());
         FieldDeclaration template = DECLARATION_CACHE.computeIfAbsent(cache, (entry) -> {

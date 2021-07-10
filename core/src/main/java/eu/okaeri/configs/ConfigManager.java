@@ -6,6 +6,7 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,7 +15,7 @@ import java.util.Optional;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigManager {
 
-    public static <T extends OkaeriConfig> T create(Class<T> clazz) throws OkaeriException {
+    public static <T extends OkaeriConfig> T create(@NonNull Class<T> clazz) throws OkaeriException {
 
         T config;
         try {
@@ -27,7 +28,7 @@ public final class ConfigManager {
         return initialize(config);
     }
 
-    public static <T extends OkaeriConfig> T createUnsafe(Class<T> clazz) throws OkaeriException {
+    public static <T extends OkaeriConfig> T createUnsafe(@NonNull Class<T> clazz) throws OkaeriException {
 
         T config;
         try {
@@ -44,7 +45,7 @@ public final class ConfigManager {
         return initialize(config);
     }
 
-    public static <T extends OkaeriConfig> T create(Class<T> clazz, OkaeriConfigInitializer initializer) throws OkaeriException {
+    public static <T extends OkaeriConfig> T create(@NonNull Class<T> clazz, @NonNull OkaeriConfigInitializer initializer) throws OkaeriException {
         T config = create(clazz);
         try {
             initializer.apply(config);
@@ -57,7 +58,7 @@ public final class ConfigManager {
         return config;
     }
 
-    public static <T extends OkaeriConfig> T transformCopy(OkaeriConfig config, Class<T> into) throws OkaeriException {
+    public static <T extends OkaeriConfig> T transformCopy(@NonNull OkaeriConfig config, @NonNull Class<T> into) throws OkaeriException {
 
         T copy = ConfigManager.createUnsafe(into);
         Configurer configurer = config.getConfigurer();
@@ -85,7 +86,7 @@ public final class ConfigManager {
         return copy;
     }
 
-    public static <T extends OkaeriConfig> T deepCopy(OkaeriConfig config, Configurer newConfigurer, Class<T> into) throws OkaeriException {
+    public static <T extends OkaeriConfig> T deepCopy(@NonNull OkaeriConfig config, @NonNull Configurer newConfigurer, @NonNull Class<T> into) throws OkaeriException {
         T copy = ConfigManager.createUnsafe(into);
         copy.withConfigurer(newConfigurer, config.getConfigurer().getRegistry().allSerdes());
         copy.withBindFile(config.getBindFile());
@@ -93,7 +94,7 @@ public final class ConfigManager {
         return copy;
     }
 
-    public static <T extends OkaeriConfig> T initialize(T config) {
+    public static <T extends OkaeriConfig> T initialize(@NonNull T config) {
         config.updateDeclaration();
         return config;
     }

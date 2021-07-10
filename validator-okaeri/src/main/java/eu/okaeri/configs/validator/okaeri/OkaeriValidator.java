@@ -6,6 +6,7 @@ import eu.okaeri.configs.exception.ValidationException;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.validator.ConstraintViolation;
 import eu.okaeri.validator.policy.NullPolicy;
+import lombok.NonNull;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,17 +15,17 @@ public class OkaeriValidator extends WrappedConfigurer {
 
     private final boolean defaultNotNull;
 
-    public OkaeriValidator(Configurer wrapped) {
+    public OkaeriValidator(@NonNull Configurer wrapped) {
         this(wrapped, false);
     }
 
-    public OkaeriValidator(Configurer wrapped, boolean defaultNotNull) {
+    public OkaeriValidator(@NonNull Configurer wrapped, boolean defaultNotNull) {
         super(wrapped);
         this.defaultNotNull = defaultNotNull;
     }
 
     @Override
-    public boolean isValid(FieldDeclaration declaration, Object value) {
+    public boolean isValid(@NonNull FieldDeclaration declaration, Object value) {
 
         Class<?> parent = declaration.getObject().getClass();
         String realFieldName = declaration.getField().getName();

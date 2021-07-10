@@ -7,6 +7,7 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import lombok.NonNull;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,14 +16,14 @@ public class JakartaValidator extends WrappedConfigurer {
 
     private final Validator validator;
 
-    public JakartaValidator(Configurer wrapped) {
+    public JakartaValidator(@NonNull Configurer wrapped) {
         super(wrapped);
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public boolean isValid(FieldDeclaration declaration, Object value) {
+    public boolean isValid(@NonNull FieldDeclaration declaration, Object value) {
 
         Class<Object> parent = (Class<Object>) declaration.getObject().getClass();
         String realFieldName = declaration.getField().getName();

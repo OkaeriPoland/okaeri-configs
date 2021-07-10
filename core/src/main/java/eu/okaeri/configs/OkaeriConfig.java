@@ -10,6 +10,7 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.io.*;
@@ -28,35 +29,35 @@ public abstract class OkaeriConfig {
         this.updateDeclaration();
     }
 
-    public void setConfigurer(Configurer configurer) {
+    public void setConfigurer(@NonNull Configurer configurer) {
         this.configurer = configurer;
         this.configurer.setParent(this);
     }
 
-    public OkaeriConfig withConfigurer(Configurer configurer) {
+    public OkaeriConfig withConfigurer(@NonNull Configurer configurer) {
         if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
         return this;
     }
 
-    public OkaeriConfig withConfigurer(Configurer configurer, OkaeriSerdesPack... serdesPack) {
+    public OkaeriConfig withConfigurer(@NonNull Configurer configurer, @NonNull OkaeriSerdesPack... serdesPack) {
         if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
         Arrays.stream(serdesPack).forEach(this.getConfigurer()::register);
         return this;
     }
 
-    public OkaeriConfig withSerdesPack(OkaeriSerdesPack serdesPack) {
+    public OkaeriConfig withSerdesPack(@NonNull OkaeriSerdesPack serdesPack) {
         this.getConfigurer().register(serdesPack);
         return this;
     }
 
-    public OkaeriConfig withBindFile(File bindFile) {
+    public OkaeriConfig withBindFile(@NonNull File bindFile) {
         this.setBindFile(bindFile);
         return this;
     }
 
-    public OkaeriConfig withBindFile(String pathname) {
+    public OkaeriConfig withBindFile(@NonNull String pathname) {
         this.setBindFile(new File(pathname));
         return this;
     }
@@ -74,7 +75,7 @@ public abstract class OkaeriConfig {
         return this.save();
     }
 
-    public void set(String key, Object value) throws OkaeriException {
+    public void set(@NonNull String key, Object value) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -90,7 +91,7 @@ public abstract class OkaeriConfig {
         this.getConfigurer().setValue(key, value, fieldGenerics, field);
     }
 
-    public Object get(String key) throws OkaeriException {
+    public Object get(@NonNull String key) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -104,7 +105,7 @@ public abstract class OkaeriConfig {
         return this.getConfigurer().getValue(key);
     }
 
-    public <T> T get(String key, Class<T> clazz) throws OkaeriException {
+    public <T> T get(@NonNull String key, @NonNull Class<T> clazz) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -123,12 +124,7 @@ public abstract class OkaeriConfig {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public OkaeriConfig save(File file) throws OkaeriException {
-
-        if (file == null) {
-            throw new OkaeriException("cannot use #save(File) with null file");
-        }
-
+    public OkaeriConfig save(@NonNull File file) throws OkaeriException {
         try {
             File parentFile = file.getParentFile();
             if (parentFile != null) parentFile.mkdirs();
@@ -144,7 +140,7 @@ public abstract class OkaeriConfig {
         return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
     }
 
-    public OkaeriConfig save(OutputStream outputStream) throws OkaeriException {
+    public OkaeriConfig save(@NonNull OutputStream outputStream) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -170,7 +166,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public Map<String, Object> asMap(Configurer configurer, boolean conservative) throws OkaeriException {
+    public Map<String, Object> asMap(@NonNull Configurer configurer, boolean conservative) throws OkaeriException {
 
         Map<String, Object> map = new LinkedHashMap<>();
 
@@ -208,7 +204,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig load(String data) throws OkaeriException {
+    public OkaeriConfig load(@NonNull String data) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -218,7 +214,7 @@ public abstract class OkaeriConfig {
         return this.load(inputStream);
     }
 
-    public OkaeriConfig load(InputStream inputStream) throws OkaeriException {
+    public OkaeriConfig load(@NonNull InputStream inputStream) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -237,12 +233,7 @@ public abstract class OkaeriConfig {
         return this.load(this.getBindFile());
     }
 
-    public OkaeriConfig load(File file) throws OkaeriException {
-
-        if (file == null) {
-            throw new OkaeriException("cannot use #load(File) with null file");
-        }
-
+    public OkaeriConfig load(@NonNull File file) throws OkaeriException {
         try {
             return this.load(new FileInputStream(file));
         } catch (FileNotFoundException exception) {
@@ -250,7 +241,7 @@ public abstract class OkaeriConfig {
         }
     }
 
-    public OkaeriConfig load(Map<String, Object> map) throws OkaeriException {
+    public OkaeriConfig load(@NonNull Map<String, Object> map) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -260,7 +251,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig load(OkaeriConfig otherConfig) throws OkaeriException {
+    public OkaeriConfig load(@NonNull OkaeriConfig otherConfig) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");

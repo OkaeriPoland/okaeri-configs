@@ -1,13 +1,14 @@
 package eu.okaeri.configs.serdes;
 
 import eu.okaeri.configs.schema.GenericsPair;
+import lombok.NonNull;
 
 public abstract class SimpleObjectTransformer {
 
     private SimpleObjectTransformer() {
     }
 
-    public static <S, D> ObjectTransformer<S, D> of(Class<S> from, Class<D> to, SimpleObjectTransformerExecutor<S, D> transformer) {
+    public static <S, D> ObjectTransformer<S, D> of(@NonNull Class<S> from, @NonNull Class<D> to, @NonNull SimpleObjectTransformerExecutor<S, D> transformer) {
         return new ObjectTransformer<S, D>() {
             @Override
             public GenericsPair getPair() {

@@ -2,6 +2,7 @@ package eu.okaeri.configs.serdes.commons;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import lombok.NonNull;
 
 import java.time.Instant;
 
@@ -13,12 +14,12 @@ public class InstantTransformer extends TwoSideObjectTransformer<String, Instant
     }
 
     @Override
-    public Instant leftToRight(String data) {
+    public Instant leftToRight(@NonNull String data) {
         return Instant.parse(data);
     }
 
     @Override
-    public String rightToLeft(Instant data) {
+    public String rightToLeft(@NonNull Instant data) {
         return data.toString();
     }
 }

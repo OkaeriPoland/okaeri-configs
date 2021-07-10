@@ -3,6 +3,7 @@ package eu.okaeri.configs.configurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import lombok.NonNull;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,17 +14,17 @@ public class InMemoryConfigurer extends Configurer {
     private Map<String, Object> map = new LinkedHashMap<>();
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         this.map.put(key, value);
     }
 
     @Override
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.map.get(key);
     }
 
     @Override
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.map.containsKey(key);
     }
 

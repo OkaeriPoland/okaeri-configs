@@ -5,6 +5,7 @@ import eu.okaeri.configs.annotation.Header;
 import eu.okaeri.configs.annotation.Headers;
 import eu.okaeri.configs.annotation.Names;
 import lombok.Data;
+import lombok.NonNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +16,7 @@ public class ConfigDeclaration {
 
     private static final Map<Class<?>, ConfigDeclaration> DECLARATION_CACHE = new ConcurrentHashMap<>();
 
-    public static ConfigDeclaration of(Class<?> clazz, OkaeriConfig config) {
+    public static ConfigDeclaration of(@NonNull Class<?> clazz, OkaeriConfig config) {
 
         ConfigDeclaration template = DECLARATION_CACHE.computeIfAbsent(clazz, (klass) -> {
             ConfigDeclaration declaration = new ConfigDeclaration();
@@ -43,15 +44,15 @@ public class ConfigDeclaration {
         return declaration;
     }
 
-    public static ConfigDeclaration of(OkaeriConfig config) {
+    public static ConfigDeclaration of(@NonNull OkaeriConfig config) {
         return of(config.getClass(), config);
     }
 
-    public static ConfigDeclaration of(Class<?> clazz) {
+    public static ConfigDeclaration of(@NonNull Class<?> clazz) {
         return of(clazz, null);
     }
 
-    private static String[] readHeader(Class<?> clazz) {
+    private static String[] readHeader(@NonNull Class<?> clazz) {
 
         Headers headers = clazz.getAnnotation(Headers.class);
         if (headers != null) {
@@ -70,7 +71,7 @@ public class ConfigDeclaration {
         return null;
     }
 
-    private static Names readNames(Class<?> clazz) {
+    private static Names readNames(@NonNull Class<?> clazz) {
         Names names = clazz.getAnnotation(Names.class);
         while (names == null) {
             clazz = clazz.getEnclosingClass();
@@ -82,11 +83,11 @@ public class ConfigDeclaration {
         return names;
     }
 
-    public Optional<FieldDeclaration> getField(String key) {
+    public Optional<FieldDeclaration> getField(@NonNull String key) {
         return Optional.ofNullable(this.fieldMap.get(key));
     }
 
-    public GenericsDeclaration getGenericsOrNull(String key) {
+    public GenericsDeclaration getGenericsOrNull(@NonNull String key) {
         return this.getField(key)
                 .map(FieldDeclaration::getType)
                 .orElse(null);

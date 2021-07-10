@@ -2,6 +2,7 @@ package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import lombok.NonNull;
 import org.bukkit.enchantments.Enchantment;
 
 public class StringEnchantmentTransformer extends TwoSideObjectTransformer<String, Enchantment> {
@@ -12,12 +13,12 @@ public class StringEnchantmentTransformer extends TwoSideObjectTransformer<Strin
     }
 
     @Override
-    public Enchantment leftToRight(String data) {
+    public Enchantment leftToRight(@NonNull String data) {
         return Enchantment.getByName(data);
     }
 
     @Override
-    public String rightToLeft(Enchantment data) {
+    public String rightToLeft(@NonNull Enchantment data) {
         return data.getName();
     }
 }

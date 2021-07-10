@@ -5,6 +5,7 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.TransformerRegistry;
+import lombok.NonNull;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -75,7 +76,7 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget) {
         return this.wrapped.resolveType(object, genericSource, targetClazz, genericTarget);
     }
 

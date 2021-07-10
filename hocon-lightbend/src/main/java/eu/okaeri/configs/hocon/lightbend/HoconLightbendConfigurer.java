@@ -10,6 +10,7 @@ import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import lombok.NonNull;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,11 +33,11 @@ public class HoconLightbendConfigurer extends Configurer {
     public HoconLightbendConfigurer() {
     }
 
-    public HoconLightbendConfigurer(String sectionSeparator) {
+    public HoconLightbendConfigurer(@NonNull String sectionSeparator) {
         this.sectionSeparator = sectionSeparator;
     }
 
-    public HoconLightbendConfigurer(String commentPrefix, String sectionSeparator) {
+    public HoconLightbendConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this.commentPrefix = commentPrefix;
         this.sectionSeparator = sectionSeparator;
     }
@@ -57,7 +58,7 @@ public class HoconLightbendConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
@@ -73,18 +74,18 @@ public class HoconLightbendConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, true);
         this.map.put(key, simplified);
     }
 
     @Override
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.map.get(key);
     }
 
     @Override
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.map.containsKey(key);
     }
 
@@ -94,13 +95,13 @@ public class HoconLightbendConfigurer extends Configurer {
     }
 
     @Override
-    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         this.config = ConfigFactory.parseString(ConfigPostprocessor.of(inputStream).getContext());
         this.map = this.hoconToMap(this.config, declaration);
     }
 
     @Override
-    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
 
         this.config = ConfigFactory.parseMap(this.map);
         StringBuilder buf = new StringBuilder();

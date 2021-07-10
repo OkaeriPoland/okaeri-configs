@@ -4,6 +4,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
+import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -11,12 +12,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
 
     @Override
-    public boolean supports(Class<? super ItemStack> type) {
+    public boolean supports(@NonNull Class<? super ItemStack> type) {
         return ItemStack.class.isAssignableFrom(type);
     }
 
     @Override
-    public void serialize(ItemStack itemStack, SerializationData data) {
+    public void serialize(@NonNull ItemStack itemStack, @NonNull SerializationData data) {
 
         data.add("material", itemStack.getType());
 
@@ -34,7 +35,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
     }
 
     @Override
-    public ItemStack deserialize(DeserializationData data, GenericsDeclaration generics) {
+    public ItemStack deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
 
         String materialName = data.get("material", String.class);
         Material material = Material.valueOf(materialName);
