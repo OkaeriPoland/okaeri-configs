@@ -7,6 +7,7 @@ import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import lombok.NonNull;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,28 +26,28 @@ public class JsonGsonConfigurer extends Configurer {
         this.map = new LinkedHashMap<>();
     }
 
-    public JsonGsonConfigurer(Gson gson) {
+    public JsonGsonConfigurer(@NonNull Gson gson) {
         this(gson, new LinkedHashMap<>());
     }
 
-    public JsonGsonConfigurer(Gson gson, Map<String, Object> map) {
+    public JsonGsonConfigurer(@NonNull Gson gson, @NonNull Map<String, Object> map) {
         this.gson = gson;
         this.map = map;
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, true);
         this.map.put(key, simplified);
     }
 
     @Override
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.map.get(key);
     }
 
     @Override
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.map.containsKey(key);
     }
 
@@ -57,7 +58,7 @@ public class JsonGsonConfigurer extends Configurer {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
 
         String data = ConfigPostprocessor.of(inputStream).getContext();
         this.map = this.gson.fromJson(data, Map.class);
@@ -70,7 +71,9 @@ public class JsonGsonConfigurer extends Configurer {
     }
 
     @Override
-    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
-        this.gson.toJson(this.map, new OutputStreamWriter(outputStream));
+    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+        this.gson.toJson(this.map, writer);
+        writer.flush();
     }
 }

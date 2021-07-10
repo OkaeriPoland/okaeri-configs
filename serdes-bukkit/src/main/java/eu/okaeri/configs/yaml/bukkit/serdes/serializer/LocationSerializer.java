@@ -4,18 +4,19 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
+import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.World;
 
 public class LocationSerializer implements ObjectSerializer<Location> {
 
     @Override
-    public boolean supports(Class<? super Location> type) {
+    public boolean supports(@NonNull Class<? super Location> type) {
         return Location.class.isAssignableFrom(type);
     }
 
     @Override
-    public void serialize(Location location, SerializationData data) {
+    public void serialize(@NonNull Location location, @NonNull SerializationData data) {
         data.add("world", location.getWorld(), World.class);
         data.add("x", location.getX());
         data.add("y", location.getY());
@@ -25,7 +26,7 @@ public class LocationSerializer implements ObjectSerializer<Location> {
     }
 
     @Override
-    public Location deserialize(DeserializationData data, GenericsDeclaration generics) {
+    public Location deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
 
         World world = data.get("world", World.class);
         double x = data.get("x", Double.class);

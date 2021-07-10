@@ -9,6 +9,7 @@ import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import lombok.NonNull;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -26,22 +27,22 @@ public class YamlBungeeConfigurer extends Configurer {
     private String commentPrefix = "# ";
     private String sectionSeparator = SectionSeparator.NONE;
 
-    public YamlBungeeConfigurer(YamlConfiguration config, String commentPrefix, String sectionSeparator) {
+    public YamlBungeeConfigurer(@NonNull YamlConfiguration config, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this(commentPrefix, sectionSeparator);
     }
 
-    public YamlBungeeConfigurer(String commentPrefix, String sectionSeparator) {
+    public YamlBungeeConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this();
         this.commentPrefix = commentPrefix;
         this.sectionSeparator = sectionSeparator;
     }
 
-    public YamlBungeeConfigurer(String sectionSeparator) {
+    public YamlBungeeConfigurer(@NonNull String sectionSeparator) {
         this();
         this.sectionSeparator = sectionSeparator;
     }
 
-    public YamlBungeeConfigurer(Configuration config) {
+    public YamlBungeeConfigurer(@NonNull Configuration config) {
         this.config = config;
     }
 
@@ -64,7 +65,7 @@ public class YamlBungeeConfigurer extends Configurer {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget) {
 
         if (object instanceof Configuration) {
             Configuration configuration = (Configuration) object;
@@ -77,18 +78,18 @@ public class YamlBungeeConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, true);
         this.config.set(key, simplified);
     }
 
     @Override
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.config.get(key);
     }
 
     @Override
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.config.getKeys().contains(key);
     }
 
@@ -98,13 +99,13 @@ public class YamlBungeeConfigurer extends Configurer {
     }
 
     @Override
-    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         String data = ConfigPostprocessor.of(inputStream).getContext();
         this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(data);
     }
 
     @Override
-    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
 
         // bungee's save
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

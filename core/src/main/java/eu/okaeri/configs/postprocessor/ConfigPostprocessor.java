@@ -1,6 +1,7 @@
 package eu.okaeri.configs.postprocessor;
 
 import lombok.Data;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 
 import java.io.*;
@@ -15,24 +16,24 @@ public class ConfigPostprocessor {
 
     private String context;
 
-    public static ConfigPostprocessor of(InputStream inputStream) {
+    public static ConfigPostprocessor of(@NonNull InputStream inputStream) {
         ConfigPostprocessor postprocessor = new ConfigPostprocessor();
         postprocessor.setContext(readInput(inputStream));
         return postprocessor;
     }
 
-    public static ConfigPostprocessor of(String context) {
+    public static ConfigPostprocessor of(@NonNull String context) {
         ConfigPostprocessor postprocessor = new ConfigPostprocessor();
         postprocessor.setContext(context);
         return postprocessor;
     }
 
-    public ConfigPostprocessor write(OutputStream outputStream) {
+    public ConfigPostprocessor write(@NonNull OutputStream outputStream) {
         writeOutput(outputStream, this.context);
         return this;
     }
 
-    public ConfigPostprocessor removeLines(ConfigLineFilter filter) {
+    public ConfigPostprocessor removeLines(@NonNull ConfigLineFilter filter) {
 
         String[] lines = this.context.split("\n");
         StringBuilder buf = new StringBuilder();
@@ -48,7 +49,7 @@ public class ConfigPostprocessor {
         return this;
     }
 
-    public ConfigPostprocessor updateLines(ConfigContextManipulator manipulator) {
+    public ConfigPostprocessor updateLines(@NonNull ConfigContextManipulator manipulator) {
 
         String[] lines = this.context.split("\n");
         StringBuilder buf = new StringBuilder();
@@ -61,7 +62,7 @@ public class ConfigPostprocessor {
         return this;
     }
 
-    public ConfigPostprocessor updateLinesKeys(ConfigSectionWalker walker) {
+    public ConfigPostprocessor updateLinesKeys(@NonNull ConfigSectionWalker walker) {
 
         String[] lines = this.context.split("\n");
         List<ConfigLineInfo> currentPath = new ArrayList<>();
@@ -120,7 +121,7 @@ public class ConfigPostprocessor {
         return this;
     }
 
-    public static int countIndent(String line) {
+    public static int countIndent(@NonNull String line) {
         int whitespaces = 0;
         for (char c : line.toCharArray()) {
             if (!Character.isWhitespace(c)) {
@@ -131,7 +132,7 @@ public class ConfigPostprocessor {
         return whitespaces;
     }
 
-    public static String addIndent(String line, int size) {
+    public static String addIndent(@NonNull String line, int size) {
 
         StringBuilder buf = new StringBuilder();
         for (int i = 0; i < size; i++) buf.append(" ");
@@ -143,7 +144,7 @@ public class ConfigPostprocessor {
                 + "\n";
     }
 
-    public ConfigPostprocessor updateContext(ConfigContextManipulator manipulator) {
+    public ConfigPostprocessor updateContext(@NonNull ConfigContextManipulator manipulator) {
         this.context = manipulator.convert(this.context);
         return this;
     }

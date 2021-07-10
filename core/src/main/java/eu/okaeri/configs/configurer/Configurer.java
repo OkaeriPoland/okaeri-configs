@@ -9,6 +9,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.*;
 import eu.okaeri.configs.serdes.standard.StandardSerdes;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.io.InputStream;
@@ -29,7 +30,7 @@ public abstract class Configurer {
         this.registry.register(new StandardSerdes());
     }
 
-    public void setRegistry(TransformerRegistry registry) {
+    public void setRegistry(@NonNull TransformerRegistry registry) {
         this.registry = registry;
     }
 
@@ -37,7 +38,7 @@ public abstract class Configurer {
         return this.registry;
     }
 
-    public void register(OkaeriSerdesPack pack) {
+    public void register(@NonNull OkaeriSerdesPack pack) {
         this.registry.register(pack);
     }
 
@@ -45,7 +46,7 @@ public abstract class Configurer {
 
     public abstract Object getValue(String key);
 
-    public boolean isToStringObject(Object object, GenericsDeclaration genericsDeclaration) {
+    public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericsDeclaration) {
         if (object instanceof Class) {
             Class<?> clazzObject = (Class<?>) object;
             return clazzObject.isEnum() || this.registry.canTransform(genericsDeclaration, GenericsDeclaration.of(String.class));
@@ -54,7 +55,7 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplifyCollection(@NonNull Collection<?> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         List collection = new ArrayList();
         GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
@@ -67,7 +68,7 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
@@ -143,14 +144,14 @@ public abstract class Configurer {
         return serializationMap;
     }
 
-    public <T> T getValue(String key, Class<T> clazz, GenericsDeclaration genericType) {
+    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType) {
         Object value = this.getValue(key);
         if (value == null) return null;
         return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, Class<T> targetClazz, GenericsDeclaration genericTarget) throws OkaeriException {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget) throws OkaeriException {
 
         if (object == null) {
             return null;
@@ -284,7 +285,7 @@ public abstract class Configurer {
         return targetClazz.cast(transformer.transform(object));
     }
 
-    public Object createInstance(Class<?> clazz) throws OkaeriException {
+    public Object createInstance(@NonNull Class<?> clazz) throws OkaeriException {
         try {
             if (Collection.class.isAssignableFrom(clazz)) {
                 if (clazz == Set.class) return new HashSet<>();
@@ -303,7 +304,7 @@ public abstract class Configurer {
         }
     }
 
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.getValue(key) != null;
     }
 

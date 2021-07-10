@@ -3,6 +3,7 @@ package eu.okaeri.configs.schema;
 import eu.okaeri.configs.OkaeriConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NonNull;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -16,12 +17,12 @@ public class GenericsDeclaration {
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<>();
     private static final Set<Class<?>> PRIMITIVE_WRAPPERS = new HashSet<>();
 
-    public static boolean isUnboxedCompatibleWithBoxed(Class<?> unboxedClazz, Class<?> boxedClazz) {
+    public static boolean isUnboxedCompatibleWithBoxed(@NonNull Class<?> unboxedClazz, @NonNull Class<?> boxedClazz) {
         Class<?> primitiveWrapper = PRIMITIVE_TO_WRAPPER.get(unboxedClazz);
         return primitiveWrapper == boxedClazz;
     }
 
-    public static boolean doBoxTypesMatch(Class<?> clazz1, Class<?> clazz2) {
+    public static boolean doBoxTypesMatch(@NonNull Class<?> clazz1, @NonNull Class<?> clazz2) {
         return isUnboxedCompatibleWithBoxed(clazz1, clazz2) || isUnboxedCompatibleWithBoxed(clazz2, clazz1);
     }
 
@@ -52,7 +53,7 @@ public class GenericsDeclaration {
         PRIMITIVE_WRAPPERS.add(Short.class);
     }
 
-    public static GenericsDeclaration of(Object type, List<Object> subtypes) {
+    public static GenericsDeclaration of(Object type, @NonNull List<Object> subtypes) {
         GenericsDeclaration declaration = of(type);
         declaration.setSubtype(subtypes.stream().map(GenericsDeclaration::of).collect(Collectors.toList()));
         return declaration;
@@ -75,7 +76,7 @@ public class GenericsDeclaration {
         return new GenericsDeclaration(object.getClass());
     }
 
-    public static GenericsDeclaration from(String typeName) {
+    public static GenericsDeclaration from(@NonNull String typeName) {
 
         GenericsDeclaration declaration = new GenericsDeclaration();
         StringBuilder buf = new StringBuilder();

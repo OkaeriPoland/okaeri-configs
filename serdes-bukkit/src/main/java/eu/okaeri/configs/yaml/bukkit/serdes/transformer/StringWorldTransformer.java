@@ -2,6 +2,7 @@ package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
@@ -13,12 +14,12 @@ public class StringWorldTransformer extends TwoSideObjectTransformer<String, Wor
     }
 
     @Override
-    public World leftToRight(String data) {
+    public World leftToRight(@NonNull String data) {
         return Bukkit.getWorld(data);
     }
 
     @Override
-    public String rightToLeft(World data) {
+    public String rightToLeft(@NonNull World data) {
         return data.getName();
     }
 }

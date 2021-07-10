@@ -4,6 +4,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
+import lombok.NonNull;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -23,12 +24,12 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     private static final char ALT_COLOR_CHAR = '&';
 
     @Override
-    public boolean supports(Class<? super ItemMeta> type) {
+    public boolean supports(@NonNull Class<? super ItemMeta> type) {
         return ItemMeta.class.isAssignableFrom(type);
     }
 
     @Override
-    public void serialize(ItemMeta itemMeta, SerializationData data) {
+    public void serialize(@NonNull ItemMeta itemMeta, @NonNull SerializationData data) {
 
         if (itemMeta.hasDisplayName()) {
             data.add("display-name", this.decolor(itemMeta.getDisplayName()));
@@ -48,7 +49,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     }
 
     @Override
-    public ItemMeta deserialize(DeserializationData data, GenericsDeclaration generics) {
+    public ItemMeta deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
 
         String displayName = data.get("display-name", String.class);
 

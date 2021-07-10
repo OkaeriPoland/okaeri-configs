@@ -2,6 +2,7 @@ package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import lombok.NonNull;
 import org.bukkit.potion.PotionEffectType;
 
 public class StringPotionEffectTypeTransformer extends TwoSideObjectTransformer<String, PotionEffectType> {
@@ -12,12 +13,12 @@ public class StringPotionEffectTypeTransformer extends TwoSideObjectTransformer<
     }
 
     @Override
-    public PotionEffectType leftToRight(String data) {
+    public PotionEffectType leftToRight(@NonNull String data) {
         return PotionEffectType.getByName(data);
     }
 
     @Override
-    public String rightToLeft(PotionEffectType data) {
+    public String rightToLeft(@NonNull PotionEffectType data) {
         return data.getName();
     }
 }

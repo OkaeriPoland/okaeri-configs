@@ -8,6 +8,7 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.hjson.*;
+import lombok.NonNull;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,12 +23,12 @@ public class HjsonConfigurer extends Configurer {
     public HjsonConfigurer() {
     }
 
-    public HjsonConfigurer(String commentPrefix, String sectionSeparator) {
+    public HjsonConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this.commentPrefix = commentPrefix;
         this.sectionSeparator = sectionSeparator;
     }
 
-    public HjsonConfigurer(String commentPrefix) {
+    public HjsonConfigurer(@NonNull String commentPrefix) {
         this.commentPrefix = commentPrefix;
     }
 
@@ -47,7 +48,7 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
@@ -63,19 +64,19 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, true);
         JsonValue jsonValue = this.toJsonValue(simplified);
         this.json.set(key, jsonValue);
     }
 
     @Override
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.fromJsonValue(this.json.get(key));
     }
 
     @Override
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.json.has(key);
     }
 
@@ -89,13 +90,13 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
-    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         String data = ConfigPostprocessor.of(inputStream).getContext();
         this.json = JsonValue.readHjson(data).asObject();
     }
 
     @Override
-    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
 
         // add comments to nodes
         this.addComments(this.json, declaration, null);
@@ -110,8 +111,9 @@ public class HjsonConfigurer extends Configurer {
 
     private void addComments(Object object, ConfigDeclaration declaration, String key) {
 
-        FieldDeclaration field = declaration.getField(key)
-                .orElse(null);
+        FieldDeclaration field = (key != null)
+                ? declaration.getField(key).orElse(null)
+                : null;
 
         if (object instanceof JsonObject) {
             JsonObject jsonObject = (JsonObject) object;

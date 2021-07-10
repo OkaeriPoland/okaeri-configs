@@ -6,6 +6,7 @@ import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import lombok.NonNull;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
@@ -37,11 +38,11 @@ public class JsonSimpleConfigurer extends Configurer {
         this.map = new LinkedHashMap<>();
     }
 
-    public JsonSimpleConfigurer(JSONParser parser) {
+    public JsonSimpleConfigurer(@NonNull JSONParser parser) {
         this(parser, new LinkedHashMap<>());
     }
 
-    public JsonSimpleConfigurer(JSONParser parser, Map<String, Object> map) {
+    public JsonSimpleConfigurer(@NonNull JSONParser parser, @NonNull Map<String, Object> map) {
         this.parser = parser;
         this.map = map;
     }
@@ -62,18 +63,18 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, true);
         this.map.put(key, simplified);
     }
 
     @Override
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.map.get(key);
     }
 
     @Override
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.map.containsKey(key);
     }
 
@@ -84,7 +85,7 @@ public class JsonSimpleConfigurer extends Configurer {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
 
         String data = ConfigPostprocessor.of(inputStream).getContext();
         this.map = (Map<String, Object>) this.parser.parse(data, CONTAINER_FACTORY);
@@ -97,7 +98,7 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
-    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         JSONObject object = new JSONObject(this.map);
         ConfigPostprocessor.of(object.toJSONString()).write(outputStream);
     }
