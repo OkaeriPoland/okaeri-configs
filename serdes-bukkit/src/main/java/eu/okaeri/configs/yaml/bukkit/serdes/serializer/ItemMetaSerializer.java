@@ -36,7 +36,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
         }
 
         if (itemMeta.hasLore()) {
-            data.add("lore", this.decolor(itemMeta.getLore()));
+            data.addCollection("lore", this.decolor(itemMeta.getLore()), String.class);
         }
 
         if (!itemMeta.getEnchants().isEmpty()) {
