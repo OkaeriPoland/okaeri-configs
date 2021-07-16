@@ -36,7 +36,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
         }
 
         if (itemMeta.hasLore()) {
-            data.add("lore", this.decolor(itemMeta.getLore()));
+            data.addCollection("lore", this.decolor(itemMeta.getLore()), String.class);
         }
 
         if (!itemMeta.getEnchants().isEmpty()) {
@@ -49,7 +49,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     }
 
     @Override
-    public ItemMeta deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+    public ItemMeta deserialize(@NonNull DeserializationData data, GenericsDeclaration generics) {
 
         String displayName = data.get("display-name", String.class);
 

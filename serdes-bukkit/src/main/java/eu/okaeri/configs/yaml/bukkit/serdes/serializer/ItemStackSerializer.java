@@ -35,7 +35,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
     }
 
     @Override
-    public ItemStack deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+    public ItemStack deserialize(@NonNull DeserializationData data, GenericsDeclaration generics) {
 
         String materialName = data.get("material", String.class);
         Material material = Material.valueOf(materialName);
