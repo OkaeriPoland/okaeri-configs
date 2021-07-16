@@ -212,7 +212,7 @@ public abstract class Configurer {
         ObjectSerializer objectSerializer = this.registry.getSerializer(targetClazz);
         if ((object instanceof Map) && (objectSerializer != null)) {
             DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, this);
-            Object deserialized = objectSerializer.deserialize(deserializationData, genericTarget);
+            Object deserialized = objectSerializer.deserialize(deserializationData, target);
             return targetClazz.cast(deserialized);
         }
 
