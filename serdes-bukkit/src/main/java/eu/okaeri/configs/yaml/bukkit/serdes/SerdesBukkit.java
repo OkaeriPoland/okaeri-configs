@@ -1,13 +1,14 @@
 package eu.okaeri.configs.yaml.bukkit.serdes;
 
+import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.TransformerRegistry;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemMetaSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemStackSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.LocationSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.PotionEffectSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringEnchantmentTransformer;
+import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringPotionEffectTypeTransformer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringWorldTransformer;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
-import eu.okaeri.configs.serdes.TransformerRegistry;
 
 public class SerdesBukkit implements OkaeriSerdesPack {
 
@@ -21,7 +22,8 @@ public class SerdesBukkit implements OkaeriSerdesPack {
         registry.register(new PotionEffectSerializer());
 
         // transformers
-        registry.register(new StringWorldTransformer());
         registry.register(new StringEnchantmentTransformer());
+        registry.register(new StringPotionEffectTypeTransformer());
+        registry.register(new StringWorldTransformer());
     }
 }
