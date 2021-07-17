@@ -46,12 +46,12 @@ public abstract class Configurer {
 
     public abstract Object getValue(String key);
 
-    public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericsDeclaration) {
+    public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
         if (object instanceof Class) {
             Class<?> clazzObject = (Class<?>) object;
-            return clazzObject.isEnum() || this.registry.canTransform(genericsDeclaration, GenericsDeclaration.of(String.class));
+            return clazzObject.isEnum() || ((genericType != null) && this.registry.canTransform(genericType, GenericsDeclaration.of(String.class)));
         }
-        return object.getClass().isEnum() || this.isToStringObject(object.getClass(), genericsDeclaration);
+        return object.getClass().isEnum() || this.isToStringObject(object.getClass(), genericType);
     }
 
     @SuppressWarnings("unchecked")
