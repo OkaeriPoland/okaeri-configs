@@ -73,6 +73,7 @@ public class SerializationData {
      * @param key       target key
      * @param value     target value
      * @param valueType type of value for simplification process
+     * @param <T>       type of value
      */
     public <T> void add(@NonNull String key, Object value, @NonNull Class<T> valueType) {
         GenericsDeclaration genericType = GenericsDeclaration.of(valueType);
@@ -93,7 +94,7 @@ public class SerializationData {
      * @param collection  target collection
      * @param genericType type declaration of value for simplification process
      */
-    public <T> void addCollection(@NonNull String key, Collection<?> collection, @NonNull GenericsDeclaration genericType) {
+    public void addCollection(@NonNull String key, Collection<?> collection, @NonNull GenericsDeclaration genericType) {
         Object object = this.configurer.simplifyCollection(collection, genericType, true);
         this.data.put(key, object);
     }
@@ -112,6 +113,7 @@ public class SerializationData {
      * @param key                 target key
      * @param collection          target collection
      * @param collectionValueType type of collection for simplification process
+     * @param <T>                 type of collection values
      */
     public <T> void addCollection(@NonNull String key, Collection<?> collection, @NonNull Class<T> collectionValueType) {
         GenericsDeclaration genericType = GenericsDeclaration.of(collection, Collections.singletonList(collectionValueType));
@@ -133,7 +135,7 @@ public class SerializationData {
      * @param genericType type of map for simplification process
      */
     @SuppressWarnings("unchecked")
-    public <K, V> void addAsMap(@NonNull String key, Map<K, V> map, @NonNull GenericsDeclaration genericType) {
+    public void addAsMap(@NonNull String key, Map<?, ?> map, @NonNull GenericsDeclaration genericType) {
         Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, true);
         this.data.put(key, object);
     }
@@ -153,6 +155,8 @@ public class SerializationData {
      * @param map          target map
      * @param mapKeyType   type of key for simplification process
      * @param mapValueType type of value for simplification process
+     * @param <K>          type of map keys
+     * @param <V>          type of map values
      */
     @SuppressWarnings("unchecked")
     public <K, V> void addAsMap(@NonNull String key, Map<K, V> map, @NonNull Class<K> mapKeyType, @NonNull Class<V> mapValueType) {

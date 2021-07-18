@@ -134,7 +134,7 @@ public abstract class OkaeriConfig {
 
     /**
      * Updates configuration value by its raw key. Attempts serialization/deserialization and other
-     * transformation techniques if necessary to match field type (e.g. String -> int).
+     * transformation techniques if necessary to match field type (e.g. String to int).
      *
      * @param key   target key
      * @param value target value
@@ -179,10 +179,11 @@ public abstract class OkaeriConfig {
 
     /**
      * Gets configuration value by its raw key. Attempts serialization/deserialization and other
-     * transformation techniques if necessary to match provided class type (e.g. int -> String).
+     * transformation techniques if necessary to match provided class type (e.g. int = String).
      *
      * @param key   target key
-     * @param clazz target value class
+     * @param clazz target class for value
+     * @param <T>   target value type
      * @return the resolved value
      * @throws OkaeriException if configurer is null or the value processing fails
      */

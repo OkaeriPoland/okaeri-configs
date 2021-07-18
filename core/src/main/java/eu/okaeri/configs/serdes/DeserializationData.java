@@ -68,7 +68,8 @@ public class DeserializationData {
      * deserialization for the specified class.
      *
      * @param key       target key
-     * @param valueType target type for value
+     * @param valueType target class for value
+     * @param <T>       type of transformed value
      * @return transformed value or null
      */
     public <T> T get(@NonNull String key, @NonNull Class<T> valueType) {
@@ -86,6 +87,7 @@ public class DeserializationData {
      * @param key                 target key
      * @param collectionValueType target type for collection
      * @param genericType         target type declaration for collection
+     * @param <T>                 type of collection
      * @return transformed collection or null
      */
     @SuppressWarnings("unchecked")
@@ -102,6 +104,7 @@ public class DeserializationData {
      *
      * @param key           target key
      * @param listValueType target type for list
+     * @param <T>           target type for list
      * @return transformed list or null
      */
     @SuppressWarnings("unchecked")
@@ -117,6 +120,8 @@ public class DeserializationData {
      * @param key          target key
      * @param mapKeyType   target type for map keys
      * @param mapValueType target type for map values
+     * @param <K>          type of map keys
+     * @param <V>          type of map values
      * @return transformed map or null
      */
     @SuppressWarnings("unchecked")
@@ -135,6 +140,8 @@ public class DeserializationData {
      *
      * @param key         target key
      * @param genericType target type declaration for map
+     * @param <K>         type of map keys
+     * @param <V>         type of map values
      * @return transformed map or null
      */
     @SuppressWarnings("unchecked")
