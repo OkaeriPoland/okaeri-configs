@@ -15,12 +15,44 @@ public class SerializationData {
         this.configurer = configurer;
     }
 
+    /**
+     * @return immutable map of current serialization data
+     */
     public Map<String, Object> asMap() {
-        return this.data;
+        return Collections.unmodifiableMap(this.data);
     }
 
+    /**
+     * Adds value to the serialization data under specific key.
+     * Provided value is simplified using attached Configurer.
+     *
+     * @param key   target key
+     * @param value target value
+     */
     public void add(@NonNull String key, Object value) {
         value = this.configurer.simplify(value, null, true);
+        this.data.put(key, value);
+    }
+
+    /**
+     * Adds value to the serialization data under specific key.
+     * Provided value is simplified using attached Configurer.
+     * <p>
+     * Allows to provide {@link GenericsDeclaration} for simplification process.
+     * If possible, it is recommended to use one of generic methods:
+     * - {@link #add(String, Object, Class)}
+     * - {@link #addCollection(String, Collection, Class)}
+     * - {@link #addAsMap(String, Map, Class, Class)}
+     * <p>
+     * This method is intended to use when adding complex generic
+     * types as for example {@code Map<SomeType, Map<String, SomeState>>}.
+     *
+     * @param key         target key
+     * @param value       target value
+     * @param genericType type declaration of value for simplification process
+     */
+    public void add(@NonNull String key, Object value, @NonNull GenericsDeclaration genericType) {
+        value = this.configurer.simplify(value, genericType, true);
         this.data.put(key, value);
     }
 

@@ -133,7 +133,7 @@ public abstract class Configurer {
 
         SerializationData serializationData = new SerializationData(this);
         serializer.serialize(value, serializationData);
-        Map<String, Object> serializationMap = serializationData.asMap();
+        Map<String, Object> serializationMap = new LinkedHashMap<>(serializationData.asMap());
 
         if (!conservative) {
             Map<String, Object> newSerializationMap = new LinkedHashMap<>();
