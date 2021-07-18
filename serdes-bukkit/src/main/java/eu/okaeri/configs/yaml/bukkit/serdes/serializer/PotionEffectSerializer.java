@@ -26,7 +26,7 @@ public class PotionEffectSerializer implements ObjectSerializer<PotionEffect> {
     public PotionEffect deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
 
         int amplifier = data.get("amplifier", Integer.class);
-        int duration = data.get("duration", Byte.class);
+        int duration = data.get("duration", Integer.class);
         PotionEffectType potionEffectType = data.get("type", PotionEffectType.class);
 
         return new PotionEffect(potionEffectType, duration, amplifier);
