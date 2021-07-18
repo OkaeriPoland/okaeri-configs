@@ -49,18 +49,20 @@ public class DeserializationData {
      * Gets data under specific key applying type resolving a.k.a.
      * deserialization for the specified {@link GenericsDeclaration}.
      * <p>
-     * See also more specific methods:
+     * This one is hacky, see also more specific methods:
      * - {@link #get(String, Class)}
      * - {@link #getAsList(String, Class)}
      * - {@link #getAsMap(String, Class, Class)}
      *
      * @param key         target key
      * @param genericType target type for value
+     * @param <T>         type of transformed value
      * @return transformed value or null
      */
-    public Object getDirect(@NonNull String key, @NonNull GenericsDeclaration genericType) {
+    @SuppressWarnings("unchecked")
+    public <T> T getDirect(@NonNull String key, @NonNull GenericsDeclaration genericType) {
         Object object = this.data.get(key);
-        return this.configurer.resolveType(object, GenericsDeclaration.of(object), genericType.getType(), genericType);
+        return (T) this.configurer.resolveType(object, GenericsDeclaration.of(object), genericType.getType(), genericType);
     }
 
     /**
@@ -84,18 +86,16 @@ public class DeserializationData {
      * Allows to specify extended generic type that can be used
      * to resolve more complex collections, e.g. {@code LinkedList<Map<String, SomeState>>}
      *
-     * @param key                 target key
-     * @param collectionValueType target type for collection
-     * @param genericType         target type declaration for collection
-     * @param <T>                 type of collection
+     * @param key         target key
+     * @param genericType target type declaration for collection
+     * @param <T>         type of collection
      * @return transformed collection or null
      */
-    @SuppressWarnings("unchecked")
-    public <T> Collection<T> getAsCollection(@NonNull String key, @NonNull Class<T> collectionValueType, @NonNull GenericsDeclaration genericType) {
+    public <T> Collection<T> getAsCollection(@NonNull String key, @NonNull GenericsDeclaration genericType) {
         if (!Collections.class.isAssignableFrom(genericType.getType())) {
             throw new IllegalArgumentException("genericType.type must be a superclass of Collection");
         }
-        return (Collection<T>) this.getDirect(key, genericType);
+        return this.getDirect(key, genericType);
     }
 
     /**
@@ -107,10 +107,9 @@ public class DeserializationData {
      * @param <T>           target type for list
      * @return transformed list or null
      */
-    @SuppressWarnings("unchecked")
     public <T> List<T> getAsList(@NonNull String key, @NonNull Class<T> listValueType) {
         GenericsDeclaration genericType = GenericsDeclaration.of(List.class, Collections.singletonList(listValueType));
-        return (List<T>) this.getAsCollection(key, listValueType, genericType);
+        return (List<T>) this.getAsCollection(key, genericType);
     }
 
     /**
@@ -124,11 +123,9 @@ public class DeserializationData {
      * @param <V>          type of map values
      * @return transformed map or null
      */
-    @SuppressWarnings("unchecked")
     public <K, V> Map<K, V> getAsMap(@NonNull String key, @NonNull Class<K> mapKeyType, @NonNull Class<V> mapValueType) {
-        Object object = this.data.get(key);
         GenericsDeclaration genericType = GenericsDeclaration.of(Map.class, Arrays.asList(mapKeyType, mapValueType));
-        return (Map<K, V>) this.configurer.resolveType(object, GenericsDeclaration.of(object), Map.class, genericType);
+        return this.getDirect(key, genericType);
     }
 
     /**
@@ -144,11 +141,10 @@ public class DeserializationData {
      * @param <V>         type of map values
      * @return transformed map or null
      */
-    @SuppressWarnings("unchecked")
     public <K, V> Map<K, V> getAsMap(@NonNull String key, @NonNull GenericsDeclaration genericType) {
         if (!Map.class.isAssignableFrom(genericType.getType())) {
             throw new IllegalArgumentException("genericType.type must be a superclass of Map");
         }
-        return (Map<K, V>) this.getDirect(key, genericType);
+        return this.getDirect(key, genericType);
     }
 }
