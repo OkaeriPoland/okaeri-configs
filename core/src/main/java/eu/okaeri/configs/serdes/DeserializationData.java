@@ -18,11 +18,20 @@ public class DeserializationData {
     @Getter private Configurer configurer;
 
     public Map<String, Object> asMap() {
-        return this.data;
+        return Collections.unmodifiableMap(this.data);
     }
 
     public boolean containsKey(@NonNull String key) {
         return this.data.containsKey(key);
+    }
+
+    public Object getRaw(@NonNull String key) {
+        return this.data.get(key);
+    }
+
+    public Object getDirect(@NonNull String key, @NonNull GenericsDeclaration genericType) {
+        Object object = this.data.get(key);
+        return this.configurer.resolveType(object, GenericsDeclaration.of(object), genericType.getType(), genericType);
     }
 
     public <T> T get(@NonNull String key, @NonNull Class<T> clazz) {
