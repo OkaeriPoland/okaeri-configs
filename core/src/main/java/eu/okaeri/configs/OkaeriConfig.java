@@ -15,7 +15,9 @@ import lombok.Setter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -29,17 +31,47 @@ public abstract class OkaeriConfig {
         this.updateDeclaration();
     }
 
+    /**
+     * Replaces the current configurer with the provided.
+     * Sets parent field of the configurer to this instance.
+     *
+     * @param configurer new configurer
+     */
     public void setConfigurer(@NonNull Configurer configurer) {
         this.configurer = configurer;
         this.configurer.setParent(this);
     }
 
+    /**
+     * Replaces the current configurer with the provided, assigning previous
+     * {@link eu.okaeri.configs.serdes.TransformerRegistry} to the new one
+     * if available.
+     * <p>
+     * This method allows easy change of the configuration backend without
+     * the need to re-register serdes packs. To preserve the registry of
+     * the new configurer use {@link #setConfigurer(Configurer)}.
+     *
+     * @param configurer the new configurer
+     * @return this instance
+     */
     public OkaeriConfig withConfigurer(@NonNull Configurer configurer) {
         if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
         return this;
     }
 
+    /**
+     * Replaces the current configurer with the provided, assigning previous
+     * {@link eu.okaeri.configs.serdes.TransformerRegistry} to the new one
+     * if available.
+     * <p>
+     * Registers provided serdes packs in the configurer afterwards.
+     * To preserve the registry of the new configurer use {@link #setConfigurer(Configurer)}.
+     *
+     * @param configurer the new configurer
+     * @param serdesPack the array of serdes packs to be registered
+     * @return this instance
+     */
     public OkaeriConfig withConfigurer(@NonNull Configurer configurer, @NonNull OkaeriSerdesPack... serdesPack) {
         if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
@@ -47,21 +79,46 @@ public abstract class OkaeriConfig {
         return this;
     }
 
+    /**
+     * Registers provided serdes pack in the current configurer.
+     *
+     * @param serdesPack the serdes pack
+     * @return this instance
+     */
     public OkaeriConfig withSerdesPack(@NonNull OkaeriSerdesPack serdesPack) {
         this.getConfigurer().register(serdesPack);
         return this;
     }
 
+    /**
+     * Sets related configuration {@link File}.
+     *
+     * @param bindFile the bind file
+     * @return this instance
+     */
     public OkaeriConfig withBindFile(@NonNull File bindFile) {
         this.setBindFile(bindFile);
         return this;
     }
 
+    /**
+     * Sets related configuration {@link File} using its pathname.
+     * Same as {@link #withBindFile(File)} with {@code new File(pathname)}.
+     *
+     * @param pathname the bind file path
+     * @return this instance
+     */
     public OkaeriConfig withBindFile(@NonNull String pathname) {
         this.setBindFile(new File(pathname));
         return this;
     }
 
+    /**
+     * Saves current configuration state to the bindFile if file does not exist.
+     *
+     * @return this instance
+     * @throws OkaeriException if bindFile is null or saving fails
+     */
     public OkaeriConfig saveDefaults() throws OkaeriException {
 
         if (this.getBindFile() == null) {
@@ -75,6 +132,14 @@ public abstract class OkaeriConfig {
         return this.save();
     }
 
+    /**
+     * Updates configuration value by its raw key. Attempts serialization/deserialization and other
+     * transformation techniques if necessary to match field type (e.g. String -> int).
+     *
+     * @param key   target key
+     * @param value target value
+     * @throws OkaeriException if configurer is null or value processing fails
+     */
     public void set(@NonNull String key, Object value) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
@@ -91,6 +156,13 @@ public abstract class OkaeriConfig {
         this.getConfigurer().setValue(key, value, fieldGenerics, field);
     }
 
+    /**
+     * Gets configuration value by its raw key.
+     *
+     * @param key target key
+     * @return the resolved value
+     * @throws OkaeriException if configurer is null or getting the value fails
+     */
     public Object get(@NonNull String key) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
@@ -105,6 +177,15 @@ public abstract class OkaeriConfig {
         return this.getConfigurer().getValue(key);
     }
 
+    /**
+     * Gets configuration value by its raw key. Attempts serialization/deserialization and other
+     * transformation techniques if necessary to match provided class type (e.g. int -> String).
+     *
+     * @param key   target key
+     * @param clazz target value class
+     * @return the resolved value
+     * @throws OkaeriException if configurer is null or the value processing fails
+     */
     public <T> T get(@NonNull String key, @NonNull Class<T> clazz) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
@@ -119,10 +200,23 @@ public abstract class OkaeriConfig {
         return this.getConfigurer().getValue(key, clazz, null);
     }
 
+    /**
+     * Saves current configuration state to the bindFile.
+     *
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} or {@link #bindFile} is null or saving fails
+     */
     public OkaeriConfig save() throws OkaeriException {
         return this.save(this.getBindFile());
     }
 
+    /**
+     * Saves current configuration state to the specific file.
+     *
+     * @param file target file
+     * @return this instance
+     * @throws OkaeriException if configurer is null or saving fails
+     */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public OkaeriConfig save(@NonNull File file) throws OkaeriException {
         try {
@@ -134,12 +228,25 @@ public abstract class OkaeriConfig {
         }
     }
 
+    /**
+     * Saves current configuration state as {@link String}.
+     *
+     * @return saved configuration text
+     * @throws OkaeriException if configurer is null or saving fails
+     */
     public String saveToString() throws OkaeriException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         this.save(outputStream);
         return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
     }
 
+    /**
+     * Saves current configuration state to the provided {@link OutputStream}.
+     *
+     * @param outputStream target output
+     * @return this instance
+     * @throws OkaeriException if configurer is null or saving fails
+     */
     public OkaeriConfig save(@NonNull OutputStream outputStream) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
@@ -166,6 +273,21 @@ public abstract class OkaeriConfig {
         return this;
     }
 
+    /**
+     * Converts current configuration state to map. Values are subject to the simplification process.
+     * <p>
+     * Result may depend on the used Configurer backend. General rule is that non-conservative simplification
+     * provides almost everything as Strings while conservative one preserves most of the primitive types.
+     * <p>
+     * Notable differences:
+     * - some formats may not support maps with non-string keys
+     * - some formats may not support primitives like char
+     *
+     * @param configurer   configurer to be used for simplification
+     * @param conservative should basic types be preserved
+     * @return resulting map
+     * @throws OkaeriException if simplification process fails
+     */
     public Map<String, Object> asMap(@NonNull Configurer configurer, boolean conservative) throws OkaeriException {
 
         Map<String, Object> map = new LinkedHashMap<>();
@@ -196,6 +318,13 @@ public abstract class OkaeriConfig {
         return map;
     }
 
+    /**
+     * Loads new state to the configuration from its {@link #bindFile}.
+     *
+     * @param update should configuration be saved afterwards
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} or {@link #bindFile} is null or loading fails
+     */
     public OkaeriConfig load(boolean update) throws OkaeriException {
         this.load();
         if (update) {
@@ -204,6 +333,13 @@ public abstract class OkaeriConfig {
         return this;
     }
 
+    /**
+     * Loads new state to the configuration from the provided {@link String}.
+     *
+     * @param data text representation of the configuration
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or loading fails
+     */
     public OkaeriConfig load(@NonNull String data) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
@@ -214,6 +350,13 @@ public abstract class OkaeriConfig {
         return this.load(inputStream);
     }
 
+    /**
+     * Loads new state to the configuration from the provided {@link InputStream}.
+     *
+     * @param inputStream source input
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or loading fails
+     */
     public OkaeriConfig load(@NonNull InputStream inputStream) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
@@ -229,10 +372,23 @@ public abstract class OkaeriConfig {
         return this.update();
     }
 
+    /**
+     * Loads new state to the configuration from its {@link #bindFile}.
+     *
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} or {@link #bindFile} is null or loading fails
+     */
     public OkaeriConfig load() throws OkaeriException {
         return this.load(this.getBindFile());
     }
 
+    /**
+     * Loads new state to the configuration from the specified file.
+     *
+     * @param file source file
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} or {@link #bindFile} is null or loading fails
+     */
     public OkaeriConfig load(@NonNull File file) throws OkaeriException {
         try {
             return this.load(new FileInputStream(file));
@@ -241,6 +397,13 @@ public abstract class OkaeriConfig {
         }
     }
 
+    /**
+     * Loads new state to the configuration from the specified map.
+     *
+     * @param map source map
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or loading fails
+     */
     public OkaeriConfig load(@NonNull Map<String, Object> map) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
@@ -251,6 +414,13 @@ public abstract class OkaeriConfig {
         return this;
     }
 
+    /**
+     * Loads new state to the configuration from the other config.
+     *
+     * @param otherConfig source config
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or loading fails
+     */
     public OkaeriConfig load(@NonNull OkaeriConfig otherConfig) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
@@ -260,6 +430,13 @@ public abstract class OkaeriConfig {
         return this.load(otherConfig.asMap(this.getConfigurer(), true));
     }
 
+    /**
+     * Updates state of the configuration with values provided by the Configurer,
+     * also applying {@link Variable} annotation to the fields if present.
+     *
+     * @return this instance
+     * @throws OkaeriException if {@link #declaration} is null or update fails
+     */
     public OkaeriConfig update() throws OkaeriException {
 
         if (this.getDeclaration() == null) {
@@ -275,17 +452,23 @@ public abstract class OkaeriConfig {
             boolean updateValue = true;
 
             if (variable != null) {
-                String property = this.getPropertyOrEnv(variable.value());
+
+                String rawProperty = System.getProperty(variable.value());
+                String property = (rawProperty == null) ? System.getenv(variable.value()) : rawProperty;
+
                 if (property != null) {
+
                     Object value;
                     try {
                         value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType);
                     } catch (Exception exception) {
                         throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
                     }
+
                     if (!this.getConfigurer().isValid(field, value)) {
                         throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
                     }
+
                     field.updateValue(value);
                     field.setVariableHide(true);
                     updateValue = false;
@@ -316,11 +499,12 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    private String getPropertyOrEnv(String name) {
-        String property = System.getProperty(name);
-        return (property == null) ? System.getenv(name) : property;
-    }
-
+    /**
+     * Updates the configuration declaration with the new one.
+     * Useful in situations where constructor may not be invoked.
+     *
+     * @return this instance
+     */
     public OkaeriConfig updateDeclaration() {
         this.setDeclaration(ConfigDeclaration.of(this));
         return this;
