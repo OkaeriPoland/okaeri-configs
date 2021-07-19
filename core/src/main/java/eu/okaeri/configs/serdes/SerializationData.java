@@ -19,7 +19,7 @@ public class SerializationData {
     }
 
     /**
-     * @return immutable map of current serialization data
+     * @return unmodifiable map of current serialization data
      */
     public Map<String, Object> asMap() {
         return Collections.unmodifiableMap(this.data);
