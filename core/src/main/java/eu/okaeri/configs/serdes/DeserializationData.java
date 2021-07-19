@@ -15,7 +15,7 @@ public class DeserializationData {
     @Getter private Configurer configurer;
 
     /**
-     * @return immutable map of current deserialization data
+     * @return unmodifiable map of current deserialization data
      */
     public Map<String, Object> asMap() {
         return Collections.unmodifiableMap(this.data);
@@ -62,7 +62,7 @@ public class DeserializationData {
     @SuppressWarnings("unchecked")
     public <T> T getDirect(@NonNull String key, @NonNull GenericsDeclaration genericType) {
         Object object = this.data.get(key);
-        return (T) this.configurer.resolveType(object, GenericsDeclaration.of(object), genericType.getType(), genericType);
+        return (T) this.configurer.resolveType(object, null, genericType.getType(), genericType);
     }
 
     /**
@@ -76,7 +76,7 @@ public class DeserializationData {
      */
     public <T> T get(@NonNull String key, @NonNull Class<T> valueType) {
         Object object = this.data.get(key);
-        return this.configurer.resolveType(object, GenericsDeclaration.of(object), valueType, null);
+        return this.configurer.resolveType(object, null, valueType, null);
     }
 
     /**
