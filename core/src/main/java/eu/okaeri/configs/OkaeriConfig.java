@@ -9,24 +9,36 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Getter
-@Setter
 public abstract class OkaeriConfig {
 
-    private File bindFile;
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private Path bindFile;
+
+    @Getter
     private Configurer configurer;
+
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
     private ConfigDeclaration declaration;
 
+    /**
+     * Creates config updating the declaration.
+     */
     public OkaeriConfig() {
         this.updateDeclaration();
     }
@@ -91,25 +103,36 @@ public abstract class OkaeriConfig {
     }
 
     /**
-     * Sets related configuration {@link File}.
+     * Sets related configuration {@link Path} from {@link File}.
      *
      * @param bindFile the bind file
      * @return this instance
      */
     public OkaeriConfig withBindFile(@NonNull File bindFile) {
+        this.setBindFile(bindFile.toPath());
+        return this;
+    }
+
+    /**
+     * Sets related configuration {@link Path}.
+     *
+     * @param bindFile the bind file
+     * @return this instance
+     */
+    public OkaeriConfig withBindFile(@NonNull Path bindFile) {
         this.setBindFile(bindFile);
         return this;
     }
 
     /**
      * Sets related configuration {@link File} using its pathname.
-     * Same as {@link #withBindFile(File)} with {@code new File(pathname)}.
+     * Same as {@link #withBindFile(File)} with {@code Paths.get(pathname)}.
      *
      * @param pathname the bind file path
      * @return this instance
      */
     public OkaeriConfig withBindFile(@NonNull String pathname) {
-        this.setBindFile(new File(pathname));
+        this.setBindFile(Paths.get(pathname));
         return this;
     }
 
@@ -125,7 +148,7 @@ public abstract class OkaeriConfig {
             throw new InitializationException("bindFile cannot be null");
         }
 
-        if (this.getBindFile().exists()) {
+        if (Files.exists(this.getBindFile())) {
             return this;
         }
 
@@ -218,7 +241,6 @@ public abstract class OkaeriConfig {
      * @return this instance
      * @throws OkaeriException if configurer is null or saving fails
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public OkaeriConfig save(@NonNull File file) throws OkaeriException {
         try {
             File parentFile = file.getParentFile();
@@ -227,6 +249,17 @@ public abstract class OkaeriConfig {
         } catch (FileNotFoundException | UnsupportedEncodingException exception) {
             throw new OkaeriException("failed #save using file " + file, exception);
         }
+    }
+
+    /**
+     * Saves current configuration state to the specific path.
+     *
+     * @param path target path
+     * @return this instance
+     * @throws OkaeriException if configurer is null or saving fails
+     */
+    public OkaeriConfig save(@NonNull Path path) throws OkaeriException {
+        return this.save(path.toFile());
     }
 
     /**
@@ -396,6 +429,17 @@ public abstract class OkaeriConfig {
         } catch (FileNotFoundException exception) {
             throw new OkaeriException("failed #load using file " + file, exception);
         }
+    }
+
+    /**
+     * Loads new state to the configuration from the specified path.
+     *
+     * @param path source path
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} or {@link #bindFile} is null or loading fails
+     */
+    public OkaeriConfig load(@NonNull Path path) throws OkaeriException {
+        return this.load(path.toFile());
     }
 
     /**
