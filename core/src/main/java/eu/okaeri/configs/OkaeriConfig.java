@@ -115,18 +115,19 @@ public abstract class OkaeriConfig {
 
     /**
      * Sets related configuration {@link Path}.
+     * Same effect as {@link #withBindFile(File)}.
      *
-     * @param bindFile the bind file
+     * @param path the bind file path
      * @return this instance
      */
-    public OkaeriConfig withBindFile(@NonNull Path bindFile) {
-        this.setBindFile(bindFile);
+    public OkaeriConfig withBindFile(@NonNull Path path) {
+        this.setBindFile(path);
         return this;
     }
 
     /**
-     * Sets related configuration {@link File} using its pathname.
-     * Same as {@link #withBindFile(File)} with {@code Paths.get(pathname)}.
+     * Sets related configuration {@link Path} using its pathname.
+     * Same as {@link #withBindFile(Path)} with {@code Paths.get(pathname)}.
      *
      * @param pathname the bind file path
      * @return this instance
