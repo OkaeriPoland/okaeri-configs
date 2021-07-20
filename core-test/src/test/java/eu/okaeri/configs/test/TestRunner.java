@@ -15,7 +15,8 @@ import eu.okaeri.configs.validator.okaeri.OkaeriValidator;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public final class TestRunner {
 
@@ -88,7 +89,7 @@ public final class TestRunner {
     private static void inline(String pathname, Configurer configurer) {
 
         System.out.println("#inline " + pathname);
-        File bindFile = new File(pathname);
+        Path bindFile = Paths.get(pathname);
 
         OkaeriConfig inline = new OkaeriConfig() {
             String test = "siema";
@@ -96,7 +97,7 @@ public final class TestRunner {
         };
 
         inline.updateDeclaration();
-        inline.setBindFile(bindFile);
+        inline.withBindFile(bindFile);
         inline.setConfigurer(configurer);
 
         inline.save();
@@ -106,11 +107,11 @@ public final class TestRunner {
     private static void empty(String pathname, Configurer configurer) {
 
         System.out.println("#empty " + pathname);
-        File bindFile = new File(pathname);
+        Path bindFile = Paths.get(pathname);
 
         OkaeriConfig empty = new OkaeriConfig() {};
         empty.updateDeclaration();
-        empty.setBindFile(bindFile);
+        empty.withBindFile(bindFile);
         empty.setConfigurer(configurer);
 
         empty.set("elo", 1);
