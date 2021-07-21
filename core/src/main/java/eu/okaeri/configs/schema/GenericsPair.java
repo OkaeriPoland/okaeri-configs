@@ -5,12 +5,12 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class GenericsPair {
+public class GenericsPair<L, R> {
 
     private GenericsDeclaration from;
     private GenericsDeclaration to;
 
-    public GenericsPair reverse() {
-        return new GenericsPair(this.to, this.from);
+    public GenericsPair<R, L> reverse() {
+        return new GenericsPair<R, L>(this.to, this.from);
     }
 }

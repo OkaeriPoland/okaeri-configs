@@ -8,7 +8,7 @@ import org.bukkit.potion.PotionEffectType;
 public class StringPotionEffectTypeTransformer extends TwoSideObjectTransformer<String, PotionEffectType> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, PotionEffectType> getPair() {
         return this.genericsPair(String.class, PotionEffectType.class);
     }
 

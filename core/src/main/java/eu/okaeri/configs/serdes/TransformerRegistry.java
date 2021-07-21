@@ -22,27 +22,26 @@ public class TransformerRegistry {
         serdesPack.register(this);
     }
 
-    @SuppressWarnings("unchecked")
-    public void register(@NonNull TwoSideObjectTransformer transformer) {
-        this.register(new ObjectTransformer() {
+    public <L, R> void register(@NonNull TwoSideObjectTransformer<L, R> transformer) {
+        this.register(new ObjectTransformer<L, R>() {
             @Override
-            public GenericsPair getPair() {
+            public GenericsPair<L, R> getPair() {
                 return transformer.getPair();
             }
 
             @Override
-            public Object transform(Object data) {
+            public R transform(L data) {
                 return transformer.leftToRight(data);
             }
         });
-        this.register(new ObjectTransformer() {
+        this.register(new ObjectTransformer<R, L>() {
             @Override
-            public GenericsPair getPair() {
+            public GenericsPair<R, L> getPair() {
                 return transformer.getPair().reverse();
             }
 
             @Override
-            public Object transform(Object data) {
+            public L transform(R data) {
                 return transformer.rightToLeft(data);
             }
         });

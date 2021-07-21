@@ -8,7 +8,8 @@ public class SerdesCommons implements OkaeriSerdesPack {
 
     @Override
     public void register(TransformerRegistry registry) {
-        registry.register(new PatternTransformer());
+        registry.register(new DurationTransformer());
         registry.register(new InstantTransformer());
+        registry.register(new PatternTransformer());
     }
 }

@@ -7,7 +7,7 @@ import lombok.NonNull;
 public class StringToBooleanTransformer extends ObjectTransformer<String, Boolean> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, Boolean> getPair() {
         return this.genericsPair(String.class, Boolean.class);
     }
 
