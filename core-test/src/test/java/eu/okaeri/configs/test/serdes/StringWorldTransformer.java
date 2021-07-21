@@ -8,7 +8,7 @@ import eu.okaeri.configs.test.obj.World;
 public class StringWorldTransformer extends TwoSideObjectTransformer<String, World> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, World> getPair() {
         return this.genericsPair(String.class, World.class);
     }
 

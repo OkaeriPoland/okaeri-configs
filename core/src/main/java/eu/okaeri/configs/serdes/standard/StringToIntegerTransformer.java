@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 public class StringToIntegerTransformer extends ObjectTransformer<String, Integer> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, Integer> getPair() {
         return this.genericsPair(String.class, Integer.class);
     }
 

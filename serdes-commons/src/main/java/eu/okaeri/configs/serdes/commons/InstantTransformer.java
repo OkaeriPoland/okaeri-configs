@@ -9,7 +9,7 @@ import java.time.Instant;
 public class InstantTransformer extends TwoSideObjectTransformer<String, Instant> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, Instant> getPair() {
         return this.genericsPair(String.class, Instant.class);
     }
 

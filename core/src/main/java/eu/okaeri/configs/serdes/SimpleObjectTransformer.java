@@ -11,7 +11,7 @@ public abstract class SimpleObjectTransformer {
     public static <S, D> ObjectTransformer<S, D> of(@NonNull Class<S> from, @NonNull Class<D> to, @NonNull SimpleObjectTransformerExecutor<S, D> transformer) {
         return new ObjectTransformer<S, D>() {
             @Override
-            public GenericsPair getPair() {
+            public GenericsPair<S, D> getPair() {
                 return this.genericsPair(from, to);
             }
 

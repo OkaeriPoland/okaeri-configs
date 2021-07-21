@@ -6,11 +6,11 @@ import lombok.NonNull;
 
 public abstract class ObjectTransformer<S, D> {
 
-    public abstract GenericsPair getPair();
+    public abstract GenericsPair<S, D> getPair();
 
     public abstract D transform(S data);
 
-    protected GenericsPair genericsPair(@NonNull Class<?> from, @NonNull Class<?> to) {
-        return new GenericsPair(GenericsDeclaration.of(from), GenericsDeclaration.of(to));
+    protected GenericsPair<S, D> genericsPair(@NonNull Class<S> from, @NonNull Class<D> to) {
+        return new GenericsPair<>(GenericsDeclaration.of(from), GenericsDeclaration.of(to));
     }
 }

@@ -12,12 +12,12 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-validator-okaeri</artifactId>
-  <version>2.7.32</version>
+  <version>2.8.0-SNAPSHOT</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-validator-okaeri:2.7.32'
+implementation 'eu.okaeri:okaeri-configs-validator-okaeri:2.8.0-SNAPSHOT'
 ```
 
 ## Usage

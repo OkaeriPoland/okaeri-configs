@@ -9,7 +9,7 @@ import java.math.BigInteger;
 public class StringToBigIntegerTransformer extends ObjectTransformer<String, BigInteger> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, BigInteger> getPair() {
         return this.genericsPair(String.class, BigInteger.class);
     }
 

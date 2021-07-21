@@ -9,7 +9,7 @@ import java.util.UUID;
 public class StringToUuidTransformer extends ObjectTransformer<String, UUID> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, UUID> getPair() {
         return this.genericsPair(String.class, UUID.class);
     }
 

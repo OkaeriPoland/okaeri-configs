@@ -8,7 +8,7 @@ import org.bukkit.enchantments.Enchantment;
 public class StringEnchantmentTransformer extends TwoSideObjectTransformer<String, Enchantment> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, Enchantment> getPair() {
         return this.genericsPair(String.class, Enchantment.class);
     }
 

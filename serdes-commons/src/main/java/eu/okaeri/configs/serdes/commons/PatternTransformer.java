@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class PatternTransformer extends TwoSideObjectTransformer<String, Pattern> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, Pattern> getPair() {
         return this.genericsPair(String.class, Pattern.class);
     }
 

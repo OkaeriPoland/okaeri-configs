@@ -7,7 +7,7 @@ import lombok.NonNull;
 public class StringToCharacterTransformer extends ObjectTransformer<String, Character> {
 
     @Override
-    public GenericsPair getPair() {
+    public GenericsPair<String, Character> getPair() {
         return this.genericsPair(String.class, Character.class);
     }
 
