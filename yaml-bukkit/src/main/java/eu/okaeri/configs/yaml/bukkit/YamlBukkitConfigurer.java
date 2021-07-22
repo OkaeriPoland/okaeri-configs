@@ -9,6 +9,7 @@ import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -47,30 +48,30 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value instanceof MemorySection) {
             return ((MemorySection) value).getValues(false);
         }
 
-        return super.simplify(value, genericType, conservative);
+        return super.simplify(value, genericType, serdesContext, conservative);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget) {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, SerdesContext serdesContext) {
 
         if (object instanceof MemorySection) {
             Map<String, Object> values = ((MemorySection) object).getValues(false);
-            return super.resolveType(values, GenericsDeclaration.of(values), targetClazz, genericTarget);
+            return super.resolveType(values, GenericsDeclaration.of(values), targetClazz, genericTarget, serdesContext);
         }
 
-        return super.resolveType(object, genericSource, targetClazz, genericTarget);
+        return super.resolveType(object, genericSource, targetClazz, genericTarget, serdesContext);
     }
 
     @Override
     public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, true);
+        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
         this.config.set(key, simplified);
     }
 

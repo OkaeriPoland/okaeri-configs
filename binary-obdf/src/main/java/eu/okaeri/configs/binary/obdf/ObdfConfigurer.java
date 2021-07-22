@@ -6,6 +6,7 @@ import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 
 import java.io.InputStream;
@@ -21,7 +22,7 @@ public class ObdfConfigurer extends Configurer {
 
     @Override
     public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, false);
+        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), false);
         this.bin.putUnsafe(key, simplified);
     }
 

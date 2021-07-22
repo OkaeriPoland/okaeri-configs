@@ -1,12 +1,12 @@
 package eu.okaeri.configs.serdes.standard;
 
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
-import eu.okaeri.configs.serdes.TransformerRegistry;
+import eu.okaeri.configs.serdes.SerdesRegistry;
 
 public class StandardSerdes implements OkaeriSerdesPack {
 
     @Override
-    public void register(TransformerRegistry registry) {
+    public void register(SerdesRegistry registry) {
 
         // some magic
         registry.register(new ObjectToStringTransformer());

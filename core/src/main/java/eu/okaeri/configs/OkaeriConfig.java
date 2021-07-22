@@ -9,24 +9,38 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.SerdesContext;
+import eu.okaeri.configs.serdes.SerdesRegistry;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Getter
-@Setter
 public abstract class OkaeriConfig {
 
-    private File bindFile;
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private Path bindFile;
+
+    @Getter
     private Configurer configurer;
+
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
     private ConfigDeclaration declaration;
 
+    /**
+     * Creates config updating the declaration.
+     */
     public OkaeriConfig() {
         this.updateDeclaration();
     }
@@ -44,8 +58,7 @@ public abstract class OkaeriConfig {
 
     /**
      * Replaces the current configurer with the provided, assigning previous
-     * {@link eu.okaeri.configs.serdes.TransformerRegistry} to the new one
-     * if available.
+     * {@link SerdesRegistry} to the new one if available.
      * <p>
      * This method allows easy change of the configuration backend without
      * the need to re-register serdes packs. To preserve the registry of
@@ -62,8 +75,7 @@ public abstract class OkaeriConfig {
 
     /**
      * Replaces the current configurer with the provided, assigning previous
-     * {@link eu.okaeri.configs.serdes.TransformerRegistry} to the new one
-     * if available.
+     * {@link SerdesRegistry} to the new one if available.
      * <p>
      * Registers provided serdes packs in the configurer afterwards.
      * To preserve the registry of the new configurer use {@link #setConfigurer(Configurer)}.
@@ -91,25 +103,37 @@ public abstract class OkaeriConfig {
     }
 
     /**
-     * Sets related configuration {@link File}.
+     * Sets related configuration {@link Path} from {@link File}.
      *
      * @param bindFile the bind file
      * @return this instance
      */
     public OkaeriConfig withBindFile(@NonNull File bindFile) {
-        this.setBindFile(bindFile);
+        this.setBindFile(bindFile.toPath());
         return this;
     }
 
     /**
-     * Sets related configuration {@link File} using its pathname.
-     * Same as {@link #withBindFile(File)} with {@code new File(pathname)}.
+     * Sets related configuration {@link Path}.
+     * Same effect as {@link #withBindFile(File)}.
+     *
+     * @param path the bind file path
+     * @return this instance
+     */
+    public OkaeriConfig withBindFile(@NonNull Path path) {
+        this.setBindFile(path);
+        return this;
+    }
+
+    /**
+     * Sets related configuration {@link Path} using its pathname.
+     * Same as {@link #withBindFile(Path)} with {@code Paths.get(pathname)}.
      *
      * @param pathname the bind file path
      * @return this instance
      */
     public OkaeriConfig withBindFile(@NonNull String pathname) {
-        this.setBindFile(new File(pathname));
+        this.setBindFile(Paths.get(pathname));
         return this;
     }
 
@@ -125,7 +149,7 @@ public abstract class OkaeriConfig {
             throw new InitializationException("bindFile cannot be null");
         }
 
-        if (this.getBindFile().exists()) {
+        if (Files.exists(this.getBindFile())) {
             return this;
         }
 
@@ -148,7 +172,7 @@ public abstract class OkaeriConfig {
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            value = this.getConfigurer().resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
+            value = this.getConfigurer().resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType(), SerdesContext.of(this.configurer, field));
             field.updateValue(value);
         }
 
@@ -195,10 +219,10 @@ public abstract class OkaeriConfig {
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            return this.getConfigurer().resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz));
+            return this.getConfigurer().resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz), SerdesContext.of(this.configurer, field));
         }
 
-        return this.getConfigurer().getValue(key, clazz, null);
+        return this.getConfigurer().getValue(key, clazz, null, SerdesContext.of(this.configurer, null));
     }
 
     /**
@@ -218,7 +242,6 @@ public abstract class OkaeriConfig {
      * @return this instance
      * @throws OkaeriException if configurer is null or saving fails
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public OkaeriConfig save(@NonNull File file) throws OkaeriException {
         try {
             File parentFile = file.getParentFile();
@@ -227,6 +250,17 @@ public abstract class OkaeriConfig {
         } catch (FileNotFoundException | UnsupportedEncodingException exception) {
             throw new OkaeriException("failed #save using file " + file, exception);
         }
+    }
+
+    /**
+     * Saves current configuration state to the specific path.
+     *
+     * @param path target path
+     * @return this instance
+     * @throws OkaeriException if configurer is null or saving fails
+     */
+    public OkaeriConfig save(@NonNull Path path) throws OkaeriException {
+        return this.save(path.toFile());
     }
 
     /**
@@ -295,7 +329,7 @@ public abstract class OkaeriConfig {
 
         // fetch by declaration
         for (FieldDeclaration field : this.getDeclaration().getFields()) {
-            Object simplified = configurer.simplify(field.getValue(), field.getType(), conservative);
+            Object simplified = configurer.simplify(field.getValue(), field.getType(), SerdesContext.of(configurer, field), conservative);
             map.put(field.getName(), simplified);
         }
 
@@ -312,7 +346,7 @@ public abstract class OkaeriConfig {
             }
 
             Object value = this.getConfigurer().getValue(keyName);
-            Object simplified = configurer.simplify(value, GenericsDeclaration.of(value), conservative);
+            Object simplified = configurer.simplify(value, GenericsDeclaration.of(value), SerdesContext.of(configurer, null), conservative);
             map.put(keyName, simplified);
         }
 
@@ -399,6 +433,17 @@ public abstract class OkaeriConfig {
     }
 
     /**
+     * Loads new state to the configuration from the specified path.
+     *
+     * @param path source path
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} or {@link #bindFile} is null or loading fails
+     */
+    public OkaeriConfig load(@NonNull Path path) throws OkaeriException {
+        return this.load(path.toFile());
+    }
+
+    /**
      * Loads new state to the configuration from the specified map.
      *
      * @param map source map
@@ -461,7 +506,7 @@ public abstract class OkaeriConfig {
 
                     Object value;
                     try {
-                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType);
+                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType, SerdesContext.of(this.configurer, field));
                     } catch (Exception exception) {
                         throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
                     }
@@ -482,7 +527,7 @@ public abstract class OkaeriConfig {
 
             Object value;
             try {
-                value = this.getConfigurer().getValue(fieldName, type, genericType);
+                value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
             } catch (Exception exception) {
                 throw new OkaeriException("failed to #getValue for " + fieldName, exception);
             }

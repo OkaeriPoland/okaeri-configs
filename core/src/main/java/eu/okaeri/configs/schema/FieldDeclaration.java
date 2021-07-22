@@ -1,12 +1,17 @@
 package eu.okaeri.configs.schema;
 
 import eu.okaeri.configs.annotation.*;
+import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
+import eu.okaeri.configs.serdes.SerdesAnnotationResolver;
+import eu.okaeri.configs.serdes.SerdesContextAttachment;
+import eu.okaeri.configs.serdes.SerdesContextAttachments;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -105,8 +110,8 @@ public class FieldDeclaration {
 
     public void updateValue(Object value) throws OkaeriException {
         try {
-            this.field.setAccessible(true);
-            this.field.set(this.object, value);
+            this.getField().setAccessible(true);
+            this.getField().set(this.getObject(), value);
         }
         catch (IllegalAccessException exception) {
             throw new OkaeriException("failed to #updateValue", exception);
@@ -115,17 +120,39 @@ public class FieldDeclaration {
 
     public Object getValue() throws OkaeriException {
 
-        if (this.variableHide) {
-            return this.startingValue;
+        if (this.isVariableHide()) {
+            return this.getStartingValue();
         }
 
         try {
-            this.field.setAccessible(true);
-            return this.field.get(this.object);
+            this.getField().setAccessible(true);
+            return this.getField().get(this.getObject());
         }
         catch (IllegalAccessException exception) {
             throw new OkaeriException("failed to #getValue", exception);
         }
+    }
+
+    public <T extends Annotation> Optional<T> getAnnotation(@NonNull Class<T> type) {
+        return Optional.ofNullable(this.getField().getAnnotation(type));
+    }
+
+    public SerdesContextAttachments readStaticAnnotations(@NonNull Configurer configurer) {
+        SerdesContextAttachments attachments = new SerdesContextAttachments();
+        for (Annotation annotation : this.getField().getAnnotations()) {
+            SerdesAnnotationResolver<Annotation, SerdesContextAttachment> annotationResolver = configurer.getRegistry().getAnnotationResolver(annotation);
+            if (annotationResolver == null) {
+                continue;
+            }
+            Optional<? extends SerdesContextAttachment> attachmentOptional = annotationResolver.resolveAttachment(this.getField(), annotation);
+            if (!attachmentOptional.isPresent()) {
+                continue;
+            }
+            SerdesContextAttachment attachment = attachmentOptional.get();
+            Class<? extends SerdesContextAttachment> attachmentType = attachment.getClass();
+            attachments.put(attachmentType, attachment);
+        }
+        return attachments;
     }
 
     private Object startingValue;

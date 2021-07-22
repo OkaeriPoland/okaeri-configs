@@ -9,6 +9,7 @@ import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -51,7 +52,7 @@ public class YamlBungeeConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value instanceof Configuration) {
             Configuration configuration = (Configuration) value;
@@ -60,26 +61,26 @@ public class YamlBungeeConfigurer extends Configurer {
             return values;
         }
 
-        return super.simplify(value, genericType, conservative);
+        return super.simplify(value, genericType, serdesContext, conservative);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget) {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, SerdesContext serdesContext) {
 
         if (object instanceof Configuration) {
             Configuration configuration = (Configuration) object;
             Map<String, Object> values = new LinkedHashMap<>();
             configuration.getKeys().forEach(key -> values.put(key, configuration.get(key)));
-            return super.resolveType(values, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), targetClazz, genericTarget);
+            return super.resolveType(values, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), targetClazz, genericTarget, serdesContext);
         }
 
-        return super.resolveType(object, genericSource, targetClazz, genericTarget);
+        return super.resolveType(object, genericSource, targetClazz, genericTarget, serdesContext);
     }
 
     @Override
     public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, true);
+        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
         this.config.set(key, simplified);
     }
 
