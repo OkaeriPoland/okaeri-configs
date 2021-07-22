@@ -6,10 +6,10 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
     </parent>
     <artifactId>okaeri-configs-core</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

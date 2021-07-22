@@ -92,8 +92,8 @@ public class DeserializationData {
      * @return transformed collection or null
      */
     public <T> Collection<T> getAsCollection(@NonNull String key, @NonNull GenericsDeclaration genericType) {
-        if (!Collections.class.isAssignableFrom(genericType.getType())) {
-            throw new IllegalArgumentException("genericType.type must be a superclass of Collection");
+        if (!Collection.class.isAssignableFrom(genericType.getType())) {
+            throw new IllegalArgumentException("genericType.type must be a superclass of Collection: " + genericType);
         }
         return this.getDirect(key, genericType);
     }
@@ -143,7 +143,7 @@ public class DeserializationData {
      */
     public <K, V> Map<K, V> getAsMap(@NonNull String key, @NonNull GenericsDeclaration genericType) {
         if (!Map.class.isAssignableFrom(genericType.getType())) {
-            throw new IllegalArgumentException("genericType.type must be a superclass of Map");
+            throw new IllegalArgumentException("genericType.type must be a superclass of Map: " + genericType);
         }
         return this.getDirect(key, genericType);
     }
