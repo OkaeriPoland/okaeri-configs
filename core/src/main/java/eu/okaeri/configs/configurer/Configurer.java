@@ -131,7 +131,7 @@ public abstract class Configurer {
             throw new OkaeriException("cannot simplify type " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
         }
 
-        SerializationData serializationData = new SerializationData(this);
+        SerializationData serializationData = new SerializationData(this, serdesContext);
         serializer.serialize(value, serializationData);
         Map<String, Object> serializationMap = new LinkedHashMap<>(serializationData.asMap());
 
@@ -211,7 +211,7 @@ public abstract class Configurer {
         // deserialization
         ObjectSerializer objectSerializer = this.registry.getSerializer(targetClazz);
         if ((object instanceof Map) && (objectSerializer != null)) {
-            DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, this);
+            DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, this, serdesContext);
             Object deserialized = objectSerializer.deserialize(deserializationData, target);
             return targetClazz.cast(deserialized);
         }

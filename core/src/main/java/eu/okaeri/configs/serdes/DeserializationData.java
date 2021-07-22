@@ -11,8 +11,9 @@ import java.util.*;
 @AllArgsConstructor
 public class DeserializationData {
 
-    private Map<String, Object> data;
-    @Getter private Configurer configurer;
+    @NonNull private Map<String, Object> data;
+    @Getter @NonNull private Configurer configurer;
+    @Getter @NonNull private SerdesContext context;
 
     /**
      * @return unmodifiable map of current deserialization data

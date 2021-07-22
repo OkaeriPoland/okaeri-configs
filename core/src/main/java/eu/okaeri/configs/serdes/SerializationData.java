@@ -2,21 +2,18 @@ package eu.okaeri.configs.serdes;
 
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 
+@RequiredArgsConstructor
 public class SerializationData {
 
     private Map<String, Object> data = new LinkedHashMap<>();
-    private final Configurer configurer;
-
-    /**
-     * @param configurer configured to be used in simplification process
-     */
-    public SerializationData(@NonNull Configurer configurer) {
-        this.configurer = configurer;
-    }
+    @Getter @NonNull private final Configurer configurer;
+    @Getter @NonNull private final SerdesContext context;
 
     /**
      * @return unmodifiable map of current serialization data
