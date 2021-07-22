@@ -77,6 +77,11 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
             return data.toString();
         }
 
+        // preserve zero
+        if (data.isZero()) {
+            return "0";
+        }
+
         // matcher for simplified format
         String stringDuration = data.toString();
         Matcher matcher = SIMPLE_ISO_DURATION_PATTERN.matcher(stringDuration);
