@@ -29,6 +29,7 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
 
     private static final Pattern SIMPLE_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>[0-9]+)(?<unit>H|M|S)");
     private static final Pattern SIMPLE_DURATION_PATTERN = Pattern.compile("(?<value>-?[0-9]+)(?<unit>d|h|m|s)");
+    private static final Pattern JBOD_FULL_DURATION_PATTERN = Pattern.compile("((-?[0-9]+)(d|h|m|s))+");
 
     @Override
     public GenericsPair<String, Duration> getPair() {
@@ -124,21 +125,34 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
      * <p>
      * Example valid formats:
      * - 14d
+     * - 14D
      * - 14d12h
      * - 14d 12h
      * - 14d1d
-     * - 14d6h30m30s
+     * - 14d6H30m30s
      * - 30s
+     * <p>
+     * Example invalid formats:
+     * - 14d huh 6h ???
+     * - 1y
      *
      * @param text value to be parsed
      * @return parsed {@link Duration} or empty when failed to parse
      */
     private static Optional<Duration> readJbodPattern(String text) {
 
+        // basic preprocessing & cleanup
         text = text.toLowerCase(Locale.ROOT);
         text = text.replace(" ", "");
-        Matcher matcher = SIMPLE_DURATION_PATTERN.matcher(text);
 
+        // does not match full pattern (may contain bloat)
+        Matcher fullMatcher = JBOD_FULL_DURATION_PATTERN.matcher(text);
+        if (!fullMatcher.matches()) {
+            return Optional.empty();
+        }
+
+        // match duration elements one by one
+        Matcher matcher = SIMPLE_DURATION_PATTERN.matcher(text);
         boolean matched = false;
         long currentValue = 0;
 
@@ -149,6 +163,7 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
             currentValue += timeToDuration(longValue, unit).toMillis();
         }
 
+        // if found and only if found return duration
         return matched ? Optional.of(Duration.ofMillis(currentValue)) : Optional.empty();
     }
 }
