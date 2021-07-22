@@ -1,5 +1,6 @@
 package eu.okaeri.configs.postprocessor;
 
+import lombok.Cleanup;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -193,8 +194,7 @@ public class ConfigPostprocessor {
 
     @SneakyThrows
     private static void writeOutput(OutputStream outputStream, String text) {
-        try (PrintStream out = new PrintStream(outputStream, true, StandardCharsets.UTF_8.name())) {
-            out.print(text);
-        }
+        @Cleanup PrintStream out = new PrintStream(outputStream, true, StandardCharsets.UTF_8.name());
+        out.print(text);
     }
 }

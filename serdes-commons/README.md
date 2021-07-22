@@ -9,13 +9,13 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-commons</artifactId>
-  <version>2.7.32</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 ### Gradle
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-serdes-commons:2.7.32'
+implementation 'eu.okaeri:okaeri-configs-serdes-commons:3.0.0'
 ```
 
 ## Supported types
@@ -26,3 +26,4 @@ implementation 'eu.okaeri:okaeri-configs-serdes-commons:2.7.32'
 |-|-|-|
 | java.lang.String | java.time.Instant | Two-side |
 | java.lang.String | java.util.regex.Pattern | Two-side |
+| java.lang.String | java.time.Duration | Two-side |

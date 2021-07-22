@@ -4,7 +4,8 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
-import eu.okaeri.configs.serdes.TransformerRegistry;
+import eu.okaeri.configs.serdes.SerdesContext;
+import eu.okaeri.configs.serdes.SerdesRegistry;
 import lombok.NonNull;
 
 import java.io.InputStream;
@@ -26,12 +27,12 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public void setRegistry(TransformerRegistry registry) {
+    public void setRegistry(SerdesRegistry registry) {
         this.wrapped.setRegistry(registry);
     }
 
     @Override
-    public TransformerRegistry getRegistry() {
+    public SerdesRegistry getRegistry() {
         return this.wrapped.getRegistry();
     }
 
@@ -56,28 +57,28 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType, boolean conservative) {
-        return this.wrapped.simplifyCollection(value, genericType, conservative);
+    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) {
+        return this.wrapped.simplifyCollection(value, genericType, serdesContext, conservative);
     }
 
     @Override
-    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) {
-        return this.wrapped.simplifyMap(value, genericType, conservative);
+    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) {
+        return this.wrapped.simplifyMap(value, genericType, serdesContext, conservative);
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) {
-        return this.wrapped.simplify(value, genericType, conservative);
+    public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) {
+        return this.wrapped.simplify(value, genericType, serdesContext, conservative);
     }
 
     @Override
-    public <T> T getValue(String key, Class<T> clazz, GenericsDeclaration genericType) {
-        return this.wrapped.getValue(key, clazz, genericType);
+    public <T> T getValue(String key, Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
+        return this.wrapped.getValue(key, clazz, genericType, serdesContext);
     }
 
     @Override
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget) {
-        return this.wrapped.resolveType(object, genericSource, targetClazz, genericTarget);
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, @NonNull SerdesContext serdesContext) {
+        return this.wrapped.resolveType(object, genericSource, targetClazz, genericTarget, serdesContext);
     }
 
     @Override

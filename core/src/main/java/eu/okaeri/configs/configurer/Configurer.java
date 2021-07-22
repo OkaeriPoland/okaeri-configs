@@ -25,16 +25,16 @@ public abstract class Configurer {
     @Setter
     private OkaeriConfig parent;
 
-    private TransformerRegistry registry = new TransformerRegistry();
+    private SerdesRegistry registry = new SerdesRegistry();
     {
         this.registry.register(new StandardSerdes());
     }
 
-    public void setRegistry(@NonNull TransformerRegistry registry) {
+    public void setRegistry(@NonNull SerdesRegistry registry) {
         this.registry = registry;
     }
 
-    public TransformerRegistry getRegistry() {
+    public SerdesRegistry getRegistry() {
         return this.registry;
     }
 
@@ -55,28 +55,28 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyCollection(@NonNull Collection<?> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplifyCollection(@NonNull Collection<?> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         List collection = new ArrayList();
         GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
 
         for (Object collectionElement : value) {
-            collection.add(this.simplify(collectionElement, collectionSubtype, conservative));
+            collection.add(this.simplify(collectionElement, collectionSubtype, serdesContext, conservative));
         }
 
         return collection;
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
         GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(1);
 
         for (Map.Entry<Object, Object> entry : value.entrySet()) {
-            Object key = this.simplify(entry.getKey(), keyDeclaration, conservative);
-            Object kValue = this.simplify(entry.getValue(), valueDeclaration, conservative);
+            Object key = this.simplify(entry.getKey(), keyDeclaration, serdesContext, conservative);
+            Object kValue = this.simplify(entry.getValue(), valueDeclaration, serdesContext, conservative);
             map.put(key, kValue);
         }
 
@@ -84,7 +84,7 @@ public abstract class Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value == null) {
             return null;
@@ -106,26 +106,26 @@ public abstract class Configurer {
 
             if (serializerType.isPrimitive()) {
                 Class<?> wrappedPrimitive = GenericsDeclaration.of(serializerType).wrap();
-                return this.simplify(wrappedPrimitive.cast(value), GenericsDeclaration.of(wrappedPrimitive), conservative);
+                return this.simplify(wrappedPrimitive.cast(value), GenericsDeclaration.of(wrappedPrimitive), serdesContext, conservative);
             }
 
             if (genericType == null) {
                 GenericsDeclaration valueDeclaration = GenericsDeclaration.of(value);
                 if (this.isToStringObject(serializerType, valueDeclaration)) {
-                    return this.resolveType(value, genericType, String.class, null);
+                    return this.resolveType(value, genericType, String.class, null, serdesContext);
                 }
             }
 
             if (this.isToStringObject(serializerType, genericType)) {
-                return this.resolveType(value, genericType, String.class, null);
+                return this.resolveType(value, genericType, String.class, null, serdesContext);
             }
 
             if (value instanceof Collection) {
-                return this.simplifyCollection((Collection<?>) value, genericType, conservative);
+                return this.simplifyCollection((Collection<?>) value, genericType, serdesContext, conservative);
             }
 
             if (value instanceof Map) {
-                return this.simplifyMap((Map<Object, Object>) value, genericType, conservative);
+                return this.simplifyMap((Map<Object, Object>) value, genericType, serdesContext, conservative);
             }
 
             throw new OkaeriException("cannot simplify type " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
@@ -137,21 +137,21 @@ public abstract class Configurer {
 
         if (!conservative) {
             Map<String, Object> newSerializationMap = new LinkedHashMap<>();
-            serializationMap.forEach((mKey, mValue) -> newSerializationMap.put(mKey, this.simplify(mValue, GenericsDeclaration.of(mValue), false)));
+            serializationMap.forEach((mKey, mValue) -> newSerializationMap.put(mKey, this.simplify(mValue, GenericsDeclaration.of(mValue), serdesContext, false)));
             return newSerializationMap;
         }
 
         return serializationMap;
     }
 
-    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType) {
+    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
         Object value = this.getValue(key);
         if (value == null) return null;
-        return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType);
+        return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType, serdesContext);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget) throws OkaeriException {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, @NonNull SerdesContext serdesContext) throws OkaeriException {
 
         if (object == null) {
             return null;
@@ -203,7 +203,7 @@ public abstract class Configurer {
         // subconfig
         if (OkaeriConfig.class.isAssignableFrom(targetClazz)) {
             OkaeriConfig config = ConfigManager.createUnsafe((Class<? extends OkaeriConfig>) targetClazz);
-            Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)));
+            Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
             config.setConfigurer(new InMemoryWrappedConfigurer(this, configMap));
             return (T) config.update();
         }
@@ -227,7 +227,7 @@ public abstract class Configurer {
                 GenericsDeclaration listDeclaration = genericTarget.getSubtypeAtOrNull(0);
 
                 for (Object item : sourceList) {
-                    Object converted = this.resolveType(item, GenericsDeclaration.of(item), listDeclaration.getType(), listDeclaration);
+                    Object converted = this.resolveType(item, GenericsDeclaration.of(item), listDeclaration.getType(), listDeclaration, serdesContext);
                     targetList.add(converted);
                 }
 
@@ -243,8 +243,8 @@ public abstract class Configurer {
                 Map<Object, Object> map = (Map<Object, Object>) this.createInstance(targetClazz);
 
                 for (Map.Entry<Object, Object> entry : values.entrySet()) {
-                    Object key = this.resolveType(entry.getKey(), GenericsDeclaration.of(entry.getKey()), keyDeclaration.getType(), keyDeclaration);
-                    Object value = this.resolveType(entry.getValue(), GenericsDeclaration.of(entry.getValue()), valueDeclaration.getType(), valueDeclaration);
+                    Object key = this.resolveType(entry.getKey(), GenericsDeclaration.of(entry.getKey()), keyDeclaration.getType(), keyDeclaration, serdesContext);
+                    Object value = this.resolveType(entry.getValue(), GenericsDeclaration.of(entry.getValue()), valueDeclaration.getType(), valueDeclaration, serdesContext);
                     map.put(key, value);
                 }
 
@@ -264,13 +264,32 @@ public abstract class Configurer {
 
             // transform primitives/primitive wrappers through String (int -> long)
             if (targetClazz.isPrimitive() || GenericsDeclaration.of(targetClazz).isPrimitiveWrapper()) {
-                Object simplified = this.simplify(object, GenericsDeclaration.of(objectClazz), false);
-                return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz));
+                Object simplified = this.simplify(object, GenericsDeclaration.of(objectClazz), serdesContext, false);
+                return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz), serdesContext);
             }
 
+            // in conservative mode some values may change their type unexpected, e.g. '10' becomes 10
+            // this safeguard searches possible two step conversions and performs them if available
+            List<ObjectTransformer> transformersFrom = this.getRegistry().getTransformersFrom(source);
+            for (ObjectTransformer stepOneTransformer : transformersFrom) {
+
+                // get step one target and search for starting from this type
+                GenericsDeclaration stepOneTarget = stepOneTransformer.getPair().getTo();
+                ObjectTransformer stepTwoTransformer = this.getRegistry().getTransformer(stepOneTarget, target);
+
+                // found it! convert
+                if (stepTwoTransformer != null) {
+                    Object transformed = stepOneTransformer.transform(object, serdesContext);
+                    Object doubleTransformed = stepTwoTransformer.transform(transformed, serdesContext);
+                    return targetClazz.cast(doubleTransformed);
+                }
+            }
+
+            // no more known options, try casting
             try {
                 return targetClazz.cast(object);
             }
+            // failed casting, explicit error
             catch (ClassCastException exception) {
                 throw new OkaeriException("cannot resolve " + object.getClass() + " to " + targetClazz + " (" + source + " => " + target + "): " + object, exception);
             }
@@ -278,11 +297,11 @@ public abstract class Configurer {
 
         // primitives transformer
         if (targetClazz.isPrimitive()) {
-            Object transformed = transformer.transform(object);
+            Object transformed = transformer.transform(object, serdesContext);
             return (T) GenericsDeclaration.of(targetClazz).unwrapValue(transformed);
         }
 
-        return targetClazz.cast(transformer.transform(object));
+        return targetClazz.cast(transformer.transform(object, serdesContext));
     }
 
     public Object createInstance(@NonNull Class<?> clazz) throws OkaeriException {

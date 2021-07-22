@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,8 +53,9 @@ public class GenericsDeclaration {
         PRIMITIVE_WRAPPERS.add(Short.class);
     }
 
-    public static GenericsDeclaration of(Object type, @NonNull List<Object> subtypes) {
-        GenericsDeclaration declaration = of(type);
+    public static GenericsDeclaration of(@NonNull Object type, @NonNull List<Object> subtypes) {
+        Class<?> finalType = (type instanceof Class<?>) ? (Class<?>) type : type.getClass();
+        GenericsDeclaration declaration = new GenericsDeclaration(finalType);
         declaration.setSubtype(subtypes.stream().map(GenericsDeclaration::of).collect(Collectors.toList()));
         return declaration;
     }
@@ -70,99 +71,34 @@ public class GenericsDeclaration {
         }
 
         if (object instanceof Type) {
-            return from(((Type) object).getTypeName());
+            return from((Type) object);
         }
 
         return new GenericsDeclaration(object.getClass());
     }
 
-    public static GenericsDeclaration from(@NonNull String typeName) {
+    private static GenericsDeclaration from(Type type) {
 
-        GenericsDeclaration declaration = new GenericsDeclaration();
-        StringBuilder buf = new StringBuilder();
-        char[] charArray = typeName.toCharArray();
+        if (type instanceof ParameterizedType) {
 
-        for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
-            char c = charArray[i];
-            if (c == '<') {
-                declaration.setType(resolvePrimitiveOrClass(buf.toString()));
-                String genericType = typeName.substring(i + 1, typeName.length() - 1);
-                List<GenericsDeclaration> separateTypes = separateTypes(genericType).stream()
-                        .map(GenericsDeclaration::from)
-                        .collect(Collectors.toList());
-                declaration.setSubtype(separateTypes);
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type rawType = parameterizedType.getRawType();
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+            if (rawType instanceof Class<?>) {
+                GenericsDeclaration declaration = new GenericsDeclaration((Class<?>) rawType);
+                declaration.setSubtype(Arrays.stream(actualTypeArguments)
+                        .map(GenericsDeclaration::of)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
                 return declaration;
             }
-            buf.append(c);
         }
 
-        Class<?> type = resolvePrimitiveOrClass(buf.toString());
-        declaration.setType(type);
-        if (type != null) declaration.setEnum(type.isEnum());
-
-        return declaration;
+        throw new IllegalArgumentException("cannot process type: " + type + " [" + type.getClass() + "]");
     }
 
-    private static Class<?> resolvePrimitiveOrClass(String type) {
-
-        Class<?> primitiveClass = PRIMITIVES.get(type);
-        if (primitiveClass != null) {
-            return primitiveClass;
-        }
-
-        try {
-            return Class.forName(type);
-        }
-        // generics, eg.:
-        // - ? super T
-        // - T
-        catch (ClassNotFoundException exception) {
-            return null;
-        }
-    }
-
-    private static List<String> separateTypes(String types) {
-
-        StringBuilder buf = new StringBuilder();
-        char[] charArray = types.toCharArray();
-        boolean skip = false;
-        List<String> out = new ArrayList<>();
-
-        for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
-
-            char c = charArray[i];
-
-            if (c == '<') {
-                skip = true;
-            }
-
-            if (c == '>') {
-                skip = false;
-            }
-
-            if (skip) {
-                buf.append(c);
-                continue;
-            }
-
-            if (c == ',') {
-                out.add(buf.toString());
-                buf.setLength(0);
-                i++;
-                continue;
-            }
-
-            buf.append(c);
-        }
-
-        out.add(buf.toString());
-        return out;
-    }
-
-    public GenericsDeclaration() {
-    }
-
-    public GenericsDeclaration(Class<?> type) {
+    private GenericsDeclaration(Class<?> type) {
         this.type = type;
         this.isEnum = type.isEnum();
     }

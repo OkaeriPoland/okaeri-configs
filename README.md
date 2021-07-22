@@ -61,6 +61,7 @@ Okaeri's configuration library is an easy way to use java classes as config adap
 ## Example
 
 ```java
+// getter/setter from lombok recommended
 @Header("################################################################")
 @Header("#                                                              #")
 @Header("#    okaeri-configs test                                       #")
@@ -130,6 +131,22 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Math test")
     private BigInteger bigInteger = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999876543210");
 
+    @Comment("Subconfigs are the way!")
+    private StorageConfig storage = new StorageConfig();
+
+    // getter/setter from lombok recommended
+    public class StorageConfig extends OkaeriConfig {
+
+        @Variable("APP_STORAGE_URI")
+        @Comment("FLAT   : not applicable, plugin controlled")
+        @Comment("REDIS  : redis://localhost")
+        @Comment("MYSQL  : jdbc:mysql://localhost:3306/db?user=root&password=1234")
+        @Comment("H2     : jdbc:h2:file:./plugins/OkaeriPlatformBukkitExample/storage;mode=mysql")
+        private String uri = "redis://localhost";
+
+        /* ... */
+    }
+
     @Exclude
     private Instant start = Instant.now();
 
@@ -143,7 +160,7 @@ public class TestConfig extends OkaeriConfig {
 ```java
 TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
     it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
-    it.withBindFile("config.yml"); // specify File or pathname
+    it.withBindFile("config.yml"); // specify Path, File or pathname
     it.saveDefaults(); // save file if does not exists
     it.load(true); // load and save to update comments/new fields 
 });
@@ -153,7 +170,7 @@ TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
 ```java
 TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
     .withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()) // specify configurer implementation, optionally additional serdes packages
-    .withBindFile("config.yml") // specify File or pathname
+    .withBindFile("config.yml") // specify Path, File or pathname
     .saveDefaults() // save file if does not exists
     .load(true); // load and save to update comments/new fields
 ````
