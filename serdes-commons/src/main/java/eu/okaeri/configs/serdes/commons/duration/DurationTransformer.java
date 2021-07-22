@@ -72,7 +72,7 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
         }
 
         // parse iso spec duration
-        return Duration.parse(data);
+        return Duration.parse(data.toUpperCase(Locale.ROOT));
     }
 
     @Override
