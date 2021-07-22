@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public class DurationTransformer extends TwoSideObjectTransformer<String, Duration> {
 
     private static final Pattern SIMPLE_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>[0-9]+)(?<unit>H|M|S)");
-    private static final Pattern SIMPLE_DURATION_PATTERN = Pattern.compile("(?<value>[0-9]+)(?<unit>h|m|s)");
+    private static final Pattern SIMPLE_DURATION_PATTERN = Pattern.compile("(?<value>-?[0-9]+)(?<unit>h|m|s)");
 
     @Override
     public GenericsPair<String, Duration> getPair() {
@@ -96,7 +96,7 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
         if (matcher.matches()) {
             long longValue = Long.parseLong(matcher.group("value"));
             String unit = matcher.group("unit").toLowerCase(Locale.ROOT);
-            return longValue + unit;
+            return (longValue < 0 ? "-" : "") + longValue + unit;
         }
 
         // not applicable, return ISO
