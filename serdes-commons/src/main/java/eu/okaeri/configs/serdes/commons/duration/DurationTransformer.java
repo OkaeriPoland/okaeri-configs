@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,25 +38,10 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
     @Override
     public Duration leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
 
-        // parse simplified if applicable
-        Matcher simpleDurationMatcher = SIMPLE_DURATION_PATTERN.matcher(data.toLowerCase(Locale.ROOT));
-        if (simpleDurationMatcher.matches()) {
-            // get value and unit
-            long longValue = Long.parseLong(simpleDurationMatcher.group("value"));
-            String unit = simpleDurationMatcher.group("unit");
-            // resolve unit from shorthand
-            switch (unit) {
-                case "d":
-                    return Duration.ofDays(longValue);
-                case "h":
-                    return Duration.ofHours(longValue);
-                case "m":
-                    return Duration.ofMinutes(longValue);
-                case "s":
-                    return Duration.ofSeconds(longValue);
-                default:
-                    throw new IllegalArgumentException("Really, this one should not be possible: " + unit);
-            }
+        // try reading jbod formats
+        Optional<Duration> jbodResult = readJbodPattern(data);
+        if (jbodResult.isPresent()) {
+            return jbodResult.get();
         }
 
         // parse plain number duration if applicable
@@ -74,7 +60,7 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
         }
 
         // parse iso spec duration
-        return Duration.parse(data.toUpperCase(Locale.ROOT));
+        return Duration.parse(data);
     }
 
     @Override
@@ -109,5 +95,60 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
 
         // not applicable, return ISO
         return stringDuration;
+    }
+
+    /**
+     * Converts raw units to {@link Duration}.
+     *
+     * @param longValue amount of units
+     * @param unit      string unit representation
+     * @return resolved duration
+     */
+    private static Duration timeToDuration(long longValue, String unit) {
+        switch (unit) {
+            case "d":
+                return Duration.ofDays(longValue);
+            case "h":
+                return Duration.ofHours(longValue);
+            case "m":
+                return Duration.ofMinutes(longValue);
+            case "s":
+                return Duration.ofSeconds(longValue);
+            default:
+                throw new IllegalArgumentException("Really, this one should not be possible: " + unit);
+        }
+    }
+
+    /**
+     * Reads "Just a Bunch of Durations" patterns.
+     * <p>
+     * Example valid formats:
+     * - 14d
+     * - 14d12h
+     * - 14d 12h
+     * - 14d1d
+     * - 14d6h30m30s
+     * - 30s
+     *
+     * @param text value to be parsed
+     * @return parsed {@link Duration} or empty when failed to parse
+     */
+    private static Optional<Duration> readJbodPattern(String text) {
+
+        text = text.toLowerCase(Locale.ROOT);
+        text = text.replace(" ", "");
+        Matcher matcher = SIMPLE_DURATION_PATTERN.matcher(text);
+
+        boolean matched = false;
+        long currentValue = 0;
+
+        while (matcher.find()) {
+            matched = true;
+            long longValue = Long.parseLong(matcher.group("value"));
+            String unit = matcher.group("unit");
+            currentValue += timeToDuration(longValue, unit).toMillis();
+        }
+
+        return matched ? Optional.of(Duration.ofMillis(currentValue)) : Optional.empty();
     }
 }
