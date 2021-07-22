@@ -72,6 +72,11 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
                 .map(DurationSpecData::getFormat)
                 .orElse(DurationFormat.SIMPLIFIED);
 
+        // resolve default unit
+        TemporalUnit fallbackUnit = serdesContext.getAttachment(DurationSpecData.class)
+                .map(DurationSpecData::getFallbackUnit)
+                .orElse(ChronoUnit.SECONDS);
+
         // ISO format, no need for additional processing
         if (durationFormat == DurationFormat.ISO) {
             return data.toString();
@@ -91,8 +96,8 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
             // get value and unit
             long longValue = Long.parseLong(matcher.group("value"));
             String unit = matcher.group("unit").toLowerCase(Locale.ROOT);
-            // value represents multiple of full days in hours
-            if ("h".equals(unit) && ((longValue % 24) == 0)) {
+            // value represents multiple of full days in hours and fallback unit is not hours
+            if ("h".equals(unit) && ((longValue % 24) == 0) && (fallbackUnit != ChronoUnit.HOURS)) {
                 return (longValue < 0 ? "-" : "") + (longValue / 24) + "d";
             }
             // save as provided by Duration
