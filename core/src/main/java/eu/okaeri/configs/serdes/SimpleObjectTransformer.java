@@ -16,7 +16,7 @@ public abstract class SimpleObjectTransformer {
             }
 
             @Override
-            public D transform(S data) {
+            public D transform(@NonNull S data, @NonNull SerdesContext serdesContext) {
                 return transformer.transform(data);
             }
         };

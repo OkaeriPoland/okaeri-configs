@@ -9,6 +9,8 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.SerdesContext;
+import eu.okaeri.configs.serdes.SerdesRegistry;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -56,8 +58,7 @@ public abstract class OkaeriConfig {
 
     /**
      * Replaces the current configurer with the provided, assigning previous
-     * {@link eu.okaeri.configs.serdes.TransformerRegistry} to the new one
-     * if available.
+     * {@link SerdesRegistry} to the new one if available.
      * <p>
      * This method allows easy change of the configuration backend without
      * the need to re-register serdes packs. To preserve the registry of
@@ -74,8 +75,7 @@ public abstract class OkaeriConfig {
 
     /**
      * Replaces the current configurer with the provided, assigning previous
-     * {@link eu.okaeri.configs.serdes.TransformerRegistry} to the new one
-     * if available.
+     * {@link SerdesRegistry} to the new one if available.
      * <p>
      * Registers provided serdes packs in the configurer afterwards.
      * To preserve the registry of the new configurer use {@link #setConfigurer(Configurer)}.
@@ -172,7 +172,7 @@ public abstract class OkaeriConfig {
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            value = this.getConfigurer().resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType());
+            value = this.getConfigurer().resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType(), SerdesContext.of(this.configurer, field));
             field.updateValue(value);
         }
 
@@ -219,10 +219,10 @@ public abstract class OkaeriConfig {
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            return this.getConfigurer().resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz));
+            return this.getConfigurer().resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz), SerdesContext.of(this.configurer, field));
         }
 
-        return this.getConfigurer().getValue(key, clazz, null);
+        return this.getConfigurer().getValue(key, clazz, null, SerdesContext.of(this.configurer, null));
     }
 
     /**
@@ -329,7 +329,7 @@ public abstract class OkaeriConfig {
 
         // fetch by declaration
         for (FieldDeclaration field : this.getDeclaration().getFields()) {
-            Object simplified = configurer.simplify(field.getValue(), field.getType(), conservative);
+            Object simplified = configurer.simplify(field.getValue(), field.getType(), SerdesContext.of(configurer, field), conservative);
             map.put(field.getName(), simplified);
         }
 
@@ -346,7 +346,7 @@ public abstract class OkaeriConfig {
             }
 
             Object value = this.getConfigurer().getValue(keyName);
-            Object simplified = configurer.simplify(value, GenericsDeclaration.of(value), conservative);
+            Object simplified = configurer.simplify(value, GenericsDeclaration.of(value), SerdesContext.of(configurer, null), conservative);
             map.put(keyName, simplified);
         }
 
@@ -506,7 +506,7 @@ public abstract class OkaeriConfig {
 
                     Object value;
                     try {
-                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType);
+                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType, SerdesContext.of(this.configurer, field));
                     } catch (Exception exception) {
                         throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
                     }
@@ -527,7 +527,7 @@ public abstract class OkaeriConfig {
 
             Object value;
             try {
-                value = this.getConfigurer().getValue(fieldName, type, genericType);
+                value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
             } catch (Exception exception) {
                 throw new OkaeriException("failed to #getValue for " + fieldName, exception);
             }

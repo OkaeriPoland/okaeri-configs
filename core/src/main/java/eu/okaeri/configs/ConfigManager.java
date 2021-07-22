@@ -4,6 +4,7 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -80,7 +81,7 @@ public final class ConfigManager {
                     GenericsDeclaration generics = GenericsDeclaration.of(value);
 
                     if ((value != null) && ((field.getType().getType() != value.getClass()) || (!generics.isPrimitiveWrapper() && !generics.isPrimitive()))) {
-                        value = configurer.resolveType(value, generics, field.getType().getType(), field.getType());
+                        value = configurer.resolveType(value, generics, field.getType().getType(), field.getType(), SerdesContext.of(configurer, field));
                     }
 
                     field.updateValue(value);

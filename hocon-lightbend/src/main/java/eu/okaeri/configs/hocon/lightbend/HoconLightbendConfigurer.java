@@ -10,6 +10,7 @@ import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 
 import java.io.InputStream;
@@ -43,7 +44,7 @@ public class HoconLightbendConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value == null) {
             return null;
@@ -51,22 +52,22 @@ public class HoconLightbendConfigurer extends Configurer {
 
         GenericsDeclaration genericsDeclaration = GenericsDeclaration.of(value);
         if ((genericsDeclaration.getType() == char.class) || (genericsDeclaration.getType() == Character.class)) {
-            return super.simplify(value, genericType, false);
+            return super.simplify(value, genericType, serdesContext, false);
         }
 
-        return super.simplify(value, genericType, conservative);
+        return super.simplify(value, genericType, serdesContext, conservative);
     }
 
     @Override
-    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
         GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(1);
 
         for (Map.Entry<Object, Object> entry : value.entrySet()) {
-            Object key = this.simplify(entry.getKey(), keyDeclaration, false);
-            Object kValue = this.simplify(entry.getValue(), valueDeclaration, conservative);
+            Object key = this.simplify(entry.getKey(), keyDeclaration, serdesContext, false);
+            Object kValue = this.simplify(entry.getValue(), valueDeclaration, serdesContext, conservative);
             map.put(key, kValue);
         }
 
@@ -75,7 +76,7 @@ public class HoconLightbendConfigurer extends Configurer {
 
     @Override
     public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, true);
+        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
         this.map.put(key, simplified);
     }
 

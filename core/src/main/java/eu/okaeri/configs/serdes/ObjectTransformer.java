@@ -8,7 +8,7 @@ public abstract class ObjectTransformer<S, D> {
 
     public abstract GenericsPair<S, D> getPair();
 
-    public abstract D transform(S data);
+    public abstract D transform(S data, SerdesContext context);
 
     protected GenericsPair<S, D> genericsPair(@NonNull Class<S> from, @NonNull Class<D> to) {
         return new GenericsPair<>(GenericsDeclaration.of(from), GenericsDeclaration.of(to));
