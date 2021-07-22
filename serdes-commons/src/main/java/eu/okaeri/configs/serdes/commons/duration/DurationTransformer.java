@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 /**
  * Spec breaking duration transformer that aims at supporting
- * more noob friendly formats like '1h', '30m', '5s', etc.
+ * more noob friendly formats like '7d', '1h', '30m', '5s', etc.
  * <p>
  * Allows to also specify default duration unit for values
  * that do not have any suffix and are just plain number
@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public class DurationTransformer extends TwoSideObjectTransformer<String, Duration> {
 
     private static final Pattern SIMPLE_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>[0-9]+)(?<unit>H|M|S)");
-    private static final Pattern SIMPLE_DURATION_PATTERN = Pattern.compile("(?<value>-?[0-9]+)(?<unit>h|m|s)");
+    private static final Pattern SIMPLE_DURATION_PATTERN = Pattern.compile("(?<value>-?[0-9]+)(?<unit>d|h|m|s)");
 
     @Override
     public GenericsPair<String, Duration> getPair() {
@@ -45,6 +45,8 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
             String unit = simpleDurationMatcher.group("unit");
             // resolve unit from shorthand
             switch (unit) {
+                case "d":
+                    return Duration.ofDays(longValue);
                 case "h":
                     return Duration.ofHours(longValue);
                 case "m":
@@ -94,8 +96,14 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
 
         // check if simplified format is applicable and return if so
         if (matcher.matches()) {
+            // get value and unit
             long longValue = Long.parseLong(matcher.group("value"));
             String unit = matcher.group("unit").toLowerCase(Locale.ROOT);
+            // value represents multiple of full days in hours
+            if ("h".equals(unit) && ((longValue % 24) == 0)) {
+                return (longValue < 0 ? "-" : "") + (longValue / 24) + "d";
+            }
+            // save as provided by Duration
             return (longValue < 0 ? "-" : "") + longValue + unit;
         }
 
