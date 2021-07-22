@@ -1,7 +1,7 @@
 package eu.okaeri.configs.yaml.bukkit.serdes;
 
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
-import eu.okaeri.configs.serdes.TransformerRegistry;
+import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemMetaSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemStackSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.LocationSerializer;
@@ -13,7 +13,7 @@ import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringWorldTransformer;
 public class SerdesBukkit implements OkaeriSerdesPack {
 
     @Override
-    public void register(TransformerRegistry registry) {
+    public void register(SerdesRegistry registry) {
 
         // serializer/deserializer
         registry.register(new ItemMetaSerializer());

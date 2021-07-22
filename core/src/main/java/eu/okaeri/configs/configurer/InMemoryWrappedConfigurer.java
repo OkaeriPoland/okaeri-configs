@@ -2,6 +2,7 @@ package eu.okaeri.configs.configurer;
 
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -34,10 +35,10 @@ public class InMemoryWrappedConfigurer extends WrappedConfigurer {
     }
 
     @Override
-    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType) {
+    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
         Object value = this.getValue(key);
         if (value == null) return null;
-        return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType);
+        return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType, serdesContext);
     }
 
     @Override

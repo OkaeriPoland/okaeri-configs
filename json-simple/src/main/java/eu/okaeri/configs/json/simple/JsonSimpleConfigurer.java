@@ -6,6 +6,7 @@ import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ContainerFactory;
@@ -48,7 +49,7 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value == null) {
             return null;
@@ -56,15 +57,15 @@ public class JsonSimpleConfigurer extends Configurer {
 
         GenericsDeclaration genericsDeclaration = GenericsDeclaration.of(value);
         if ((genericsDeclaration.getType() == char.class) || (genericsDeclaration.getType() == Character.class)) {
-            return super.simplify(value, genericType, false);
+            return super.simplify(value, genericType, serdesContext, false);
         }
 
-        return super.simplify(value, genericType, conservative);
+        return super.simplify(value, genericType, serdesContext, conservative);
     }
 
     @Override
     public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, true);
+        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
         this.map.put(key, simplified);
     }
 

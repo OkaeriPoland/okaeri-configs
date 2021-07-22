@@ -7,6 +7,7 @@ import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.hjson.*;
 import lombok.NonNull;
 
@@ -33,7 +34,7 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value == null) {
             return null;
@@ -41,22 +42,22 @@ public class HjsonConfigurer extends Configurer {
 
         GenericsDeclaration genericsDeclaration = GenericsDeclaration.of(value);
         if ((genericsDeclaration.getType() == char.class) || (genericsDeclaration.getType() == Character.class)) {
-            return super.simplify(value, genericType, false);
+            return super.simplify(value, genericType, serdesContext, false);
         }
 
-        return super.simplify(value, genericType, conservative);
+        return super.simplify(value, genericType, serdesContext, conservative);
     }
 
     @Override
-    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, boolean conservative) throws OkaeriException {
+    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
         GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(1);
 
         for (Map.Entry<Object, Object> entry : value.entrySet()) {
-            Object key = this.simplify(entry.getKey(), keyDeclaration, false);
-            Object kValue = this.simplify(entry.getValue(), valueDeclaration, conservative);
+            Object key = this.simplify(entry.getKey(), keyDeclaration, serdesContext, false);
+            Object kValue = this.simplify(entry.getValue(), valueDeclaration, serdesContext, conservative);
             map.put(key, kValue);
         }
 
@@ -65,7 +66,7 @@ public class HjsonConfigurer extends Configurer {
 
     @Override
     public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, true);
+        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
         JsonValue jsonValue = this.toJsonValue(simplified);
         this.json.set(key, jsonValue);
     }
@@ -125,7 +126,7 @@ public class HjsonConfigurer extends Configurer {
                 });
             }
             // sub
-            else {
+            else if (field.getType().isConfig()) {
                 jsonObject.names().forEach(name -> {
                     ConfigDeclaration configDeclaration = ConfigDeclaration.of(field.getType().getType());
                     this.addComments(jsonObject.get(name), configDeclaration, name);
@@ -135,8 +136,10 @@ public class HjsonConfigurer extends Configurer {
 
         if ((object instanceof JsonArray) && (field != null)) {
             GenericsDeclaration arrayType = field.getType().getSubtypeAtOrNull(0);
-            ConfigDeclaration configDeclaration = ConfigDeclaration.of(arrayType.getType());
-            ((JsonArray) object).forEach(item -> this.addComments(item, configDeclaration, null));
+            if (arrayType.isConfig()) {
+                ConfigDeclaration configDeclaration = ConfigDeclaration.of(arrayType.getType());
+                ((JsonArray) object).forEach(item -> this.addComments(item, configDeclaration, null));
+            }
         }
 
         JsonValue value = (JsonValue) object;
