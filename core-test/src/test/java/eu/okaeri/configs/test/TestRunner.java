@@ -14,6 +14,7 @@ import eu.okaeri.configs.test.serdes.StringWorldTransformer;
 import eu.okaeri.configs.validator.okaeri.OkaeriValidator;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +32,11 @@ public final class TestRunner {
         config("config.bungee.yml", new YamlBungeeConfigurer());
         empty("empty.bungee.yml", new YamlBungeeConfigurer());
         inline("inline.bungee.yml", new YamlBungeeConfigurer());
+
+        // snakeyaml
+        config("config.snakeyaml.yml", new YamlSnakeYamlConfigurer());
+        empty("empty.snakeyaml.yml", new YamlSnakeYamlConfigurer());
+        inline("inline.snakeyaml.yml", new YamlSnakeYamlConfigurer());
 
         // gson
         config("config.gson.json", new JsonGsonConfigurer());
