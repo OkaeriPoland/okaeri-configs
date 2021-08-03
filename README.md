@@ -9,6 +9,8 @@
 
 ## Supported platforms (general use)
 General implementations based on standard format libraries directly.
+- **YAML**
+  - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): YAML for everyone! Your best choice for public projects and their configurations
 - **HJSON**
   - 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON is the best choice for your JSON configuration, small (core+55kB) but yet powerful
 - **JSON**
@@ -29,8 +31,8 @@ Special implementations for safe use in specific environment, eg. gameservers.
   - 🌟 [Minecraft (Bungee) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee): no need for additional dependencies when writing BungeeCord/Waterfall plugins
 - **Velocity (Minecraft proxy), Sponge (Minecraft server)**
   - currently no ready adapters, but use with [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson), 
-    [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend) is possible (remember to exclude format specific dependencies (eg. gson) when shading, 
-    these should be provided by the environment directly).
+    [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend), [SnakeYAML](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml)
+    is possible (remember to exclude format specific dependencies (eg. gson) when shading, these should be provided by the environment directly).
 
 ## Validation extensions
 - 🌟 [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri): simple validator with jakrataee-like annotations but much less code (+15kB)
