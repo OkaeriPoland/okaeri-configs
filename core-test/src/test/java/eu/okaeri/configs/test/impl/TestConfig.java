@@ -188,6 +188,13 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Test multiline string")
     private String multiline = "WELCOME\nMULTIPLIE\n\nLINES\n!!!!!!!!!!!11111";
 
+    @Comment("Test multiline string list")
+    private List<String> multilineStrings = Arrays.asList(
+            "WELCOME\nMULTIPLIE\n\nLINES\n!!!!!!!!!!!11111",
+            "WELCOME\nMULTIPLIE\n\nLINES\n!!!!!!!!!!!11111",
+            "WELCOME\nMULTIPLIE\n\nLINES\n!!!!!!!!!!!11111"
+    );
+
     @Exclude
     private Instant start = Instant.now();
 }
