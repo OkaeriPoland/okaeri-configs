@@ -26,6 +26,7 @@ public class YamlBukkitConfigurer extends Configurer {
 
     public YamlBukkitConfigurer(@NonNull YamlConfiguration config, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this(commentPrefix, sectionSeparator);
+        this.config = config;
     }
 
     public YamlBukkitConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
