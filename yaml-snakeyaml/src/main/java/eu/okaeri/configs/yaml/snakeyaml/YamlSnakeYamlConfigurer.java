@@ -1,7 +1,6 @@
-package eu.okaeri.configs.yaml.bukkit;
+package eu.okaeri.configs.yaml.snakeyaml;
 
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigLineInfo;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.postprocessor.SectionSeparator;
@@ -11,96 +10,99 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
-import org.bukkit.configuration.MemorySection;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.representer.Representer;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.function.Consumer;
 
-public class YamlBukkitConfigurer extends Configurer {
+public class YamlSnakeYamlConfigurer extends Configurer {
 
-    private YamlConfiguration config;
+    private Yaml config;
+    private Map<String, Object> map = new LinkedHashMap<>();
+
     private String commentPrefix = "# ";
     private String sectionSeparator = SectionSeparator.NONE;
 
-    public YamlBukkitConfigurer(@NonNull YamlConfiguration config, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
+    public YamlSnakeYamlConfigurer(@NonNull Yaml config, @NonNull Map<String, Object> map, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
+        this(config, commentPrefix, sectionSeparator);
+        this.map = map;
+    }
+
+    public YamlSnakeYamlConfigurer(@NonNull Yaml config, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this(commentPrefix, sectionSeparator);
         this.config = config;
     }
 
-    public YamlBukkitConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
+    public YamlSnakeYamlConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
         this();
         this.commentPrefix = commentPrefix;
         this.sectionSeparator = sectionSeparator;
     }
 
-    public YamlBukkitConfigurer(@NonNull String sectionSeparator) {
+    public YamlSnakeYamlConfigurer(@NonNull String sectionSeparator) {
         this();
         this.sectionSeparator = sectionSeparator;
     }
 
-    public YamlBukkitConfigurer(@NonNull YamlConfiguration config) {
+    public YamlSnakeYamlConfigurer(@NonNull Yaml config, @NonNull Map<String, Object> map) {
+        this.config = config;
+        this.map = map;
+    }
+
+    public YamlSnakeYamlConfigurer(@NonNull Yaml config) {
         this.config = config;
     }
 
-    public YamlBukkitConfigurer() {
-        this(new YamlConfiguration());
+    public YamlSnakeYamlConfigurer() {
+        this(new Yaml(
+                new Constructor(),
+                apply(new Representer(), (representer) -> representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)),
+                apply(new DumperOptions(), (dumperOptions) -> dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)),
+                new LoaderOptions(),
+                new Resolver()));
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
-
-        if (value instanceof MemorySection) {
-            return ((MemorySection) value).getValues(false);
-        }
-
-        return super.simplify(value, genericType, serdesContext, conservative);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, SerdesContext serdesContext) {
-
-        if (object instanceof MemorySection) {
-            Map<String, Object> values = ((MemorySection) object).getValues(false);
-            return super.resolveType(values, GenericsDeclaration.of(values), targetClazz, genericTarget, serdesContext);
-        }
-
-        return super.resolveType(object, genericSource, targetClazz, genericTarget, serdesContext);
-    }
-
-    @Override
-    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
-        this.config.set(key, simplified);
+        this.map.put(key, simplified);
     }
 
     @Override
     public Object getValue(@NonNull String key) {
-        return this.config.get(key);
+        return this.map.get(key);
     }
 
     @Override
     public boolean keyExists(@NonNull String key) {
-        return this.config.getKeys(false).contains(key);
+        return this.map.containsKey(key);
     }
 
     @Override
     public List<String> getAllKeys() {
-        return Collections.unmodifiableList(new ArrayList<>(this.config.getKeys(false)));
+        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
     }
 
     @Override
     public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        this.config.loadFromString(ConfigPostprocessor.of(inputStream).getContext());
+        // try loading from input stream
+        this.map = this.config.load(inputStream);
+        // when no map was loaded reset with empty
+        if (this.map == null) this.map = new LinkedHashMap<>();
     }
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
 
-        // bukkit's save
-        String contents = this.config.saveToString();
+        // render to string
+        String contents = this.config.dump(this.map);
 
         // postprocess
         ConfigPostprocessor.of(contents)
@@ -135,7 +137,7 @@ public class YamlBukkitConfigurer extends Configurer {
                             return line;
                         }
 
-                        String comment = ConfigPostprocessor.createComment(YamlBukkitConfigurer.this.commentPrefix, fieldComment);
+                        String comment = ConfigPostprocessor.createComment(YamlSnakeYamlConfigurer.this.commentPrefix, fieldComment);
                         return ConfigPostprocessor.addIndent(comment, lineInfo.getIndent()) + line;
                     }
                 })
@@ -143,5 +145,10 @@ public class YamlBukkitConfigurer extends Configurer {
                 .prependContextComment(this.commentPrefix, this.sectionSeparator, declaration.getHeader())
                 // save
                 .write(outputStream);
+    }
+
+    private static <T> T apply(T object, Consumer<T> consumer) {
+        consumer.accept(object);
+        return object;
     }
 }
