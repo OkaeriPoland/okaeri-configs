@@ -6,10 +6,10 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
     </parent>
     <artifactId>okaeri-configs-yaml-bukkit</artifactId>
-    <version>3.1.0</version>
+    <version>3.2.0</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
