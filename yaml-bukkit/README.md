@@ -48,9 +48,9 @@ Please use YamlBukkitConfigurer as your configurer:
 // default ('# ', '')
 new YamlBukkitConfigurer()
 // add empty spaces between sections
-new YamlBukkitConfigurer(SectionSeparator.NEW_WLINE)
+new YamlBukkitConfigurer(SectionSeparator.NEW_LINE)
 // change comment character and section separator (no space after # in comments, empty newlines)
-new YamlBukkitConfigurer("#", SectionSeparator.NEW_WLINE)
+new YamlBukkitConfigurer("#", SectionSeparator.NEW_LINE)
 ```
 For [serializers/deserializers/transformers](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit) use:
 ```java
