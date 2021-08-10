@@ -39,8 +39,8 @@ Please use YamlBungeeConfigurer as your configurer:
 // default ('# ', '')
 new YamlBungeeConfigurer()
 // add empty spaces between sections
-new YamlBungeeConfigurer(SectionSeparator.NEW_WLINE)
+new YamlBungeeConfigurer(SectionSeparator.NEW_LINE)
 // change comment character and section separator (no space after # in comments, empty newlines)
-new YamlBungeeConfigurer("#", SectionSeparator.NEW_WLINE)
+new YamlBungeeConfigurer("#", SectionSeparator.NEW_LINE)
 ```
 
