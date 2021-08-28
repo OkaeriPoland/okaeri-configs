@@ -23,7 +23,7 @@ public class SerdesContext {
     }
 
     public static SerdesContext of(@NonNull Configurer configurer, FieldDeclaration field, @NonNull SerdesContextAttachments attachments) {
-        return new SerdesContext(configurer, null, attachments);
+        return new SerdesContext(configurer, field, attachments);
     }
 
     public static SerdesContext.Builder builder() {

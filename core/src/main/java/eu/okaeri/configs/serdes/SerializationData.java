@@ -30,7 +30,7 @@ public class SerializationData {
      * @param value target value
      */
     public void add(@NonNull String key, Object value) {
-        value = this.configurer.simplify(value, null, SerdesContext.of(this.configurer, null), true);
+        value = this.configurer.simplify(value, null, SerdesContext.of(this.configurer), true);
         this.data.put(key, value);
     }
 
@@ -52,7 +52,7 @@ public class SerializationData {
      * @param genericType type declaration of value for simplification process
      */
     public void add(@NonNull String key, Object value, @NonNull GenericsDeclaration genericType) {
-        value = this.configurer.simplify(value, genericType, SerdesContext.of(this.configurer, null), true);
+        value = this.configurer.simplify(value, genericType, SerdesContext.of(this.configurer), true);
         this.data.put(key, value);
     }
 
@@ -92,7 +92,7 @@ public class SerializationData {
      * @param genericType type declaration of value for simplification process
      */
     public void addCollection(@NonNull String key, Collection<?> collection, @NonNull GenericsDeclaration genericType) {
-        Object object = this.configurer.simplifyCollection(collection, genericType, SerdesContext.of(this.configurer, null), true);
+        Object object = this.configurer.simplifyCollection(collection, genericType, SerdesContext.of(this.configurer), true);
         this.data.put(key, object);
     }
 
@@ -133,7 +133,7 @@ public class SerializationData {
      */
     @SuppressWarnings("unchecked")
     public void addAsMap(@NonNull String key, Map<?, ?> map, @NonNull GenericsDeclaration genericType) {
-        Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, SerdesContext.of(this.configurer, null), true);
+        Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, SerdesContext.of(this.configurer), true);
         this.data.put(key, object);
     }
 
