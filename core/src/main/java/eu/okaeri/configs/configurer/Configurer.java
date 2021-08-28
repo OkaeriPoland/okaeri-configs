@@ -222,18 +222,16 @@ public abstract class Configurer {
 
             // custom target type
             FieldDeclaration serdesContextField = serdesContext.getField();
-            if (serdesContextField != null) {
-                Optional<? extends Class<?>> targetClazzOverrideOptional = serdesContextField.getAnnotation(TargetType.class).map(TargetType::value);
-                if (targetClazzOverrideOptional.isPresent()) {
-                    targetClazz = (Class<T>) targetClazzOverrideOptional.get();
-                }
-            }
+            Class<T> localTargetClazz = (serdesContextField == null) ? targetClazz : serdesContextField.getAnnotation(TargetType.class)
+                    .map(TargetType::value)
+                    .map(type -> (Class<T>) type)
+                    .orElse(targetClazz);
 
             // collections
-            if ((object instanceof Collection) && Collection.class.isAssignableFrom(targetClazz)) {
+            if ((object instanceof Collection) && Collection.class.isAssignableFrom(localTargetClazz)) {
 
                 Collection<?> sourceList = (Collection<?>) object;
-                Collection<Object> targetList = (Collection<Object>) this.createInstance(targetClazz);
+                Collection<Object> targetList = (Collection<Object>) this.createInstance(localTargetClazz);
                 GenericsDeclaration listDeclaration = genericTarget.getSubtypeAtOrNull(0);
 
                 for (Object item : sourceList) {
@@ -241,16 +239,16 @@ public abstract class Configurer {
                     targetList.add(converted);
                 }
 
-                return targetClazz.cast(targetList);
+                return localTargetClazz.cast(targetList);
             }
 
             // maps
-            if ((object instanceof Map) && Map.class.isAssignableFrom(targetClazz)) {
+            if ((object instanceof Map) && Map.class.isAssignableFrom(localTargetClazz)) {
 
                 Map<Object, Object> values = ((Map<Object, Object>) object);
                 GenericsDeclaration keyDeclaration = genericTarget.getSubtypeAtOrNull(0);
                 GenericsDeclaration valueDeclaration = genericTarget.getSubtypeAtOrNull(1);
-                Map<Object, Object> map = (Map<Object, Object>) this.createInstance(targetClazz);
+                Map<Object, Object> map = (Map<Object, Object>) this.createInstance(localTargetClazz);
 
                 for (Map.Entry<Object, Object> entry : values.entrySet()) {
                     Object key = this.resolveType(entry.getKey(), GenericsDeclaration.of(entry.getKey()), keyDeclaration.getType(), keyDeclaration, serdesContext);
@@ -258,7 +256,7 @@ public abstract class Configurer {
                     map.put(key, value);
                 }
 
-                return targetClazz.cast(map);
+                return localTargetClazz.cast(map);
             }
         }
 

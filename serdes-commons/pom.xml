@@ -5,7 +5,7 @@
     <parent>
         <artifactId>okaeri-configs</artifactId>
         <groupId>eu.okaeri</groupId>
-        <version>3.2.1</version>
+        <version>3.2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>3.2.1</version>
+            <version>3.2.2</version>
         </dependency>
     </dependencies>
 
