@@ -2,6 +2,7 @@ package eu.okaeri.configs.configurer;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.TargetType;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
@@ -219,6 +220,15 @@ public abstract class Configurer {
         // generics
         if (genericTarget != null) {
 
+            // custom target type
+            FieldDeclaration serdesContextField = serdesContext.getField();
+            if (serdesContextField != null) {
+                Optional<? extends Class<?>> targetClazzOverrideOptional = serdesContextField.getAnnotation(TargetType.class).map(TargetType::value);
+                if (targetClazzOverrideOptional.isPresent()) {
+                    targetClazz = (Class<T>) targetClazzOverrideOptional.get();
+                }
+            }
+
             // collections
             if ((object instanceof Collection) && Collection.class.isAssignableFrom(targetClazz)) {
 
@@ -307,16 +317,30 @@ public abstract class Configurer {
     public Object createInstance(@NonNull Class<?> clazz) throws OkaeriException {
         try {
             if (Collection.class.isAssignableFrom(clazz)) {
-                if (clazz == Set.class) return new HashSet<>();
-                if (clazz == List.class) return new ArrayList<>();
-                return clazz.newInstance();
+                if (clazz == Set.class) {
+                    return new HashSet<>();
+                }
+                if (clazz == List.class) {
+                    return new ArrayList<>();
+                }
+                try {
+                    return clazz.newInstance();
+                } catch (InstantiationException exception) {
+                    throw new OkaeriException("cannot create instance of " + clazz + " (tip: provide implementation " +
+                            "(e.g. ArrayList) for types with no default constructor using @TargetType annotation)", exception);
+                }
             }
-
             if (Map.class.isAssignableFrom(clazz)) {
-                if (clazz == Map.class) return new LinkedHashMap<>();
-                return clazz.newInstance();
+                if (clazz == Map.class) {
+                    return new LinkedHashMap<>();
+                }
+                try {
+                    return clazz.newInstance();
+                } catch (InstantiationException exception) {
+                    throw new OkaeriException("cannot create instance of " + clazz + " (tip: provide implementation " +
+                            "(e.g. LinkedHashMap) for types with no default constructor using @TargetType annotation)", exception);
+                }
             }
-
             throw new OkaeriException("cannot create instance of " + clazz);
         } catch (Exception exception) {
             throw new OkaeriException("failed to create instance of " + clazz, exception);

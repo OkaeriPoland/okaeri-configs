@@ -222,7 +222,7 @@ public abstract class OkaeriConfig {
             return this.getConfigurer().resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz), SerdesContext.of(this.configurer, field));
         }
 
-        return this.getConfigurer().getValue(key, clazz, null, SerdesContext.of(this.configurer, null));
+        return this.getConfigurer().getValue(key, clazz, null, SerdesContext.of(this.configurer));
     }
 
     /**
