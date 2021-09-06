@@ -5,6 +5,7 @@ import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
 import lombok.NonNull;
 
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
@@ -15,7 +16,13 @@ import java.util.regex.Pattern;
 
 /**
  * Spec breaking duration transformer that aims at supporting
- * more noob friendly formats like '7d', '1h', '30m', '5s', etc.
+ * more noob friendly formats and combinations like:
+ * - 7d
+ * - 1h
+ * - 30m
+ * - 5s
+ * - 100ms
+ * - 233ns
  * <p>
  * Allows to also specify default duration unit for values
  * that do not have any suffix and are just plain number
@@ -27,9 +34,10 @@ import java.util.regex.Pattern;
  */
 public class DurationTransformer extends TwoSideObjectTransformer<String, Duration> {
 
-    private static final Pattern SIMPLE_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>[0-9]+)(?<unit>H|M|S)");
-    private static final Pattern SIMPLE_DURATION_PATTERN = Pattern.compile("(?<value>-?[0-9]+)(?<unit>d|h|m|s)");
-    private static final Pattern JBOD_FULL_DURATION_PATTERN = Pattern.compile("((-?[0-9]+)(d|h|m|s))+");
+    private static final Pattern SIMPLE_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>-?[0-9]+)(?<unit>H|M|S)");
+    private static final Pattern SUBSEC_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>-?[0-9]\\.[0-9]+)S?");
+    private static final Pattern SIMPLE_DURATION_PATTERN = Pattern.compile("(?<value>-?[0-9]+)(?<unit>ms|ns|d|h|m|s)");
+    private static final Pattern JBOD_FULL_DURATION_PATTERN = Pattern.compile("((-?[0-9]+)(ms|ns|d|h|m|s))+");
 
     @Override
     public GenericsPair<String, Duration> getPair() {
@@ -104,6 +112,26 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
             return (longValue < 0 ? "-" : "") + longValue + unit;
         }
 
+        // matcher for sub-second format
+        Matcher subsecMatcher = SUBSEC_ISO_DURATION_PATTERN.matcher(stringDuration);
+
+        // check of sub-second format is applicable and return if so
+        if (subsecMatcher.matches()) {
+            // get value in seconds
+            double doubleValue = Double.parseDouble(subsecMatcher.group("value"));
+            // check if negative
+            boolean negative = doubleValue < 0;
+            // convert to absolute for scale checking
+            double absoluteValue = Math.abs(doubleValue);
+            // resolve biggest possible unit
+            int msValue = (int) Math.round(absoluteValue * 1.0e3d);
+            if (msValue > 0) {
+                return (negative ? "-" : "") + msValue + "ms";
+            }
+            int nsValue = (int) Math.ceil(absoluteValue * 1.0e9d);
+            return (negative ? "-" : "") + nsValue + "ns";
+        }
+
         // not applicable, return ISO
         return stringDuration;
     }
@@ -125,6 +153,10 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
                 return Duration.ofMinutes(longValue);
             case "s":
                 return Duration.ofSeconds(longValue);
+            case "ms":
+                return Duration.ofMillis(longValue);
+            case "ns":
+                return Duration.ofNanos(longValue);
             default:
                 throw new IllegalArgumentException("Really, this one should not be possible: " + unit);
         }
@@ -164,16 +196,16 @@ public class DurationTransformer extends TwoSideObjectTransformer<String, Durati
         // match duration elements one by one
         Matcher matcher = SIMPLE_DURATION_PATTERN.matcher(text);
         boolean matched = false;
-        long currentValue = 0;
+        BigInteger currentValue = BigInteger.valueOf(0);
 
         while (matcher.find()) {
             matched = true;
             long longValue = Long.parseLong(matcher.group("value"));
             String unit = matcher.group("unit");
-            currentValue += timeToDuration(longValue, unit).toMillis();
+            currentValue = currentValue.add(BigInteger.valueOf(timeToDuration(longValue, unit).toNanos()));
         }
 
         // if found and only if found return duration
-        return matched ? Optional.of(Duration.ofMillis(currentValue)) : Optional.empty();
+        return matched ? Optional.of(Duration.ofNanos(currentValue.longValueExact())) : Optional.empty();
     }
 }
