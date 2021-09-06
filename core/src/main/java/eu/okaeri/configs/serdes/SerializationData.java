@@ -118,6 +118,26 @@ public class SerializationData {
     }
 
     /**
+     * Adds array of values to the serialization data under specific key.
+     * Provided array of values is simplified using attached Configurer.
+     * <p>
+     * This method allows to narrow target simplification type
+     * and is recommended to be used with arrays.
+     * <p>
+     * Specifying target simplification type allows to make sure
+     * correct serializer is used, e.g. interface type instead
+     * of some implementation type that would otherwise inferred.
+     *
+     * @param key            target key
+     * @param array          target array
+     * @param arrayValueType type of array for simplification process
+     * @param <T>            type of array values
+     */
+    public <T> void addArray(@NonNull String key, T[] array, @NonNull Class<T> arrayValueType) {
+        this.addCollection(key, (array == null) ? null : Arrays.asList(array), arrayValueType);
+    }
+
+    /**
      * Adds map to the serialization data under specific key.
      * Provided map is simplified using attached Configurer.
      * <p>
