@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>okaeri-configs</artifactId>
         <groupId>eu.okaeri</groupId>
         <version>3.3.3</version>
     </parent>
-    <artifactId>okaeri-configs-json-gson</artifactId>
-    <version>3.3.3</version>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>okaeri-configs-serdes-bucket4j</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -21,13 +21,13 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
             <version>3.3.3</version>
-            <scope>compile</scope>
         </dependency>
+
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
-            <scope>compile</scope>
+            <groupId>com.github.vladimir-bukhtoyarov</groupId>
+            <artifactId>bucket4j-core</artifactId>
+            <version>6.2.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
