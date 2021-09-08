@@ -6,7 +6,7 @@
 
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs</artifactId>
-    <version>3.3.2</version>
+    <version>3.3.3</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -42,6 +42,7 @@
         <!-- additional serdes modules -->
         <module>serdes-commons</module>
         <module>serdes-bukkit</module>
+        <module>serdes-bucket4j</module>
     </modules>
 
     <build>
