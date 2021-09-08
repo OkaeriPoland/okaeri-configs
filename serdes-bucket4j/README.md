@@ -26,7 +26,7 @@ implementation 'eu.okaeri:okaeri-configs-serdes-bucket4j:3.3.3'
 ### Serializers
 
 | Type | Properties |
-|-|-|-|
+|-|-|
 | io.github.bucket4j.local.LocalBucket | `bandwidths` |
 | io.github.bucket4j.Bandwidth | `capacity`, `refill-period`, `refill-tokens` |
 | eu.okaeri.configs.serdes.bucket4j.wrapper.SingleBandwidthBucket | `capacity`, `refill-period`, `refill-tokens` |
