@@ -81,6 +81,7 @@ public class ConfigPostprocessor {
             // skip non-keys
             if (!walker.isKey(line)) {
                 newContext.append(line).append("\n");
+                multilineSkip = false;
                 continue;
             }
 

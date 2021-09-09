@@ -195,6 +195,12 @@ public class TestConfig extends OkaeriConfig {
             "WELCOME\nMULTIPLIE\n\nLINES\n!!!!!!!!!!!11111"
     );
 
+    @Comment("Test property after multiline")
+    private String afterMultiline = "where is my comment??";
+
+    @Comment("Test property after multiline 2")
+    private String afterMultiline2 = "where is my comment?? 2";
+
     @Exclude
     private Instant start = Instant.now();
 }
