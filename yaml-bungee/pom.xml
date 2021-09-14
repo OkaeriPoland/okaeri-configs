@@ -11,11 +11,6 @@
     <artifactId>okaeri-configs-yaml-bungee</artifactId>
     <version>3.3.4</version>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>net.md-5</groupId>
