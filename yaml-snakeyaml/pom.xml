@@ -11,11 +11,6 @@
     <artifactId>okaeri-configs-yaml-snakeyaml</artifactId>
     <version>3.3.4</version>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
