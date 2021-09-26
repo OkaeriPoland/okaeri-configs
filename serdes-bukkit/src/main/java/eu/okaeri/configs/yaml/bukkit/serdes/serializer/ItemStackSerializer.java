@@ -44,18 +44,24 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
                 ? data.get("amount", Integer.class)
                 : 1;
 
-        int durability = data.containsKey("durability")
-                ? data.get("durability", Integer.class)
+        short durability = data.containsKey("durability")
+                ? data.get("durability", Short.class)
                 : 0;
 
         ItemMeta itemMeta = data.containsKey("item-meta")
                 ? data.get("item-meta", ItemMeta.class)
                 : null;
 
+        // create ItemStack base
         ItemStack itemStack = new ItemStack(material, amount);
-        itemStack.setDurability((short) durability);
+        // set ItemMeta FIRST due to 1.16+ server
+        // ItemStacks storing more and more data
+        // here, in the attributes of ItemMeta
         itemStack.setItemMeta(itemMeta);
+        // then override durability with setter
+        itemStack.setDurability(durability);
 
+        // woah, it works
         return itemStack;
     }
 }
