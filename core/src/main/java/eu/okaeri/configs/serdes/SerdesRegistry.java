@@ -60,6 +60,12 @@ public class SerdesRegistry {
         this.serializerSet.add(serializer);
     }
 
+    @SuppressWarnings("unchecked")
+    public void registerExclusive(@NonNull Class<?> type, @NonNull ObjectSerializer serializer) {
+        this.serializerSet.removeIf(ser -> ser.supports(type));
+        this.serializerSet.add(serializer);
+    }
+
     public ObjectTransformer getTransformer(@NonNull GenericsDeclaration from, @NonNull GenericsDeclaration to) {
         GenericsPair pair = new GenericsPair(from, to);
         return this.transformerMap.get(pair);
