@@ -2,7 +2,7 @@ package eu.okaeri.configs.serdes.commons.duration;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.SerdesContext;
-import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import lombok.NonNull;
 
 import java.math.BigInteger;
@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * the format in which the value would be saved back to
  * the string.
  */
-public class DurationTransformer extends TwoSideObjectTransformer<String, Duration> {
+public class DurationTransformer extends BidirectionalTransformer<String, Duration> {
 
     private static final Pattern SIMPLE_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>-?[0-9]+)(?<unit>H|M|S)");
     private static final Pattern SUBSEC_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>-?[0-9]\\.[0-9]+)S?");

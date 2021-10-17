@@ -2,12 +2,12 @@ package eu.okaeri.configs.serdes.commons;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.SerdesContext;
-import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import lombok.NonNull;
 
 import java.util.regex.Pattern;
 
-public class PatternTransformer extends TwoSideObjectTransformer<String, Pattern> {
+public class PatternTransformer extends BidirectionalTransformer<String, Pattern> {
 
     @Override
     public GenericsPair<String, Pattern> getPair() {

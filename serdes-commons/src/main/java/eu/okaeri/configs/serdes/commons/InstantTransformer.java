@@ -2,12 +2,12 @@ package eu.okaeri.configs.serdes.commons;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.SerdesContext;
-import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import lombok.NonNull;
 
 import java.time.Instant;
 
-public class InstantTransformer extends TwoSideObjectTransformer<String, Instant> {
+public class InstantTransformer extends BidirectionalTransformer<String, Instant> {
 
     @Override
     public GenericsPair<String, Instant> getPair() {
