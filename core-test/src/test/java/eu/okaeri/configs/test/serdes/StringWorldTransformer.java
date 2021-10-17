@@ -2,12 +2,12 @@ package eu.okaeri.configs.test.serdes;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.SerdesContext;
-import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.test.obj.CraftWorld;
 import eu.okaeri.configs.test.obj.World;
 import lombok.NonNull;
 
-public class StringWorldTransformer extends TwoSideObjectTransformer<String, World> {
+public class StringWorldTransformer extends BidirectionalTransformer<String, World> {
 
     @Override
     public GenericsPair<String, World> getPair() {

@@ -26,7 +26,15 @@ public class SerdesRegistry {
         serdesPack.register(this);
     }
 
+    /**
+     * @deprecated Use {@link #register(BidirectionalTransformer)}
+     */
+    @Deprecated
     public <L, R> void register(@NonNull TwoSideObjectTransformer<L, R> transformer) {
+        this.register(((BidirectionalTransformer<L, R>) transformer));
+    }
+
+    public <L, R> void register(@NonNull BidirectionalTransformer<L, R> transformer) {
         this.register(new ObjectTransformer<L, R>() {
             @Override
             public GenericsPair<L, R> getPair() {

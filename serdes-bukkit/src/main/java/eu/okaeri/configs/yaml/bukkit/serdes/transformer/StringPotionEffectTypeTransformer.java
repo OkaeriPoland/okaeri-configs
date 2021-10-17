@@ -2,11 +2,11 @@ package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.SerdesContext;
-import eu.okaeri.configs.serdes.TwoSideObjectTransformer;
+import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import lombok.NonNull;
 import org.bukkit.potion.PotionEffectType;
 
-public class StringPotionEffectTypeTransformer extends TwoSideObjectTransformer<String, PotionEffectType> {
+public class StringPotionEffectTypeTransformer extends BidirectionalTransformer<String, PotionEffectType> {
 
     @Override
     public GenericsPair<String, PotionEffectType> getPair() {
