@@ -63,7 +63,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-validator-okaeri</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-yaml-bukkit</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -83,13 +83,13 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-yaml-bungee</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-yaml-snakeyaml</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-json-gson</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-json-simple</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -120,7 +120,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-binary-obdf</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -128,7 +128,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-hocon-lightbend</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -136,7 +136,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-hjson</artifactId>
-            <version>3.3.6</version>
+            <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
