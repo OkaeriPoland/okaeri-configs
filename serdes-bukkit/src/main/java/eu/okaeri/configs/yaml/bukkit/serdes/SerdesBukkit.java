@@ -2,6 +2,7 @@ package eu.okaeri.configs.yaml.bukkit.serdes;
 
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.SerdesRegistry;
+import eu.okaeri.configs.yaml.bukkit.serdes.itemstack.ItemStackAttachmentResolver;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemMetaSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemStackSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.LocationSerializer;
@@ -18,6 +19,7 @@ public class SerdesBukkit implements OkaeriSerdesPack {
         // serializer/deserializer
         registry.register(new ItemMetaSerializer());
         registry.register(new ItemStackSerializer());
+        registry.register(new ItemStackAttachmentResolver());
         registry.register(new LocationSerializer());
         registry.register(new PotionEffectSerializer());
 
