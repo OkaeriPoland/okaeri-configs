@@ -4,12 +4,16 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
+import eu.okaeri.configs.yaml.bukkit.serdes.itemstack.ItemStackFormat;
+import eu.okaeri.configs.yaml.bukkit.serdes.itemstack.ItemStackSpecData;
 import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
+
+    private static final ItemMetaSerializer ITEM_META_SERIALIZER = new ItemMetaSerializer();
 
     @Override
     public boolean supports(@NonNull Class<? super ItemStack> type) {
@@ -29,8 +33,23 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
             data.add("durability", itemStack.getDurability());
         }
 
-        if (itemStack.hasItemMeta()) {
-            data.add("item-meta", itemStack.getItemMeta(), ItemMeta.class);
+        ItemStackFormat format = data.getContext().getAttachment(ItemStackSpecData.class)
+                .map(ItemStackSpecData::getFormat)
+                .orElse(ItemStackFormat.NATURAL);
+
+        if (!itemStack.hasItemMeta()) {
+            return;
+        }
+
+        switch (format) {
+            case NATURAL:
+                data.add("item-meta", itemStack.getItemMeta(), ItemMeta.class);
+                break;
+            case COMPACT:
+                ITEM_META_SERIALIZER.serialize(itemStack.getItemMeta(), data);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown format: " + format);
         }
     }
 
@@ -48,9 +67,37 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
                 ? data.get("durability", Short.class)
                 : 0;
 
-        ItemMeta itemMeta = data.containsKey("item-meta")
-                ? data.get("item-meta", ItemMeta.class)
-                : null;
+        ItemStackFormat format = data.getContext().getAttachment(ItemStackSpecData.class)
+                .map(ItemStackSpecData::getFormat)
+                .orElse(ItemStackFormat.NATURAL);
+
+        ItemMeta itemMeta;
+        switch (format) {
+            case NATURAL:
+                // support conversion COMPACT->NATURAL
+                if (data.containsKey("display-name")) {
+                    itemMeta = ITEM_META_SERIALIZER.deserialize(data, generics);
+                }
+                // standard deserialize
+                else {
+                    itemMeta = data.containsKey("item-meta")
+                            ? data.get("item-meta", ItemMeta.class)
+                            : null;
+                }
+                break;
+            case COMPACT:
+                // support conversion NATURAL->COMPACT
+                if (data.containsKey("item-meta")) {
+                    itemMeta = data.get("item-meta", ItemMeta.class);
+                }
+                // standard deserialize
+                else {
+                    itemMeta = ITEM_META_SERIALIZER.deserialize(data, generics);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown format: " + format);
+        }
 
         // create ItemStack base
         ItemStack itemStack = new ItemStack(material, amount);
