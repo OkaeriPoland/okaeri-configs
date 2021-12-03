@@ -10,7 +10,6 @@ import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -79,7 +78,6 @@ public class IndexedSetSerializer implements ObjectSerializer<IndexedSet<Object,
     }
 
     @Override
-    @SneakyThrows
     @SuppressWarnings("unchecked")
     public IndexedSet<Object, ?> deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
 
