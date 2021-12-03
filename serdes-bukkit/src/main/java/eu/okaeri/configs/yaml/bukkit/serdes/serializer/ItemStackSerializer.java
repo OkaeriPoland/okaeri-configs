@@ -21,7 +21,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
     }
 
     @Override
-    public void serialize(@NonNull ItemStack itemStack, @NonNull SerializationData data) {
+    public void serialize(@NonNull ItemStack itemStack, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
 
         data.add("material", itemStack.getType());
 
@@ -46,7 +46,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
                 data.add("item-meta", itemStack.getItemMeta(), ItemMeta.class);
                 break;
             case COMPACT:
-                ITEM_META_SERIALIZER.serialize(itemStack.getItemMeta(), data);
+                ITEM_META_SERIALIZER.serialize(itemStack.getItemMeta(), data, generics);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown format: " + format);

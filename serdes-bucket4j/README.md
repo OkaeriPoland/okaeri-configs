@@ -2,6 +2,10 @@
 
 Serializers/Deserializers for [vladimir-bukhtoyarov/bucket4j](https://github.com/vladimir-bukhtoyarov/bucket4j), a java rate limiting library based on token/leaky-bucket algorithm.
 
+```java
+new SerdesBucket4j()
+```
+
 ## Notes
 Requires [serdes-commons](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-commons) or other `java.time.Duration` transformer provider.
 
@@ -12,13 +16,13 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bucket4j</artifactId>
-  <version>3.4.2</version>
+  <version>4.0.0-beta1</version>
 </dependency>
 ```
 ### Gradle
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-serdes-bucket4j:3.4.2'
+implementation 'eu.okaeri:okaeri-configs-serdes-bucket4j:4.0.0-beta1'
 ```
 
 ## Supported types
