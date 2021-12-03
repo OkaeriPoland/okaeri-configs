@@ -8,9 +8,9 @@ public abstract class BidirectionalTransformer<L, R> {
 
     public abstract GenericsPair<L, R> getPair();
 
-    public abstract R leftToRight(L data, SerdesContext serdesContext);
+    public abstract R leftToRight(@NonNull L data, @NonNull SerdesContext serdesContext);
 
-    public abstract L rightToLeft(R data, SerdesContext serdesContext);
+    public abstract L rightToLeft(@NonNull R data, @NonNull SerdesContext serdesContext);
 
     protected GenericsPair<L, R> generics(@NonNull GenericsDeclaration from, @NonNull GenericsDeclaration to) {
         return new GenericsPair<>(from, to);

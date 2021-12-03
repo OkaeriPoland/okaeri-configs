@@ -2,6 +2,10 @@
 
 Serializers/Deserializers/Transformers for Bukkit types. See [yaml-bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit).
 
+```java
+new SerdesBukkit()
+```
+
 ## Installation
 ### Maven
 Add dependency to the `dependencies` section:
@@ -9,13 +13,13 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-  <version>3.4.2</version>
+  <version>4.0.0-beta1</version>
 </dependency>
 ```
 ### Gradle
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-serdes-bukkit:3.4.2'
+implementation 'eu.okaeri:okaeri-configs-serdes-bukkit:4.0.0-beta1'
 ```
 
 ## Supported types

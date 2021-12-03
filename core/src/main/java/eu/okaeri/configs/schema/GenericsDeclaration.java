@@ -111,6 +111,14 @@ public class GenericsDeclaration {
         return (this.subtype == null) ? null : ((index >= this.subtype.size()) ? null : this.subtype.get(index));
     }
 
+    public GenericsDeclaration getSubtypeAtOrThrow(int index) {
+        GenericsDeclaration subtype = this.getSubtypeAtOrNull(index);
+        if (subtype == null) {
+            throw new IllegalArgumentException("Cannot resolve subtype with index " + index + " for " + this);
+        }
+        return subtype;
+    }
+
     public Class<?> wrap() {
         return PRIMITIVE_TO_WRAPPER.get(this.type);
     }

@@ -29,7 +29,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     }
 
     @Override
-    public void serialize(@NonNull ItemMeta itemMeta, @NonNull SerializationData data) {
+    public void serialize(@NonNull ItemMeta itemMeta, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
 
         if (itemMeta.hasDisplayName()) {
             data.add("display-name", this.decolor(itemMeta.getDisplayName()));

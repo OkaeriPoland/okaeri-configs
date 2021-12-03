@@ -6,25 +6,26 @@ import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Refill;
+import lombok.NonNull;
 
 import java.time.Duration;
 
 public class BandwidthSerializer implements ObjectSerializer<Bandwidth> {
 
     @Override
-    public boolean supports(Class<? super Bandwidth> clazz) {
+    public boolean supports(@NonNull Class<? super Bandwidth> clazz) {
         return Bandwidth.class.isAssignableFrom(clazz);
     }
 
     @Override
-    public void serialize(Bandwidth bandwidth, SerializationData serializationData) {
+    public void serialize(@NonNull Bandwidth bandwidth,@NonNull  SerializationData serializationData, @NonNull GenericsDeclaration generics) {
         serializationData.add("capacity", bandwidth.getCapacity());
         serializationData.add("refill-period", Duration.ofNanos(bandwidth.getRefillPeriodNanos()), Duration.class);
         serializationData.add("refill-tokens", bandwidth.getRefillTokens());
     }
 
     @Override
-    public Bandwidth deserialize(DeserializationData deserializationData, GenericsDeclaration genericsDeclaration) {
+    public Bandwidth deserialize(@NonNull DeserializationData deserializationData, @NonNull GenericsDeclaration generics) {
 
         long capacity = deserializationData.get("capacity", long.class);
         Duration refillPeriod = deserializationData.get("refill-period", Duration.class);
