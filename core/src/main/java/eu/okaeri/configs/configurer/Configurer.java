@@ -133,7 +133,7 @@ public abstract class Configurer {
         }
 
         SerializationData serializationData = new SerializationData(this, serdesContext);
-        serializer.serialize(value, serializationData);
+        serializer.serialize(value, serializationData, (genericType == null) ? GenericsDeclaration.of(value) : genericType);
         Map<String, Object> serializationMap = new LinkedHashMap<>(serializationData.asMap());
 
         if (!conservative) {

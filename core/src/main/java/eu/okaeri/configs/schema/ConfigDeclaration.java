@@ -38,7 +38,7 @@ public class ConfigDeclaration {
                 .map(field -> FieldDeclaration.of(declaration, field, config))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(FieldDeclaration::getName, field -> field, (u, v) -> {
-                    throw new IllegalStateException("duplicate key " + u);
+                    throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
                 }, LinkedHashMap::new)));
 
         return declaration;

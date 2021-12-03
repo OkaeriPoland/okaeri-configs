@@ -7,18 +7,19 @@ import eu.okaeri.configs.serdes.SerializationData;
 import eu.okaeri.configs.serdes.bucket4j.wrapper.SingleBandwidthBucket;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Refill;
+import lombok.NonNull;
 
 import java.time.Duration;
 
 public class SingleBandwidthBucketSerializer implements ObjectSerializer<SingleBandwidthBucket> {
 
     @Override
-    public boolean supports(Class<? super SingleBandwidthBucket> clazz) {
+    public boolean supports(@NonNull Class<? super SingleBandwidthBucket> clazz) {
         return SingleBandwidthBucket.class.isAssignableFrom(clazz);
     }
 
     @Override
-    public void serialize(SingleBandwidthBucket simpleBucket, SerializationData serializationData) {
+    public void serialize(@NonNull SingleBandwidthBucket simpleBucket, @NonNull SerializationData serializationData, @NonNull GenericsDeclaration generics) {
         Bandwidth bandwidth = simpleBucket.getBandwidth();
         serializationData.add("capacity", bandwidth.getCapacity());
         serializationData.add("refill-period", Duration.ofNanos(bandwidth.getRefillPeriodNanos()), Duration.class);
@@ -26,7 +27,7 @@ public class SingleBandwidthBucketSerializer implements ObjectSerializer<SingleB
     }
 
     @Override
-    public SingleBandwidthBucket deserialize(DeserializationData deserializationData, GenericsDeclaration genericsDeclaration) {
+    public SingleBandwidthBucket deserialize(@NonNull DeserializationData deserializationData, @NonNull GenericsDeclaration generics) {
 
         long capacity = deserializationData.get("capacity", long.class);
         Duration refillPeriod = deserializationData.get("refill-period", Duration.class);

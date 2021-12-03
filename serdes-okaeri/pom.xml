@@ -9,13 +9,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>okaeri-configs-serdes-commons</artifactId>
+    <artifactId>okaeri-configs-serdes-okaeri</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
             <version>4.0.0-beta1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-commons-core</artifactId>
+            <version>0.2.5</version>
         </dependency>
     </dependencies>
 

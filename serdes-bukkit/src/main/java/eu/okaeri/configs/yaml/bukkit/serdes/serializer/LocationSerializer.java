@@ -16,7 +16,7 @@ public class LocationSerializer implements ObjectSerializer<Location> {
     }
 
     @Override
-    public void serialize(@NonNull Location location, @NonNull SerializationData data) {
+    public void serialize(@NonNull Location location, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         data.add("world", location.getWorld(), World.class);
         data.add("x", location.getX());
         data.add("y", location.getY());

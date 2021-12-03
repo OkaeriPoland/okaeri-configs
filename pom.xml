@@ -6,7 +6,7 @@
 
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs</artifactId>
-    <version>3.4.2</version>
+    <version>4.0.0-beta1</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -41,10 +41,11 @@
         <module>hocon-lightbend</module>
 
         <!-- additional serdes modules -->
-        <module>serdes-commons</module>
+        <module>serdes-bucket4j</module>
         <module>serdes-bukkit</module>
         <module>serdes-bungee</module>
-        <module>serdes-bucket4j</module>
+        <module>serdes-commons</module>
+        <module>serdes-okaeri</module>
     </modules>
 
     <build>
@@ -98,6 +99,19 @@
             <artifactId>lombok</artifactId>
             <version>1.18.22</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -10,11 +10,12 @@ import eu.okaeri.configs.yaml.bukkit.serdes.serializer.PotionEffectSerializer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringEnchantmentTransformer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringPotionEffectTypeTransformer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringWorldTransformer;
+import lombok.NonNull;
 
 public class SerdesBukkit implements OkaeriSerdesPack {
 
     @Override
-    public void register(SerdesRegistry registry) {
+    public void register(@NonNull SerdesRegistry registry) {
 
         // serializer/deserializer
         registry.register(new ItemMetaSerializer());
