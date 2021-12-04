@@ -1,8 +1,7 @@
 package eu.okaeri.configs.serdes.okaeri.indexedset;
 
-import eu.okaeri.commons.indexedset.AbstractIndexedSet;
-import eu.okaeri.commons.indexedset.IndexedLinkedHashSet;
-import eu.okaeri.commons.indexedset.IndexedSet;
+import eu.okaeri.commons.indexedset.*;
+import eu.okaeri.configs.annotation.TargetType;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
@@ -10,9 +9,12 @@ import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Serializes {@link IndexedSet}
@@ -93,7 +95,7 @@ public class IndexedSetSerializer implements ObjectSerializer<IndexedSet<Object,
         if (abstractIndexedSet == null) abstractIndexedSet = (AbstractIndexedSet) data.getContext().getField().getValue();
 
         // copy keyFunction to the new set and clear the current data
-        IndexedSet<Object, Object> set = new IndexedLinkedHashSet(abstractIndexedSet);
+        IndexedSet set = this.createSetCopy(abstractIndexedSet, generics, data);
         set.clear();
 
         // resolve all data entries to the set elements
@@ -115,5 +117,42 @@ public class IndexedSetSerializer implements ObjectSerializer<IndexedSet<Object,
         }
 
         return set;
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    private IndexedSet createSetCopy(@NonNull AbstractIndexedSet set, @NonNull GenericsDeclaration generics, DeserializationData data) {
+
+        // resolve real target type
+        if (generics.getType() == IndexedSet.class) {
+            Optional<TargetType> targetTypeOptional = data.getContext().getFieldAnnotation(TargetType.class);
+            if (targetTypeOptional.isPresent()) {
+                TargetType targetType = targetTypeOptional.get();
+                return this.createSetCopy(set, GenericsDeclaration.of(targetType.value()), null);
+            }
+            return new IndexedLinkedHashSet(set);
+        }
+
+        // standard types
+        if (generics.getType() == IndexedLinkedHashSet.class) {
+            return new IndexedLinkedHashSet(set);
+        }
+
+        if (generics.getType() == IndexedConcurrentHashSet.class) {
+            return new IndexedConcurrentHashSet(set);
+        }
+
+        if (generics.getType() == IndexedHashSet.class) {
+            return new IndexedHashSet(set);
+        }
+
+        // custom types
+        try {
+            Constructor<?> constructor = generics.getType().getConstructor(AbstractIndexedSet.class);
+            return (IndexedSet) constructor.newInstance(set);
+        } catch (NoSuchMethodException ignored) {
+        }
+
+        throw new IllegalArgumentException("Cannot copy the set into " + generics.getType() + "! Unknown set type: " + generics);
     }
 }
