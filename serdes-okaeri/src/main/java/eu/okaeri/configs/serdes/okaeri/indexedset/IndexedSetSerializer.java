@@ -36,19 +36,20 @@ import java.util.Optional;
  * - hiding the key field from the serialized output
  * - adding the key field before further deserialization
  */
-public class IndexedSetSerializer implements ObjectSerializer<IndexedSet<Object, ?>> {
+public class IndexedSetSerializer implements ObjectSerializer<IndexedSet> {
 
     @Override
-    public boolean supports(@NonNull Class<? super IndexedSet<Object, ?>> type) {
+    public boolean supports(@NonNull Class<? super IndexedSet> type) {
         return IndexedSet.class.isAssignableFrom(type);
     }
 
     @Override
-    public void serialize(@NonNull IndexedSet<Object, ?> set, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+    @SuppressWarnings("unchecked")
+    public void serialize(@NonNull IndexedSet set, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
 
         Configurer configurer = data.getConfigurer();
-        GenericsDeclaration keyType = generics.getSubtypeAtOrThrow(0);
-        GenericsDeclaration valueType = generics.getSubtypeAtOrThrow(1);
+        GenericsDeclaration valueType = generics.getSubtypeAtOrThrow(0);
+        GenericsDeclaration keyType = generics.getSubtypeAtOrThrow(1);
 
         String keyFieldName = data.getContext().getAttachment(IndexedSetSpecData.class)
                 .map(IndexedSetSpecData::getKey)
@@ -81,10 +82,10 @@ public class IndexedSetSerializer implements ObjectSerializer<IndexedSet<Object,
 
     @Override
     @SuppressWarnings("unchecked")
-    public IndexedSet<Object, ?> deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+    public IndexedSet deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
 
         Configurer configurer = data.getConfigurer();
-        GenericsDeclaration targetValueType = generics.getSubtypeAtOrThrow(1);
+        GenericsDeclaration targetValueType = generics.getSubtypeAtOrThrow(0);
 
         String keyFieldName = data.getContext().getAttachment(IndexedSetSpecData.class)
                 .map(IndexedSetSpecData::getKey)
