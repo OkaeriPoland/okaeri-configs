@@ -13,13 +13,13 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-  <version>4.0.0-beta1</version>
+  <version>4.0.0-beta2</version>
 </dependency>
 ```
 ### Gradle
 Add dependency to the `maven` section:
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-serdes-bukkit:4.0.0-beta1'
+implementation 'eu.okaeri:okaeri-configs-serdes-bukkit:4.0.0-beta2'
 ```
 
 ## Supported types

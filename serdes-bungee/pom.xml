@@ -6,10 +6,10 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>4.0.0-beta1</version>
+        <version>4.0.0-beta2</version>
     </parent>
     <artifactId>okaeri-configs-serdes-bungee</artifactId>
-    <version>4.0.0-beta1</version>
+    <version>4.0.0-beta2</version>
 
     <dependencies>
         <dependency>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>4.0.0-beta1</version>
+            <version>4.0.0-beta2</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
