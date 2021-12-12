@@ -21,12 +21,14 @@ public class FieldDeclaration {
 
     private static final Map<CacheEntry, FieldDeclaration> DECLARATION_CACHE = new ConcurrentHashMap<>();
 
-    @Data
-    @RequiredArgsConstructor
-    private static class CacheEntry {
-        private final Class<?> type;
-        private final String fieldName;
-    }
+    private Object startingValue;
+    private String name;
+    private String[] comment;
+    private GenericsDeclaration type;
+    private Variable variable;
+    private boolean variableHide;
+    private Field field;
+    private Object object;
 
     @SneakyThrows
     public static FieldDeclaration of(@NonNull ConfigDeclaration config, @NonNull Field field, Object object) {
@@ -112,8 +114,7 @@ public class FieldDeclaration {
         try {
             this.getField().setAccessible(true);
             this.getField().set(this.getObject(), value);
-        }
-        catch (IllegalAccessException exception) {
+        } catch (IllegalAccessException exception) {
             throw new OkaeriException("failed to #updateValue", exception);
         }
     }
@@ -127,8 +128,7 @@ public class FieldDeclaration {
         try {
             this.getField().setAccessible(true);
             return this.getField().get(this.getObject());
-        }
-        catch (IllegalAccessException exception) {
+        } catch (IllegalAccessException exception) {
             throw new OkaeriException("failed to #getValue", exception);
         }
     }
@@ -155,13 +155,10 @@ public class FieldDeclaration {
         return attachments;
     }
 
-    private Object startingValue;
-    private String name;
-    private String[] comment;
-    private GenericsDeclaration type;
-    private Variable variable;
-    private boolean variableHide;
-
-    private Field field;
-    private Object object;
+    @Data
+    @RequiredArgsConstructor
+    private static class CacheEntry {
+        private final Class<?> type;
+        private final String fieldName;
+    }
 }

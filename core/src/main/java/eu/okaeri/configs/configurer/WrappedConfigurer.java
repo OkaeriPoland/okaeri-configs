@@ -27,13 +27,13 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public void setRegistry(SerdesRegistry registry) {
-        this.wrapped.setRegistry(registry);
+    public SerdesRegistry getRegistry() {
+        return this.wrapped.getRegistry();
     }
 
     @Override
-    public SerdesRegistry getRegistry() {
-        return this.wrapped.getRegistry();
+    public void setRegistry(SerdesRegistry registry) {
+        this.wrapped.setRegistry(registry);
     }
 
     @Override

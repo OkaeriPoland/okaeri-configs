@@ -23,7 +23,7 @@ public final class ConfigManager {
             config = clazz.newInstance();
         } catch (InstantiationException | IllegalAccessException exception) {
             throw new OkaeriException("cannot create " + clazz.getSimpleName() + " instance: " +
-                    "make sure default constructor is available or if subconfig use new instead");
+                "make sure default constructor is available or if subconfig use new instead");
         }
 
         return initialize(config);
@@ -72,20 +72,20 @@ public final class ConfigManager {
         }
 
         configurer.getAllKeys().stream()
-                .map(copyDeclaration::getField)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(field -> {
+            .map(copyDeclaration::getField)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .forEach(field -> {
 
-                    Object value = configurer.getValue(field.getName());
-                    GenericsDeclaration generics = GenericsDeclaration.of(value);
+                Object value = configurer.getValue(field.getName());
+                GenericsDeclaration generics = GenericsDeclaration.of(value);
 
-                    if ((value != null) && ((field.getType().getType() != value.getClass()) || (!generics.isPrimitiveWrapper() && !generics.isPrimitive()))) {
-                        value = configurer.resolveType(value, generics, field.getType().getType(), field.getType(), SerdesContext.of(configurer, field));
-                    }
+                if ((value != null) && ((field.getType().getType() != value.getClass()) || (!generics.isPrimitiveWrapper() && !generics.isPrimitive()))) {
+                    value = configurer.resolveType(value, generics, field.getType().getType(), field.getType(), SerdesContext.of(configurer, field));
+                }
 
-                    field.updateValue(value);
-                });
+                field.updateValue(value);
+            });
 
         return copy;
     }

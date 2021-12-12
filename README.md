@@ -1,4 +1,4 @@
-# Okaeri Configs 
+# Okaeri Configs
 
 ![License](https://img.shields.io/github/license/OkaeriPoland/okaeri-configs)
 ![Total lines](https://img.shields.io/tokei/lines/github/OkaeriPoland/okaeri-configs)
@@ -6,39 +6,44 @@
 ![Contributors](https://img.shields.io/github/contributors/OkaeriPoland/okaeri-configs)
 [![Discord](https://img.shields.io/discord/589089838200913930)](https://discord.gg/hASN5eX)
 
-
 ## Supported platforms (general use)
-General implementations based on standard format libraries directly.
-- **YAML**
-  - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): YAML for everyone! Your best choice for public projects and their configurations
-- **HJSON**
-  - 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON is the best choice for your JSON configuration, small (core+55kB) but yet powerful
-- **JSON**
-  - 🌟 [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): ideal for GSON lovers, best suited for in-app storage or advanced user configurations
-  - [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): fairly limited but still working, no pretty print, probably best suited for simple in-app storage
-- **Binary**
-  - [OBDF (Okaeri Binary Data Format)](https://github.com/OkaeriPoland/okaeri-configs/tree/master/binary-obdf): smallest standalone platform yet (core+17kB), experimental format suited for in-app storage only
-- **HOCON**
-  - [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): use Human-Optimized Config Object Notation for your configs, but beware of limitations
 
+General implementations based on standard format libraries directly.
+
+- **YAML**
+    - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): YAML for everyone! Your best choice for public projects and their configurations
+- **HJSON**
+    - 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON is the best choice for your JSON configuration, small (core+55kB) but yet powerful
+- **JSON**
+    - 🌟 [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): ideal for GSON lovers, best suited for in-app storage or advanced user configurations
+    - [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): fairly limited but still working, no pretty print, probably best suited for simple in-app storage
+- **Binary**
+    - [OBDF (Okaeri Binary Data Format)](https://github.com/OkaeriPoland/okaeri-configs/tree/master/binary-obdf): smallest standalone platform yet (core+17kB), experimental format suited for in-app
+      storage only
+- **HOCON**
+    - [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): use Human-Optimized Config Object Notation for your configs, but beware of limitations
 
 ## Supported platforms (environment dependant)
+
 Special implementations for safe use in specific environment, eg. gameservers.
+
 - **Bukkit/Spigot/Paper (Minecraft server)**
-  - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Spigot/Paper plugins 
-    (best used with [okaeri-platform](https://github.com/OkaeriPoland/okaeri-platform))
+    - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Spigot/Paper plugins
+      (best used with [okaeri-platform](https://github.com/OkaeriPoland/okaeri-platform))
 - **BungeeCord/Waterfall (Minecraft proxy)**
-  - 🌟 [Minecraft (Bungee) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee): no need for additional dependencies when writing BungeeCord/Waterfall plugins
+    - 🌟 [Minecraft (Bungee) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee): no need for additional dependencies when writing BungeeCord/Waterfall plugins
 - **Velocity (Minecraft proxy), Sponge (Minecraft server)**
-  - currently no ready adapters, but use with [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson), 
-    [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend), [SnakeYAML](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml)
-    is possible (remember to exclude format specific dependencies (eg. gson) when shading, these should be provided by the environment directly).
+    - currently no ready adapters, but use with [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson),
+      [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend), [SnakeYAML](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml)
+      is possible (remember to exclude format specific dependencies (eg. gson) when shading, these should be provided by the environment directly).
 
 ## Validation extensions
+
 - 🌟 [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri): simple validator with jakrataee-like annotations but much less code (+15kB)
 - [Jakarta EE](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): hibernate-validator based with full Jakarta Bean Validation 3.0 support
 
 ## Serialization extensions
+
 - 🌟 [serdes-commons](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-commons): for common but not mandatory types, e.g. Instant, Pattern, Duration
 - [serdes-bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit): for Minecraft (Bukkit) types
 - [serdes-bucket4j](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bucket4j): for [vladimir-bukhtoyarov/bucket4j](https://github.com/vladimir-bukhtoyarov/bucket4j) types
@@ -163,6 +168,7 @@ public class TestConfig extends OkaeriConfig {
 ## Usage
 
 ### With create(clazz, initializer)
+
 ```java
 TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
     it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
@@ -173,6 +179,7 @@ TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
 ```
 
 ### With create(clazz)
+
 ```java
 TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
     .withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()) // specify configurer implementation, optionally additional serdes packages

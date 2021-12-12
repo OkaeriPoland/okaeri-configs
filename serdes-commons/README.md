@@ -7,8 +7,11 @@ new SerdesCommons()
 ```
 
 ## Installation
+
 ### Maven
+
 Add dependency to the `dependencies` section:
+
 ```xml
 <dependency>
   <groupId>eu.okaeri</groupId>
@@ -16,8 +19,11 @@ Add dependency to the `dependencies` section:
   <version>4.0.0-beta2</version>
 </dependency>
 ```
+
 ### Gradle
+
 Add dependency to the `maven` section:
+
 ```groovy
 implementation 'eu.okaeri:okaeri-configs-serdes-commons:4.0.0-beta2'
 ```

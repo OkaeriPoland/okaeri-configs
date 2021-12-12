@@ -7,11 +7,15 @@ new SerdesBucket4j()
 ```
 
 ## Notes
+
 Requires [serdes-commons](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-commons) or other `java.time.Duration` transformer provider.
 
 ## Installation
+
 ### Maven
+
 Add dependency to the `dependencies` section:
+
 ```xml
 <dependency>
   <groupId>eu.okaeri</groupId>
@@ -19,8 +23,11 @@ Add dependency to the `dependencies` section:
   <version>4.0.0-beta2</version>
 </dependency>
 ```
+
 ### Gradle
+
 Add dependency to the `maven` section:
+
 ```groovy
 implementation 'eu.okaeri:okaeri-configs-serdes-bucket4j:4.0.0-beta2'
 ```

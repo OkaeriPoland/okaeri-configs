@@ -7,7 +7,7 @@ public abstract class YamlSectionWalker implements ConfigSectionWalker {
     @Override
     public boolean isKeyMultilineStart(String line) {
         String trimmed = line.trim();
-        return !line.isEmpty() && (trimmed.endsWith(">")  || trimmed.endsWith(">-") || trimmed.endsWith("|") || trimmed.endsWith("|-"));
+        return !line.isEmpty() && (trimmed.endsWith(">") || trimmed.endsWith(">-") || trimmed.endsWith("|") || trimmed.endsWith("|-"));
     }
 
     @Override

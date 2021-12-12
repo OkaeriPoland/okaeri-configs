@@ -16,8 +16,8 @@ public class SingleBandwidthBucket implements LocalBucket {
 
     public SingleBandwidthBucket(@NonNull Bandwidth bandwidth) {
         this.bucket = Bucket4j.builder()
-                .addLimit(bandwidth)
-                .build();
+            .addLimit(bandwidth)
+            .build();
         this.bandwidth = bandwidth;
     }
 

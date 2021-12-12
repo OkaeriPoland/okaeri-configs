@@ -5,7 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
-import java.lang.reflect.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,15 +17,6 @@ public class GenericsDeclaration {
     private static final Map<String, Class<?>> PRIMITIVES = new HashMap<>();
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<>();
     private static final Set<Class<?>> PRIMITIVE_WRAPPERS = new HashSet<>();
-
-    public static boolean isUnboxedCompatibleWithBoxed(@NonNull Class<?> unboxedClazz, @NonNull Class<?> boxedClazz) {
-        Class<?> primitiveWrapper = PRIMITIVE_TO_WRAPPER.get(unboxedClazz);
-        return primitiveWrapper == boxedClazz;
-    }
-
-    public static boolean doBoxTypesMatch(@NonNull Class<?> clazz1, @NonNull Class<?> clazz2) {
-        return isUnboxedCompatibleWithBoxed(clazz1, clazz2) || isUnboxedCompatibleWithBoxed(clazz2, clazz1);
-    }
 
     static {
         PRIMITIVES.put(boolean.class.getName(), boolean.class);
@@ -51,6 +43,24 @@ public class GenericsDeclaration {
         PRIMITIVE_WRAPPERS.add(Integer.class);
         PRIMITIVE_WRAPPERS.add(Long.class);
         PRIMITIVE_WRAPPERS.add(Short.class);
+    }
+
+    private Class<?> type;
+    private List<GenericsDeclaration> subtype;
+    private boolean isEnum;
+
+    private GenericsDeclaration(Class<?> type) {
+        this.type = type;
+        this.isEnum = type.isEnum();
+    }
+
+    public static boolean isUnboxedCompatibleWithBoxed(@NonNull Class<?> unboxedClazz, @NonNull Class<?> boxedClazz) {
+        Class<?> primitiveWrapper = PRIMITIVE_TO_WRAPPER.get(unboxedClazz);
+        return primitiveWrapper == boxedClazz;
+    }
+
+    public static boolean doBoxTypesMatch(@NonNull Class<?> clazz1, @NonNull Class<?> clazz2) {
+        return isUnboxedCompatibleWithBoxed(clazz1, clazz2) || isUnboxedCompatibleWithBoxed(clazz2, clazz1);
     }
 
     public static GenericsDeclaration of(@NonNull Object type, @NonNull List<Object> subtypes) {
@@ -88,24 +98,15 @@ public class GenericsDeclaration {
             if (rawType instanceof Class<?>) {
                 GenericsDeclaration declaration = new GenericsDeclaration((Class<?>) rawType);
                 declaration.setSubtype(Arrays.stream(actualTypeArguments)
-                        .map(GenericsDeclaration::of)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList()));
+                    .map(GenericsDeclaration::of)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
                 return declaration;
             }
         }
 
         throw new IllegalArgumentException("cannot process type: " + type + " [" + type.getClass() + "]");
     }
-
-    private GenericsDeclaration(Class<?> type) {
-        this.type = type;
-        this.isEnum = type.isEnum();
-    }
-
-    private Class<?> type;
-    private List<GenericsDeclaration> subtype;
-    private boolean isEnum;
 
     public GenericsDeclaration getSubtypeAtOrNull(int index) {
         return (this.subtype == null) ? null : ((index >= this.subtype.size()) ? null : this.subtype.get(index));

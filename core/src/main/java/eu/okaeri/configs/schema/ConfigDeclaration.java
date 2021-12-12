@@ -16,6 +16,12 @@ public class ConfigDeclaration {
 
     private static final Map<Class<?>, ConfigDeclaration> DECLARATION_CACHE = new ConcurrentHashMap<>();
 
+    private Names nameStrategy;
+    private String[] header;
+    private Map<String, FieldDeclaration> fieldMap;
+    private boolean real;
+    private Class<?> type;
+
     public static ConfigDeclaration of(@NonNull Class<?> clazz, OkaeriConfig config) {
 
         ConfigDeclaration template = DECLARATION_CACHE.computeIfAbsent(clazz, (klass) -> {
@@ -34,12 +40,12 @@ public class ConfigDeclaration {
         declaration.setType(template.getType());
 
         declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
-                .filter(field -> !field.getName().startsWith("this$"))
-                .map(field -> FieldDeclaration.of(declaration, field, config))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(FieldDeclaration::getName, field -> field, (u, v) -> {
-                    throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
-                }, LinkedHashMap::new)));
+            .filter(field -> !field.getName().startsWith("this$"))
+            .map(field -> FieldDeclaration.of(declaration, field, config))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toMap(FieldDeclaration::getName, field -> field, (u, v) -> {
+                throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
+            }, LinkedHashMap::new)));
 
         return declaration;
     }
@@ -89,17 +95,11 @@ public class ConfigDeclaration {
 
     public GenericsDeclaration getGenericsOrNull(@NonNull String key) {
         return this.getField(key)
-                .map(FieldDeclaration::getType)
-                .orElse(null);
+            .map(FieldDeclaration::getType)
+            .orElse(null);
     }
 
     public Collection<FieldDeclaration> getFields() {
         return this.fieldMap.values();
     }
-
-    private Names nameStrategy;
-    private String[] header;
-    private Map<String, FieldDeclaration> fieldMap;
-    private boolean real;
-    private Class<?> type;
 }

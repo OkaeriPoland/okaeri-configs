@@ -1,4 +1,3 @@
-
 package eu.okaeri.configs.yaml.bukkit.serdes.itemstack;
 
 import eu.okaeri.configs.serdes.SerdesAnnotationResolver;
