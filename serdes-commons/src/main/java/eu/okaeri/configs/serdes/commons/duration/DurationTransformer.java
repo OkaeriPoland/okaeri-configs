@@ -1,8 +1,8 @@
 package eu.okaeri.configs.serdes.commons.duration;
 
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 
 import java.math.BigInteger;
@@ -38,103 +38,6 @@ public class DurationTransformer extends BidirectionalTransformer<String, Durati
     private static final Pattern SUBSEC_ISO_DURATION_PATTERN = Pattern.compile("PT(?<value>-?[0-9]\\.[0-9]+)S?");
     private static final Pattern SIMPLE_DURATION_PATTERN = Pattern.compile("(?<value>-?[0-9]+)(?<unit>ms|ns|d|h|m|s)");
     private static final Pattern JBOD_FULL_DURATION_PATTERN = Pattern.compile("((-?[0-9]+)(ms|ns|d|h|m|s))+");
-
-    @Override
-    public GenericsPair<String, Duration> getPair() {
-        return this.genericsPair(String.class, Duration.class);
-    }
-
-    @Override
-    public Duration leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
-
-        // try reading jbod formats
-        Optional<Duration> jbodResult = readJbodPattern(data);
-        if (jbodResult.isPresent()) {
-            return jbodResult.get();
-        }
-
-        // parse plain number duration if applicable
-        if (data.matches("-?\\d+")) {
-
-            // parse text as long
-            long longValue = Long.parseLong(data);
-
-            // resolve default unit
-            TemporalUnit unit = serdesContext.getAttachment(DurationSpecData.class)
-                    .map(DurationSpecData::getFallbackUnit)
-                    .orElse(ChronoUnit.SECONDS);
-
-            // create duration
-            return Duration.of(longValue, unit);
-        }
-
-        // parse iso spec duration
-        return Duration.parse(data);
-    }
-
-    @Override
-    public String rightToLeft(@NonNull Duration data, @NonNull SerdesContext serdesContext) {
-
-        // resolve save format
-        DurationFormat durationFormat = serdesContext.getAttachment(DurationSpecData.class)
-                .map(DurationSpecData::getFormat)
-                .orElse(DurationFormat.SIMPLIFIED);
-
-        // resolve default unit
-        TemporalUnit fallbackUnit = serdesContext.getAttachment(DurationSpecData.class)
-                .map(DurationSpecData::getFallbackUnit)
-                .orElse(ChronoUnit.SECONDS);
-
-        // ISO format, no need for additional processing
-        if (durationFormat == DurationFormat.ISO) {
-            return data.toString();
-        }
-
-        // preserve zero
-        if (data.isZero()) {
-            return "0";
-        }
-
-        // matcher for simplified format
-        String stringDuration = data.toString();
-        Matcher matcher = SIMPLE_ISO_DURATION_PATTERN.matcher(stringDuration);
-
-        // check if simplified format is applicable and return if so
-        if (matcher.matches()) {
-            // get value and unit
-            long longValue = Long.parseLong(matcher.group("value"));
-            String unit = matcher.group("unit").toLowerCase(Locale.ROOT);
-            // value represents multiple of full days in hours and fallback unit is not hours
-            if ("h".equals(unit) && ((longValue % 24) == 0) && (fallbackUnit != ChronoUnit.HOURS)) {
-                return (longValue < 0 ? "-" : "") + (longValue / 24) + "d";
-            }
-            // save as provided by Duration
-            return (longValue < 0 ? "-" : "") + longValue + unit;
-        }
-
-        // matcher for sub-second format
-        Matcher subsecMatcher = SUBSEC_ISO_DURATION_PATTERN.matcher(stringDuration);
-
-        // check of sub-second format is applicable and return if so
-        if (subsecMatcher.matches()) {
-            // get value in seconds
-            double doubleValue = Double.parseDouble(subsecMatcher.group("value"));
-            // check if negative
-            boolean negative = doubleValue < 0;
-            // convert to absolute for scale checking
-            double absoluteValue = Math.abs(doubleValue);
-            // resolve biggest possible unit
-            int msValue = (int) Math.round(absoluteValue * 1.0e3d);
-            if (msValue > 0) {
-                return (negative ? "-" : "") + msValue + "ms";
-            }
-            int nsValue = (int) Math.ceil(absoluteValue * 1.0e9d);
-            return (negative ? "-" : "") + nsValue + "ns";
-        }
-
-        // not applicable, return ISO
-        return stringDuration;
-    }
 
     /**
      * Converts raw units to {@link Duration}.
@@ -207,5 +110,102 @@ public class DurationTransformer extends BidirectionalTransformer<String, Durati
 
         // if found and only if found return duration
         return matched ? Optional.of(Duration.ofNanos(currentValue.longValueExact())) : Optional.empty();
+    }
+
+    @Override
+    public GenericsPair<String, Duration> getPair() {
+        return this.genericsPair(String.class, Duration.class);
+    }
+
+    @Override
+    public Duration leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
+
+        // try reading jbod formats
+        Optional<Duration> jbodResult = readJbodPattern(data);
+        if (jbodResult.isPresent()) {
+            return jbodResult.get();
+        }
+
+        // parse plain number duration if applicable
+        if (data.matches("-?\\d+")) {
+
+            // parse text as long
+            long longValue = Long.parseLong(data);
+
+            // resolve default unit
+            TemporalUnit unit = serdesContext.getAttachment(DurationSpecData.class)
+                .map(DurationSpecData::getFallbackUnit)
+                .orElse(ChronoUnit.SECONDS);
+
+            // create duration
+            return Duration.of(longValue, unit);
+        }
+
+        // parse iso spec duration
+        return Duration.parse(data);
+    }
+
+    @Override
+    public String rightToLeft(@NonNull Duration data, @NonNull SerdesContext serdesContext) {
+
+        // resolve save format
+        DurationFormat durationFormat = serdesContext.getAttachment(DurationSpecData.class)
+            .map(DurationSpecData::getFormat)
+            .orElse(DurationFormat.SIMPLIFIED);
+
+        // resolve default unit
+        TemporalUnit fallbackUnit = serdesContext.getAttachment(DurationSpecData.class)
+            .map(DurationSpecData::getFallbackUnit)
+            .orElse(ChronoUnit.SECONDS);
+
+        // ISO format, no need for additional processing
+        if (durationFormat == DurationFormat.ISO) {
+            return data.toString();
+        }
+
+        // preserve zero
+        if (data.isZero()) {
+            return "0";
+        }
+
+        // matcher for simplified format
+        String stringDuration = data.toString();
+        Matcher matcher = SIMPLE_ISO_DURATION_PATTERN.matcher(stringDuration);
+
+        // check if simplified format is applicable and return if so
+        if (matcher.matches()) {
+            // get value and unit
+            long longValue = Long.parseLong(matcher.group("value"));
+            String unit = matcher.group("unit").toLowerCase(Locale.ROOT);
+            // value represents multiple of full days in hours and fallback unit is not hours
+            if ("h".equals(unit) && ((longValue % 24) == 0) && (fallbackUnit != ChronoUnit.HOURS)) {
+                return (longValue < 0 ? "-" : "") + (longValue / 24) + "d";
+            }
+            // save as provided by Duration
+            return (longValue < 0 ? "-" : "") + longValue + unit;
+        }
+
+        // matcher for sub-second format
+        Matcher subsecMatcher = SUBSEC_ISO_DURATION_PATTERN.matcher(stringDuration);
+
+        // check of sub-second format is applicable and return if so
+        if (subsecMatcher.matches()) {
+            // get value in seconds
+            double doubleValue = Double.parseDouble(subsecMatcher.group("value"));
+            // check if negative
+            boolean negative = doubleValue < 0;
+            // convert to absolute for scale checking
+            double absoluteValue = Math.abs(doubleValue);
+            // resolve biggest possible unit
+            int msValue = (int) Math.round(absoluteValue * 1.0e3d);
+            if (msValue > 0) {
+                return (negative ? "-" : "") + msValue + "ms";
+            }
+            int nsValue = (int) Math.ceil(absoluteValue * 1.0e9d);
+            return (negative ? "-" : "") + nsValue + "ns";
+        }
+
+        // not applicable, return ISO
+        return stringDuration;
     }
 }

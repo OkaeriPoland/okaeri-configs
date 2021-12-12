@@ -11,9 +11,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class SerializationData {
 
-    private Map<String, Object> data = new LinkedHashMap<>();
     @Getter @NonNull private final Configurer configurer;
     @Getter @NonNull private final SerdesContext context;
+    private Map<String, Object> data = new LinkedHashMap<>();
 
     /**
      * @return unmodifiable map of current serialization data

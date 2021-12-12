@@ -21,10 +21,11 @@ import java.util.function.Predicate;
 public class HoconLightbendConfigurer extends Configurer {
 
     private ConfigRenderOptions renderOpts = ConfigRenderOptions.defaults()
-            .setFormatted(true)
-            .setOriginComments(false)
-            .setComments(true)
-            .setJson(false);
+        .setFormatted(true)
+        .setOriginComments(false)
+        .setComments(true)
+        .setJson(false);
+
     private String commentPrefix = "# ";
     private String sectionSeparator = SectionSeparator.NONE;
 
@@ -122,27 +123,27 @@ public class HoconLightbendConfigurer extends Configurer {
 
         // postprocess
         ConfigPostprocessor.of(buf.toString())
-                // remove all current commments
-                .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-                // add new comments
-                .updateLines((line) -> declaration.getFields().stream()
-                        .filter(this.isFieldDeclaredForLine(line))
-                        .findAny()
-                        .map(FieldDeclaration::getComment)
-                        .map(comment -> this.sectionSeparator + ConfigPostprocessor.createComment(this.commentPrefix, comment) + line)
-                        .orElse(line))
-                // add header if available
-                .prependContextComment(this.commentPrefix, declaration.getHeader())
-                // save
-                .write(outputStream);
+            // remove all current commments
+            .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
+            // add new comments
+            .updateLines((line) -> declaration.getFields().stream()
+                .filter(this.isFieldDeclaredForLine(line))
+                .findAny()
+                .map(FieldDeclaration::getComment)
+                .map(comment -> this.sectionSeparator + ConfigPostprocessor.createComment(this.commentPrefix, comment) + line)
+                .orElse(line))
+            // add header if available
+            .prependContextComment(this.commentPrefix, declaration.getHeader())
+            // save
+            .write(outputStream);
     }
 
     private Predicate<FieldDeclaration> isFieldDeclaredForLine(String line) {
         return field -> line.startsWith(field.getName() + "=") // key=
-                || line.startsWith(field.getName() + " =") // key =
-                || line.startsWith("\"" + field.getName() + "\"") // "key"
-                || line.startsWith(field.getName() + "{") // key{
-                || line.startsWith(field.getName() + " {"); // key {
+            || line.startsWith(field.getName() + " =") // key =
+            || line.startsWith("\"" + field.getName() + "\"") // "key"
+            || line.startsWith(field.getName() + "{") // key{
+            || line.startsWith(field.getName() + " {"); // key {
     }
 
     private Map<String, Object> hoconToMap(Config config, ConfigDeclaration declaration) {

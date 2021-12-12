@@ -26,14 +26,6 @@ public class SerdesRegistry {
         serdesPack.register(this);
     }
 
-    /**
-     * @deprecated Use {@link #register(BidirectionalTransformer)}
-     */
-    @Deprecated
-    public <L, R> void register(@NonNull TwoSideObjectTransformer<L, R> transformer) {
-        this.register(((BidirectionalTransformer<L, R>) transformer));
-    }
-
     public <L, R> void register(@NonNull BidirectionalTransformer<L, R> transformer) {
         this.register(new ObjectTransformer<L, R>() {
             @Override
@@ -81,16 +73,16 @@ public class SerdesRegistry {
 
     public List<ObjectTransformer> getTransformersFrom(@NonNull GenericsDeclaration from) {
         return this.transformerMap.entrySet().stream()
-                .filter(entry -> from.equals(entry.getKey().getFrom()))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+            .filter(entry -> from.equals(entry.getKey().getFrom()))
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
     }
 
     public List<ObjectTransformer> getTransformersTo(@NonNull GenericsDeclaration to) {
         return this.transformerMap.entrySet().stream()
-                .filter(entry -> to.equals(entry.getKey().getTo()))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+            .filter(entry -> to.equals(entry.getKey().getTo()))
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
     }
 
     public boolean canTransform(@NonNull GenericsDeclaration from, @NonNull GenericsDeclaration to) {
@@ -100,9 +92,9 @@ public class SerdesRegistry {
     @SuppressWarnings("unchecked")
     public ObjectSerializer getSerializer(@NonNull Class<?> clazz) {
         return this.serializerSet.stream()
-                .filter(serializer -> serializer.supports(clazz))
-                .findFirst()
-                .orElse(null);
+            .filter(serializer -> serializer.supports(clazz))
+            .findFirst()
+            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")

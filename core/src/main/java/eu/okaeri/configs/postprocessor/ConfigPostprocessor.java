@@ -29,6 +29,59 @@ public class ConfigPostprocessor {
         return postprocessor;
     }
 
+    public static int countIndent(@NonNull String line) {
+        int whitespaces = 0;
+        for (char c : line.toCharArray()) {
+            if (!Character.isWhitespace(c)) {
+                return whitespaces;
+            }
+            whitespaces++;
+        }
+        return whitespaces;
+    }
+
+    public static String addIndent(@NonNull String line, int size) {
+
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < size; i++) buf.append(" ");
+        String indent = buf.toString();
+
+        return Arrays.stream(line.split("\n"))
+            .map(part -> indent + part)
+            .collect(Collectors.joining("\n"))
+            + "\n";
+    }
+
+    public static String createCommentOrEmpty(String commentPrefix, String[] strings) {
+        return (strings == null) ? "" : createComment(commentPrefix, strings);
+    }
+
+    public static String createComment(String commentPrefix, String[] strings) {
+
+        if (strings == null) return null;
+        if (commentPrefix == null) commentPrefix = "";
+        List<String> lines = new ArrayList<>();
+
+        for (String line : strings) {
+            String[] parts = line.split("\n");
+            String prefix = line.startsWith(commentPrefix.trim()) ? "" : commentPrefix;
+            lines.add((line.isEmpty() ? "" : prefix) + line);
+        }
+
+        return String.join("\n", lines) + "\n";
+    }
+
+    private static String readInput(InputStream inputStream) {
+        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines()
+            .collect(Collectors.joining("\n"));
+    }
+
+    @SneakyThrows
+    private static void writeOutput(OutputStream outputStream, String text) {
+        @Cleanup PrintStream out = new PrintStream(outputStream, true, StandardCharsets.UTF_8.name());
+        out.print(text);
+    }
+
     public ConfigPostprocessor write(@NonNull OutputStream outputStream) {
         writeOutput(outputStream, this.context);
         return this;
@@ -123,29 +176,6 @@ public class ConfigPostprocessor {
         return this;
     }
 
-    public static int countIndent(@NonNull String line) {
-        int whitespaces = 0;
-        for (char c : line.toCharArray()) {
-            if (!Character.isWhitespace(c)) {
-                return whitespaces;
-            }
-            whitespaces++;
-        }
-        return whitespaces;
-    }
-
-    public static String addIndent(@NonNull String line, int size) {
-
-        StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < size; i++) buf.append(" ");
-        String indent = buf.toString();
-
-        return Arrays.stream(line.split("\n"))
-                .map(part -> indent + part)
-                .collect(Collectors.joining("\n"))
-                + "\n";
-    }
-
     public ConfigPostprocessor updateContext(@NonNull ConfigContextManipulator manipulator) {
         this.context = manipulator.convert(this.context);
         return this;
@@ -167,35 +197,5 @@ public class ConfigPostprocessor {
     public ConfigPostprocessor appendContextComment(String prefix, String separator, String[] strings) {
         if (strings != null) this.context += separator + createComment(prefix, strings);
         return this;
-    }
-
-    public static String createCommentOrEmpty(String commentPrefix, String[] strings) {
-        return (strings == null) ? "" : createComment(commentPrefix, strings);
-    }
-
-    public static String createComment(String commentPrefix, String[] strings) {
-
-        if (strings == null) return null;
-        if (commentPrefix == null) commentPrefix = "";
-        List<String> lines = new ArrayList<>();
-
-        for (String line : strings) {
-            String[] parts = line.split("\n");
-            String prefix = line.startsWith(commentPrefix.trim()) ? "" : commentPrefix;
-            lines.add((line.isEmpty() ? "" : prefix) + line);
-        }
-
-        return String.join("\n", lines) + "\n";
-    }
-
-    private static String readInput(InputStream inputStream) {
-        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines()
-                .collect(Collectors.joining("\n"));
-    }
-
-    @SneakyThrows
-    private static void writeOutput(OutputStream outputStream, String text) {
-        @Cleanup PrintStream out = new PrintStream(outputStream, true, StandardCharsets.UTF_8.name());
-        out.print(text);
     }
 }

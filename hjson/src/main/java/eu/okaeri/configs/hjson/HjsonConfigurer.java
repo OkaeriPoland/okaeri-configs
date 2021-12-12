@@ -113,8 +113,8 @@ public class HjsonConfigurer extends Configurer {
     private void addComments(Object object, ConfigDeclaration declaration, String key) {
 
         FieldDeclaration field = (key != null)
-                ? declaration.getField(key).orElse(null)
-                : null;
+            ? declaration.getField(key).orElse(null)
+            : null;
 
         if (object instanceof JsonObject) {
             JsonObject jsonObject = (JsonObject) object;
