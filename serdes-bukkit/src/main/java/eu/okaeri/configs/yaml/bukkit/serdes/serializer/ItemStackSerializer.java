@@ -34,8 +34,8 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
         }
 
         ItemStackFormat format = data.getContext().getAttachment(ItemStackSpecData.class)
-                .map(ItemStackSpecData::getFormat)
-                .orElse(ItemStackFormat.NATURAL);
+            .map(ItemStackSpecData::getFormat)
+            .orElse(ItemStackFormat.NATURAL);
 
         if (!itemStack.hasItemMeta()) {
             return;
@@ -60,16 +60,16 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
         Material material = Material.valueOf(materialName);
 
         int amount = data.containsKey("amount")
-                ? data.get("amount", Integer.class)
-                : 1;
+            ? data.get("amount", Integer.class)
+            : 1;
 
         short durability = data.containsKey("durability")
-                ? data.get("durability", Short.class)
-                : 0;
+            ? data.get("durability", Short.class)
+            : 0;
 
         ItemStackFormat format = data.getContext().getAttachment(ItemStackSpecData.class)
-                .map(ItemStackSpecData::getFormat)
-                .orElse(ItemStackFormat.NATURAL);
+            .map(ItemStackSpecData::getFormat)
+            .orElse(ItemStackFormat.NATURAL);
 
         ItemMeta itemMeta;
         switch (format) {
@@ -81,8 +81,8 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
                 // standard deserialize
                 else {
                     itemMeta = data.containsKey("item-meta")
-                            ? data.get("item-meta", ItemMeta.class)
-                            : null;
+                        ? data.get("item-meta", ItemMeta.class)
+                        : null;
                 }
                 break;
             case COMPACT:

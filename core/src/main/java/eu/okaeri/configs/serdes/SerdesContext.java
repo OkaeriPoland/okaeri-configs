@@ -14,6 +14,10 @@ import java.util.Optional;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SerdesContext {
 
+    @NonNull private final Configurer configurer;
+    private final FieldDeclaration field;
+    private final SerdesContextAttachments attachments;
+
     public static SerdesContext of(@NonNull Configurer configurer) {
         return of(configurer, null, new SerdesContextAttachments());
     }
@@ -30,20 +34,16 @@ public class SerdesContext {
         return new SerdesContext.Builder();
     }
 
-    @NonNull private final Configurer configurer;
-    private final FieldDeclaration field;
-    private final SerdesContextAttachments attachments;
-
     public <T extends Annotation> Optional<T> getConfigAnnotation(@NonNull Class<T> type) {
         return (this.getConfigurer().getParent() == null)
-                ? Optional.empty()
-                : Optional.ofNullable(this.getConfigurer().getParent().getClass().getAnnotation(type));
+            ? Optional.empty()
+            : Optional.ofNullable(this.getConfigurer().getParent().getClass().getAnnotation(type));
     }
 
     public <T extends Annotation> Optional<T> getFieldAnnotation(@NonNull Class<T> type) {
         return (this.getField() == null)
-                ? Optional.empty()
-                : this.getField().getAnnotation(type);
+            ? Optional.empty()
+            : this.getField().getAnnotation(type);
     }
 
     @SuppressWarnings("unchecked")
@@ -58,9 +58,9 @@ public class SerdesContext {
 
     private static class Builder {
 
+        private final SerdesContextAttachments attachments = new SerdesContextAttachments();
         private Configurer configurer;
         private FieldDeclaration field;
-        private final SerdesContextAttachments attachments = new SerdesContextAttachments();
 
         public void configurer(Configurer configurer) {
             this.configurer = configurer;

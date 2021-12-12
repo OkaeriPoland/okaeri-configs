@@ -62,11 +62,16 @@ public class YamlSnakeYamlConfigurer extends Configurer {
 
     public YamlSnakeYamlConfigurer() {
         this(new Yaml(
-                new Constructor(),
-                apply(new Representer(), (representer) -> representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)),
-                apply(new DumperOptions(), (dumperOptions) -> dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)),
-                new LoaderOptions(),
-                new Resolver()));
+            new Constructor(),
+            apply(new Representer(), (representer) -> representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)),
+            apply(new DumperOptions(), (dumperOptions) -> dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)),
+            new LoaderOptions(),
+            new Resolver()));
+    }
+
+    private static <T> T apply(T object, Consumer<T> consumer) {
+        consumer.accept(object);
+        return object;
     }
 
     @Override
@@ -106,49 +111,44 @@ public class YamlSnakeYamlConfigurer extends Configurer {
 
         // postprocess
         ConfigPostprocessor.of(contents)
-                // remove all current top-level commments (bukkit may preserve header)
-                .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-                // add new comments
-                .updateLinesKeys(new YamlSectionWalker() {
-                    @Override
-                    public String update(String line, ConfigLineInfo lineInfo, List<ConfigLineInfo> path) {
+            // remove all current top-level commments (bukkit may preserve header)
+            .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
+            // add new comments
+            .updateLinesKeys(new YamlSectionWalker() {
+                @Override
+                public String update(String line, ConfigLineInfo lineInfo, List<ConfigLineInfo> path) {
 
-                        ConfigDeclaration currentDeclaration = declaration;
-                        for (int i = 0; i < (path.size() - 1); i++) {
-                            ConfigLineInfo pathElement = path.get(i);
-                            Optional<FieldDeclaration> field = currentDeclaration.getField(pathElement.getName());
-                            if (!field.isPresent()) {
-                                return line;
-                            }
-                            GenericsDeclaration fieldType = field.get().getType();
-                            if (!fieldType.isConfig()) {
-                                return line;
-                            }
-                            currentDeclaration = ConfigDeclaration.of(fieldType.getType());
-                        }
-
-                        Optional<FieldDeclaration> lineDeclaration = currentDeclaration.getField(lineInfo.getName());
-                        if (!lineDeclaration.isPresent()) {
+                    ConfigDeclaration currentDeclaration = declaration;
+                    for (int i = 0; i < (path.size() - 1); i++) {
+                        ConfigLineInfo pathElement = path.get(i);
+                        Optional<FieldDeclaration> field = currentDeclaration.getField(pathElement.getName());
+                        if (!field.isPresent()) {
                             return line;
                         }
-
-                        String[] fieldComment = lineDeclaration.get().getComment();
-                        if (fieldComment == null) {
+                        GenericsDeclaration fieldType = field.get().getType();
+                        if (!fieldType.isConfig()) {
                             return line;
                         }
-
-                        String comment = ConfigPostprocessor.createComment(YamlSnakeYamlConfigurer.this.commentPrefix, fieldComment);
-                        return ConfigPostprocessor.addIndent(comment, lineInfo.getIndent()) + line;
+                        currentDeclaration = ConfigDeclaration.of(fieldType.getType());
                     }
-                })
-                // add header if available
-                .prependContextComment(this.commentPrefix, this.sectionSeparator, declaration.getHeader())
-                // save
-                .write(outputStream);
-    }
 
-    private static <T> T apply(T object, Consumer<T> consumer) {
-        consumer.accept(object);
-        return object;
+                    Optional<FieldDeclaration> lineDeclaration = currentDeclaration.getField(lineInfo.getName());
+                    if (!lineDeclaration.isPresent()) {
+                        return line;
+                    }
+
+                    String[] fieldComment = lineDeclaration.get().getComment();
+                    if (fieldComment == null) {
+                        return line;
+                    }
+
+                    String comment = ConfigPostprocessor.createComment(YamlSnakeYamlConfigurer.this.commentPrefix, fieldComment);
+                    return ConfigPostprocessor.addIndent(comment, lineInfo.getIndent()) + line;
+                }
+            })
+            // add header if available
+            .prependContextComment(this.commentPrefix, this.sectionSeparator, declaration.getHeader())
+            // save
+            .write(outputStream);
     }
 }

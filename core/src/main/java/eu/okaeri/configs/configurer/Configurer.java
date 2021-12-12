@@ -26,17 +26,12 @@ public abstract class Configurer {
     @Setter
     private OkaeriConfig parent;
 
+    @Setter
+    @Getter
+    @NonNull
     private SerdesRegistry registry = new SerdesRegistry();
     {
         this.registry.register(new StandardSerdes());
-    }
-
-    public void setRegistry(@NonNull SerdesRegistry registry) {
-        this.registry = registry;
-    }
-
-    public SerdesRegistry getRegistry() {
-        return this.registry;
     }
 
     public void register(@NonNull OkaeriSerdesPack pack) {

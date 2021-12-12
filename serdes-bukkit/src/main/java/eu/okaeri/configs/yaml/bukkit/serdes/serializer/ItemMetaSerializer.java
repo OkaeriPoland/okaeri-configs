@@ -54,16 +54,16 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
         String displayName = data.get("display-name", String.class);
 
         List<String> lore = data.containsKey("lore")
-                ? data.getAsList("lore", String.class)
-                : Collections.emptyList();
+            ? data.getAsList("lore", String.class)
+            : Collections.emptyList();
 
         Map<Enchantment, Integer> enchantments = data.containsKey("enchantments")
-                ? data.getAsMap("enchantments", Enchantment.class, Integer.class)
-                : Collections.emptyMap();
+            ? data.getAsMap("enchantments", Enchantment.class, Integer.class)
+            : Collections.emptyMap();
 
         List<ItemFlag> itemFlags = data.containsKey("item-flags")
-                ? data.getAsList("item-flags", ItemFlag.class)
-                : Collections.emptyList();
+            ? data.getAsList("item-flags", ItemFlag.class)
+            : Collections.emptyList();
 
         ItemMeta itemMeta = new ItemStack(Material.COBBLESTONE).getItemMeta();
         if (displayName != null) {

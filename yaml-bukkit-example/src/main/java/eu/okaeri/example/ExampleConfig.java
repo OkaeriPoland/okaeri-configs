@@ -65,8 +65,8 @@ public class ExampleConfig extends OkaeriConfig {
     @Comment("Test custom object list")
     @Comment(".. and repeating comments")
     private List<Location> testLocationList = Arrays.asList(
-            new Location(null, 1, 2, 3, 4, 5),
-            new Location(null, 3, 3, 5, 6, 9)
+        new Location(null, 1, 2, 3, 4, 5),
+        new Location(null, 3, 3, 5, 6, 9)
     );
 
     @Comment("Uber-complex-map test")
@@ -75,8 +75,8 @@ public class ExampleConfig extends OkaeriConfig {
     @CustomKey("list-to-uber-complex-map")
     @Comment("List-to-Uber-complex-map test")
     private List<Map<ExampleEnum, Location>> listMapEnumToLocationMap = Arrays.asList(
-            Collections.singletonMap(ExampleEnum.THREE, new Location(Bukkit.getWorlds().get(0), 1, 2, 3, 4, 5)),
-            Collections.singletonMap(ExampleEnum.ONE_THO_THREE, new Location(Bukkit.getWorlds().get(0), 3, 2, 3, 4, 5))
+        Collections.singletonMap(ExampleEnum.THREE, new Location(Bukkit.getWorlds().get(0), 1, 2, 3, 4, 5)),
+        Collections.singletonMap(ExampleEnum.ONE_THO_THREE, new Location(Bukkit.getWorlds().get(0), 3, 2, 3, 4, 5))
     );
 
     @Comment("Math test")

@@ -1,8 +1,8 @@
 package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 import org.bukkit.enchantments.Enchantment;
 

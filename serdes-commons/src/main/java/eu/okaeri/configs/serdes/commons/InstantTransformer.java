@@ -1,8 +1,8 @@
 package eu.okaeri.configs.serdes.commons;
 
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
+import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 
 import java.time.Instant;
