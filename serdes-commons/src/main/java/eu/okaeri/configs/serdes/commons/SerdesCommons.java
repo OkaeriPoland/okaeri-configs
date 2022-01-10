@@ -16,6 +16,7 @@ public class SerdesCommons implements OkaeriSerdesPack {
         registry.register(new DurationAttachmentResolver());
 
         registry.register(new InstantTransformer());
+        registry.register(new LocaleTransformer());
         registry.register(new PatternTransformer());
     }
 }
