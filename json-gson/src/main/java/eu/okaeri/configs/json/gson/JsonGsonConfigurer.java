@@ -13,6 +13,7 @@ import lombok.NonNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class JsonGsonConfigurer extends Configurer {
@@ -73,7 +74,7 @@ public class JsonGsonConfigurer extends Configurer {
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
         this.gson.toJson(this.map, writer);
         writer.flush();
     }
