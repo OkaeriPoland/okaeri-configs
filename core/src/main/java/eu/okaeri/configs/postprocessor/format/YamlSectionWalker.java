@@ -2,12 +2,45 @@ package eu.okaeri.configs.postprocessor.format;
 
 import eu.okaeri.configs.postprocessor.ConfigSectionWalker;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public abstract class YamlSectionWalker implements ConfigSectionWalker {
+
+    private static final Set<String> MULTILINE_START = new HashSet<>(Arrays.asList(
+        ">",
+        ">-",
+        "|",
+        "|-"
+    ));
 
     @Override
     public boolean isKeyMultilineStart(String line) {
-        String trimmed = line.trim();
-        return !line.isEmpty() && (trimmed.endsWith(">") || trimmed.endsWith(">-") || trimmed.endsWith("|") || trimmed.endsWith("|-"));
+
+        String trimmed = line.trim().replaceAll("\\s{2,}", " ");
+        if (trimmed.isEmpty()) {
+            return false;
+        }
+
+        int colon = trimmed.indexOf(":");
+        int distance = trimmed.length() - colon;
+
+        for (String trigger : MULTILINE_START) {
+
+            // offset by 2 due to ': ' before the trigger
+            if (distance > (trigger.length() + 2)) {
+                continue;
+            }
+
+            if (!trimmed.endsWith(trigger)) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     @Override
