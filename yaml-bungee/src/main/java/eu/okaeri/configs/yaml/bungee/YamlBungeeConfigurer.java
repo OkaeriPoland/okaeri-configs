@@ -110,7 +110,7 @@ public class YamlBungeeConfigurer extends Configurer {
 
         // bungee's save
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ConfigurationProvider.getProvider(YamlConfiguration.class).save(this.config, new OutputStreamWriter(baos));
+        ConfigurationProvider.getProvider(YamlConfiguration.class).save(this.config, new OutputStreamWriter(baos, StandardCharsets.UTF_8));
         String contents = new String(baos.toByteArray(), StandardCharsets.UTF_8);
 
         // postprocess
