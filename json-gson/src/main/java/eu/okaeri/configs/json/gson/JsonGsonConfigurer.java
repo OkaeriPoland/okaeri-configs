@@ -23,6 +23,7 @@ public class JsonGsonConfigurer extends Configurer {
 
     public JsonGsonConfigurer() {
         this.gson = new GsonBuilder()
+            .disableHtmlEscaping()
             .setPrettyPrinting()
             .create();
         this.map = new LinkedHashMap<>();
