@@ -17,6 +17,7 @@
             <artifactId>okaeri-configs-core</artifactId>
             <version>4.0.0-beta6</version>
         </dependency>
+
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
