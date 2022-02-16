@@ -21,7 +21,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-hjson</artifactId>
-  <version>4.0.0-beta6</version>
+  <version>4.0.0-beta7</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 Add dependency to the `maven` section:
 
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-hjson:4.0.0-beta6'
+implementation 'eu.okaeri:okaeri-configs-hjson:4.0.0-beta7'
 ```
 
 ## Usage
