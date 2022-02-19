@@ -5,7 +5,6 @@ import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -91,6 +90,6 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     }
 
     private String decolor(String text) {
-        return StringUtils.replace(text, COLOR_CHAR + "", ALT_COLOR_CHAR + "");
+        return text.replace(COLOR_CHAR + "", ALT_COLOR_CHAR + "");
     }
 }
