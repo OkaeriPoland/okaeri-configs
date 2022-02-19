@@ -131,7 +131,7 @@ public abstract class Configurer {
         serializer.serialize(value, serializationData, (genericType == null) ? GenericsDeclaration.of(value) : genericType);
         Map<Object, Object> serializationMap = new LinkedHashMap<>(serializationData.asMap());
 
-        return this.simplifyMap(serializationMap, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext, conservative);
+        return this.simplifyMap(serializationMap, GenericsDeclaration.of(Map.class, Collections.singletonList(String.class)), serdesContext, conservative);
     }
 
     public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
