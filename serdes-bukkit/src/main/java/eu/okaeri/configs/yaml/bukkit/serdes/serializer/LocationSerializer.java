@@ -35,6 +35,6 @@ public class LocationSerializer implements ObjectSerializer<Location> {
         float yaw = data.get("yaw", Float.class);
         float pitch = data.get("pitch", Float.class);
 
-        return new Location(world, x, y, z, pitch, yaw);
+        return new Location(world, x, y, z, yaw, pitch);
     }
 }
