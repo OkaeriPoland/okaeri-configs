@@ -52,6 +52,11 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
+    public Object remove(@NonNull String key) {
+        return this.wrapped.remove(key);
+    }
+
+    @Override
     public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
         return this.wrapped.isToStringObject(object, genericType);
     }

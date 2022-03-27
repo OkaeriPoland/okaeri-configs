@@ -32,6 +32,11 @@ public class ObdfConfigurer extends Configurer {
     }
 
     @Override
+    public Object remove(@NonNull String key) {
+        return this.bin.getData().remove(key);
+    }
+
+    @Override
     public boolean keyExists(@NonNull String key) {
         return this.bin.containsKey(key);
     }

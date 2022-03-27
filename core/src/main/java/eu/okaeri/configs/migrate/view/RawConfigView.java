@@ -26,16 +26,29 @@ public class RawConfigView {
     }
 
     public Object set(@NonNull String key, Object value) {
+
         Map<String, Object> document = this.config.asMap(this.config.getConfigurer(), true);
         Object old = this.valuePut(document, key, value);
-        this.config.load(document); // mutate parent
+
+        // mutate parent
+        this.config.load(document);
+
         return old;
     }
 
     public Object remove(@NonNull String key) {
+
         Map<String, Object> document = this.config.asMap(this.config.getConfigurer(), true);
         Object old = this.valueRemove(document, key);
-        this.config.load(document); // mutate parent
+
+        // top-level keys may require manual remove
+        if (key.split(this.nestedSeparator).length == 1) {
+            this.config.getConfigurer().remove(key);
+        }
+
+        // mutate parent
+        this.config.load(document);
+
         return old;
     }
 

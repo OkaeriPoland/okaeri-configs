@@ -494,6 +494,14 @@ public abstract class OkaeriConfig {
         return this.load(otherConfig.asMap(this.getConfigurer(), true));
     }
 
+    /**
+     * Performs migrations and confirms the data is still loadable afterwards,
+     * then executes {@link #save()}.
+     *
+     * @param migrations migrations to be performed
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or migration fails
+     */
     public OkaeriConfig migrate(@NonNull ConfigMigration... migrations) throws OkaeriException {
        return this.migrate(
            (performed) -> {
@@ -508,6 +516,15 @@ public abstract class OkaeriConfig {
        );
     }
 
+    /**
+     * Performs migrations and invokes consumer if performed migrations
+     * count is greater than zero.
+     *
+     * @param callback performed migrations count consumer
+     * @param migrations migrations to be performed
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or migration fails
+     */
     public OkaeriConfig migrate(@NonNull Consumer<Long> callback, @NonNull ConfigMigration... migrations) throws OkaeriException {
         RawConfigView view = new RawConfigView(this);
         long performed = Arrays.stream(migrations)

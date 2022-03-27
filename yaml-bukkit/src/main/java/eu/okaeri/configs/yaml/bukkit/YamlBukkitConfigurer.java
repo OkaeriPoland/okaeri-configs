@@ -82,6 +82,18 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
+    public Object remove(@NonNull String key) {
+
+        if (!this.keyExists(key)) {
+            return null;
+        }
+
+        Object old = this.config.get(key);
+        this.config.set(key, null);
+        return old;
+    }
+
+    @Override
     public boolean keyExists(@NonNull String key) {
         return this.config.getKeys(false).contains(key);
     }
