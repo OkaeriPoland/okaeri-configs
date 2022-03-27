@@ -7,8 +7,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.Objects;
-
 @ToString
 @RequiredArgsConstructor
 public class SimpleMoveMigration implements ConfigMigration {
@@ -26,6 +24,6 @@ public class SimpleMoveMigration implements ConfigMigration {
         Object targetValue = view.remove(this.fromKey);
         Object oldValue = view.set(this.toKey, targetValue);
 
-        return !Objects.equals(targetValue, oldValue);
+        return true;
     }
 }
