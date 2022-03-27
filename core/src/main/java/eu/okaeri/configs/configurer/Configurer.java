@@ -42,6 +42,8 @@ public abstract class Configurer {
 
     public abstract Object getValue(@NonNull String key);
 
+    public abstract Object remove(@NonNull String key);
+
     public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
         if (object instanceof Class) {
             Class<?> clazzObject = (Class<?>) object;
