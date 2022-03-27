@@ -8,10 +8,10 @@ import lombok.ToString;
 @ToString
 public class NamedMigration extends SimpleSequentialMigration {
 
-    private @Getter final String name;
+    private @Getter final String description;
 
-    public NamedMigration(String name, ConfigMigration... migrations) {
+    public NamedMigration(String description, ConfigMigration... migrations) {
         super(migrations);
-        this.name = name;
+        this.description = description;
     }
 }

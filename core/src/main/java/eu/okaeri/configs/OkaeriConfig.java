@@ -6,6 +6,7 @@ import eu.okaeri.configs.exception.InitializationException;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.exception.ValidationException;
 import eu.okaeri.configs.migrate.ConfigMigration;
+import eu.okaeri.configs.migrate.builtin.NamedMigration;
 import eu.okaeri.configs.migrate.view.RawConfigView;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
@@ -27,8 +28,12 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public abstract class OkaeriConfig {
+
+    @Setter
+    private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
@@ -137,6 +142,17 @@ public abstract class OkaeriConfig {
      */
     public OkaeriConfig withBindFile(@NonNull String pathname) {
         this.setBindFile(Paths.get(pathname));
+        return this;
+    }
+
+    /**
+     * Replaces the current local logger with the provided.
+     *
+     * @param logger the logger
+     * @return this instance
+     */
+    public OkaeriConfig withLogger(@NonNull Logger logger) {
+        this.setLogger(logger);
         return this;
     }
 
@@ -533,6 +549,13 @@ public abstract class OkaeriConfig {
                     return migration.migrate(this, view);
                 } catch (Exception exception) {
                     throw new OkaeriException("migrate failure in " + migration.getClass().getName(), exception);
+                }
+            })
+            .peek(migration -> {
+                if (migration instanceof NamedMigration) {
+                    String name = migration.getClass().getSimpleName();
+                    String description = ((NamedMigration) migration).getDescription();
+                    this.logger.info(name + ": " + description);
                 }
             })
             .count();
