@@ -38,9 +38,9 @@ public abstract class Configurer {
         this.registry.register(pack);
     }
 
-    public abstract void setValue(String key, Object value, GenericsDeclaration genericType, FieldDeclaration field);
+    public abstract void setValue(@NonNull String key, Object value, GenericsDeclaration genericType, FieldDeclaration field);
 
-    public abstract Object getValue(String key);
+    public abstract Object getValue(@NonNull String key);
 
     public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
         if (object instanceof Class) {
@@ -338,7 +338,7 @@ public abstract class Configurer {
         return this.getValue(key) != null;
     }
 
-    public boolean isValid(FieldDeclaration declaration, Object value) {
+    public boolean isValid(@NonNull FieldDeclaration declaration, Object value) {
         return true;
     }
 
@@ -348,7 +348,7 @@ public abstract class Configurer {
                 .collect(Collectors.toList());
     }
 
-    public abstract void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception;
+    public abstract void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception;
 
-    public abstract void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception;
+    public abstract void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception;
 }
