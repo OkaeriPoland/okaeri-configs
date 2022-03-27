@@ -24,6 +24,11 @@ public class InMemoryConfigurer extends Configurer {
     }
 
     @Override
+    public Object remove(@NonNull String key) {
+        return this.map.remove(key);
+    }
+
+    @Override
     public boolean keyExists(@NonNull String key) {
         return this.map.containsKey(key);
     }

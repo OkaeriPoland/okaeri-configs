@@ -77,6 +77,11 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
+    public Object remove(@NonNull String key) {
+        return this.json.remove(key);
+    }
+
+    @Override
     public boolean keyExists(@NonNull String key) {
         return this.json.has(key);
     }
