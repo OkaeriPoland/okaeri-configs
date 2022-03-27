@@ -49,7 +49,7 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value instanceof MemorySection) {
             return ((MemorySection) value).getValues(false);
@@ -60,7 +60,7 @@ public class YamlBukkitConfigurer extends Configurer {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, SerdesContext serdesContext) {
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, @NonNull SerdesContext serdesContext) {
 
         if (object instanceof MemorySection) {
             Map<String, Object> values = ((MemorySection) object).getValues(false);
@@ -71,7 +71,7 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
         this.config.set(key, simplified);
     }
