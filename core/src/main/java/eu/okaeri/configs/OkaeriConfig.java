@@ -5,6 +5,8 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.InitializationException;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.exception.ValidationException;
+import eu.okaeri.configs.migrate.ConfigMigration;
+import eu.okaeri.configs.migrate.view.RawConfigView;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -24,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public abstract class OkaeriConfig {
 
@@ -212,6 +215,21 @@ public abstract class OkaeriConfig {
      * @throws OkaeriException if configurer is null or the value processing fails
      */
     public <T> T get(@NonNull String key, @NonNull Class<T> clazz) throws OkaeriException {
+        return this.get(key, GenericsDeclaration.of(clazz));
+    }
+
+    /**
+     * Gets configuration value by its raw key. Attempts serialization/deserialization and other
+     * transformation techniques if necessary to match provided class type (e.g. int = String).
+     *
+     * @param key   target key
+     * @param generics target type for value
+     * @param <T>   target value type
+     * @return the resolved value
+     * @throws OkaeriException if configurer is null or the value processing fails
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T get(@NonNull String key, @NonNull GenericsDeclaration generics) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new InitializationException("configurer cannot be null");
@@ -219,10 +237,10 @@ public abstract class OkaeriConfig {
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            return this.getConfigurer().resolveType(field.getValue(), field.getType(), clazz, GenericsDeclaration.of(clazz), SerdesContext.of(this.configurer, field));
+            return (T) this.getConfigurer().resolveType(field.getValue(), field.getType(), generics.getType(), generics, SerdesContext.of(this.configurer, field));
         }
 
-        return this.getConfigurer().getValue(key, clazz, null, SerdesContext.of(this.configurer));
+        return (T) this.getConfigurer().getValue(key, generics.getType(), null, SerdesContext.of(this.configurer));
     }
 
     /**
@@ -474,6 +492,37 @@ public abstract class OkaeriConfig {
         }
 
         return this.load(otherConfig.asMap(this.getConfigurer(), true));
+    }
+
+    public OkaeriConfig migrate(@NonNull ConfigMigration... migrations) throws OkaeriException {
+       return this.migrate(
+           (performed) -> {
+               try {
+                   this.load(this.saveToString());
+               } catch (OkaeriException exception) {
+                   throw new OkaeriException("failed #migrate due to load error after migrations (not saving)", exception);
+               }
+               this.save();
+           },
+           migrations
+       );
+    }
+
+    public OkaeriConfig migrate(@NonNull Consumer<Long> callback, @NonNull ConfigMigration... migrations) throws OkaeriException {
+        RawConfigView view = new RawConfigView(this);
+        long performed = Arrays.stream(migrations)
+            .filter(migration -> {
+                try {
+                    return migration.migrate(this, view);
+                } catch (Exception exception) {
+                    throw new OkaeriException("migrate failure in " + migration.getClass().getName(), exception);
+                }
+            })
+            .count();
+        if (performed > 0) {
+            callback.accept(performed);
+        }
+        return this;
     }
 
     /**

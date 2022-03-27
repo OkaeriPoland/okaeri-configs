@@ -6,16 +6,16 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>4.0.0-beta10</version>
+        <version>4.0.0-beta11</version>
     </parent>
     <artifactId>okaeri-configs-yaml-snakeyaml</artifactId>
-    <version>4.0.0-beta10</version>
+    <version>4.0.0-beta11</version>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>4.0.0-beta10</version>
+            <version>4.0.0-beta11</version>
             <scope>compile</scope>
         </dependency>
 

@@ -49,7 +49,7 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value == null) {
             return null;

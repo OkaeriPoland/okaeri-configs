@@ -19,14 +19,14 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-validator-jakartaee</artifactId>
-  <version>4.0.0-beta10</version>
+  <version>4.0.0-beta11</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-validator-jakartaee:4.0.0-beta10'
+implementation 'eu.okaeri:okaeri-configs-validator-jakartaee:4.0.0-beta11'
 ```
 
 ## Usage

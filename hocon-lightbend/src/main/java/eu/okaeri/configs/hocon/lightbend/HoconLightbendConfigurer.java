@@ -45,7 +45,7 @@ public class HoconLightbendConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplify(Object value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
+    public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value == null) {
             return null;
@@ -60,7 +60,7 @@ public class HoconLightbendConfigurer extends Configurer {
     }
 
     @Override
-    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, SerdesContext serdesContext, boolean conservative) throws OkaeriException {
+    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         Map<Object, Object> map = new LinkedHashMap<>();
         GenericsDeclaration keyDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);

@@ -32,37 +32,37 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public void setRegistry(SerdesRegistry registry) {
+    public void setRegistry(@NonNull SerdesRegistry registry) {
         this.wrapped.setRegistry(registry);
     }
 
     @Override
-    public void register(OkaeriSerdesPack pack) {
+    public void register(@NonNull OkaeriSerdesPack pack) {
         this.wrapped.register(pack);
     }
 
     @Override
-    public void setValue(String key, Object value, GenericsDeclaration genericType, FieldDeclaration field) {
+    public void setValue(@NonNull String key, Object value, GenericsDeclaration genericType, FieldDeclaration field) {
         this.wrapped.setValue(key, value, genericType, field);
     }
 
     @Override
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.wrapped.getValue(key);
     }
 
     @Override
-    public boolean isToStringObject(Object object, GenericsDeclaration genericType) {
+    public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
         return this.wrapped.isToStringObject(object, genericType);
     }
 
     @Override
-    public Object simplifyCollection(Collection<?> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) {
+    public Object simplifyCollection(@NonNull Collection<?> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) {
         return this.wrapped.simplifyCollection(value, genericType, serdesContext, conservative);
     }
 
     @Override
-    public Object simplifyMap(Map<Object, Object> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) {
+    public Object simplifyMap(@NonNull Map<Object, Object> value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) {
         return this.wrapped.simplifyMap(value, genericType, serdesContext, conservative);
     }
 
@@ -72,7 +72,7 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public <T> T getValue(String key, Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
+    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
         return this.wrapped.getValue(key, clazz, genericType, serdesContext);
     }
 
@@ -82,17 +82,17 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public Object createInstance(Class<?> clazz) {
+    public Object createInstance(@NonNull Class<?> clazz) {
         return this.wrapped.createInstance(clazz);
     }
 
     @Override
-    public boolean keyExists(String key) {
+    public boolean keyExists(@NonNull String key) {
         return this.wrapped.keyExists(key);
     }
 
     @Override
-    public boolean isValid(FieldDeclaration declaration, Object value) {
+    public boolean isValid(@NonNull FieldDeclaration declaration, Object value) {
         return this.wrapped.isValid(declaration, value);
     }
 
@@ -102,12 +102,12 @@ public class WrappedConfigurer extends Configurer {
     }
 
     @Override
-    public void write(OutputStream outputStream, ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         this.wrapped.write(outputStream, declaration);
     }
 
     @Override
-    public void load(InputStream inputStream, ConfigDeclaration declaration) throws Exception {
+    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         this.wrapped.load(inputStream, declaration);
     }
 }
