@@ -43,6 +43,18 @@ public interface ConfigMigrationDsl {
         return new SimpleExistsMigration(key);
     }
 
+    static ConfigMigration multi(@NonNull ConfigMigration... migrations) {
+        return new SimpleMultiMigration(migrations);
+    }
+
+    static ConfigMigration any(@NonNull ConfigMigration... migrations) {
+        return new SimpleMultiMigration(migrations);
+    }
+
+    static ConfigMigration all(@NonNull ConfigMigration... migrations) {
+        return new SimpleMultiMigration(migrations, true);
+    }
+
     static ConfigMigration noop(boolean result) {
         return new SimpleNoopMigration(result);
     }
@@ -53,9 +65,5 @@ public interface ConfigMigrationDsl {
 
     static <T> ConfigMigration match(@NonNull String key, @NonNull Predicate<T> predicate) {
         return new SimplePredicateMigration<>(key, predicate);
-    }
-
-    static ConfigMigration multi(@NonNull ConfigMigration... migrations) {
-        return new SimpleSequentialMigration(migrations);
     }
 }
