@@ -3,10 +3,7 @@ package eu.okaeri.configs.yaml.bukkit.serdes;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.yaml.bukkit.serdes.itemstack.ItemStackAttachmentResolver;
-import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemMetaSerializer;
-import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemStackSerializer;
-import eu.okaeri.configs.yaml.bukkit.serdes.serializer.LocationSerializer;
-import eu.okaeri.configs.yaml.bukkit.serdes.serializer.PotionEffectSerializer;
+import eu.okaeri.configs.yaml.bukkit.serdes.serializer.*;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringEnchantmentTransformer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringPotionEffectTypeTransformer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringWorldTransformer;
@@ -23,6 +20,7 @@ public class SerdesBukkit implements OkaeriSerdesPack {
         registry.register(new ItemStackAttachmentResolver());
         registry.register(new LocationSerializer());
         registry.register(new PotionEffectSerializer());
+        registry.register(new VectorSerializer());
 
         // transformers
         registry.register(new StringEnchantmentTransformer());
