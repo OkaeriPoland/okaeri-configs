@@ -49,6 +49,11 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
+    public List<String> getExtensions() {
+        return Collections.singletonList("json");
+    }
+
+    @Override
     public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value == null) {

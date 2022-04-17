@@ -49,6 +49,11 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
+    public List<String> getExtensions() {
+        return Arrays.asList("yml", "yaml");
+    }
+
+    @Override
     public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value instanceof MemorySection) {
