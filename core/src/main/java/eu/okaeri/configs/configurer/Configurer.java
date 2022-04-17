@@ -38,6 +38,10 @@ public abstract class Configurer {
         this.registry.register(pack);
     }
 
+    public List<String> getExtensions() {
+        return Collections.emptyList();
+    }
+
     public abstract void setValue(@NonNull String key, Object value, GenericsDeclaration genericType, FieldDeclaration field);
 
     public abstract Object getValue(@NonNull String key);
