@@ -92,15 +92,15 @@ public abstract class Configurer {
             return null;
         }
 
-        if (OkaeriConfig.class.isAssignableFrom(value.getClass())) {
-            OkaeriConfig config = (OkaeriConfig) value;
-            return config.asMap(this, conservative);
-        }
-
         Class<?> serializerType = (genericType != null) ? genericType.getType() : value.getClass();
         ObjectSerializer serializer = this.registry.getSerializer(serializerType);
 
         if (serializer == null) {
+
+            if (OkaeriConfig.class.isAssignableFrom(value.getClass())) {
+                OkaeriConfig config = (OkaeriConfig) value;
+                return config.asMap(this, conservative);
+            }
 
             if (conservative && (serializerType.isPrimitive() || GenericsDeclaration.of(serializerType).isPrimitiveWrapper())) {
                 return value;
