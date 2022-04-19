@@ -161,39 +161,12 @@ public abstract class Configurer {
             target = GenericsDeclaration.of(target.wrap());
         }
 
-        // enums
-        Class<?> objectClazz = object.getClass();
-        try {
-            if ((object instanceof String) && target.isEnum()) {
-                String strObject = (String) object;
-                // 1:1 match ONE=ONE
-                try {
-                    Method enumMethod = targetClazz.getMethod("valueOf", String.class);
-                    Object enumValue = enumMethod.invoke(null, strObject);
-                    if (enumValue != null) {
-                        return targetClazz.cast(enumValue);
-                    }
-                }
-                // match first case-insensitive
-                catch (InvocationTargetException ignored) {
-                    Enum[] enumValues = (Enum[]) targetClazz.getEnumConstants();
-                    for (Enum value : enumValues) {
-                        if (!strObject.equalsIgnoreCase(value.name())) {
-                            continue;
-                        }
-                        return targetClazz.cast(value);
-                    }
-                }
-                // match fail
-                String enumValuesStr = Arrays.stream(targetClazz.getEnumConstants()).map(item -> ((Enum) item).name()).collect(Collectors.joining(", "));
-                throw new IllegalArgumentException("no enum value for name " + strObject + " (available: " + enumValuesStr + ")");
-            }
-            if (source.isEnum() && (targetClazz == String.class)) {
-                Method enumMethod = objectClazz.getMethod("name");
-                return targetClazz.cast(enumMethod.invoke(object));
-            }
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
-            throw new OkaeriException("failed to resolve enum " + object.getClass() + " <> " + targetClazz, exception);
+        // deserialization
+        ObjectSerializer objectSerializer = this.registry.getSerializer(targetClazz);
+        if ((object instanceof Map) && (objectSerializer != null)) {
+            DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, this, serdesContext);
+            Object deserialized = objectSerializer.deserialize(deserializationData, target);
+            return targetClazz.cast(deserialized);
         }
 
         // subconfig
@@ -202,14 +175,6 @@ public abstract class Configurer {
             Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
             config.setConfigurer(new InMemoryWrappedConfigurer(this, configMap));
             return (T) config.update();
-        }
-
-        // deserialization
-        ObjectSerializer objectSerializer = this.registry.getSerializer(targetClazz);
-        if ((object instanceof Map) && (objectSerializer != null)) {
-            DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, this, serdesContext);
-            Object deserialized = objectSerializer.deserialize(deserializationData, target);
-            return targetClazz.cast(deserialized);
         }
 
         // generics
@@ -258,6 +223,41 @@ public abstract class Configurer {
         // basic transformer
         ObjectTransformer transformer = this.registry.getTransformer(source, target);
         if (transformer == null) {
+
+            // enums
+            Class<?> objectClazz = object.getClass();
+            try {
+                if ((object instanceof String) && target.isEnum()) {
+                    String strObject = (String) object;
+                    // 1:1 match ONE=ONE
+                    try {
+                        Method enumMethod = targetClazz.getMethod("valueOf", String.class);
+                        Object enumValue = enumMethod.invoke(null, strObject);
+                        if (enumValue != null) {
+                            return targetClazz.cast(enumValue);
+                        }
+                    }
+                    // match first case-insensitive
+                    catch (InvocationTargetException ignored) {
+                        Enum[] enumValues = (Enum[]) targetClazz.getEnumConstants();
+                        for (Enum value : enumValues) {
+                            if (!strObject.equalsIgnoreCase(value.name())) {
+                                continue;
+                            }
+                            return targetClazz.cast(value);
+                        }
+                    }
+                    // match fail
+                    String enumValuesStr = Arrays.stream(targetClazz.getEnumConstants()).map(item -> ((Enum) item).name()).collect(Collectors.joining(", "));
+                    throw new IllegalArgumentException("no enum value for name " + strObject + " (available: " + enumValuesStr + ")");
+                }
+                if (source.isEnum() && (targetClazz == String.class)) {
+                    Method enumMethod = objectClazz.getMethod("name");
+                    return targetClazz.cast(enumMethod.invoke(object));
+                }
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
+                throw new OkaeriException("failed to resolve enum " + object.getClass() + " <> " + targetClazz, exception);
+            }
 
             // unbox primitive (Integer -> int)
             if (targetClazz.isPrimitive() && GenericsDeclaration.doBoxTypesMatch(targetClazz, objectClazz)) {
