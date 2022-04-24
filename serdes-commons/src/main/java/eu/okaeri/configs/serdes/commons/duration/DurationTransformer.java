@@ -205,6 +205,16 @@ public class DurationTransformer extends BidirectionalTransformer<String, Durati
             return (negative ? "-" : "") + nsValue + "ns";
         }
 
+        // try fallback generation
+        String simplified = stringDuration.substring(2).toLowerCase(Locale.ROOT);
+        try {
+            if (data.equals(this.leftToRight(simplified, serdesContext))) {
+                return simplified;
+            }
+        }
+        catch (Exception ignored) {
+        }
+
         // not applicable, return ISO
         return stringDuration;
     }
