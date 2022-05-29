@@ -90,6 +90,11 @@ public class YamlBungeeConfigurer extends Configurer {
     }
 
     @Override
+    public void setValueUnsafe(@NonNull String key, Object value) {
+        this.config.set(key, value);
+    }
+
+    @Override
     public Object getValue(@NonNull String key) {
         return this.config.get(key);
     }
