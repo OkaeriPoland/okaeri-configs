@@ -181,11 +181,7 @@ public abstract class Configurer {
         if (genericTarget != null) {
 
             // custom target type
-            FieldDeclaration serdesContextField = serdesContext.getField();
-            Class<T> localTargetClazz = (serdesContextField == null) ? targetClazz : serdesContextField.getAnnotation(TargetType.class)
-                    .map(TargetType::value)
-                    .map(type -> (Class<T>) type)
-                    .orElse(targetClazz);
+            Class<T> localTargetClazz = (Class<T>) this.resolveTargetBaseType(serdesContext, target, source);
 
             // collections
             if ((object instanceof Collection) && Collection.class.isAssignableFrom(localTargetClazz)) {
@@ -305,6 +301,32 @@ public abstract class Configurer {
         }
 
         return targetClazz.cast(transformer.transform(object, serdesContext));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class<?> resolveTargetBaseType(@NonNull SerdesContext serdesContext, @NonNull GenericsDeclaration target, @NonNull GenericsDeclaration source) {
+
+        FieldDeclaration serdesContextField = serdesContext.getField();
+        Class<?> targetType = target.getType();
+
+        // @TargetType shall apply only to the parent field
+        if ((serdesContextField != null) && !serdesContextField.getType().equals(target)) {
+            return targetType;
+        }
+
+        // no field, no annotation, return default
+        if (serdesContextField == null) {
+            return targetType;
+        }
+
+        // resolve from @TargetType
+        Optional<TargetType> targetTypeAnnotation = serdesContextField.getAnnotation(TargetType.class);
+        if (targetTypeAnnotation.isPresent()) {
+            return targetTypeAnnotation.get().value();
+        }
+
+        // no annotation, return default
+        return targetType;
     }
 
     public Object createInstance(@NonNull Class<?> clazz) throws OkaeriException {
