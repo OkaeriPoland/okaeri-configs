@@ -86,6 +86,11 @@ public class YamlSnakeYamlConfigurer extends Configurer {
     }
 
     @Override
+    public void setValueUnsafe(@NonNull String key, Object value) {
+        this.map.put(key, value);
+    }
+
+    @Override
     public Object getValue(@NonNull String key) {
         return this.map.get(key);
     }

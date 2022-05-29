@@ -77,8 +77,18 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
+    public void setValueUnsafe(@NonNull String key, Object value) {
+        this.json.set(key, (JsonValue) value);
+    }
+
+    @Override
     public Object getValue(@NonNull String key) {
         return this.fromJsonValue(this.json.get(key));
+    }
+
+    @Override
+    public Object getValueUnsafe(@NonNull String key) {
+        return this.json.get(key);
     }
 
     @Override

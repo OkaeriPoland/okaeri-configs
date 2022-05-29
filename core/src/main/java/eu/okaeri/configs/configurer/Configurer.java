@@ -44,7 +44,13 @@ public abstract class Configurer {
 
     public abstract void setValue(@NonNull String key, Object value, GenericsDeclaration genericType, FieldDeclaration field);
 
+    public abstract void setValueUnsafe(@NonNull String key, Object value);
+
     public abstract Object getValue(@NonNull String key);
+
+    public Object getValueUnsafe(@NonNull String key) {
+        return this.getValue(key);
+    }
 
     public abstract Object remove(@NonNull String key);
 
@@ -374,6 +380,32 @@ public abstract class Configurer {
         return this.getParent().getDeclaration().getFields().stream()
                 .map(FieldDeclaration::getName)
                 .collect(Collectors.toList());
+    }
+
+    public Set<String> sort(@NonNull ConfigDeclaration declaration) {
+
+        // extract current data in declaration order
+        Map<String, Object> reordered = declaration.getFields().stream()
+            .collect(Collectors.toMap(
+                FieldDeclaration::getName,
+                field -> {
+                    Object oldValue = this.getValueUnsafe(field.getName());
+                    this.remove(field.getName());
+                    return oldValue;
+                },
+                (u, v) -> {
+                    throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
+                }, LinkedHashMap::new
+            ));
+
+        // save the orphans!
+        Set<String> orphans = new LinkedHashSet<>(this.getAllKeys());
+
+        // load new order
+        reordered.forEach(this::setValueUnsafe);
+
+        // get rid of the problem
+        return orphans;
     }
 
     public abstract void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception;
