@@ -333,7 +333,7 @@ public abstract class Configurer {
         try {
             if (Collection.class.isAssignableFrom(clazz)) {
                 if (clazz == Set.class) {
-                    return new HashSet<>();
+                    return new LinkedHashSet<>();
                 }
                 if (clazz == List.class) {
                     return new ArrayList<>();
