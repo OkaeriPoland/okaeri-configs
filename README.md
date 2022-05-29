@@ -196,7 +196,7 @@ TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
 - Math types: `java.math.BigInteger`, `java.math.BigDecimal`
 - Complex types:
     - `Map<K, V>`: results in LinkedHashMap
-    - `Set<T>`: results in HashSet
+    - `Set<T>`: results in LinkedHashSet
     - `List<T>`: results in ArrayList
     - Any type assignable from Map or Collection if non-interface type is used and default constructor is available
 - Enum types: any enum is automatically transformed using `valueOf()` (with case-insensitive fallback) and `name()`
