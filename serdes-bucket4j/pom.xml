@@ -5,7 +5,7 @@
     <parent>
         <artifactId>okaeri-configs</artifactId>
         <groupId>eu.okaeri</groupId>
-        <version>4.0.0-beta21</version>
+        <version>4.0.0-beta22</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,13 +15,13 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>4.0.0-beta21</version>
+            <version>4.0.0-beta22</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.vladimir-bukhtoyarov</groupId>
             <artifactId>bucket4j-core</artifactId>
-            <version>7.2.0</version>
+            <version>7.5.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
