@@ -162,7 +162,7 @@ public abstract class OkaeriConfig {
     }
 
     /**
-     * Sets the state automatic of orphan removal
+     * Sets the state of automatic orphan removal
      * - True: orphaned keys would be explicitly removed
      * - False: it is up to configurer to manage orphaned keys
      *
