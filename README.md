@@ -170,6 +170,7 @@ public class TestConfig extends OkaeriConfig {
 TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
     it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
     it.withBindFile("config.yml"); // specify Path, File or pathname
+    it.withRemoveOrphans(true); // automatic removal of undeclared keys
     it.saveDefaults(); // save file if does not exists
     it.load(true); // load and save to update comments/new fields 
 });
@@ -181,6 +182,7 @@ TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
 TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
     .withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()) // specify configurer implementation, optionally additional serdes packages
     .withBindFile("config.yml") // specify Path, File or pathname
+    .withRemoveOrphans(true); // automatic removal of undeclared keys
     .saveDefaults() // save file if does not exists
     .load(true); // load and save to update comments/new fields
 ````
