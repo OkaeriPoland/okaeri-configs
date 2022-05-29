@@ -45,4 +45,9 @@ public class InMemoryWrappedConfigurer extends WrappedConfigurer {
     public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         this.map.put(key, value);
     }
+
+    @Override
+    public void setValueUnsafe(@NonNull String key, Object value) {
+        this.map.put(key, value);
+    }
 }

@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -45,6 +46,10 @@ public abstract class OkaeriConfig {
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private ConfigDeclaration declaration;
+
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private boolean removeOrphans = false;
 
     /**
      * Creates config updating the declaration.
@@ -153,6 +158,19 @@ public abstract class OkaeriConfig {
      */
     public OkaeriConfig withLogger(@NonNull Logger logger) {
         this.setLogger(logger);
+        return this;
+    }
+
+    /**
+     * Sets the state automatic of orphan removal
+     * - True: orphaned keys would be explicitly removed
+     * - False: it is up to configurer to manage orphaned keys
+     *
+     * @param removeOrphans new state
+     * @return this instance
+     */
+    public OkaeriConfig withRemoveOrphans(boolean removeOrphans) {
+        this.setRemoveOrphans(removeOrphans);
         return this;
     }
 
@@ -334,6 +352,11 @@ public abstract class OkaeriConfig {
         }
 
         try {
+            Set<String> orphans = this.getConfigurer().sort(this.getDeclaration());
+            if (!orphans.isEmpty() && this.isRemoveOrphans()) {
+                this.logger.warning("Removed orphaned (undeclared) keys: " + orphans);
+                orphans.forEach(orphan -> this.getConfigurer().remove(orphan));
+            }
             this.getConfigurer().write(outputStream, this.getDeclaration());
         } catch (Exception exception) {
             throw new OkaeriException("failed #write", exception);
