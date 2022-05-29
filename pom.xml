@@ -34,9 +34,6 @@
         <module>json-gson</module>
         <module>json-simple</module>
 
-        <!-- binary modules -->
-        <module>binary-obdf</module>
-
         <!-- hocon modules -->
         <module>hocon-lightbend</module>
 
