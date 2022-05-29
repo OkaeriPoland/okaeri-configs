@@ -20,7 +20,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bucket4j</artifactId>
-  <version>4.0.0-beta21</version>
+  <version>4.0.0-beta22</version>
 </dependency>
 ```
 
@@ -29,7 +29,7 @@ Add dependency to the `dependencies` section:
 Add dependency to the `maven` section:
 
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-serdes-bucket4j:4.0.0-beta21'
+implementation 'eu.okaeri:okaeri-configs-serdes-bucket4j:4.0.0-beta22'
 ```
 
 ## Supported types
