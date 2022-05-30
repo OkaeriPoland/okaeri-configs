@@ -348,7 +348,7 @@ public abstract class Configurer {
                     return clazz.newInstance();
                 } catch (InstantiationException exception) {
                     throw new OkaeriException("cannot create instance of " + clazz + " (tip: provide implementation " +
-                            "(e.g. ArrayList) for types with no default constructor using @TargetType annotation)", exception);
+                        "(e.g. ArrayList) for types with no default constructor using @TargetType annotation)", exception);
                 }
             }
             if (Map.class.isAssignableFrom(clazz)) {
@@ -359,7 +359,7 @@ public abstract class Configurer {
                     return clazz.newInstance();
                 } catch (InstantiationException exception) {
                     throw new OkaeriException("cannot create instance of " + clazz + " (tip: provide implementation " +
-                            "(e.g. LinkedHashMap) for types with no default constructor using @TargetType annotation)", exception);
+                        "(e.g. LinkedHashMap) for types with no default constructor using @TargetType annotation)", exception);
                 }
             }
             throw new OkaeriException("cannot create instance of " + clazz);
@@ -378,25 +378,21 @@ public abstract class Configurer {
 
     public List<String> getAllKeys() {
         return this.getParent().getDeclaration().getFields().stream()
-                .map(FieldDeclaration::getName)
-                .collect(Collectors.toList());
+            .map(FieldDeclaration::getName)
+            .collect(Collectors.toList());
     }
 
     public Set<String> sort(@NonNull ConfigDeclaration declaration) {
 
         // extract current data in declaration order
-        Map<String, Object> reordered = declaration.getFields().stream()
-            .collect(Collectors.toMap(
-                FieldDeclaration::getName,
-                field -> {
-                    Object oldValue = this.getValueUnsafe(field.getName());
-                    this.remove(field.getName());
-                    return oldValue;
-                },
-                (u, v) -> {
-                    throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
-                }, LinkedHashMap::new
-            ));
+        Map<String, Object> reordered = declaration.getFields().stream().collect(
+            LinkedHashMap::new,
+            (map, field) -> {
+                Object oldValue = this.getValueUnsafe(field.getName());
+                this.remove(field.getName());
+                map.put(field.getName(), oldValue);
+            },
+            LinkedHashMap::putAll);
 
         // save the orphans!
         Set<String> orphans = new LinkedHashSet<>(this.getAllKeys());
