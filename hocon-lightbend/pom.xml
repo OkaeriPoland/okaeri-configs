@@ -6,16 +6,16 @@
     <parent>
         <artifactId>okaeri-configs</artifactId>
         <groupId>eu.okaeri</groupId>
-        <version>4.0.0-beta24</version>
+        <version>4.0.1</version>
     </parent>
     <artifactId>okaeri-configs-hocon-lightbend</artifactId>
-    <version>4.0.0-beta24</version>
+    <version>4.0.1</version>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>4.0.0-beta24</version>
+            <version>4.0.1</version>
             <scope>compile</scope>
         </dependency>
 
