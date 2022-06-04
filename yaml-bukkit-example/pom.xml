@@ -60,13 +60,13 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-yaml-bukkit</artifactId>
-            <version>4.0.0-beta24</version>
+            <version>4.0.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-            <version>4.0.0-beta24</version>
+            <version>4.0.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
