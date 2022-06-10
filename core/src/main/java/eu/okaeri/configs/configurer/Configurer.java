@@ -98,6 +98,10 @@ public abstract class Configurer {
             return null;
         }
 
+        if ((genericType != null) && (genericType.getType() == Object.class) && genericType.getSubtype().isEmpty()) {
+            genericType = GenericsDeclaration.of(value);
+        }
+
         Class<?> serializerType = (genericType != null) ? genericType.getType() : value.getClass();
         ObjectSerializer serializer = this.registry.getSerializer(serializerType);
 
