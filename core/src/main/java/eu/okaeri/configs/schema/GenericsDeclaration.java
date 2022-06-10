@@ -76,6 +76,10 @@ public class GenericsDeclaration {
             return null;
         }
 
+        if (object instanceof GenericsDeclaration) {
+            return (GenericsDeclaration) object;
+        }
+
         if (object instanceof Class) {
             return new GenericsDeclaration((Class<?>) object);
         }
