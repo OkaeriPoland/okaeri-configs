@@ -24,6 +24,16 @@ public class SerializationData {
 
     /**
      * Adds value to the serialization data under specific key.
+     *
+     * @param key   target key
+     * @param value target value
+     */
+    public void addRaw(@NonNull String key, Object value) {
+        this.data.put(key, value);
+    }
+
+    /**
+     * Adds value to the serialization data under specific key.
      * Provided value is simplified using attached Configurer.
      *
      * @param key   target key
