@@ -65,6 +65,10 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
             : Collections.emptyList();
 
         ItemMeta itemMeta = new ItemStack(Material.COBBLESTONE).getItemMeta();
+        if (itemMeta == null) {
+            throw new IllegalStateException("Cannot extract empty ItemMeta from COBBLESTONE");
+        }
+
         if (displayName != null) {
             itemMeta.setDisplayName(this.color(displayName));
         }
