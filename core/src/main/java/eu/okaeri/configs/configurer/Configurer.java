@@ -98,7 +98,7 @@ public abstract class Configurer {
             return null;
         }
 
-        if ((genericType != null) && (genericType.getType() == Object.class) && genericType.getSubtype().isEmpty()) {
+        if ((genericType != null) && (genericType.getType() == Object.class) && !genericType.hasSubtypes()) {
             genericType = GenericsDeclaration.of(value);
         }
 
