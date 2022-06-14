@@ -46,7 +46,7 @@ public class GenericsDeclaration {
     }
 
     private Class<?> type;
-    private List<GenericsDeclaration> subtype;
+    private List<GenericsDeclaration> subtype = new ArrayList<>();
     private boolean isEnum;
 
     private GenericsDeclaration(Class<?> type) {
@@ -151,5 +151,9 @@ public class GenericsDeclaration {
 
     public boolean isConfig() {
         return OkaeriConfig.class.isAssignableFrom(this.type);
+    }
+
+    public boolean hasSubtypes() {
+        return (this.subtype != null) && !this.subtype.isEmpty();
     }
 }
