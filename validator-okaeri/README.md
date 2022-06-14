@@ -15,14 +15,14 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-validator-okaeri</artifactId>
-  <version>4.0.4</version>
+  <version>4.0.5</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-validator-okaeri:4.0.4'
+implementation 'eu.okaeri:okaeri-configs-validator-okaeri:4.0.5'
 ```
 
 ## Usage
