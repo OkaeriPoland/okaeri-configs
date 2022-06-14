@@ -16,6 +16,13 @@ public class SerializationData {
     private Map<String, Object> data = new LinkedHashMap<>();
 
     /**
+     * Removes all currently stored serialization data.
+     */
+    public void clear() {
+        this.data.clear();
+    }
+
+    /**
      * @return unmodifiable map of current serialization data
      */
     public Map<String, Object> asMap() {
