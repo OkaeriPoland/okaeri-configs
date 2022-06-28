@@ -13,13 +13,17 @@ import lombok.SneakyThrows;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 @Data
 public class FieldDeclaration {
 
+    private static final Logger LOGGER = Logger.getLogger(FieldDeclaration.class.getSimpleName());
     private static final Map<CacheEntry, FieldDeclaration> DECLARATION_CACHE = new ConcurrentHashMap<>();
+    private static final Set<String> FINAL_WARNS = new HashSet<>();
 
     private Object startingValue;
     private String name;
@@ -112,6 +116,10 @@ public class FieldDeclaration {
 
     public void updateValue(Object value) throws OkaeriException {
         try {
+            if (Modifier.isFinal(this.getField().getModifiers()) && FINAL_WARNS.add(this.getField().toString())) {
+                LOGGER.warning(this.getField() + ": final fields (especially with default value) " +
+                    "may prevent loading of the data. Removal of the final modifier is strongly advised.");
+            }
             this.getField().setAccessible(true);
             this.getField().set(this.getObject(), value);
         } catch (IllegalAccessException exception) {
