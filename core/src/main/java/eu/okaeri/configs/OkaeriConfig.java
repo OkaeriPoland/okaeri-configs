@@ -199,7 +199,7 @@ public abstract class OkaeriConfig {
      *
      * @param key   target key
      * @param value target value
-     * @throws OkaeriException if configurer is null or value processing fails
+     * @throws OkaeriException if {@link #configurer} is null or value processing fails
      */
     public void set(@NonNull String key, Object value) throws OkaeriException {
 
@@ -222,7 +222,7 @@ public abstract class OkaeriConfig {
      *
      * @param key target key
      * @return the resolved value
-     * @throws OkaeriException if configurer is null or getting the value fails
+     * @throws OkaeriException if {@link #configurer} is null or getting the value fails
      */
     public Object get(@NonNull String key) throws OkaeriException {
 
@@ -246,7 +246,7 @@ public abstract class OkaeriConfig {
      * @param clazz target class for value
      * @param <T>   target value type
      * @return the resolved value
-     * @throws OkaeriException if configurer is null or the value processing fails
+     * @throws OkaeriException if {@link #configurer} is null or the value processing fails
      */
     public <T> T get(@NonNull String key, @NonNull Class<T> clazz) throws OkaeriException {
         return this.get(key, GenericsDeclaration.of(clazz));
@@ -260,7 +260,7 @@ public abstract class OkaeriConfig {
      * @param generics target type for value
      * @param <T>   target value type
      * @return the resolved value
-     * @throws OkaeriException if configurer is null or the value processing fails
+     * @throws OkaeriException if {@link #configurer} is null or the value processing fails
      */
     @SuppressWarnings("unchecked")
     public <T> T get(@NonNull String key, @NonNull GenericsDeclaration generics) throws OkaeriException {
@@ -292,7 +292,7 @@ public abstract class OkaeriConfig {
      *
      * @param file target file
      * @return this instance
-     * @throws OkaeriException if configurer is null or saving fails
+     * @throws OkaeriException if {@link #configurer} is null or saving fails
      */
     public OkaeriConfig save(@NonNull File file) throws OkaeriException {
         try {
@@ -309,7 +309,7 @@ public abstract class OkaeriConfig {
      *
      * @param path target path
      * @return this instance
-     * @throws OkaeriException if configurer is null or saving fails
+     * @throws OkaeriException if {@link #configurer} is null or saving fails
      */
     public OkaeriConfig save(@NonNull Path path) throws OkaeriException {
         return this.save(path.toFile());
@@ -319,7 +319,7 @@ public abstract class OkaeriConfig {
      * Saves current configuration state as {@link String}.
      *
      * @return saved configuration text
-     * @throws OkaeriException if configurer is null or saving fails
+     * @throws OkaeriException if {@link #configurer} is null or saving fails
      */
     public String saveToString() throws OkaeriException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -332,7 +332,7 @@ public abstract class OkaeriConfig {
      *
      * @param outputStream target output
      * @return this instance
-     * @throws OkaeriException if configurer is null or saving fails
+     * @throws OkaeriException if {@link #configurer} is null or saving fails
      */
     public OkaeriConfig save(@NonNull OutputStream outputStream) throws OkaeriException {
 
