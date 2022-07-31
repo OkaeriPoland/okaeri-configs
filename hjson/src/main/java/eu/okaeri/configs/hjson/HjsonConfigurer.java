@@ -3,35 +3,24 @@ package eu.okaeri.configs.hjson;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
-import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.hjson.*;
 import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+@Accessors(chain = true)
 public class HjsonConfigurer extends Configurer {
 
     private JsonObject json = new JsonObject();
-    private String commentPrefix = "# ";
-    private String sectionSeparator = SectionSeparator.NONE;
-
-    public HjsonConfigurer() {
-    }
-
-    public HjsonConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
-        this.commentPrefix = commentPrefix;
-        this.sectionSeparator = sectionSeparator;
-    }
-
-    public HjsonConfigurer(@NonNull String commentPrefix) {
-        this.commentPrefix = commentPrefix;
-    }
+    @Setter private String commentPrefix = "# ";
 
     @Override
     public List<String> getExtensions() {
@@ -124,7 +113,7 @@ public class HjsonConfigurer extends Configurer {
 
         // header
         String header = ConfigPostprocessor.createCommentOrEmpty(this.commentPrefix, declaration.getHeader());
-        this.json.setFullComment(CommentType.BOL, header.isEmpty() ? "" : (header + this.sectionSeparator));
+        this.json.setFullComment(CommentType.BOL, header);
 
         // save
         ConfigPostprocessor.of(this.json.toString(Stringify.HJSON_COMMENTS)).write(outputStream);
@@ -173,7 +162,7 @@ public class HjsonConfigurer extends Configurer {
         }
 
         String commentOrEmpty = ConfigPostprocessor.createCommentOrEmpty(this.commentPrefix, comment);
-        value.setFullComment(CommentType.BOL, commentOrEmpty.isEmpty() ? "" : (this.sectionSeparator + commentOrEmpty));
+        value.setFullComment(CommentType.BOL, commentOrEmpty);
     }
 
     @SuppressWarnings("unchecked")

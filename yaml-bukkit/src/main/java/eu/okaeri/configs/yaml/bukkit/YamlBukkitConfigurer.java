@@ -4,13 +4,14 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigLineInfo;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
-import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -18,27 +19,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+@Accessors(chain = true)
 public class YamlBukkitConfigurer extends Configurer {
 
     private YamlConfiguration config;
-    private String commentPrefix = "# ";
-    private String sectionSeparator = SectionSeparator.NONE;
-
-    public YamlBukkitConfigurer(@NonNull YamlConfiguration config, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
-        this(commentPrefix, sectionSeparator);
-        this.config = config;
-    }
-
-    public YamlBukkitConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
-        this();
-        this.commentPrefix = commentPrefix;
-        this.sectionSeparator = sectionSeparator;
-    }
-
-    public YamlBukkitConfigurer(@NonNull String sectionSeparator) {
-        this();
-        this.sectionSeparator = sectionSeparator;
-    }
+    @Setter private String commentPrefix = "# ";
 
     public YamlBukkitConfigurer(@NonNull YamlConfiguration config) {
         this.config = config;
@@ -127,44 +112,44 @@ public class YamlBukkitConfigurer extends Configurer {
 
         // postprocess
         ConfigPostprocessor.of(contents)
-                // remove all current top-level commments (bukkit may preserve header)
-                .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-                // add new comments
-                .updateLinesKeys(new YamlSectionWalker() {
-                    @Override
-                    public String update(String line, ConfigLineInfo lineInfo, List<ConfigLineInfo> path) {
+            // remove all current top-level commments (bukkit may preserve header)
+            .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
+            // add new comments
+            .updateLinesKeys(new YamlSectionWalker() {
+                @Override
+                public String update(String line, ConfigLineInfo lineInfo, List<ConfigLineInfo> path) {
 
-                        ConfigDeclaration currentDeclaration = declaration;
-                        for (int i = 0; i < (path.size() - 1); i++) {
-                            ConfigLineInfo pathElement = path.get(i);
-                            Optional<FieldDeclaration> field = currentDeclaration.getField(pathElement.getName());
-                            if (!field.isPresent()) {
-                                return line;
-                            }
-                            GenericsDeclaration fieldType = field.get().getType();
-                            if (!fieldType.isConfig()) {
-                                return line;
-                            }
-                            currentDeclaration = ConfigDeclaration.of(fieldType.getType());
-                        }
-
-                        Optional<FieldDeclaration> lineDeclaration = currentDeclaration.getField(lineInfo.getName());
-                        if (!lineDeclaration.isPresent()) {
+                    ConfigDeclaration currentDeclaration = declaration;
+                    for (int i = 0; i < (path.size() - 1); i++) {
+                        ConfigLineInfo pathElement = path.get(i);
+                        Optional<FieldDeclaration> field = currentDeclaration.getField(pathElement.getName());
+                        if (!field.isPresent()) {
                             return line;
                         }
-
-                        String[] fieldComment = lineDeclaration.get().getComment();
-                        if (fieldComment == null) {
+                        GenericsDeclaration fieldType = field.get().getType();
+                        if (!fieldType.isConfig()) {
                             return line;
                         }
-
-                        String comment = ConfigPostprocessor.createComment(YamlBukkitConfigurer.this.commentPrefix, fieldComment);
-                        return ConfigPostprocessor.addIndent(comment, lineInfo.getIndent()) + line;
+                        currentDeclaration = ConfigDeclaration.of(fieldType.getType());
                     }
-                })
-                // add header if available
-                .prependContextComment(this.commentPrefix, this.sectionSeparator, declaration.getHeader())
-                // save
-                .write(outputStream);
+
+                    Optional<FieldDeclaration> lineDeclaration = currentDeclaration.getField(lineInfo.getName());
+                    if (!lineDeclaration.isPresent()) {
+                        return line;
+                    }
+
+                    String[] fieldComment = lineDeclaration.get().getComment();
+                    if (fieldComment == null) {
+                        return line;
+                    }
+
+                    String comment = ConfigPostprocessor.createComment(YamlBukkitConfigurer.this.commentPrefix, fieldComment);
+                    return ConfigPostprocessor.addIndent(comment, lineInfo.getIndent()) + line;
+                }
+            })
+            // add header if available
+            .prependContextComment(this.commentPrefix, declaration.getHeader())
+            // save
+            .write(outputStream);
     }
 }

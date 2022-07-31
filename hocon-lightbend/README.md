@@ -56,10 +56,5 @@ Lightbend's config at the time of implementing has poor support for dynamically 
 Please use HoconLightbendConfigurer as your configurer:
 
 ```java
-// default ('# ', '\n')
 new HoconLightbendConfigurer()
-// add empty spaces between sections
-new HoconLightbendConfigurer(SectionSeparator.NEW_LINE)
-// change comment character and section separator (no space after # in comments, empty spaces between sections)
-new HoconLightbendConfigurer("#", SectionSeparator.NEW_LINE)
 ```

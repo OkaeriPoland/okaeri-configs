@@ -56,10 +56,5 @@ implementation 'eu.okaeri:okaeri-configs-yaml-snakeyaml:4.0.6'
 Please use YamlSnakeYamlConfigurer as your configurer:
 
 ```java
-// default ('# ', '')
 new YamlSnakeYamlConfigurer()
-// add empty spaces between sections
-new YamlSnakeYamlConfigurer(SectionSeparator.NEW_LINE)
-// change comment character and section separator (no space after # in comments, empty newlines)
-new YamlSnakeYamlConfigurer("#", SectionSeparator.NEW_LINE)
 ```
