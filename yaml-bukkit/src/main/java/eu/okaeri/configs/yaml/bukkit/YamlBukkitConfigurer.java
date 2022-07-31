@@ -46,6 +46,7 @@ public class YamlBukkitConfigurer extends Configurer {
 
     public YamlBukkitConfigurer() {
         this(new YamlConfiguration());
+        this.config.options().pathSeparator((char) 29);
     }
 
     @Override
