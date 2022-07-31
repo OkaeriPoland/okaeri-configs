@@ -3,13 +3,14 @@ package eu.okaeri.configs.yaml.snakeyaml;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.postprocessor.ConfigLineInfo;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
-import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -22,42 +23,21 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.function.Consumer;
 
+@Accessors(chain = true)
 public class YamlSnakeYamlConfigurer extends Configurer {
 
-    private Yaml config;
+    private Yaml yaml;
     private Map<String, Object> map = new LinkedHashMap<>();
 
-    private String commentPrefix = "# ";
-    private String sectionSeparator = SectionSeparator.NONE;
+    @Setter private String commentPrefix = "# ";
 
-    public YamlSnakeYamlConfigurer(@NonNull Yaml config, @NonNull Map<String, Object> map, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
-        this(config, commentPrefix, sectionSeparator);
+    public YamlSnakeYamlConfigurer(@NonNull Yaml yaml, @NonNull Map<String, Object> map) {
+        this.yaml = yaml;
         this.map = map;
     }
 
-    public YamlSnakeYamlConfigurer(@NonNull Yaml config, @NonNull String commentPrefix, @NonNull String sectionSeparator) {
-        this(commentPrefix, sectionSeparator);
-        this.config = config;
-    }
-
-    public YamlSnakeYamlConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
-        this();
-        this.commentPrefix = commentPrefix;
-        this.sectionSeparator = sectionSeparator;
-    }
-
-    public YamlSnakeYamlConfigurer(@NonNull String sectionSeparator) {
-        this();
-        this.sectionSeparator = sectionSeparator;
-    }
-
-    public YamlSnakeYamlConfigurer(@NonNull Yaml config, @NonNull Map<String, Object> map) {
-        this.config = config;
-        this.map = map;
-    }
-
-    public YamlSnakeYamlConfigurer(@NonNull Yaml config) {
-        this.config = config;
+    public YamlSnakeYamlConfigurer(@NonNull Yaml yaml) {
+        this.yaml = yaml;
     }
 
     public YamlSnakeYamlConfigurer() {
@@ -113,7 +93,7 @@ public class YamlSnakeYamlConfigurer extends Configurer {
     @Override
     public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         // try loading from input stream
-        this.map = this.config.load(inputStream);
+        this.map = this.yaml.load(inputStream);
         // when no map was loaded reset with empty
         if (this.map == null) this.map = new LinkedHashMap<>();
     }
@@ -122,7 +102,7 @@ public class YamlSnakeYamlConfigurer extends Configurer {
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
 
         // render to string
-        String contents = this.config.dump(this.map);
+        String contents = this.yaml.dump(this.map);
 
         // postprocess
         ConfigPostprocessor.of(contents)
@@ -162,7 +142,7 @@ public class YamlSnakeYamlConfigurer extends Configurer {
                 }
             })
             // add header if available
-            .prependContextComment(this.commentPrefix, this.sectionSeparator, declaration.getHeader())
+            .prependContextComment(this.commentPrefix, declaration.getHeader())
             // save
             .write(outputStream);
     }

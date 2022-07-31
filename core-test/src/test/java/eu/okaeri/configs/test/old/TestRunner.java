@@ -23,7 +23,7 @@ public final class TestRunner {
     public static void main(String[] args) {
 
         // bukkit
-        config("config.bukkit.yml", new YamlBukkitConfigurer("# ", ""));
+        config("config.bukkit.yml", new YamlBukkitConfigurer());
         empty("empty.bukkit.yml", new YamlBukkitConfigurer());
         inline("inline.bukkit.yml", new YamlBukkitConfigurer());
 

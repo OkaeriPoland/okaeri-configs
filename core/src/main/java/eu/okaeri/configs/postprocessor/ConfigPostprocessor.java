@@ -182,11 +182,7 @@ public class ConfigPostprocessor {
     }
 
     public ConfigPostprocessor prependContextComment(String prefix, String[] strings) {
-        return this.prependContextComment(prefix, "", strings);
-    }
-
-    public ConfigPostprocessor prependContextComment(String prefix, String separator, String[] strings) {
-        if (strings != null) this.context = createComment(prefix, strings) + separator + this.context;
+        if (strings != null) this.context = createComment(prefix, strings) + this.context;
         return this;
     }
 

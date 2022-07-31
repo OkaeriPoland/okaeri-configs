@@ -6,43 +6,32 @@ import com.typesafe.config.ConfigRenderOptions;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
-import eu.okaeri.configs.postprocessor.SectionSeparator;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.function.Predicate;
 
+@Accessors(chain = true)
 public class HoconLightbendConfigurer extends Configurer {
 
-    private ConfigRenderOptions renderOpts = ConfigRenderOptions.defaults()
+    @Setter private ConfigRenderOptions renderOpts = ConfigRenderOptions.defaults()
         .setFormatted(true)
         .setOriginComments(false)
         .setComments(true)
         .setJson(false);
 
-    private String commentPrefix = "# ";
-    private String sectionSeparator = SectionSeparator.NONE;
+    @Setter private String commentPrefix = "# ";
 
     private Map<String, Object> map = new LinkedHashMap<>();
     private Config config = ConfigFactory.parseMap(new LinkedHashMap<>());
-
-    public HoconLightbendConfigurer() {
-    }
-
-    public HoconLightbendConfigurer(@NonNull String sectionSeparator) {
-        this.sectionSeparator = sectionSeparator;
-    }
-
-    public HoconLightbendConfigurer(@NonNull String commentPrefix, @NonNull String sectionSeparator) {
-        this.commentPrefix = commentPrefix;
-        this.sectionSeparator = sectionSeparator;
-    }
 
     @Override
     public List<String> getExtensions() {
@@ -128,7 +117,7 @@ public class HoconLightbendConfigurer extends Configurer {
             for (FieldDeclaration field : declaration.getFields()) {
                 Map<String, Object> entryMap = Collections.singletonMap(field.getName(), this.getValue(field.getName()));
                 Config entryConfig = ConfigFactory.parseMap(entryMap);
-                buf.append(entryConfig.root().render(this.renderOpts)).append(this.sectionSeparator);
+                buf.append(entryConfig.root().render(this.renderOpts));
             }
         }
         // unofficial support for "empty configs" (see TestRunner in core-test)
@@ -145,7 +134,7 @@ public class HoconLightbendConfigurer extends Configurer {
                 .filter(this.isFieldDeclaredForLine(line))
                 .findAny()
                 .map(FieldDeclaration::getComment)
-                .map(comment -> this.sectionSeparator + ConfigPostprocessor.createComment(this.commentPrefix, comment) + line)
+                .map(comment -> ConfigPostprocessor.createComment(this.commentPrefix, comment) + line)
                 .orElse(line))
             // add header if available
             .prependContextComment(this.commentPrefix, declaration.getHeader())
