@@ -152,6 +152,14 @@ public class YamlBungeeConfigurer extends Configurer {
                             return line;
                         }
                         GenericsDeclaration fieldType = field.get().getType();
+                        while (fieldType.isMap() || fieldType.isCollection()) {
+                            if (fieldType.isMap()) {
+                                fieldType = fieldType.getSubtype(1);
+                                i++;
+                            } else {
+                                fieldType = fieldType.getSubtype(0);
+                            }
+                        }
                         if (!fieldType.isConfig()) {
                             return line;
                         }
