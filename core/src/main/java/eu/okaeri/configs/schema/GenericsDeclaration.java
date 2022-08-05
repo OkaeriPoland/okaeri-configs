@@ -145,6 +145,14 @@ public class GenericsDeclaration {
         return this.type.isPrimitive();
     }
 
+    public boolean isMap() {
+        return Map.class.isAssignableFrom(this.type);
+    }
+
+    public boolean isCollection() {
+        return Collection.class.isAssignableFrom(this.type);
+    }
+
     public boolean isPrimitiveWrapper() {
         return PRIMITIVE_WRAPPERS.contains(this.type);
     }
@@ -155,5 +163,12 @@ public class GenericsDeclaration {
 
     public boolean hasSubtypes() {
         return (this.subtype != null) && !this.subtype.isEmpty();
+    }
+
+    public GenericsDeclaration getSubtype(int index) {
+        if (subtype.size() <= index) {
+            throw new IllegalArgumentException("Cannot find subtype at position " + index);
+        }
+        return subtype.get(index);
     }
 }
