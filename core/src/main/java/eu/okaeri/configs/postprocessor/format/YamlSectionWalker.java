@@ -50,6 +50,17 @@ public abstract class YamlSectionWalker implements ConfigSectionWalker {
     }
 
     @Override
+    public boolean isKeyCollectionStart(final String line) {
+        String name = this.readName(line);
+        return name.charAt(0) == '-';
+    }
+
+    @Override
+    public char getCollectionStartChar() {
+        return '-';
+    }
+
+    @Override
     public String readName(String line) {
         return line.split(":", 2)[0].trim();
     }

@@ -8,6 +8,10 @@ public interface ConfigSectionWalker {
 
     boolean isKeyMultilineStart(String line);
 
+    boolean isKeyCollectionStart(String line);
+
+    char getCollectionStartChar();
+
     String readName(String line);
 
     String update(String line, ConfigLineInfo lineInfo, List<ConfigLineInfo> path);

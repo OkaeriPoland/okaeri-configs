@@ -47,10 +47,6 @@ Add dependency to the `maven` section:
 implementation 'eu.okaeri:okaeri-configs-yaml-snakeyaml:4.0.6'
 ```
 
-## Limitations
-
-- Comments do not work on the elements of Collection or Map.
-
 ## Usage
 
 Please use YamlSnakeYamlConfigurer as your configurer:

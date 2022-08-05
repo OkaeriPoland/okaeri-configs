@@ -128,6 +128,15 @@ public class ConfigPostprocessor {
         for (String line : lines) {
 
             int indent = countIndent(line);
+
+            int collectionsStartCount = 0;
+            while (walker.isKeyCollectionStart(line)) {
+                collectionsStartCount++;
+                int collectionStartCharIndex = line.indexOf(walker.getCollectionStartChar());
+                line = line.substring(0, collectionStartCharIndex) + ' ' + line.substring(collectionStartCharIndex + 1);
+                indent += 2;
+            }
+
             int change = indent - lastIndent;
             String key = walker.readName(line);
 
@@ -169,6 +178,12 @@ public class ConfigPostprocessor {
 
             lastIndent = indent;
             String updatedLine = walker.update(line, currentPath.get(currentPath.size() - 1), currentPath);
+
+            while (collectionsStartCount != 0) {
+                updatedLine = updatedLine.substring(0, indent - collectionsStartCount * 2) + walker.getCollectionStartChar() + updatedLine.substring(indent - collectionsStartCount * 2 + 1);
+                collectionsStartCount--;
+            }
+
             newContext.append(updatedLine).append("\n");
         }
 
