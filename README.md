@@ -81,7 +81,8 @@ Okaeri's configuration library is an easy way to use java classes as config adap
 @Header("#    https://github.com/OkaeriPoland/okaeri-configs            #")
 @Header("#                                                              #")
 @Header("################################################################")
-@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+// optional global key formatting (may yield unexpected names, use at own risk)
+// @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
 public class TestConfig extends OkaeriConfig {
 
     @Variable("APP_TOKEN") // use jvm property or environment variable if available
