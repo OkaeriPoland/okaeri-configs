@@ -168,6 +168,7 @@ public class TestConfig extends OkaeriConfig {
 ### With create(clazz, initializer)
 
 ```java
+// recommended
 TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
     it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
     it.withBindFile("config.yml"); // specify Path, File or pathname
