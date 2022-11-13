@@ -4,6 +4,7 @@ import eu.okaeri.commons.RomanNumeral;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.serdes.SerdesContext;
+import lombok.NonNull;
 
 public class RomanNumeralTransformer extends BidirectionalTransformer<String, RomanNumeral> {
 
@@ -13,12 +14,12 @@ public class RomanNumeralTransformer extends BidirectionalTransformer<String, Ro
     }
 
     @Override
-    public RomanNumeral leftToRight(String data, SerdesContext serdesContext) {
+    public RomanNumeral leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
         return new RomanNumeral(data);
     }
 
     @Override
-    public String rightToLeft(RomanNumeral data, SerdesContext serdesContext) {
+    public String rightToLeft(RomanNumeral data, @NonNull SerdesContext serdesContext) {
         return data.toString();
     }
 }
