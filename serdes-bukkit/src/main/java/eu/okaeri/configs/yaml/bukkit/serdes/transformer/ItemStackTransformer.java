@@ -7,8 +7,10 @@ import eu.okaeri.configs.yaml.bukkit.serdes.transformer.experimental.StringBase6
  * initialized in failsafe mode using constructor param ({@code new ItemStackSerializer(true)}).
  *
  * Example override:
+ * <pre>
  * {@code registry.register(new SerdesBukkit());}
  * {@code registry.registerExclusive(ItemStack.class, new ItemStackSerializer(true));}
+ * </pre>
  *
  * Alternatively use {@link StringBase64ItemStackTransformer} directly instead.
  */
