@@ -37,12 +37,15 @@
         <!-- hocon modules -->
         <module>hocon-lightbend</module>
 
-        <!-- additional serdes modules -->
+        <!-- serdes modules -->
         <module>serdes-bucket4j</module>
         <module>serdes-bukkit</module>
         <module>serdes-bungee</module>
         <module>serdes-commons</module>
+
+        <!-- serdes modules: okaeri-commons -->
         <module>serdes-okaeri</module>
+        <module>serdes-okaeri-bukkit</module>
     </modules>
 
     <build>
