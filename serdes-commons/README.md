@@ -35,5 +35,6 @@ implementation 'eu.okaeri:okaeri-configs-serdes-commons:4.0.6'
 | Side | Side | Type |
 |-|-|-|
 | java.lang.String | java.time.Instant | Two-side |
+| java.lang.String | java.util.Locale | Two-side |
 | java.lang.String | java.util.regex.Pattern | Two-side |
 | java.lang.String | java.time.Duration | Two-side |
