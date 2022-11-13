@@ -27,6 +27,15 @@ public class SerdesBukkit implements OkaeriSerdesPack {
         // transformers
         registry.register(new StringEnchantmentTransformer());
         registry.register(new StringPotionEffectTypeTransformer());
+        whenClass("org.bukkit.Tag", () -> registry.register(new StringTagTransformer()));
         registry.register(new StringWorldTransformer());
+    }
+
+    private static void whenClass(@NonNull String name, @NonNull Runnable runnable) {
+        try {
+            Class.forName(name);
+            runnable.run();
+        } catch (ClassNotFoundException ignored) {
+        }
     }
 }
