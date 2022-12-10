@@ -81,6 +81,24 @@ public class DeserializationData {
     }
 
     /**
+     * Gets data under specific key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     *
+     * @param key          target key
+     * @param valueType    target class for value
+     * @param defaultValue default value to return if key is not present or value is null
+     * @return transformed value or default value if key is not present or value is null
+     */
+    public <T> T getOrDefault(@NonNull String key, @NonNull Class<T> valueType, T defaultValue) {
+        if (!this.containsKey(key)) {
+            return defaultValue;
+        }
+
+        T value = this.get(key, valueType);
+        return value == null ? defaultValue : value;
+    }
+
+    /**
      * Gets collection under specific key applying type resolving a.k.a.
      * deserialization for the specified class.
      * <p>
@@ -100,6 +118,24 @@ public class DeserializationData {
     }
 
     /**
+     * Gets collection under specific key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     *
+     * @param key          target key
+     * @param genericType  target class for collection
+     * @param defaultValue default value to return if key is not present or value is null
+     * @return transformed collection or default value if key is not present or value is null
+     */
+    public <T> Collection<T> getAsCollectionOrDefault(@NonNull String key, @NonNull GenericsDeclaration genericType, Collection<T> defaultValue) {
+        if (!this.containsKey(key)) {
+            return defaultValue;
+        }
+
+        Collection<T> value = this.getAsCollection(key, genericType);
+        return value == null ? defaultValue : value;
+    }
+
+    /**
      * Gets list under specific key applying type resolving a.k.a.
      * deserialization for the specified class.
      *
@@ -111,6 +147,24 @@ public class DeserializationData {
     public <T> List<T> getAsList(@NonNull String key, @NonNull Class<T> listValueType) {
         GenericsDeclaration genericType = GenericsDeclaration.of(List.class, Collections.singletonList(listValueType));
         return (List<T>) this.getAsCollection(key, genericType);
+    }
+
+    /**
+     * Gets list under specific key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     *
+     * @param key           target key
+     * @param listValueType target type for list
+     * @param defaultValue  default value to return if key is not present or value is null
+     * @return transformed list or default value if key is not present or value is null
+     */
+    public <T> List<T> getAsListOrDefault(@NonNull String key, @NonNull Class<T> listValueType, List<T> defaultValue) {
+        if (!this.containsKey(key)) {
+            return defaultValue;
+        }
+
+        List<T> value = this.getAsList(key, listValueType);
+        return value == null ? defaultValue : value;
     }
 
     /**
@@ -132,6 +186,25 @@ public class DeserializationData {
     /**
      * Gets map under specific key applying type resolving a.k.a.
      * deserialization for the specified class.
+     *
+     * @param key          target key
+     * @param mapKeyType   target type for map keys
+     * @param mapValueType target type for map values
+     * @param defaultValue default value to return if key is not present or value is null
+     * @return transformed map or default value if key is not present or value is null
+     */
+    public <K, V> Map<K, V> getAsMapOrDefault(@NonNull String key, @NonNull Class<K> mapKeyType, @NonNull Class<V> mapValueType, Map<K, V> defaultValue) {
+        if (!this.containsKey(key)) {
+            return defaultValue;
+        }
+
+        Map<K, V> value = this.getAsMap(key, mapKeyType, mapValueType);
+        return value == null ? defaultValue : value;
+    }
+
+    /**
+     * Gets map under specific key applying type resolving a.k.a.
+     * deserialization for the specified class.
      * <p>
      * Allows to specify extended generic type that can be used
      * to resolve more complex maps, e.g. {@code Map<String, Map<Integer, SomeState>>}
@@ -148,4 +221,26 @@ public class DeserializationData {
         }
         return this.getDirect(key, genericType);
     }
+
+    /**
+     * Gets map under specific key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     * <p>
+     * Allows to specify extended generic type that can be used
+     * to resolve more complex maps, e.g. {@code Map<String, Map<Integer, SomeState>>}
+     *
+     * @param key         target key
+     * @param genericType target type declaration for map
+     * @param defaultValue default value to return if key is not present or value is null
+     * @return transformed map or default value if key is not present or value is null
+     */
+    public <K, V> Map<K, V> getAsMapOrDefault(@NonNull String key, @NonNull GenericsDeclaration genericType, Map<K, V> defaultValue) {
+        if (!this.containsKey(key)) {
+            return defaultValue;
+        }
+
+        Map<K, V> value = this.getAsMap(key, genericType);
+        return value == null ? defaultValue : value;
+    }
+
 }
