@@ -229,8 +229,8 @@ public class DeserializationData {
      * Allows to specify extended generic type that can be used
      * to resolve more complex maps, e.g. {@code Map<String, Map<Integer, SomeState>>}
      *
-     * @param key         target key
-     * @param genericType target type declaration for map
+     * @param key          target key
+     * @param genericType  target type declaration for map
      * @param defaultValue default value to return if key is not present or value is null
      * @return transformed map or default value if key is not present or value is null
      */
