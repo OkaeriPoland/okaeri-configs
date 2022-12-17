@@ -111,6 +111,11 @@ public abstract class OkaeriConfig {
      * @return this instance
      */
     public OkaeriConfig withSerdesPack(@NonNull OkaeriSerdesPack serdesPack) {
+
+        if (this.getConfigurer() == null) {
+            throw new InitializationException("configurer cannot be null");
+        }
+
         this.getConfigurer().register(serdesPack);
         return this;
     }
