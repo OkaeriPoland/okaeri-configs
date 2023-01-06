@@ -30,6 +30,19 @@ public class SerializationData {
     }
 
     /**
+     * Replaces serialization result with the new value.
+     *
+     * Use this method when in need to produce multiple
+     * types of the output from a single serializer.
+     *
+     * @param value the new serialization value
+     */
+    public void setValue(Object value) {
+        this.clear();
+        this.data.put(ObjectSerializer.VALUE, value);
+    }
+
+    /**
      * Adds value to the serialization data under specific key.
      *
      * @param key   target key
