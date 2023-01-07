@@ -32,7 +32,7 @@ public class DeserializationData {
      *
      * @return state of value object presence
      */
-    public boolean hasValue() {
+    public boolean isValue() {
         return this.containsKey(ObjectSerializer.VALUE);
     }
 
@@ -77,6 +77,33 @@ public class DeserializationData {
      */
     public <T> T getValue(@NonNull Class<T> valueType) {
         return this.get(ObjectSerializer.VALUE, valueType);
+    }
+
+    /**
+     * Gets collection under value object key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     * <p>
+     * Allows to specify extended generic type that can be used
+     * to resolve more complex collections, e.g. {@code LinkedList<Map<String, SomeState>>}
+     *
+     * @param genericType target type declaration for collection
+     * @param <T>         type of collection
+     * @return transformed collection or null
+     */
+    public <T> Collection<T> getValueAsCollection(@NonNull GenericsDeclaration genericType) {
+        return this.getAsCollection(ObjectSerializer.VALUE, genericType);
+    }
+
+    /**
+     * Gets list under value object key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     *
+     * @param listValueType target type for list
+     * @param <T>           target type for list
+     * @return transformed list or null
+     */
+    public <T> List<T> getValueAsList(@NonNull Class<T> listValueType) {
+        return this.getAsList(ObjectSerializer.VALUE, listValueType);
     }
 
     /**
