@@ -117,6 +117,14 @@ public class ConfigPostprocessor {
     }
 
     public ConfigPostprocessor updateLinesKeys(@NonNull ConfigSectionWalker walker) {
+        try {
+            return this.updateLinesKeys0(walker);
+        } catch (Exception exception) {
+            throw new RuntimeException("failed to #updateLinesKeys for context:\n" + this.context, exception);
+        }
+    }
+
+    private ConfigPostprocessor updateLinesKeys0(@NonNull ConfigSectionWalker walker) {
 
         String[] lines = this.context.split("\n");
         List<ConfigLineInfo> currentPath = new ArrayList<>();

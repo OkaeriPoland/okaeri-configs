@@ -22,6 +22,10 @@ public interface ConfigMigrationDsl {
         return new SimpleMoveMigration(fromKey, toKey);
     }
 
+    static ConfigMigration move(@NonNull String fromKey, @NonNull String toKey, @NonNull Function<Object, Object> updateFunction) {
+        return new SimpleMoveMigration(fromKey, toKey, updateFunction);
+    }
+
     static ConfigMigration supply(@NonNull String key, @NonNull Supplier supplier) {
         return new SimpleSupplyMigration(key, supplier);
     }

@@ -6,6 +6,7 @@ import eu.okaeri.configs.yaml.bukkit.serdes.itemstack.ItemStackAttachmentResolve
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.*;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringEnchantmentTransformer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringPotionEffectTypeTransformer;
+import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringTagTransformer;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringWorldTransformer;
 import lombok.NonNull;
 
@@ -20,11 +21,21 @@ public class SerdesBukkit implements OkaeriSerdesPack {
         registry.register(new ItemStackAttachmentResolver());
         registry.register(new LocationSerializer());
         registry.register(new PotionEffectSerializer());
+//        registry.register(new ShapedRecipeSerializer(JavaPlugin.getPlugin(MyPlugin.class)));
         registry.register(new VectorSerializer());
 
         // transformers
         registry.register(new StringEnchantmentTransformer());
         registry.register(new StringPotionEffectTypeTransformer());
+        whenClass("org.bukkit.Tag", () -> registry.register(new StringTagTransformer()));
         registry.register(new StringWorldTransformer());
+    }
+
+    private static void whenClass(@NonNull String name, @NonNull Runnable runnable) {
+        try {
+            Class.forName(name);
+            runnable.run();
+        } catch (ClassNotFoundException ignored) {
+        }
     }
 }

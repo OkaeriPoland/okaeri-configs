@@ -148,6 +148,17 @@ public abstract class Configurer {
         serializer.serialize(value, serializationData, (genericType == null) ? GenericsDeclaration.of(value) : genericType);
         Map<Object, Object> serializationMap = new LinkedHashMap<>(serializationData.asMap());
 
+        // replace result object (see ObjectSerializer#VALUE)
+        Object serializerValue = serializationMap.get(ObjectSerializer.VALUE);
+        if (serializerValue != null) {
+            if (serializationMap.size() == 1) {
+                return serializerValue;
+            }
+            throw new OkaeriException("magic value key is not allowed with other keys (" + serializationMap.keySet() + ")"
+                + " in the SerializationData for " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
+        }
+
+        // serialize as map
         return this.simplifyMap(serializationMap, GenericsDeclaration.of(Map.class, Collections.singletonList(String.class)), serdesContext, conservative);
     }
 
@@ -174,9 +185,11 @@ public abstract class Configurer {
 
         // deserialization
         ObjectSerializer objectSerializer = this.registry.getSerializer(targetClazz);
-        if ((object instanceof Map) && (objectSerializer != null)) {
+        if (objectSerializer != null) {
             Configurer configurer = (this.getParent() == null) ? this : this.getParent().getConfigurer();
-            DeserializationData deserializationData = new DeserializationData((Map<String, Object>) object, configurer, serdesContext);
+            DeserializationData deserializationData = (object instanceof Map)
+                ? new DeserializationData((Map<String, Object>) object, configurer, serdesContext)
+                : new DeserializationData(Collections.singletonMap(ObjectSerializer.VALUE, object), configurer, serdesContext);
             Object deserialized = objectSerializer.deserialize(deserializationData, target);
             return targetClazz.cast(deserialized);
         }

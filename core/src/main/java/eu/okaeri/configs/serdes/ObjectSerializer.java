@@ -6,6 +6,20 @@ import lombok.NonNull;
 public interface ObjectSerializer<T> {
 
     /**
+     * Magic value representing the name of the key which allows
+     * to replace the serialization result with the custom object.
+     *
+     * <strong>Warning: DO NOT USE 'THE STRING' DIRECTLY</strong>
+     *
+     * Example serialization:
+     * - serializationData.addCollection(VALUE, Arrays.asList("my", "list"), String.class);
+     *
+     * Example deserialization:
+     * - deserializationData.getAsList(VALUE, String.class)
+     */
+    String VALUE = "$$__value__$$";
+
+    /**
      * @param type the type checked for compatibility
      * @return {@code true} if serializer is able to process the {@code type}
      */

@@ -16,6 +16,15 @@ import org.bukkit.plugin.Plugin;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Not included in default {@link eu.okaeri.configs.yaml.bukkit.serdes.SerdesBukkit}
+ * due to plugin instance requirement. Register when needed as follows:
+ *
+ * <pre>
+ * {@code registry.register(new SerdesBukkit());}
+ * {@code registry.register(new ShapedRecipeSerializer(JavaPlugin.getPlugin(MyPlugin.class)));}
+ * </pre>
+ */
 @RequiredArgsConstructor
 public class ShapedRecipeSerializer implements ObjectSerializer<ShapedRecipe> {
 

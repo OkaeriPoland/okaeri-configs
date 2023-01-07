@@ -23,6 +23,90 @@ public class DeserializationData {
     }
 
     /**
+     * Checks if value object is available. Magic value
+     * represents whole deserialization object when
+     * attempting to deserialize non-map object.
+     *
+     * Use this method when in need to produce multiple
+     * types of the output from a single serializer.
+     *
+     * @return state of value object presence
+     */
+    public boolean isValue() {
+        return this.containsKey(ObjectSerializer.VALUE);
+    }
+
+    /**
+     * Gets data under value object key without any transformations.
+     * May differ slightly depending on the used Configurer backend.
+     * <p>
+     * Not recommended in the most cases. Provided without
+     * any guarantees for the shape of returned data.
+     *
+     * @return value or null
+     */
+    public Object getValueRaw() {
+        return this.getRaw(ObjectSerializer.VALUE);
+    }
+
+    /**
+     * Gets data under value object key applying type resolving a.k.a.
+     * deserialization for the specified {@link GenericsDeclaration}.
+     * <p>
+     * This one is hacky, see also:
+     * - {@link #getValue(Class)}
+     *
+     * @param genericType target type for value
+     * @param <T>         type of transformed value
+     * @return transformed value or null
+     */
+    public <T> T getValueDirect(@NonNull GenericsDeclaration genericType) {
+        return this.getDirect(ObjectSerializer.VALUE, genericType);
+    }
+
+    /**
+     * Gets data under value object key applying type resolving
+     * a.k.a. deserialization for the specified class.
+     *
+     * Use this method when in need to produce multiple
+     * types of the output from a single serializer.
+     *
+     * @param valueType target class for value
+     * @param <T>       type of transformed value
+     * @return transformed value or null
+     */
+    public <T> T getValue(@NonNull Class<T> valueType) {
+        return this.get(ObjectSerializer.VALUE, valueType);
+    }
+
+    /**
+     * Gets collection under value object key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     * <p>
+     * Allows to specify extended generic type that can be used
+     * to resolve more complex collections, e.g. {@code LinkedList<Map<String, SomeState>>}
+     *
+     * @param genericType target type declaration for collection
+     * @param <T>         type of collection
+     * @return transformed collection or null
+     */
+    public <T> Collection<T> getValueAsCollection(@NonNull GenericsDeclaration genericType) {
+        return this.getAsCollection(ObjectSerializer.VALUE, genericType);
+    }
+
+    /**
+     * Gets list under value object key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     *
+     * @param listValueType target type for list
+     * @param <T>           target type for list
+     * @return transformed list or null
+     */
+    public <T> List<T> getValueAsList(@NonNull Class<T> listValueType) {
+        return this.getAsList(ObjectSerializer.VALUE, listValueType);
+    }
+
+    /**
      * Checks if value under specific key is available.
      *
      * @param key target key
