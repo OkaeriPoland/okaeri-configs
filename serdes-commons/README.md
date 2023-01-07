@@ -16,7 +16,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-commons</artifactId>
-  <version>4.0.6</version>
+  <version>4.0.10-beta.2</version>
 </dependency>
 ```
 
@@ -25,7 +25,7 @@ Add dependency to the `dependencies` section:
 Add dependency to the `maven` section:
 
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-serdes-commons:4.0.6'
+implementation 'eu.okaeri:okaeri-configs-serdes-commons:4.0.10-beta.2'
 ```
 
 ## Supported types
@@ -35,5 +35,6 @@ implementation 'eu.okaeri:okaeri-configs-serdes-commons:4.0.6'
 | Side | Side | Type |
 |-|-|-|
 | java.lang.String | java.time.Instant | Two-side |
+| java.lang.String | java.util.Locale | Two-side |
 | java.lang.String | java.util.regex.Pattern | Two-side |
 | java.lang.String | java.time.Duration | Two-side |
