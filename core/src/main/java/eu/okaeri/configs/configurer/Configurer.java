@@ -9,12 +9,14 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.*;
 import eu.okaeri.configs.serdes.standard.StandardSerdes;
+import eu.okaeri.configs.util.UnsafeUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -138,6 +140,17 @@ public abstract class Configurer {
 
             if (value instanceof Map) {
                 return this.simplifyMap((Map<Object, Object>) value, genericType, serdesContext, conservative);
+            }
+
+            if (value instanceof Serializable) {
+
+                ConfigDeclaration declaration = ConfigDeclaration.of(value);
+                SerializationData data = new SerializationData(this, serdesContext);
+
+                declaration.getFields().forEach(field -> data.add(field.getName(), field.getValue(), field.getType()));
+                LinkedHashMap<Object, Object> serializationMap = new LinkedHashMap<>(data.asMap());
+
+                return this.simplifyMap(serializationMap, GenericsDeclaration.of(Map.class, Collections.singletonList(String.class)), serdesContext, conservative);
             }
 
             throw new OkaeriException("cannot simplify type " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
@@ -307,6 +320,39 @@ public abstract class Configurer {
                     Object doubleTransformed = stepTwoTransformer.transform(transformed, serdesContext);
                     return targetClazz.cast(doubleTransformed);
                 }
+            }
+
+            // attempt serializable construction
+            if ((object instanceof Map) && Serializable.class.isAssignableFrom(targetClazz)) {
+
+                T serializableInstance = UnsafeUtil.allocateInstance(targetClazz);
+                ConfigDeclaration declaration = ConfigDeclaration.of(targetClazz, serializableInstance);
+
+                Map serializableMap = this.resolveType(
+                    object, source, Map.class,
+                    GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext
+                );
+
+                for (FieldDeclaration field : declaration.getFields()) {
+
+                    Object serializedValue = serializableMap.get(field.getName());
+                    if (serializedValue == null) {
+                        continue;
+                    }
+
+                    Object deserializedValue = this.resolveType(
+                        serializedValue, GenericsDeclaration.of(serializedValue),
+                        field.getType().getType(), field.getType(), SerdesContext.of(this, field)
+                    );
+
+                    try {
+                        field.getField().set(serializableInstance, deserializedValue);
+                    } catch (IllegalAccessException exception) {
+                        throw new OkaeriException("cannot set field of serializable " + field, exception);
+                    }
+                }
+
+                return serializableInstance;
             }
 
             // no more known options, try casting

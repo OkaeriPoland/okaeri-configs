@@ -26,7 +26,7 @@ public class DeserializationData {
      * Checks if value object is available. Magic value
      * represents whole deserialization object when
      * attempting to deserialize non-map object.
-     *
+     * <p>
      * Use this method when in need to produce multiple
      * types of the output from a single serializer.
      *
@@ -67,7 +67,7 @@ public class DeserializationData {
     /**
      * Gets data under value object key applying type resolving
      * a.k.a. deserialization for the specified class.
-     *
+     * <p>
      * Use this method when in need to produce multiple
      * types of the output from a single serializer.
      *

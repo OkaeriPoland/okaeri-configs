@@ -31,7 +31,7 @@ public class SerializationData {
 
     /**
      * Replaces serialization result with the new value.
-     *
+     * <p>
      * Use this method when in need to produce multiple
      * types of the output from a single serializer.
      *

@@ -23,6 +23,10 @@ public class ConfigDeclaration {
     private Class<?> type;
 
     public static ConfigDeclaration of(@NonNull Class<?> clazz, OkaeriConfig config) {
+        return of(clazz, (Object) config);
+    }
+
+    public static ConfigDeclaration of(@NonNull Class<?> clazz, Object object) {
 
         ConfigDeclaration template = DECLARATION_CACHE.computeIfAbsent(clazz, (klass) -> {
             ConfigDeclaration declaration = new ConfigDeclaration();
@@ -41,7 +45,7 @@ public class ConfigDeclaration {
 
         declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
             .filter(field -> !field.getName().startsWith("this$"))
-            .map(field -> FieldDeclaration.of(declaration, field, config))
+            .map(field -> FieldDeclaration.of(declaration, field, object))
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(FieldDeclaration::getName, field -> field, (u, v) -> {
                 throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
@@ -52,6 +56,10 @@ public class ConfigDeclaration {
 
     public static ConfigDeclaration of(@NonNull OkaeriConfig config) {
         return of(config.getClass(), config);
+    }
+
+    public static ConfigDeclaration of(@NonNull Object object) {
+        return of(object.getClass(), object);
     }
 
     public static ConfigDeclaration of(@NonNull Class<?> clazz) {
