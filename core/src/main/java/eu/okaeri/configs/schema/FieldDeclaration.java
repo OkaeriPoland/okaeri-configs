@@ -47,6 +47,10 @@ public class FieldDeclaration {
                 return null;
             }
 
+            if (Modifier.isTransient(field.getModifiers())) {
+                return null;
+            }
+
             CustomKey customKey = field.getAnnotation(CustomKey.class);
             if (customKey != null) {
                 declaration.setName("".equals(customKey.value()) ? field.getName() : customKey.value());
