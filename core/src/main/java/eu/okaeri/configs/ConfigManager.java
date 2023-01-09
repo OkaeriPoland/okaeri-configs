@@ -5,12 +5,11 @@ import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
+import eu.okaeri.configs.util.UnsafeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -30,20 +29,7 @@ public final class ConfigManager {
     }
 
     public static <T extends OkaeriConfig> T createUnsafe(@NonNull Class<T> clazz) throws OkaeriException {
-
-        T config;
-        try {
-            config = clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException exception) {
-            try {
-                //noinspection unchecked
-                config = (T) allocateInstance(clazz);
-            } catch (Exception exception1) {
-                throw new OkaeriException("failed to create " + clazz + " instance, neither default constructor available, nor unsafe succeeded");
-            }
-        }
-
-        return initialize(config);
+        return initialize(UnsafeUtil.allocateInstance(clazz));
     }
 
     public static <T extends OkaeriConfig> T create(@NonNull Class<T> clazz, @NonNull OkaeriConfigInitializer initializer) throws OkaeriException {
@@ -101,14 +87,5 @@ public final class ConfigManager {
     public static <T extends OkaeriConfig> T initialize(@NonNull T config) {
         config.updateDeclaration();
         return config;
-    }
-
-    private static Object allocateInstance(Class<?> clazz) throws Exception {
-        Class<?> unsafeClazz = Class.forName("sun.misc.Unsafe");
-        Field theUnsafeField = unsafeClazz.getDeclaredField("theUnsafe");
-        theUnsafeField.setAccessible(true);
-        Object unsafeInstance = theUnsafeField.get(null);
-        Method allocateInstance = unsafeClazz.getDeclaredMethod("allocateInstance", Class.class);
-        return allocateInstance.invoke(unsafeInstance, clazz);
     }
 }
