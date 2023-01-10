@@ -152,7 +152,7 @@ public abstract class Configurer {
         Object serializerValue = serializationMap.get(ObjectSerializer.VALUE);
         if (serializerValue != null) {
             if (serializationMap.size() == 1) {
-                return serializerValue;
+                return this.simplify(serializerValue, GenericsDeclaration.of(serializerValue), serdesContext, conservative);
             }
             throw new OkaeriException("magic value key is not allowed with other keys (" + serializationMap.keySet() + ")"
                 + " in the SerializationData for " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
