@@ -37,10 +37,118 @@ public class SerializationData {
      *
      * @param value the new serialization value
      */
+    public void setValueRaw(Object value) {
+        this.clear();
+        this.addRaw(ObjectSerializer.VALUE, value);
+    }
+
+    /**
+     * Replaces serialization result with the new value.
+     * Provided value is simplified using attached Configurer.
+     * <p>
+     * Use this method when in need to produce multiple
+     * types of the output from a single serializer.
+     *
+     * @param value the new serialization value
+     */
     public void setValue(Object value) {
         this.clear();
-        this.data.put(ObjectSerializer.VALUE, value);
+        this.add(ObjectSerializer.VALUE, value);
     }
+
+    /**
+     * Replaces serialization result with the new value.
+     * Provided value is simplified using attached Configurer.
+     * <p>
+     * Allows to provide {@link GenericsDeclaration} for simplification process.
+     * If possible, it is recommended to use one of generic methods:
+     * - {@link #setValue(Object, Class)}
+     * - {@link #setValueArray(Object[], Class)}
+     * - {@link #setValueCollection(Collection, Class)}
+     * There also is dedicated method for complex collections:
+     * - {@link #setValueCollection(Collection, GenericsDeclaration)}
+     *
+     * @param value       target value
+     * @param genericType type declaration of value for simplification process
+     */
+    public void setValue(Object value, @NonNull GenericsDeclaration genericType) {
+        this.add(ObjectSerializer.VALUE, value, genericType);
+    }
+
+    /**
+     * Replaces serialization result with the new value.
+     * Provided value is simplified using attached Configurer.
+     * <p>
+     * This method allows to narrow target simplification type
+     * and is recommended to be used with non-primitive classes.
+     * <p>
+     * Specifying target simplification type allows to make sure
+     * correct serializer is used, e.g. interface type instead
+     * of some implementation type that would otherwise inferred.
+     *
+     * @param value     target value
+     * @param valueType type of value for simplification process
+     * @param <T>       type of value
+     */
+    public <T> void setValue(Object value, @NonNull Class<T> valueType) {
+        this.add(ObjectSerializer.VALUE, value, valueType);
+    }
+
+    /**
+     * Replaces serialization result with the new collection of values.
+     * Provided collection of values is simplified using attached Configurer.
+     * <p>
+     * Allows to provide {@link GenericsDeclaration} for simplification process.
+     * For simple collections it is advised to use {@link #addCollection(String, Collection, Class)}
+     * <p>
+     * This method is intended to be used when adding complex generic
+     * types as for example {@code List<Map<String, SomeState>>}.
+     *
+     * @param collection  target collection
+     * @param genericType type declaration of value for simplification process
+     */
+    public void setValueCollection( Collection<?> collection, @NonNull GenericsDeclaration genericType) {
+        this.addCollection(ObjectSerializer.VALUE, collection, genericType);
+    }
+
+    /**
+     * Replaces serialization result with the new collection of values.
+     * Provided collection of values is simplified using attached Configurer.
+     * <p>
+     * This method allows to narrow target simplification type
+     * and is recommended to be used with collections.
+     * <p>
+     * Specifying target simplification type allows to make sure
+     * correct serializer is used, e.g. interface type instead
+     * of some implementation type that would otherwise inferred.
+     *
+     * @param collection          target collection
+     * @param collectionValueType type of collection for simplification process
+     * @param <T>                 type of collection values
+     */
+    public <T> void setValueCollection(Collection<?> collection, @NonNull Class<T> collectionValueType) {
+        this.addCollection(ObjectSerializer.VALUE, collection, collectionValueType);
+    }
+
+    /**
+     * Replaces serialization result with the new array of values.
+     * Provided array of values is simplified using attached Configurer.
+     * <p>
+     * This method allows to narrow target simplification type
+     * and is recommended to be used with arrays.
+     * <p>
+     * Specifying target simplification type allows to make sure
+     * correct serializer is used, e.g. interface type instead
+     * of some implementation type that would otherwise inferred.
+     *
+     * @param array          target array
+     * @param arrayValueType type of array for simplification process
+     * @param <T>            type of array values
+     */
+    public <T> void setValueArray(T[] array, @NonNull Class<T> arrayValueType) {
+        this.addArray(ObjectSerializer.VALUE, array, arrayValueType);
+    }
+
 
     /**
      * Adds value to the serialization data under specific key.
@@ -61,7 +169,7 @@ public class SerializationData {
      */
     public void add(@NonNull String key, Object value) {
         value = this.configurer.simplify(value, null, SerdesContext.of(this.configurer), true);
-        this.data.put(key, value);
+        this.addRaw(key, value);
     }
 
     /**
@@ -72,6 +180,7 @@ public class SerializationData {
      * If possible, it is recommended to use one of generic methods:
      * - {@link #add(String, Object, Class)}
      * - {@link #addCollection(String, Collection, Class)}
+     * - {@link #addArray(String, Object[], Class)}
      * - {@link #addAsMap(String, Map, Class, Class)}
      * There are also dedicated methods for complex collections/maps:
      * - {@link #addCollection(String, Collection, GenericsDeclaration)}
@@ -83,7 +192,7 @@ public class SerializationData {
      */
     public void add(@NonNull String key, Object value, @NonNull GenericsDeclaration genericType) {
         value = this.configurer.simplify(value, genericType, SerdesContext.of(this.configurer), true);
-        this.data.put(key, value);
+        this.addRaw(key, value);
     }
 
     /**
@@ -123,7 +232,7 @@ public class SerializationData {
      */
     public void addCollection(@NonNull String key, Collection<?> collection, @NonNull GenericsDeclaration genericType) {
         Object object = this.configurer.simplifyCollection(collection, genericType, SerdesContext.of(this.configurer), true);
-        this.data.put(key, object);
+        this.addRaw(key, object);
     }
 
     /**
@@ -184,7 +293,7 @@ public class SerializationData {
     @SuppressWarnings("unchecked")
     public void addAsMap(@NonNull String key, Map<?, ?> map, @NonNull GenericsDeclaration genericType) {
         Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, SerdesContext.of(this.configurer), true);
-        this.data.put(key, object);
+        this.addRaw(key, object);
     }
 
     /**
@@ -221,7 +330,7 @@ public class SerializationData {
      */
     public void addFormatted(@NonNull String key, @NonNull String format, Object value) {
         if (value == null) {
-            this.data.put(key, null);
+            this.addRaw(key, null);
             return;
         }
         this.add(key, String.format(format, value));
