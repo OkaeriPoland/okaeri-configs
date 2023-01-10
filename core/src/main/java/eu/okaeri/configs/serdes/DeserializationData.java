@@ -106,6 +106,7 @@ public class DeserializationData {
         return this.getAsList(ObjectSerializer.VALUE, listValueType);
     }
 
+
     /**
      * Checks if value under specific key is available.
      *
@@ -127,6 +128,9 @@ public class DeserializationData {
      * @return value or null
      */
     public Object getRaw(@NonNull String key) {
+        if (!this.isValue() && ObjectSerializer.VALUE.equals(key)) {
+            return this.asMap();
+        }
         return this.data.get(key);
     }
 
@@ -146,7 +150,7 @@ public class DeserializationData {
      */
     @SuppressWarnings("unchecked")
     public <T> T getDirect(@NonNull String key, @NonNull GenericsDeclaration genericType) {
-        Object object = this.data.get(key);
+        Object object = this.getRaw(key);
         return (T) this.configurer.resolveType(object, null, genericType.getType(), genericType, SerdesContext.of(this.configurer));
     }
 
@@ -160,7 +164,7 @@ public class DeserializationData {
      * @return transformed value or null
      */
     public <T> T get(@NonNull String key, @NonNull Class<T> valueType) {
-        Object object = this.data.get(key);
+        Object object = this.getRaw(key);
         return this.configurer.resolveType(object, null, valueType, null, SerdesContext.of(this.configurer));
     }
 
