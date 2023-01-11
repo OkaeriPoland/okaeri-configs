@@ -156,8 +156,8 @@ public class TestConfig extends OkaeriConfig {
         /* ... */
     }
 
-    @Exclude
-    private Instant start = Instant.now();
+    // in-memory only field
+    private transient Instant start = Instant.now();
 
     /* ... */
 }
@@ -191,7 +191,8 @@ TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
 
 ## Supported types
 
-- Subconfigs: Any config can be used in the fields of another (`OkaeriConfig`)
+- Subconfigs: Any OkaeriConfig class can be used in the field of another
+- Serializable: Treated similarly to subconfigs but now with less bloat
 - Basic Java types: Boolean, Byte, Character, Double, Float, Integer, Long, Short, String
 - Primitives: boolean, byte, char, double, float, int, long, short
 - Math types: `java.math.BigInteger`, `java.math.BigDecimal`
