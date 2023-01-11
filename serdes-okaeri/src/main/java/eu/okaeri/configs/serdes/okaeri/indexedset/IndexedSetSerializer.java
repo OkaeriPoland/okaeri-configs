@@ -59,7 +59,7 @@ public class IndexedSetSerializer implements ObjectSerializer<IndexedSet> {
         for (Object key : set.keySet()) {
 
             // validate that element key is viable for transformation to string
-            if (!configurer.isToStringObject(key, keyType)) {
+            if (!configurer.isToStringObject(key, keyType, data.getContext())) {
                 throw new IllegalArgumentException("Cannot transform IndexedSet's key to string: " + key + " [" + key.getClass() + "]");
             }
 

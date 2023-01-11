@@ -56,12 +56,42 @@ public abstract class Configurer {
 
     public abstract Object remove(@NonNull String key);
 
-    public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
-        if (object instanceof Class) {
-            Class<?> clazzObject = (Class<?>) object;
-            return clazzObject.isEnum() || ((genericType != null) && this.registry.canTransform(genericType, GenericsDeclaration.of(String.class)));
+    public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType, SerdesContext serdesContext) {
+
+        if (!(object instanceof Class)) {
+            return object.getClass().isEnum() || this.isToStringObject(object.getClass(), genericType, serdesContext);
         }
-        return object.getClass().isEnum() || this.isToStringObject(object.getClass(), genericType);
+
+        Class<?> clazzObject = (Class<?>) object;
+        if (clazzObject.isEnum()) {
+            return true;
+        }
+
+        if (genericType == null) {
+            return false;
+        }
+
+        if (this.registry.canTransform(genericType, GenericsDeclaration.of(String.class))) {
+            return true;
+        }
+
+        List<ObjectTransformer> transformersFrom = this.getRegistry().getTransformersFrom(genericType);
+        for (ObjectTransformer stepOneTransformer : transformersFrom) {
+
+            GenericsDeclaration stepOneTarget = stepOneTransformer.getPair().getTo();
+            ObjectTransformer stepTwoTransformer = this.getRegistry().getTransformer(stepOneTarget, GenericsDeclaration.of(String.class));
+
+            if (stepTwoTransformer != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Deprecated
+    public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
+        return this.isToStringObject(object, genericType, SerdesContext.of(this));
     }
 
     @SuppressWarnings("unchecked")
@@ -125,12 +155,12 @@ public abstract class Configurer {
 
             if (genericType == null) {
                 GenericsDeclaration valueDeclaration = GenericsDeclaration.of(value);
-                if (this.isToStringObject(serializerType, valueDeclaration)) {
+                if (this.isToStringObject(serializerType, valueDeclaration, serdesContext)) {
                     return this.resolveType(value, genericType, String.class, null, serdesContext);
                 }
             }
 
-            if (this.isToStringObject(serializerType, genericType)) {
+            if (this.isToStringObject(serializerType, genericType, serdesContext)) {
                 return this.resolveType(value, genericType, String.class, null, serdesContext);
             }
 
