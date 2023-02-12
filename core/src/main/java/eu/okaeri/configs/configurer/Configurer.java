@@ -192,10 +192,9 @@ public abstract class Configurer {
         Map<Object, Object> serializationMap = new LinkedHashMap<>(serializationData.asMap());
 
         // replace result object (see ObjectSerializer#VALUE)
-        Object serializerValue = serializationMap.get(ObjectSerializer.VALUE);
-        if (serializerValue != null) {
+        if (serializationMap.containsKey(ObjectSerializer.VALUE)) {
             if (serializationMap.size() == 1) {
-                return serializerValue;
+                return serializationMap.get(ObjectSerializer.VALUE);
             }
             throw new OkaeriException("magic value key is not allowed with other keys (" + serializationMap.keySet() + ")"
                 + " in the SerializationData for " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
