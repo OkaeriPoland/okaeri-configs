@@ -4,6 +4,7 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Header;
 import eu.okaeri.configs.annotation.Headers;
 import eu.okaeri.configs.annotation.Names;
+import eu.okaeri.configs.annotation.Include;
 import lombok.Data;
 import lombok.NonNull;
 
@@ -42,14 +43,18 @@ public class ConfigDeclaration {
         declaration.setHeader(template.getHeader());
         declaration.setReal(template.isReal());
         declaration.setType(template.getType());
+        declaration.setFieldMap(readFields(clazz, declaration, object));
 
-        declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
-            .filter(field -> !field.getName().startsWith("this$"))
-            .map(field -> FieldDeclaration.of(declaration, field, object))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toMap(FieldDeclaration::getName, field -> field, (u, v) -> {
-                throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
-            }, LinkedHashMap::new)));
+        Include[] subs = clazz.getDeclaredAnnotationsByType(Include.class);
+        for (Include sub : subs) {
+            Map<String, FieldDeclaration> subFields = readFields(sub.value(), declaration, object);
+            subFields.forEach((key, value) -> {
+                if (declaration.getFieldMap().containsKey(key)) {
+                    return;
+                }
+                declaration.getFieldMap().put(key, value);
+            });
+        }
 
         return declaration;
     }
@@ -95,6 +100,16 @@ public class ConfigDeclaration {
             names = clazz.getAnnotation(Names.class);
         }
         return names;
+    }
+
+    private static LinkedHashMap<String, FieldDeclaration> readFields(@NonNull Class<?> clazz, @NonNull ConfigDeclaration declaration, Object object) {
+        return Arrays.stream(clazz.getDeclaredFields())
+            .filter(field -> !field.getName().startsWith("this$"))
+            .map(field -> FieldDeclaration.of(declaration, field, object))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toMap(FieldDeclaration::getName, field -> field, (u, v) -> {
+                throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
+            }, LinkedHashMap::new));
     }
 
     public Optional<FieldDeclaration> getField(@NonNull String key) {
