@@ -16,7 +16,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-okaeri</artifactId>
-  <version>5.0.0-beta.3</version>
+  <version>5.0.0-beta.4</version>
 </dependency>
 ```
 
@@ -25,7 +25,7 @@ Add dependency to the `dependencies` section:
 Add dependency to the `maven` section:
 
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-serdes-okaeri:5.0.0-beta.3'
+implementation 'eu.okaeri:okaeri-configs-serdes-okaeri:5.0.0-beta.4'
 ```
 
 ## Supported types
