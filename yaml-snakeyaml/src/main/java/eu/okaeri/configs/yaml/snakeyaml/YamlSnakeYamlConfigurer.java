@@ -41,12 +41,23 @@ public class YamlSnakeYamlConfigurer extends Configurer {
     }
 
     public YamlSnakeYamlConfigurer() {
-        this(new Yaml(
-            new Constructor(),
-            apply(new Representer(), (representer) -> representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)),
-            apply(new DumperOptions(), (dumperOptions) -> dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)),
-            new LoaderOptions(),
-            new Resolver()));
+        this(createYaml());
+    }
+
+    private static Yaml createYaml() {
+
+        LoaderOptions loaderOptions = new LoaderOptions();
+        Constructor constructor = new Constructor(loaderOptions);
+
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+        Representer representer = new Representer(dumperOptions);
+        representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+        Resolver resolver = new Resolver();
+
+        return new Yaml(constructor, representer, dumperOptions, loaderOptions, resolver);
     }
 
     private static <T> T apply(T object, Consumer<T> consumer) {
