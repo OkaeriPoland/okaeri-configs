@@ -6,16 +6,16 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>5.0.0-beta.4</version>
+        <version>5.0.0-beta.5</version>
     </parent>
     <artifactId>okaeri-configs-yaml-bukkit</artifactId>
-    <version>5.0.0-beta.4</version>
+    <version>5.0.0-beta.5</version>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>5.0.0-beta.4</version>
+            <version>5.0.0-beta.5</version>
             <scope>compile</scope>
         </dependency>
 
