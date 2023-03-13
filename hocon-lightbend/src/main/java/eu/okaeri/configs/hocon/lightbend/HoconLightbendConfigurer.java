@@ -127,7 +127,7 @@ public class HoconLightbendConfigurer extends Configurer {
 
         // postprocess
         ConfigPostprocessor.of(buf.toString())
-            // remove all current commments
+            // remove all current comments
             .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
             // add new comments
             .updateLines((line) -> declaration.getFields().stream()

@@ -117,7 +117,7 @@ public class YamlSnakeYamlConfigurer extends Configurer {
 
         // postprocess
         ConfigPostprocessor.of(contents)
-            // remove all current top-level commments (bukkit may preserve header)
+            // remove all current top-level comments (bukkit may preserve header)
             .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
             // add new comments
             .updateLinesKeys(new YamlSectionWalker() {
