@@ -141,6 +141,7 @@ public class ConfigPostprocessor {
                 int index = line.indexOf(walker.getCollectionStartChar());
                 line = replaceChar(line, index, ' ');
                 indent += 2;
+                multilineSkip = false;
             }
 
             int change = indent - lastIndent;
