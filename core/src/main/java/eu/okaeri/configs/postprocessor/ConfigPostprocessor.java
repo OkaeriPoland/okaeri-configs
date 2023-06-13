@@ -129,11 +129,17 @@ public class ConfigPostprocessor {
 
             int indent = countIndent(line);
 
-            int collectionsStartCount = 0;
+            int collections = 0;
+
+            /*
+            Replace start collection chars to whitespaces
+            Add 2 whitespaces to indent
+            Example: "  - key:" to "    key:"
+            */
             while (walker.isKeyCollectionStart(line)) {
-                collectionsStartCount++;
-                int collectionStartCharIndex = line.indexOf(walker.getCollectionStartChar());
-                line = line.substring(0, collectionStartCharIndex) + ' ' + line.substring(collectionStartCharIndex + 1);
+                collections++;
+                int index = line.indexOf(walker.getCollectionStartChar());
+                line = replaceChar(line, index, ' ');
                 indent += 2;
             }
 
@@ -179,9 +185,10 @@ public class ConfigPostprocessor {
             lastIndent = indent;
             String updatedLine = walker.update(line, currentPath.get(currentPath.size() - 1), currentPath);
 
-            while (collectionsStartCount != 0) {
-                updatedLine = updatedLine.substring(0, indent - collectionsStartCount * 2) + walker.getCollectionStartChar() + updatedLine.substring(indent - collectionsStartCount * 2 + 1);
-                collectionsStartCount--;
+            // Replace whitespaces to start collection chars
+            while (collections != 0) {
+                updatedLine = replaceChar(updatedLine, indent - collections * 2, walker.getCollectionStartChar());
+                collections--;
             }
 
             newContext.append(updatedLine).append("\n");
@@ -189,6 +196,11 @@ public class ConfigPostprocessor {
 
         this.context = newContext.toString();
         return this;
+    }
+
+    private String replaceChar(String line, int index, char c) {
+        line = line.substring(0, index) + c + line.substring(index + 1);
+        return line;
     }
 
     public ConfigPostprocessor updateContext(@NonNull ConfigContextManipulator manipulator) {
