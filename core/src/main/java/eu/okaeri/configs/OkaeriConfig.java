@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 
 public abstract class OkaeriConfig {
 
-    public static final Map<Class<? extends OkaeriConfig>, String> LANGUAGES = new ConcurrentHashMap<>();
+    public static String LANGUAGE = null;
 
     @Setter
     private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
