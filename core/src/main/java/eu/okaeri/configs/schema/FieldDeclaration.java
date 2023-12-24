@@ -71,7 +71,7 @@ public class FieldDeclaration {
 
             Variable variable = field.getAnnotation(Variable.class);
             declaration.setVariable(variable);
-            declaration.setComment(readComments(field));
+            declaration.setComment(readComments(field, config.getType()));
             declaration.setType(GenericsDeclaration.of(field.getGenericType()));
             declaration.setField(field);
 
@@ -96,8 +96,8 @@ public class FieldDeclaration {
         return declaration;
     }
 
-    private static String[] readComments(Field field) {
-        String commentsLanguage = OkaeriConfig.LANGUAGES.get(field.getDeclaringClass());
+    private static String[] readComments(Field field, Class<?> configType) {
+        String commentsLanguage = OkaeriConfig.LANGUAGES.get(configType);
 
         Comments comments = field.getAnnotation(Comments.class);
         if (comments != null) {
