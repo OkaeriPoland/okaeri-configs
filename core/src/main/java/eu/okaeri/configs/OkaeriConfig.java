@@ -51,6 +51,9 @@ public abstract class OkaeriConfig {
     @Setter(AccessLevel.PROTECTED)
     private boolean removeOrphans = false;
 
+    @Getter
+    private String commentsLanguage;
+
     /**
      * Creates config updating the declaration.
      */
@@ -181,7 +184,8 @@ public abstract class OkaeriConfig {
      * @return this instance
      */
     public OkaeriConfig withCommentsLanguage(String commentsLanguage) {
-        this.declaration.setCommentsLanguage(commentsLanguage);
+        this.commentsLanguage = commentsLanguage;
+        updateDeclaration();
         return this;
     }
 
