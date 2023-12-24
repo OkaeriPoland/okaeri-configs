@@ -31,9 +31,6 @@ public class ConfigDeclaration {
             declaration.setHeader(readHeader(klass));
             declaration.setReal(OkaeriConfig.class.isAssignableFrom(klass));
             declaration.setType(klass);
-            if (config != null) {
-                declaration.setCommentsLanguage(config.getCommentsLanguage());
-            }
             return declaration;
         });
 
@@ -42,6 +39,11 @@ public class ConfigDeclaration {
         declaration.setHeader(template.getHeader());
         declaration.setReal(template.isReal());
         declaration.setType(template.getType());
+
+        if (config != null) {
+            declaration.setCommentsLanguage(config.getCommentsLanguage());
+            template.setCommentsLanguage(config.getCommentsLanguage());
+        }
 
         declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
             .filter(field -> !field.getName().startsWith("this$"))
