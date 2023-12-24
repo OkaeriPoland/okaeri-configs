@@ -21,8 +21,13 @@ public class ConfigDeclaration {
     private Map<String, FieldDeclaration> fieldMap;
     private boolean real;
     private Class<?> type;
+    private String language;
 
     public static ConfigDeclaration of(@NonNull Class<?> clazz, OkaeriConfig config) {
+        ConfigDeclaration current = DECLARATION_CACHE.get(clazz);
+        if (current != null && !Objects.equals(current.getLanguage(), OkaeriConfig.LANGUAGE)) {
+            DECLARATION_CACHE.remove(clazz);
+        }
 
         ConfigDeclaration template = DECLARATION_CACHE.computeIfAbsent(clazz, (klass) -> {
             ConfigDeclaration declaration = new ConfigDeclaration();
@@ -30,6 +35,7 @@ public class ConfigDeclaration {
             declaration.setHeader(readHeader(klass));
             declaration.setReal(OkaeriConfig.class.isAssignableFrom(klass));
             declaration.setType(klass);
+            declaration.setLanguage(OkaeriConfig.LANGUAGE);
             return declaration;
         });
 
@@ -38,6 +44,7 @@ public class ConfigDeclaration {
         declaration.setHeader(template.getHeader());
         declaration.setReal(template.isReal());
         declaration.setType(template.getType());
+        declaration.setLanguage(template.getLanguage());
 
         declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
             .filter(field -> !field.getName().startsWith("this$"))
