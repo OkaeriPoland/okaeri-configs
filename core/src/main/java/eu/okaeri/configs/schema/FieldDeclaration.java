@@ -34,11 +34,17 @@ public class FieldDeclaration {
     private boolean variableHide;
     private Field field;
     private Object object;
+    private String language;
 
     @SneakyThrows
     public static FieldDeclaration of(@NonNull ConfigDeclaration config, @NonNull Field field, Object object) {
 
         CacheEntry cache = new CacheEntry(config.getType(), field.getName());
+        FieldDeclaration current = DECLARATION_CACHE.get(cache);
+        if (current != null && !Objects.equals(current.getLanguage(), OkaeriConfig.LANGUAGE)) {
+            DECLARATION_CACHE.remove(cache);
+        }
+
         FieldDeclaration template = DECLARATION_CACHE.computeIfAbsent(cache, (entry) -> {
 
             FieldDeclaration declaration = new FieldDeclaration();
@@ -74,6 +80,7 @@ public class FieldDeclaration {
             declaration.setComment(readComments(field));
             declaration.setType(GenericsDeclaration.of(field.getGenericType()));
             declaration.setField(field);
+            declaration.setLanguage(OkaeriConfig.LANGUAGE);
 
             return declaration;
         });
