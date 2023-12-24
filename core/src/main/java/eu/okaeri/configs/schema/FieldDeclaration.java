@@ -33,6 +33,7 @@ public class FieldDeclaration {
     private boolean variableHide;
     private Field field;
     private Object object;
+    private String commentsLanguage;
 
     @SneakyThrows
     public static FieldDeclaration of(@NonNull ConfigDeclaration config, @NonNull Field field, Object object) {
@@ -70,9 +71,10 @@ public class FieldDeclaration {
 
             Variable variable = field.getAnnotation(Variable.class);
             declaration.setVariable(variable);
-            declaration.setComment(readComments(field));
+            declaration.setComment(readComments(field, declaration.getCommentsLanguage()));
             declaration.setType(GenericsDeclaration.of(field.getGenericType()));
             declaration.setField(field);
+            declaration.setCommentsLanguage(config.getCommentsLanguage());
 
             return declaration;
         });
@@ -95,19 +97,24 @@ public class FieldDeclaration {
         return declaration;
     }
 
-    private static String[] readComments(Field field) {
+    private static String[] readComments(Field field, String commentsLanguage) {
 
         Comments comments = field.getAnnotation(Comments.class);
         if (comments != null) {
             List<String> commentList = new ArrayList<>();
             for (Comment comment : comments.value()) {
-                commentList.addAll(Arrays.asList(comment.value()));
+                if (comment.language().equals("unspecified")
+                    || comment.language().equals(commentsLanguage)) {
+                    commentList.addAll(Arrays.asList(comment.value()));
+                }
             }
             return commentList.toArray(new String[0]);
         }
 
         Comment comment = field.getAnnotation(Comment.class);
-        if (comment != null) {
+        if (comment != null
+            && (comment.language().equals("unspecified")
+                || comment.language().equals(commentsLanguage))) {
             return comment.value();
         }
 

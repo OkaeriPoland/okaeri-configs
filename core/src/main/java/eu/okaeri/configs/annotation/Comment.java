@@ -7,4 +7,5 @@ import java.lang.annotation.*;
 @Repeatable(Comments.class)
 public @interface Comment {
     String[] value() default "";
+    String language() default "unspecified";
 }

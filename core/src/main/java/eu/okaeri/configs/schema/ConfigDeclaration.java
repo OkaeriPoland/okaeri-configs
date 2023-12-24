@@ -21,6 +21,7 @@ public class ConfigDeclaration {
     private Map<String, FieldDeclaration> fieldMap;
     private boolean real;
     private Class<?> type;
+    private String commentsLanguage;
 
     public static ConfigDeclaration of(@NonNull Class<?> clazz, OkaeriConfig config) {
 
@@ -38,6 +39,10 @@ public class ConfigDeclaration {
         declaration.setHeader(template.getHeader());
         declaration.setReal(template.isReal());
         declaration.setType(template.getType());
+
+        if (config != null) {
+            declaration.setCommentsLanguage(config.getCommentsLanguage());
+        }
 
         declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
             .filter(field -> !field.getName().startsWith("this$"))
