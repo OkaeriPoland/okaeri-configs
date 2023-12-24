@@ -176,6 +176,8 @@ public class ConfigPostprocessor {
                 }
             }
 
+            lastIndent = indent;
+
             if (multilineSkip) {
                 newContext.append(line).append("\n");
                 continue;
@@ -183,7 +185,6 @@ public class ConfigPostprocessor {
                 multilineSkip = true;
             }
 
-            lastIndent = indent;
             String updatedLine = walker.update(line, currentPath.get(currentPath.size() - 1), currentPath);
 
             // Replace whitespaces to start collection chars
