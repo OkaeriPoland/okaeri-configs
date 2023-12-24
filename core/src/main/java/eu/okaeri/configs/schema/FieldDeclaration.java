@@ -1,5 +1,6 @@
 package eu.okaeri.configs.schema;
 
+import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.*;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
@@ -70,7 +71,7 @@ public class FieldDeclaration {
 
             Variable variable = field.getAnnotation(Variable.class);
             declaration.setVariable(variable);
-            declaration.setComment(readComments(field, config.getCommentsLanguage()));
+            declaration.setComment(readComments(field));
             declaration.setType(GenericsDeclaration.of(field.getGenericType()));
             declaration.setField(field);
 
@@ -95,7 +96,8 @@ public class FieldDeclaration {
         return declaration;
     }
 
-    private static String[] readComments(Field field, String commentsLanguage) {
+    private static String[] readComments(Field field) {
+        String commentsLanguage = OkaeriConfig.LANGUAGES.get(field.getDeclaringClass());
 
         Comments comments = field.getAnnotation(Comments.class);
         if (comments != null) {

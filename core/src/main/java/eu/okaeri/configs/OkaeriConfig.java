@@ -28,10 +28,13 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public abstract class OkaeriConfig {
+
+    public static final Map<Class<? extends OkaeriConfig>, String> LANGUAGES = new ConcurrentHashMap<>();
 
     @Setter
     private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
@@ -50,9 +53,6 @@ public abstract class OkaeriConfig {
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private boolean removeOrphans = false;
-
-    @Getter
-    private String commentsLanguage;
 
     /**
      * Creates config updating the declaration.
@@ -174,18 +174,6 @@ public abstract class OkaeriConfig {
      */
     public OkaeriConfig withRemoveOrphans(boolean removeOrphans) {
         this.setRemoveOrphans(removeOrphans);
-        return this;
-    }
-
-    /**
-     * Set the comments language to use
-     *
-     * @param commentsLanguage new comments language
-     * @return this instance
-     */
-    public OkaeriConfig withCommentsLanguage(String commentsLanguage) {
-        this.commentsLanguage = commentsLanguage;
-        updateDeclaration();
         return this;
     }
 
