@@ -40,10 +40,6 @@ public class ConfigDeclaration {
         declaration.setReal(template.isReal());
         declaration.setType(template.getType());
 
-        if (config != null) {
-            declaration.setCommentsLanguage(config.getCommentsLanguage());
-        }
-
         declaration.setFieldMap(Arrays.stream(clazz.getDeclaredFields())
             .filter(field -> !field.getName().startsWith("this$"))
             .map(field -> FieldDeclaration.of(declaration, field, config))

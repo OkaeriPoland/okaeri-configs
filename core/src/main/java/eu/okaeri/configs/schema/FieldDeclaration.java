@@ -33,7 +33,6 @@ public class FieldDeclaration {
     private boolean variableHide;
     private Field field;
     private Object object;
-    private String commentsLanguage;
 
     @SneakyThrows
     public static FieldDeclaration of(@NonNull ConfigDeclaration config, @NonNull Field field, Object object) {
@@ -71,10 +70,9 @@ public class FieldDeclaration {
 
             Variable variable = field.getAnnotation(Variable.class);
             declaration.setVariable(variable);
-            declaration.setComment(readComments(field, declaration.getCommentsLanguage()));
+            declaration.setComment(readComments(field, config.getCommentsLanguage()));
             declaration.setType(GenericsDeclaration.of(field.getGenericType()));
             declaration.setField(field);
-            declaration.setCommentsLanguage(config.getCommentsLanguage());
 
             return declaration;
         });
