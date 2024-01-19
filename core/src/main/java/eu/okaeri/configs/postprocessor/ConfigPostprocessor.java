@@ -130,7 +130,6 @@ public class ConfigPostprocessor {
             int indent = countIndent(line);
 
             int collections = 0;
-            boolean collectionElementSkip = false;
 
             /*
             Replace start collection chars to whitespaces
