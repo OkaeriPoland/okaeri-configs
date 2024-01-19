@@ -165,9 +165,12 @@ public class ConfigPostprocessor {
                 }
             } else {
                 if (change != 0) {
-                    int step = 2;
-                    level -= ((change * -1) / step);
-                    currentPath = currentPath.subList(0, Math.max(Math.min(level + 1, currentPath.size() - 1), 0));
+                    if (!multilineSkip) {
+                        ConfigLineInfo lastLineInfo = currentPath.get(currentPath.size() - 1);
+                        int step = lastLineInfo.getIndent() / level;
+                        level -= ((change * -1) / step);
+                        currentPath = currentPath.subList(0, level + 1);
+                    }
                     multilineSkip = false;
                 }
                 if (!multilineSkip) {
@@ -182,7 +185,6 @@ public class ConfigPostprocessor {
                 continue;
             } else if (walker.isKeyMultilineStart(line)) {
                 multilineSkip = true;
-                level++;
             }
 
             String updatedLine = walker.update(line, currentPath.get(currentPath.size() - 1), currentPath);
