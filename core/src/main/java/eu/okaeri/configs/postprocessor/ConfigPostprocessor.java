@@ -159,8 +159,8 @@ public class ConfigPostprocessor {
             }
 
             if (change > 0) {
-                level++;
                 if (!multilineSkip) {
+                    level++;
                     currentPath.add(ConfigLineInfo.of(indent, change, key));
                 }
             } else {
@@ -183,6 +183,7 @@ public class ConfigPostprocessor {
                 continue;
             } else if (walker.isKeyMultilineStart(line)) {
                 multilineSkip = true;
+                level++;
             }
 
             String updatedLine = walker.update(line, currentPath.get(currentPath.size() - 1), currentPath);
