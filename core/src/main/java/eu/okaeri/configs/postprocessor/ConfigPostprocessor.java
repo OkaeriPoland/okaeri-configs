@@ -159,8 +159,8 @@ public class ConfigPostprocessor {
             }
 
             if (change > 0) {
+                level++;
                 if (!multilineSkip) {
-                    level++;
                     currentPath.add(ConfigLineInfo.of(indent, change, key));
                 }
             } else {
