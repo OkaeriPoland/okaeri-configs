@@ -130,6 +130,7 @@ public class ConfigPostprocessor {
             int indent = countIndent(line);
 
             int collections = 0;
+            boolean collectionElementSkip = false;
 
             /*
             Replace start collection chars to whitespaces
@@ -142,6 +143,7 @@ public class ConfigPostprocessor {
                 line = replaceChar(line, index, ' ');
                 indent += 2;
                 multilineSkip = false;
+                collectionElementSkip = true;
             }
 
             int change = indent - lastIndent;
@@ -159,7 +161,7 @@ public class ConfigPostprocessor {
             }
 
             if (change > 0) {
-                if (!multilineSkip) {
+                if (!multilineSkip && !collectionElementSkip) {
                     level++;
                     currentPath.add(ConfigLineInfo.of(indent, change, key));
                 }
