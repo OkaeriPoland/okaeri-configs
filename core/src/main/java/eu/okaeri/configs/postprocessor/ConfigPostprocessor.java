@@ -143,7 +143,6 @@ public class ConfigPostprocessor {
                 line = replaceChar(line, index, ' ');
                 indent += 2;
                 multilineSkip = false;
-                collectionElementSkip = true;
             }
 
             int change = indent - lastIndent;
@@ -161,7 +160,7 @@ public class ConfigPostprocessor {
             }
 
             if (change > 0) {
-                if (!multilineSkip && !collectionElementSkip) {
+                if (!multilineSkip) {
                     level++;
                     currentPath.add(ConfigLineInfo.of(indent, change, key));
                 }
@@ -169,7 +168,7 @@ public class ConfigPostprocessor {
                 if (change != 0) {
                     int step = 2;
                     level -= ((change * -1) / step);
-                    currentPath = currentPath.subList(0, level + 1);
+                    currentPath = currentPath.subList(0, Math.max(Math.min(level + 1, currentPath.size() - 1), 0));
                     multilineSkip = false;
                 }
                 if (!multilineSkip) {
