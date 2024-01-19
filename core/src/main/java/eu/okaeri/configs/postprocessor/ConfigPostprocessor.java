@@ -165,8 +165,7 @@ public class ConfigPostprocessor {
                 }
             } else {
                 if (change != 0) {
-                    ConfigLineInfo lastLineInfo = currentPath.get(currentPath.size() - 1);
-                    int step = level == 1 ? lastIndent : lastLineInfo.getIndent() / level;
+                    int step = 2;
                     level -= ((change * -1) / step);
                     currentPath = currentPath.subList(0, level + 1);
                     multilineSkip = false;
