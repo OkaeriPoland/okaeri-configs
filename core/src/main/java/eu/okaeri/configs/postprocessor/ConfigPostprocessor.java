@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Data
@@ -100,6 +101,23 @@ public class ConfigPostprocessor {
         }
 
         this.context = buf.toString();
+        return this;
+    }
+
+    public ConfigPostprocessor removeLinesUntil(@NonNull Predicate<String> shouldStop) {
+
+        String[] lines = this.context.split("\n");
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            if (!shouldStop.test(line)) {
+                continue;
+            }
+            String[] remaining = Arrays.copyOfRange(lines, i, lines.length);
+            this.context = String.join("\n", remaining);
+            break;
+        }
+
         return this;
     }
 

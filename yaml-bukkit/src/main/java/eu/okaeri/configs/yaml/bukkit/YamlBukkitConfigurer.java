@@ -114,6 +114,8 @@ public class YamlBukkitConfigurer extends Configurer {
         ConfigPostprocessor.of(contents)
             // remove all current top-level comments (bukkit may preserve header)
             .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
+            // remove leading empty lines (bukkit also preserves these apparently)
+            .removeLinesUntil((line) -> line.chars().anyMatch(x -> !Character.isWhitespace(x)))
             // add new comments
             .updateLinesKeys(new YamlSectionWalker() {
                 @Override
