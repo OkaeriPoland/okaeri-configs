@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     public void serialize(@NonNull ItemMeta itemMeta, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
 
         if (itemMeta.hasDisplayName()) {
-            data.add("display-name", this.decolor(itemMeta.getDisplayName()));
+            data.add("display", this.decolor(itemMeta.getDisplayName()));
         }
 
         if (itemMeta.hasLore()) {
@@ -43,14 +44,17 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
         }
 
         if (!itemMeta.getItemFlags().isEmpty()) {
-            data.addCollection("item-flags", itemMeta.getItemFlags(), ItemFlag.class);
+            data.addCollection("flags", itemMeta.getItemFlags(), ItemFlag.class);
         }
     }
 
     @Override
     public ItemMeta deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
 
-        String displayName = data.get("display-name", String.class);
+        String displayName = data.get("display", String.class);
+        if (displayName == null) { // legacy
+            displayName = data.get("display-name", String.class);
+        }
 
         List<String> lore = data.containsKey("lore")
             ? data.getAsList("lore", String.class)
@@ -60,9 +64,13 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
             ? data.getAsMap("enchantments", Enchantment.class, Integer.class)
             : Collections.emptyMap();
 
-        List<ItemFlag> itemFlags = data.containsKey("item-flags")
-            ? data.getAsList("item-flags", ItemFlag.class)
-            : Collections.emptyList();
+        List<ItemFlag> itemFlags = new ArrayList<>(data.containsKey("flags")
+            ? data.getAsList("flags", ItemFlag.class)
+            : Collections.emptyList());
+
+        if (data.containsKey("item-flags")) { // legacy
+            itemFlags.addAll(data.getAsList("item-flags", ItemFlag.class));
+        }
 
         ItemMeta itemMeta = new ItemStack(Material.COBBLESTONE).getItemMeta();
         if (itemMeta == null) {

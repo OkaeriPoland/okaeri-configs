@@ -89,7 +89,7 @@ public class TestConfig extends OkaeriConfig {
     @Comment({"Klucz prywatny API", "API secret"})
     private String token = "";
 
-    @CustomKey("example-list")
+    @CustomKey("myList")
     @Comment({"Example list", "providing @CustomKey demonstration"})
     private List<String> exampleList = Collections.singletonList("127.0.0.1");
 
@@ -130,7 +130,7 @@ public class TestConfig extends OkaeriConfig {
     @Comment("Uber-complex-map test")
     private Map<TestEnum, Location> enumToLocationMap = Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5));
 
-    @CustomKey("list-to-uber-complex-map")
+    @CustomKey("listToUberComplexMap")
     @Comment("List-to-Uber-complex-map test")
     private List<Map<TestEnum, Location>> listMapEnumToLocationMap = Arrays.asList(
             Collections.singletonMap(TestEnum.THREE, new Location(null, 1, 2, 3, 4, 5)),

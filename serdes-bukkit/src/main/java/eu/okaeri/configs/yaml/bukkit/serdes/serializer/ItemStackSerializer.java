@@ -50,7 +50,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
 
         switch (format) {
             case NATURAL:
-                data.add("item-meta", itemStack.getItemMeta(), ItemMeta.class);
+                data.add("meta", itemStack.getItemMeta(), ItemMeta.class);
                 break;
             case COMPACT:
                 ITEM_META_SERIALIZER.serialize(itemStack.getItemMeta(), data, generics);
@@ -107,19 +107,21 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
         switch (format) {
             case NATURAL:
                 // support conversion COMPACT->NATURAL
-                if (data.containsKey("display-name")) {
+                if (data.containsKey("display") || data.containsKey("display-name")/* legacy */) {
                     itemMeta = ITEM_META_SERIALIZER.deserialize(data, generics);
                 }
                 // standard deserialize
                 else {
-                    itemMeta = data.containsKey("item-meta")
-                        ? data.get("item-meta", ItemMeta.class)
-                        : null;
+                    itemMeta = data.containsKey("meta")
+                        ? data.get("meta", ItemMeta.class)
+                        : data.get("item-meta", ItemMeta.class); // legacy
                 }
                 break;
             case COMPACT:
                 // support conversion NATURAL->COMPACT
-                if (data.containsKey("item-meta")) {
+                if (data.containsKey("meta")) {
+                    itemMeta = data.get("meta", ItemMeta.class);
+                } else if (data.containsKey("item-meta")) { // legacy
                     itemMeta = data.get("item-meta", ItemMeta.class);
                 }
                 // standard deserialize

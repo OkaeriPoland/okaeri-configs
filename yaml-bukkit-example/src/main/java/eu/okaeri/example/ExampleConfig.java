@@ -25,13 +25,12 @@ import java.util.*;
 @Header("#    https://github.com/OkaeriPoland/okaeri-configs            #")
 @Header("#                                                              #")
 @Header("################################################################")
-@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
 public class ExampleConfig extends OkaeriConfig {
 
     @Comment({"Klucz prywatny API", "API secret"})
     private String token = "";
 
-    @CustomKey("example-list")
+    @CustomKey("myList")
     @Comment({"Example list", "providing @CustomKey demonstration"})
     private List<String> exampleList = Collections.singletonList("127.0.0.1");
 
@@ -72,7 +71,7 @@ public class ExampleConfig extends OkaeriConfig {
     @Comment("Uber-complex-map test")
     private Map<ExampleEnum, Location> enumToLocationMap = Collections.singletonMap(ExampleEnum.THREE, new Location(Bukkit.getWorlds().get(0), 1, 2, 3, 4, 5));
 
-    @CustomKey("list-to-uber-complex-map")
+    @CustomKey("listToUberComplexMap")
     @Comment("List-to-Uber-complex-map test")
     private List<Map<ExampleEnum, Location>> listMapEnumToLocationMap = Arrays.asList(
         Collections.singletonMap(ExampleEnum.THREE, new Location(Bukkit.getWorlds().get(0), 1, 2, 3, 4, 5)),
