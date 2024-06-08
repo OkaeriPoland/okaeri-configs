@@ -1,6 +1,6 @@
 # Okaeri Configs | Bungee
 
-Serializers/Deserializers/Transformers for Bimgee types. See [yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee).
+Serializers/Deserializers/Transformers for Bungee types. See [yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee).
 
 ```java
 new SerdesBungee()
