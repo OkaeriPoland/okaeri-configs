@@ -38,6 +38,7 @@
         <module>hocon-lightbend</module>
 
         <!-- serdes modules -->
+        <module>serdes-adventure</module>
         <module>serdes-bucket4j</module>
         <module>serdes-bukkit</module>
         <module>serdes-bungee</module>

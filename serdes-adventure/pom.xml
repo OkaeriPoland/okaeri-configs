@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>eu.okaeri</groupId>
+        <artifactId>okaeri-configs</artifactId>
+        <version>5.0.1</version>
+    </parent>
+    <artifactId>okaeri-configs-serdes-adventure</artifactId>
+    <version>5.0.1</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-configs-core</artifactId>
+            <version>5.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- adventure -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.12.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>
