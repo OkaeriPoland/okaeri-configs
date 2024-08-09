@@ -139,8 +139,14 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
         // ItemStacks storing more and more data
         // here, in the attributes of ItemMeta
         itemStack.setItemMeta(itemMeta);
-        // then override durability with setter
-        itemStack.setDurability(durability);
+
+        // DO NOT set the durability when unnecessary
+        // on 1.21+ this is like a dirt and a dirt:0
+        // these are actually different and dont stack
+        if (durability != 0) {
+            // then override durability with setter
+            itemStack.setDurability(durability);
+        }
 
         // woah, it works
         return itemStack;
