@@ -34,5 +34,6 @@ implementation 'eu.okaeri:okaeri-configs-serdes-adventure:5.0.3'
 
 | Type |
 |-|
+| net.kyori.adventure.text.Component |
 | net.kyori.adventure.text.format.TextColor |
 | net.kyori.adventure.text.format.NamedTextColor |
