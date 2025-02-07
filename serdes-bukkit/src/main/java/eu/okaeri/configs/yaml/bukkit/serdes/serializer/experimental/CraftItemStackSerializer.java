@@ -5,8 +5,7 @@ import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.experimental.StringBase64ItemStackTransformer;
-import lombok.NonNull;
-import lombok.SneakyThrows;
+import lombok.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.yaml.snakeyaml.Yaml;
@@ -51,9 +50,12 @@ import java.util.Map;
  * Note: for persistence (non-config) purposes you may want
  * to use {@link StringBase64ItemStackTransformer} instead.
  */
+@NoArgsConstructor
+@AllArgsConstructor
 public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
 
     private static final Yaml YAML = new Yaml();
+    private boolean verbose = false;
 
     @Override
     public boolean supports(@NonNull Class<? super ItemStack> type) {
@@ -70,7 +72,10 @@ public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
         Map<String, Map<String, Object>> root = YAML.load(craftConfig.saveToString());
         Map<String, Object> itemMap = root.get("_");
 
-        itemMap.remove("==");
+        if (!this.verbose) {
+            itemMap.remove("==");
+        }
+
         itemMap.forEach(data::add);
     }
 
@@ -78,6 +83,11 @@ public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public ItemStack deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+
+        if (data.getValueRaw() instanceof ItemStack) {
+            // can happen in verbose mode when using YamlBukkitConfigurer
+            return (ItemStack) data.getValueRaw();
+        }
 
         Map<String, Object> itemMap = new LinkedHashMap<>();
         itemMap.put("==", "org.bukkit.inventory.ItemStack");
@@ -88,5 +98,16 @@ public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
         craftConfig.loadFromString(craftConfig.saveToString());
 
         return craftConfig.getItemStack("_");
+    }
+
+    public static boolean compareDeep(@NonNull ItemStack stack1, @NonNull ItemStack stack2) {
+
+        YamlConfiguration config1 = new YamlConfiguration();
+        config1.set("_", stack1);
+
+        YamlConfiguration config2 = new YamlConfiguration();
+        config2.set("_", stack2);
+
+        return config1.saveToString().equals(config2.saveToString());
     }
 }
