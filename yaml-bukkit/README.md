@@ -22,7 +22,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-yaml-bukkit</artifactId>
-  <version>5.0.7</version>
+  <version>5.0.8</version>
 </dependency>
 ```
 
@@ -32,7 +32,7 @@ Additionally if you want to serialize/deserialize [supported bukkit objects](htt
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-  <version>5.0.7</version>
+  <version>5.0.8</version>
 </dependency>
 ```
 
@@ -47,7 +47,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 Add dependency to the `maven` section:
 
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:5.0.7'
+implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:5.0.8'
 ```
 
 ## Limitations
