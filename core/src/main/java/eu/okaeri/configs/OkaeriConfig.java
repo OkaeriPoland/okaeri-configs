@@ -348,13 +348,12 @@ public abstract class OkaeriConfig {
         }
 
         for (FieldDeclaration field : this.getDeclaration().getFields()) {
-            if (!this.getConfigurer().isValid(field, field.getValue())) {
-                throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
-            }
-            try {
-                this.getConfigurer().setValue(field.getName(), field.getValue(), field.getType(), field);
-            } catch (Exception exception) {
-                throw new OkaeriException("failed to #setValue for " + field.getName(), exception);
+            saveField(field);
+        }
+
+        for (FieldDeclaration field : this.getDeclaration().getReadOnlyFields()) {
+            if (this.getConfigurer().keyExists(field.getName()) || !field.getStartingValue().equals(field.getValue())) {
+                saveField(field);
             }
         }
 
@@ -372,6 +371,16 @@ public abstract class OkaeriConfig {
         return this;
     }
 
+    private void saveField(FieldDeclaration field) {
+        if (!this.getConfigurer().isValid(field, field.getValue())) {
+            throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+        }
+        try {
+            this.getConfigurer().setValue(field.getName(), field.getValue(), field.getType(), field);
+        } catch (Exception exception) {
+            throw new OkaeriException("failed to #setValue for " + field.getName(), exception);
+        }
+    }
     /**
      * Converts current configuration state to map. Values are subject to the simplification process.
      * <p>
@@ -610,62 +619,72 @@ public abstract class OkaeriConfig {
 
         for (FieldDeclaration field : this.getDeclaration().getFields()) {
 
-            String fieldName = field.getName();
-            GenericsDeclaration genericType = field.getType();
-            Class<?> type = field.getType().getType();
-            Object fieldValue = field.getValue();
-            Variable variable = field.getVariable();
-            boolean updateValue = true;
+            processField(field);
+        }
 
-            if (variable != null) {
+        for (FieldDeclaration field : this.getDeclaration().getReadOnlyFields()) {
 
-                String rawProperty = System.getProperty(variable.value());
-                String property = (rawProperty == null) ? System.getenv(variable.value()) : rawProperty;
+            processField(field);
+        }
 
-                if (property != null) {
 
-                    Object value;
-                    try {
-                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType, SerdesContext.of(this.configurer, field));
-                    } catch (Exception exception) {
-                        throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
-                    }
+        return this;
+    }
 
-                    if (!this.getConfigurer().isValid(field, value)) {
-                        throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
-                    }
+    private void processField(FieldDeclaration field) {
+        String fieldName = field.getName();
+        GenericsDeclaration genericType = field.getType();
+        Class<?> type = field.getType().getType();
+        Object fieldValue = field.getValue();
+        Variable variable = field.getVariable();
+        boolean updateValue = true;
 
-                    field.updateValue(value);
-                    field.setVariableHide(true);
-                    updateValue = false;
+        if (variable != null) {
+
+            String rawProperty = System.getProperty(variable.value());
+            String property = (rawProperty == null) ? System.getenv(variable.value()) : rawProperty;
+
+            if (property != null) {
+
+                Object value;
+                try {
+                    value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), genericType.getType(), genericType, SerdesContext.of(this.configurer, field));
+                } catch (Exception exception) {
+                    throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
                 }
-            }
 
-            if (!this.getConfigurer().keyExists(fieldName)) {
-                continue;
-            }
-
-            Object value;
-            try {
-                value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
-                if (OkaeriConfig.class.isAssignableFrom(type)) {
-                    ((OkaeriConfig) value).setExcludedFieldsBy((OkaeriConfig) fieldValue);
-                }
-            } catch (Exception exception) {
-                throw new OkaeriException("failed to #getValue for " + fieldName, exception);
-            }
-
-            if (updateValue) {
                 if (!this.getConfigurer().isValid(field, value)) {
                     throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
                 }
-                field.updateValue(value);
-            }
 
-            field.setStartingValue(value);
+                field.updateValue(value);
+                field.setVariableHide(true);
+                updateValue = false;
+            }
         }
 
-        return this;
+        if (!this.getConfigurer().keyExists(fieldName)) {
+            return;
+        }
+
+        Object value;
+        try {
+            value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
+            if (OkaeriConfig.class.isAssignableFrom(type)) {
+                ((OkaeriConfig) value).setExcludedFieldsBy((OkaeriConfig) fieldValue);
+            }
+        } catch (Exception exception) {
+            throw new OkaeriException("failed to #getValue for " + fieldName, exception);
+        }
+
+        if (updateValue) {
+            if (!this.getConfigurer().isValid(field, value)) {
+                throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+            }
+            field.updateValue(value);
+        }
+
+        field.setStartingValue(value);
     }
 
     /**

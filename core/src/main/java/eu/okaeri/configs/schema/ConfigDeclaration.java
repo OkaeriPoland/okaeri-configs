@@ -10,7 +10,6 @@ import lombok.NonNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Data
 public class ConfigDeclaration {
@@ -21,6 +20,7 @@ public class ConfigDeclaration {
     private String[] header;
     private Map<String, FieldDeclaration> fieldMap;
     private Map<String, FieldDeclaration> excludedFieldMap;
+    private Map<String, FieldDeclaration> readOnlyFieldMap;
     private boolean real;
     private Class<?> type;
 
@@ -73,38 +73,47 @@ public class ConfigDeclaration {
     private static void populateFieldMaps(Class<?> clazz, ConfigDeclaration declaration, Object object) {
         Map<String, FieldDeclaration> fieldMap = new LinkedHashMap<>();
         Map<String, FieldDeclaration> excludedMap = new LinkedHashMap<>();
+        Map<String, FieldDeclaration> readOnlyMap = new LinkedHashMap<>();
 
-        collectFields(clazz, declaration, object, fieldMap, excludedMap);
-        collectIncludedFields(clazz, declaration, object, fieldMap, excludedMap);
+        collectFields(clazz, declaration, object, fieldMap, excludedMap, readOnlyMap);
+        collectIncludedFields(clazz, declaration, object, fieldMap, excludedMap, readOnlyMap);
+
 
         declaration.setFieldMap(fieldMap);
         declaration.setExcludedFieldMap(excludedMap);
+        declaration.setReadOnlyFieldMap(readOnlyMap);
     }
 
     private static void collectIncludedFields(Class<?> clazz, ConfigDeclaration declaration, Object object,
                                               Map<String, FieldDeclaration> fieldMap,
-                                              Map<String, FieldDeclaration> excludedMap) {
+                                              Map<String, FieldDeclaration> excludedMap,
+                                              Map<String, FieldDeclaration> readOnlyMap) {
         Arrays.stream(clazz.getDeclaredAnnotationsByType(Include.class))
-            .forEach(include -> collectFields(include.value(), declaration, object, fieldMap, excludedMap));
+            .forEach(include -> collectFields(include.value(), declaration, object, fieldMap, excludedMap, readOnlyMap));
     }
 
     private static void collectFields(Class<?> clazz, ConfigDeclaration declaration, Object object,
                                       Map<String, FieldDeclaration> fieldMap,
-                                      Map<String, FieldDeclaration> excludedMap) {
+                                      Map<String, FieldDeclaration> excludedMap,
+                                      Map<String, FieldDeclaration> readOnlyMap) {
         Arrays.stream(clazz.getDeclaredFields())
             .filter(field -> !field.getName().startsWith("this$"))
             .map(field -> FieldDeclaration.of(declaration, field, object))
             .filter(Objects::nonNull)
-            .forEach(fd -> addToAppropriateMap(fd, fieldMap, excludedMap));
+            .forEach(fd -> addToAppropriateMap(fd, fieldMap, excludedMap, readOnlyMap));
     }
 
     private static void addToAppropriateMap(FieldDeclaration fieldDecl,
-                                        Map<String, FieldDeclaration> fieldMap,
-                                        Map<String, FieldDeclaration> excludedMap) {
+                                            Map<String, FieldDeclaration> fieldMap,
+                                            Map<String, FieldDeclaration> excludedMap,
+                                            Map<String, FieldDeclaration> readOnlyMap) {
         String name = fieldDecl.getName();
         switch (fieldDecl.getFieldType()) {
             case EXCLUDED:
                 excludedMap.putIfAbsent(name, fieldDecl);
+                break;
+            case READ_ONLY:
+                readOnlyMap.putIfAbsent(name, fieldDecl);
                 break;
             case NORMAL:
             default:
@@ -160,5 +169,9 @@ public class ConfigDeclaration {
 
     public Collection<FieldDeclaration> getExcludedFields() {
         return this.excludedFieldMap.values();
+    }
+
+    public Collection<FieldDeclaration> getReadOnlyFields() {
+        return this.readOnlyFieldMap.values();
     }
 }

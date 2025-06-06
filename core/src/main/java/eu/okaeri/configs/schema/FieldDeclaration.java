@@ -22,7 +22,8 @@ import java.util.logging.Logger;
 public class FieldDeclaration {
     public enum FieldDeclarationType {
         NORMAL,
-        EXCLUDED
+        EXCLUDED,
+        READ_ONLY
     }
 
     private static final Logger LOGGER = Logger.getLogger(FieldDeclaration.class.getSimpleName());
@@ -50,6 +51,8 @@ public class FieldDeclaration {
 
             if (field.getAnnotation(Exclude.class) != null || Modifier.isTransient(field.getModifiers())) {
                 declaration.setFieldType(FieldDeclarationType.EXCLUDED);
+            } else if (field.getAnnotation(ReadOnly.class) != null) {
+                declaration.setFieldType(FieldDeclarationType.READ_ONLY);
             } else {
                 declaration.setFieldType(FieldDeclarationType.NORMAL);
             }
