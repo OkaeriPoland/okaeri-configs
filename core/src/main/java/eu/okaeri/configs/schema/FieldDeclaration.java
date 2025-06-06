@@ -20,6 +20,10 @@ import java.util.logging.Logger;
 
 @Data
 public class FieldDeclaration {
+    public enum FieldDeclarationType {
+        NORMAL,
+        EXCLUDED
+    }
 
     private static final Logger LOGGER = Logger.getLogger(FieldDeclaration.class.getSimpleName());
     private static final Map<CacheEntry, FieldDeclaration> DECLARATION_CACHE = new ConcurrentHashMap<>();
@@ -33,6 +37,7 @@ public class FieldDeclaration {
     private boolean variableHide;
     private Field field;
     private Object object;
+    private FieldDeclarationType fieldType;
 
     @SneakyThrows
     public static FieldDeclaration of(@NonNull ConfigDeclaration config, @NonNull Field field, Object object) {
@@ -43,12 +48,10 @@ public class FieldDeclaration {
             FieldDeclaration declaration = new FieldDeclaration();
             field.setAccessible(true);
 
-            if (field.getAnnotation(Exclude.class) != null) {
-                return null;
-            }
-
-            if (Modifier.isTransient(field.getModifiers())) {
-                return null;
+            if (field.getAnnotation(Exclude.class) != null || Modifier.isTransient(field.getModifiers())) {
+                declaration.setFieldType(FieldDeclarationType.EXCLUDED);
+            } else {
+                declaration.setFieldType(FieldDeclarationType.NORMAL);
             }
 
             CustomKey customKey = field.getAnnotation(CustomKey.class);
@@ -85,6 +88,11 @@ public class FieldDeclaration {
             return null;
         }
 
+
+        return getFieldDeclaration(object, template);
+    }
+
+    private static FieldDeclaration getFieldDeclaration(Object object, FieldDeclaration template) throws IllegalAccessException {
         FieldDeclaration declaration = new FieldDeclaration();
         Object startingValue = (object == null) ? null : template.getField().get(object);
         declaration.setStartingValue(startingValue);
@@ -95,7 +103,7 @@ public class FieldDeclaration {
         declaration.setVariable(template.getVariable());
         declaration.setField(template.getField());
         declaration.setObject(object);
-
+        declaration.setFieldType(template.getFieldType());
         return declaration;
     }
 
@@ -165,6 +173,10 @@ public class FieldDeclaration {
             attachments.put(attachmentType, attachment);
         }
         return attachments;
+    }
+
+    public boolean isExcluded() {
+        return this.fieldType == FieldDeclarationType.EXCLUDED;
     }
 
     @Data

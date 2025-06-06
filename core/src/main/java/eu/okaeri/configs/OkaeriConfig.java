@@ -20,6 +20,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -611,6 +612,8 @@ public abstract class OkaeriConfig {
             String fieldName = field.getName();
             GenericsDeclaration genericType = field.getType();
             Class<?> type = field.getType().getType();
+
+            Object fieldValue = field.getValue();
             Variable variable = field.getVariable();
             boolean updateValue = true;
 
@@ -645,6 +648,9 @@ public abstract class OkaeriConfig {
             Object value;
             try {
                 value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
+                if (OkaeriConfig.class.isAssignableFrom(type)) {
+                    ((OkaeriConfig) value).setExcludedFieldsBy((OkaeriConfig) fieldValue);
+                }
             } catch (Exception exception) {
                 throw new OkaeriException("failed to #getValue for " + fieldName, exception);
             }
@@ -670,6 +676,19 @@ public abstract class OkaeriConfig {
      */
     public OkaeriConfig updateDeclaration() {
         this.setDeclaration(ConfigDeclaration.of(this));
+        return this;
+    }
+
+    public OkaeriConfig setExcludedFieldsBy(OkaeriConfig source) {
+        for (FieldDeclaration field : this.getDeclaration().getExcludedFields()) {
+            Field targetField = field.getField();
+            targetField.setAccessible(true);
+            try {
+                field.updateValue(targetField.get(source));
+            } catch (IllegalAccessException e) {
+                this.logger.warning("Unable to access field: " + targetField.getName() + " due to access restrictions.");
+            }
+        }
         return this;
     }
 }
