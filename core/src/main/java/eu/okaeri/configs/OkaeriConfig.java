@@ -44,7 +44,6 @@ public abstract class OkaeriConfig {
     @Getter
     private Configurer configurer;
 
-    @Getter
     @Setter(AccessLevel.PROTECTED)
     private ConfigDeclaration declaration;
 
@@ -53,11 +52,13 @@ public abstract class OkaeriConfig {
     private boolean removeOrphans = false;
 
     /**
-     * Creates config updating the declaration.
+     * Creates a new config instance. Note that the declaration initialization
+     * is now deferred until first access via {@link #getDeclaration()}.
+     * <p>
+     * This ensures all field initializers are properly set before reflection
+     * reads their values, preventing null {@code startingValue} in field declarations.
      */
-    public OkaeriConfig() {
-        this.updateDeclaration();
-    }
+    public OkaeriConfig() {}
 
     /**
      * Replaces the current configurer with the provided.
@@ -612,7 +613,6 @@ public abstract class OkaeriConfig {
             String fieldName = field.getName();
             GenericsDeclaration genericType = field.getType();
             Class<?> type = field.getType().getType();
-
             Object fieldValue = field.getValue();
             Variable variable = field.getVariable();
             boolean updateValue = true;
@@ -666,6 +666,23 @@ public abstract class OkaeriConfig {
         }
 
         return this;
+    }
+
+    /**
+     * Gets the configuration declaration, initializing it if necessary.
+     * <p>
+     * The declaration is lazily initialized on first access to ensure all field values
+     * are properly set before being read via reflection. This prevents null
+     * {@code startingValue} issues in field declarations.
+     *
+     * @return the configuration declaration (never null after first access)
+     * @see #updateDeclaration()
+     */
+    public ConfigDeclaration getDeclaration() {
+        if (this.declaration == null) {
+            this.updateDeclaration();
+        }
+        return this.declaration;
     }
 
     /**
