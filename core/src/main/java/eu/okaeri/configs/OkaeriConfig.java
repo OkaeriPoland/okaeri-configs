@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -352,7 +353,7 @@ public abstract class OkaeriConfig {
         }
 
         for (FieldDeclaration field : this.getDeclaration().getReadOnlyFields()) {
-            if (this.getConfigurer().keyExists(field.getName()) || !field.getStartingValue().equals(field.getValue())) {
+            if (shouldHandleReadOnlyField(field)) {
                 saveField(field);
             }
         }
@@ -671,7 +672,9 @@ public abstract class OkaeriConfig {
         try {
             value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
             if (OkaeriConfig.class.isAssignableFrom(type)) {
-                ((OkaeriConfig) value).setExcludedFieldsBy((OkaeriConfig) fieldValue);
+                OkaeriConfig okaeriValue = (OkaeriConfig) value;
+                OkaeriConfig okaeriFieldValue = (OkaeriConfig) fieldValue;
+                okaeriValue.setExcludedFieldsBy(okaeriFieldValue).setReadOnlyFieldsBy(okaeriFieldValue).updateDeclaration();
             }
         } catch (Exception exception) {
             throw new OkaeriException("failed to #getValue for " + fieldName, exception);
@@ -726,5 +729,27 @@ public abstract class OkaeriConfig {
             }
         }
         return this;
+    }
+
+    public OkaeriConfig setReadOnlyFieldsBy(OkaeriConfig source) {
+        Iterator<FieldDeclaration> targetIter = this.getDeclaration().getReadOnlyFields().iterator();
+        Iterator<FieldDeclaration> sourceIter = source.getDeclaration().getReadOnlyFields().iterator();
+
+        while (targetIter.hasNext() && sourceIter.hasNext()) {
+            FieldDeclaration targetField = targetIter.next();
+            FieldDeclaration sourceField = sourceIter.next();
+
+            if (this.getConfigurer().keyExists(targetField.getName())) {
+                continue;
+            }
+
+            targetField.updateValue(sourceField.getValue());
+        }
+
+        return this;
+    }
+
+    public boolean shouldHandleReadOnlyField(FieldDeclaration field) {
+        return this.getConfigurer().keyExists(field.getName()) || !field.getStartingValue().equals(field.getValue());
     }
 }
