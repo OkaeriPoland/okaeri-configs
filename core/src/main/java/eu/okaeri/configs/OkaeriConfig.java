@@ -673,8 +673,7 @@ public abstract class OkaeriConfig {
             value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
             if (OkaeriConfig.class.isAssignableFrom(type)) {
                 OkaeriConfig okaeriValue = (OkaeriConfig) value;
-                OkaeriConfig okaeriFieldValue = (OkaeriConfig) fieldValue;
-                okaeriValue.setExcludedFieldsBy(okaeriFieldValue).setReadOnlyFieldsBy(okaeriFieldValue).updateDeclaration();
+                okaeriValue.setSpecialFieldsBy(fieldValue);
             }
         } catch (Exception exception) {
             throw new OkaeriException("failed to #getValue for " + fieldName, exception);
@@ -718,7 +717,16 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig setExcludedFieldsBy(OkaeriConfig source) {
+    public OkaeriConfig setSpecialFieldsBy(Object source) {
+        return setSpecialFieldsBy((OkaeriConfig) source);
+    }
+
+    public OkaeriConfig setSpecialFieldsBy(OkaeriConfig source) {
+        if (source == null) return this;
+        return this.setExcludedFieldsBy(source).setReadOnlyFieldsBy(source).updateDeclaration();
+    }
+
+    private OkaeriConfig setExcludedFieldsBy(OkaeriConfig source) {
         for (FieldDeclaration field : this.getDeclaration().getExcludedFields()) {
             Field targetField = field.getField();
             targetField.setAccessible(true);
@@ -731,7 +739,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public OkaeriConfig setReadOnlyFieldsBy(OkaeriConfig source) {
+    private OkaeriConfig setReadOnlyFieldsBy(OkaeriConfig source) {
         Iterator<FieldDeclaration> targetIter = this.getDeclaration().getReadOnlyFields().iterator();
         Iterator<FieldDeclaration> sourceIter = source.getDeclaration().getReadOnlyFields().iterator();
 
@@ -749,7 +757,7 @@ public abstract class OkaeriConfig {
         return this;
     }
 
-    public boolean shouldHandleReadOnlyField(FieldDeclaration field) {
+    private boolean shouldHandleReadOnlyField(FieldDeclaration field) {
         return this.getConfigurer().keyExists(field.getName()) || !field.getStartingValue().equals(field.getValue());
     }
 }
