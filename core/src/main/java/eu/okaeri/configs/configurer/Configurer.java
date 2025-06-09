@@ -205,13 +205,21 @@ public abstract class Configurer {
     }
 
     public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
-        Object value = this.getValue(key);
-        if (value == null) return null;
-        return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType, serdesContext);
+        return this.getValue(key, clazz, genericType, serdesContext, null);
     }
 
-    @SuppressWarnings("unchecked")
+    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, Object originalValue) {
+        Object value = this.getValue(key);
+        if (value == null) return null;
+        return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType, serdesContext, originalValue);
+    }
+
     public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, @NonNull SerdesContext serdesContext) throws OkaeriException {
+        return this.resolveType(object, genericSource, targetClazz, genericTarget, serdesContext, null);
+    }
+
+        @SuppressWarnings("unchecked")
+    public <T> T resolveType(Object object, GenericsDeclaration genericSource, @NonNull Class<T> targetClazz, GenericsDeclaration genericTarget, @NonNull SerdesContext serdesContext, Object originalValue) throws OkaeriException {
 
         if (object == null) {
             return null;
@@ -241,6 +249,7 @@ public abstract class Configurer {
             OkaeriConfig config = ConfigManager.createUnsafe((Class<? extends OkaeriConfig>) targetClazz);
             Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
             config.setConfigurer(new InMemoryWrappedConfigurer(this, configMap));
+            config.setSpecialFieldsBy(originalValue);
             return (T) config.update();
         }
 

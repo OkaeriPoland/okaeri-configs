@@ -36,6 +36,11 @@ public class InMemoryWrappedConfigurer extends WrappedConfigurer {
 
     @Override
     public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
+        return this.getValue(key, clazz, genericType, serdesContext, null);
+    }
+
+    @Override
+    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, Object originalValue) {
         Object value = this.getValue(key);
         if (value == null) return null;
         return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType, serdesContext);

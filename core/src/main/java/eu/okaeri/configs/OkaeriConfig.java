@@ -670,11 +670,7 @@ public abstract class OkaeriConfig {
 
         Object value;
         try {
-            value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
-            if (OkaeriConfig.class.isAssignableFrom(type)) {
-                OkaeriConfig okaeriValue = (OkaeriConfig) value;
-                okaeriValue.setSpecialFieldsBy(fieldValue);
-            }
+            value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field), fieldValue);
         } catch (Exception exception) {
             throw new OkaeriException("failed to #getValue for " + fieldName, exception);
         }
