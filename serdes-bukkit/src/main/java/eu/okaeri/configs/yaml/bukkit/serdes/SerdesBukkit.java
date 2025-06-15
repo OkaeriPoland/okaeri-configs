@@ -4,11 +4,9 @@ import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.yaml.bukkit.serdes.itemstack.ItemStackAttachmentResolver;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.*;
-import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringEnchantmentTransformer;
-import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringPotionEffectTypeTransformer;
-import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringTagTransformer;
-import eu.okaeri.configs.yaml.bukkit.serdes.transformer.StringWorldTransformer;
+import eu.okaeri.configs.yaml.bukkit.serdes.transformer.*;
 import lombok.NonNull;
+import org.bukkit.block.Biome;
 
 public class SerdesBukkit implements OkaeriSerdesPack {
 
@@ -25,6 +23,7 @@ public class SerdesBukkit implements OkaeriSerdesPack {
         registry.register(new VectorSerializer());
 
         // transformers
+        if (!Biome.class.isEnum()) registry.register(new StringBiomeTransformer());
         registry.register(new StringEnchantmentTransformer());
         registry.register(new StringPotionEffectTypeTransformer());
         whenClass("org.bukkit.Tag", () -> registry.register(new StringTagTransformer()));
