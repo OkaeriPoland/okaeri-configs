@@ -106,6 +106,18 @@ public class DeserializationData {
         return this.getAsList(ObjectSerializer.VALUE, listValueType);
     }
 
+    /**
+     * Gets set under value object key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     *
+     * @param setValueType target type for set
+     * @param <T>           target type for set
+     * @return transformed set or null
+     */
+    public <T> Set<T> getValueAsSet(@NonNull Class<T> setValueType) {
+        return this.getAsSet(ObjectSerializer.VALUE, setValueType);
+    }
+
 
     /**
      * Checks if value under specific key is available.
@@ -199,6 +211,20 @@ public class DeserializationData {
     public <T> List<T> getAsList(@NonNull String key, @NonNull Class<T> listValueType) {
         GenericsDeclaration genericType = GenericsDeclaration.of(List.class, Collections.singletonList(listValueType));
         return (List<T>) this.getAsCollection(key, genericType);
+    }
+
+    /**
+     * Gets set under specific key applying type resolving a.k.a.
+     * deserialization for the specified class.
+     *
+     * @param key           target key
+     * @param setValueType target type for set
+     * @param <T>           target type for set
+     * @return transformed set or null
+     */
+    public <T> Set<T> getAsSet(@NonNull String key, @NonNull Class<T> setValueType) {
+        GenericsDeclaration genericType = GenericsDeclaration.of(Set.class, Collections.singletonList(setValueType));
+        return (Set<T>) this.getAsCollection(key, genericType);
     }
 
     /**
