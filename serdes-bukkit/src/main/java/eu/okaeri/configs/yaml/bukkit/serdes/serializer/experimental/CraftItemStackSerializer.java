@@ -69,8 +69,13 @@ public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
         YamlConfiguration craftConfig = new YamlConfiguration();
         craftConfig.set("_", stack);
 
-        Map<String, Map<String, Object>> root = YAML.load(craftConfig.saveToString());
+        String dump = craftConfig.saveToString();
+        Map<String, Map<String, Object>> root = YAML.load(dump);
         Map<String, Object> itemMap = root.get("_");
+
+        if (itemMap == null) {
+            throw new IllegalStateException("Failed to save via bukkit and then load via snakeyaml (got null) [" + dump + "]: " + stack);
+        }
 
         if (!this.verbose) {
             itemMap.remove("==");
