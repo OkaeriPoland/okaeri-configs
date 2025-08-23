@@ -107,9 +107,14 @@ public class ConfigDeclaration {
             .filter(field -> !field.getName().startsWith("this$"))
             .map(field -> FieldDeclaration.of(declaration, field, object))
             .filter(Objects::nonNull)
-            .collect(Collectors.toMap(FieldDeclaration::getName, field -> field, (u, v) -> {
-                throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
-            }, LinkedHashMap::new));
+            .collect(Collectors.toMap(
+                FieldDeclaration::getName,
+                field -> field,
+                (u, v) -> {
+                    throw new IllegalStateException("Duplicate key/field (by name)!\nLeft: " + u + "\nRight: " + v);
+                },
+                LinkedHashMap::new
+            ));
     }
 
     public Optional<FieldDeclaration> getField(@NonNull String key) {
