@@ -7,6 +7,7 @@ import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @RequiredArgsConstructor
@@ -30,9 +31,13 @@ public class InstantSerializer implements ObjectSerializer<Instant> {
 
     @Override
     public Instant deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
-        if (data.getValueRaw() instanceof String) {
-            return Instant.parse((String) data.getValueRaw());
+        String str = data.getValue(String.class);
+        try {
+            long epochMilli = new BigDecimal(str).longValueExact();
+            return Instant.ofEpochMilli(epochMilli);
         }
-        return Instant.ofEpochMilli(data.getValue(long.class));
+        catch (NumberFormatException e) {
+            return Instant.parse(str);
+        }
     }
 }
