@@ -6,9 +6,9 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>5.0.9</version>
+        <version>5.0.10</version>
     </parent>
     <artifactId>okaeri-configs-core</artifactId>
-    <version>5.0.9</version>
+    <version>5.0.10</version>
 
 </project>
