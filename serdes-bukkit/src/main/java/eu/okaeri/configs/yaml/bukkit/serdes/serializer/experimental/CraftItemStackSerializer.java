@@ -5,7 +5,10 @@ import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
 import eu.okaeri.configs.yaml.bukkit.serdes.transformer.experimental.StringBase64ItemStackTransformer;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.SneakyThrows;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.yaml.snakeyaml.Yaml;
@@ -74,7 +77,7 @@ public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
         Map<String, Object> itemMap = root.get("_");
 
         if (itemMap == null) {
-            throw new IllegalStateException("Failed to save via bukkit and then load via snakeyaml (got null) [" + dump + "]: " + stack);
+            throw new RuntimeException("Failed to save via bukkit and then load via snakeyaml (got null) [" + dump + "]: " + stack);
         }
 
         if (!this.verbose) {
@@ -100,7 +103,13 @@ public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
 
         YamlConfiguration craftConfig = new YamlConfiguration();
         craftConfig.set("_", itemMap);
-        craftConfig.loadFromString(craftConfig.saveToString());
+
+        String dump = craftConfig.saveToString();
+        try {
+            craftConfig.loadFromString(dump);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load ItemStack via bukkit [" + dump + "]", e);
+        }
 
         return craftConfig.getItemStack("_");
     }
