@@ -115,7 +115,9 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
         }
 
         // bukkit
-        if ("org.bukkit.inventory.ItemStack".equals(data.get("==", String.class)) || (data.containsKey("v") && data.containsKey("type"))) {
+        if ("org.bukkit.inventory.ItemStack".equals(data.get("==", String.class))
+            || (data.containsKey("v") && data.containsKey("type")) // bukkit's serdes basically since forever
+            || (data.containsKey("DataVersion") && data.containsKey("id"))) { // starting something circa 1.21.6-8
             return CRAFT_ITEM_STACK_SERIALIZER.deserialize(data, generics);
         }
 
