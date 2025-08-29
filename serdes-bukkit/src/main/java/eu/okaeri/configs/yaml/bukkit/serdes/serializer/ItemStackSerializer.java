@@ -82,7 +82,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
         ItemStack deserializedStack = this.deserialize(deserializationData, generics);
 
         // human-friendly form is most likely complete
-        if (deserializedStack.equals(itemStack) || CraftItemStackSerializer.compareDeep(deserializedStack, itemStack)) {
+        if (CraftItemStackSerializer.compareDeep(deserializedStack, itemStack)) {
             return;
         }
 
