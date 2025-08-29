@@ -21,7 +21,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-yaml-bungee</artifactId>
-  <version>5.0.12</version>
+  <version>5.0.13</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
 Add dependency to the `maven` section:
 
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-yaml-bungee:5.0.12'
+implementation 'eu.okaeri:okaeri-configs-yaml-bungee:5.0.13'
 ```
 
 ## Limitations
