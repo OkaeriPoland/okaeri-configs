@@ -57,7 +57,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
 
-    private static final Yaml YAML = new Yaml();
     private boolean verbose = false;
 
     @Override
@@ -73,12 +72,8 @@ public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
         craftConfig.set("_", stack);
 
         String dump = craftConfig.saveToString();
-        Map<String, Map<String, Object>> root = YAML.load(dump);
+        Map<String, Map<String, Object>> root = new Yaml().load(dump);
         Map<String, Object> itemMap = root.get("_");
-
-        if (itemMap == null) {
-            throw new RuntimeException("Failed to save via bukkit and then load via snakeyaml (got null) [" + dump + "]: " + stack);
-        }
 
         if (!this.verbose) {
             itemMap.remove("==");
