@@ -2,7 +2,6 @@ package eu.okaeri.configs;
 
 import eu.okaeri.configs.annotation.Variable;
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.exception.InitializationException;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.exception.ValidationException;
 import eu.okaeri.configs.migrate.ConfigMigration;
@@ -113,7 +112,7 @@ public abstract class OkaeriConfig {
     public OkaeriConfig withSerdesPack(@NonNull OkaeriSerdesPack serdesPack) {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         this.getConfigurer().register(serdesPack);
@@ -188,7 +187,7 @@ public abstract class OkaeriConfig {
     public OkaeriConfig saveDefaults() throws OkaeriException {
 
         if (this.getBindFile() == null) {
-            throw new InitializationException("bindFile cannot be null");
+            throw new IllegalStateException("bindFile cannot be null");
         }
 
         if (Files.exists(this.getBindFile())) {
@@ -209,7 +208,7 @@ public abstract class OkaeriConfig {
     public void set(@NonNull String key, Object value) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
@@ -232,7 +231,7 @@ public abstract class OkaeriConfig {
     public Object get(@NonNull String key) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
@@ -271,7 +270,7 @@ public abstract class OkaeriConfig {
     public <T> T get(@NonNull String key, @NonNull GenericsDeclaration generics) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
@@ -289,6 +288,11 @@ public abstract class OkaeriConfig {
      * @throws OkaeriException if {@link #configurer} or {@link #bindFile} is null or saving fails
      */
     public OkaeriConfig save() throws OkaeriException {
+
+        if (this.getBindFile() == null) {
+            throw new IllegalStateException("bindFile cannot be null");
+        }
+
         return this.save(this.getBindFile());
     }
 
@@ -342,7 +346,7 @@ public abstract class OkaeriConfig {
     public OkaeriConfig save(@NonNull OutputStream outputStream) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         for (FieldDeclaration field : this.getDeclaration().getFields()) {
@@ -440,7 +444,7 @@ public abstract class OkaeriConfig {
     public OkaeriConfig load(@NonNull String data) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
@@ -457,7 +461,7 @@ public abstract class OkaeriConfig {
     public OkaeriConfig load(@NonNull InputStream inputStream) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         try {
@@ -515,7 +519,7 @@ public abstract class OkaeriConfig {
     public OkaeriConfig load(@NonNull Map<String, Object> map) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         map.forEach(this::set);
@@ -532,7 +536,7 @@ public abstract class OkaeriConfig {
     public OkaeriConfig load(@NonNull OkaeriConfig otherConfig) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
-            throw new InitializationException("configurer cannot be null");
+            throw new IllegalStateException("configurer cannot be null");
         }
 
         return this.load(otherConfig.asMap(this.getConfigurer(), true));
@@ -603,7 +607,7 @@ public abstract class OkaeriConfig {
     public OkaeriConfig update() throws OkaeriException {
 
         if (this.getDeclaration() == null) {
-            throw new InitializationException("declaration cannot be null: config not initialized");
+            throw new IllegalStateException("declaration cannot be null: config not initialized");
         }
 
         for (FieldDeclaration field : this.getDeclaration().getFields()) {

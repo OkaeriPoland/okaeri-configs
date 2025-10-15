@@ -128,19 +128,6 @@ public class GenericsDeclaration {
         return PRIMITIVE_TO_WRAPPER.get(this.type);
     }
 
-    @SuppressWarnings("UnnecessaryUnboxing")
-    public Object unwrapValue(Object object) {
-        if (object instanceof Boolean) return ((Boolean) object).booleanValue();
-        if (object instanceof Byte) return ((Byte) object).byteValue();
-        if (object instanceof Character) return ((Character) object).charValue();
-        if (object instanceof Double) return ((Double) object).doubleValue();
-        if (object instanceof Float) return ((Float) object).floatValue();
-        if (object instanceof Integer) return ((Integer) object).intValue();
-        if (object instanceof Long) return ((Long) object).longValue();
-        if (object instanceof Short) return ((Short) object).shortValue();
-        return object;
-    }
-
     public boolean isPrimitive() {
         return this.type.isPrimitive();
     }

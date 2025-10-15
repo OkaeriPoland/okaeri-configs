@@ -220,24 +220,26 @@ public abstract class Configurer {
         GenericsDeclaration source = (genericSource == null) ? GenericsDeclaration.of(object) : genericSource;
         GenericsDeclaration target = (genericTarget == null) ? GenericsDeclaration.of(targetClazz) : genericTarget;
 
-        // primitives
+        // primitives - work with wrapper class throughout, auto-unboxing will handle conversion
+        Class<T> workingClazz = targetClazz;
         if (target.isPrimitive()) {
             target = GenericsDeclaration.of(target.wrap());
+            workingClazz = (Class<T>) target.getType();
         }
 
         // deserialization
-        ObjectSerializer objectSerializer = this.registry.getSerializer(targetClazz);
+        ObjectSerializer objectSerializer = this.registry.getSerializer(workingClazz);
         if (objectSerializer != null) {
             Configurer configurer = (this.getParent() == null) ? this : this.getParent().getConfigurer();
             DeserializationData deserializationData = (object instanceof Map)
                 ? new DeserializationData((Map<String, Object>) object, configurer, serdesContext)
                 : new DeserializationData(Collections.singletonMap(ObjectSerializer.VALUE, object), configurer, serdesContext);
             Object deserialized = objectSerializer.deserialize(deserializationData, target);
-            return targetClazz.cast(deserialized);
+            return workingClazz.cast(deserialized);
         }
 
         // subconfig
-        if (OkaeriConfig.class.isAssignableFrom(targetClazz)) {
+        if (OkaeriConfig.class.isAssignableFrom(workingClazz)) {
             OkaeriConfig config = ConfigManager.createUnsafe((Class<? extends OkaeriConfig>) targetClazz);
             Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
             config.setConfigurer(new InMemoryWrappedConfigurer(this, configMap));
@@ -322,14 +324,14 @@ public abstract class Configurer {
                 throw new OkaeriException("failed to resolve enum " + object.getClass() + " <> " + targetClazz, exception);
             }
 
-            // unbox primitive (Integer -> int)
-            if (targetClazz.isPrimitive() && GenericsDeclaration.doBoxTypesMatch(targetClazz, objectClazz)) {
-                GenericsDeclaration primitiveDeclaration = GenericsDeclaration.of(object);
-                return (T) primitiveDeclaration.unwrapValue(object);
+            // wrapper/primitive compatibility (Integer <-> int) - just cast, auto-boxing handles the rest
+            if (GenericsDeclaration.doBoxTypesMatch(workingClazz, objectClazz)) {
+                return workingClazz.cast(object);
             }
 
-            // transform primitives/primitive wrappers through String (int -> long)
-            if (targetClazz.isPrimitive() || GenericsDeclaration.of(targetClazz).isPrimitiveWrapper()) {
+            // transform primitives/primitive wrappers through String (int -> long, Integer -> Long)
+            if ((GenericsDeclaration.of(objectClazz).isPrimitiveWrapper() || objectClazz.isPrimitive()) 
+                && (GenericsDeclaration.of(workingClazz).isPrimitiveWrapper() || workingClazz.isPrimitive())) {
                 Object simplified = this.simplify(object, GenericsDeclaration.of(objectClazz), serdesContext, false);
                 return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz), serdesContext);
             }
@@ -347,15 +349,15 @@ public abstract class Configurer {
                 if (stepTwoTransformer != null) {
                     Object transformed = stepOneTransformer.transform(object, serdesContext);
                     Object doubleTransformed = stepTwoTransformer.transform(transformed, serdesContext);
-                    return targetClazz.cast(doubleTransformed);
+                    return workingClazz.cast(doubleTransformed);
                 }
             }
 
             // attempt serializable construction
-            if ((object instanceof Map) && Serializable.class.isAssignableFrom(targetClazz)) {
+            if ((object instanceof Map) && Serializable.class.isAssignableFrom(workingClazz)) {
 
-                T serializableInstance = UnsafeUtil.allocateInstance(targetClazz);
-                ConfigDeclaration declaration = ConfigDeclaration.of(targetClazz, serializableInstance);
+                T serializableInstance = UnsafeUtil.allocateInstance(workingClazz);
+                ConfigDeclaration declaration = ConfigDeclaration.of(workingClazz, serializableInstance);
 
                 Map serializableMap = this.resolveType(
                     object, source, Map.class,
@@ -386,7 +388,7 @@ public abstract class Configurer {
 
             // no more known options, try casting
             try {
-                return targetClazz.cast(object);
+                return workingClazz.cast(object);
             }
             // failed casting, explicit error
             catch (ClassCastException exception) {
@@ -394,13 +396,8 @@ public abstract class Configurer {
             }
         }
 
-        // primitives transformer
-        if (targetClazz.isPrimitive()) {
-            Object transformed = transformer.transform(object, serdesContext);
-            return (T) GenericsDeclaration.of(targetClazz).unwrapValue(transformed);
-        }
-
-        return targetClazz.cast(transformer.transform(object, serdesContext));
+        // transformer - work with wrapper, auto-unboxing handles primitive conversion
+        return workingClazz.cast(transformer.transform(object, serdesContext));
     }
 
     @SuppressWarnings("unchecked")

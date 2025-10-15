@@ -51,6 +51,10 @@ public class FieldDeclaration {
                 return null;
             }
 
+            if ("serialVersionUID".equals(field.getName())) {
+                return null;
+            }
+
             CustomKey customKey = field.getAnnotation(CustomKey.class);
             if (customKey != null) {
                 declaration.setName("".equals(customKey.value()) ? field.getName() : customKey.value());
