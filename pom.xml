@@ -18,6 +18,10 @@
     <modules>
         <module>core</module>
 
+        <!-- test modules -->
+        <module>core-test-commons</module>
+        <module>core-test</module>
+
         <!-- validators -->
         <module>validator-jakartaee</module>
         <module>validator-okaeri</module>
@@ -114,6 +118,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.24.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
