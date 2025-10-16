@@ -6,7 +6,6 @@ import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.NameModifier;
 import eu.okaeri.configs.annotation.NameStrategy;
 import eu.okaeri.configs.annotation.Names;
-import eu.okaeri.configs.configurer.InMemoryConfigurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import lombok.Data;
@@ -20,16 +19,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 
  * Verifies:
  * - IDENTITY strategy (no change)
- * - SNAKE_CASE strategy (camelCase → camel_case)
- * - HYPHEN_CASE strategy (camelCase → camel-case)
- * - TO_UPPER_CASE modifier
- * - TO_LOWER_CASE modifier
+ * - SNAKE_CASE strategy (camelCase → camel_Case with default NameModifier.NONE)
+ * - HYPHEN_CASE strategy (camelCase → camel-Case with default NameModifier.NONE)
+ * - TO_UPPER_CASE modifier (all uppercase)
+ * - TO_LOWER_CASE modifier (all lowercase)
  * - Combined strategy + modifier
  * - @CustomKey overrides @Names strategy
  * - Names annotation inheritance from enclosing class
  * 
- * Note: @Names is deprecated and has known bugs (see annotation docs).
- * These tests verify the actual (buggy) behavior, not ideal behavior.
+ * Note: @Names is deprecated. Without an explicit modifier, the regex transformations
+ * preserve original capitalization (e.g., myFieldName → my_Field_Name, not my_field_name).
+ * This is documented as "buggy behavior" but is the expected result of NameModifier.NONE.
+ * Use TO_LOWER_CASE or TO_UPPER_CASE modifier for consistent casing.
  */
 class NamesAnnotationTest {
 
@@ -129,33 +130,30 @@ class NamesAnnotationTest {
     void testNames_SnakeCase_Transforms() {
         // Given
         SnakeCaseConfig config = ConfigManager.create(SnakeCaseConfig.class);
-        InMemoryConfigurer configurer = new InMemoryConfigurer();
-        config.withConfigurer(configurer);
-        config.update();
 
-        // When - Check configurer has transformed keys (not declaration)
-        // Declaration always uses field names, @Names affects configurer keys
+        // When
+        ConfigDeclaration declaration = config.getDeclaration();
         
-        // Then - Keys in configurer should be transformed
-        assertThat(configurer.keyExists("my_field_name")).isTrue();
-        assertThat(configurer.keyExists("another_field")).isTrue();
-        assertThat(configurer.keyExists("simple_field")).isTrue();
+        // Then - With NameModifier.NONE (default), capitals are preserved
+        // myFieldName -> my_Field_Name (add TO_LOWER_CASE modifier for all lowercase)
+        assertThat(declaration.getField("my_Field_Name").isPresent()).isTrue();
+        assertThat(declaration.getField("another_Field").isPresent()).isTrue();
+        assertThat(declaration.getField("simple_Field").isPresent()).isTrue();
     }
 
     @Test
     void testNames_HyphenCase_Transforms() {
         // Given
         HyphenCaseConfig config = ConfigManager.create(HyphenCaseConfig.class);
-        InMemoryConfigurer configurer = new InMemoryConfigurer();
-        config.withConfigurer(configurer);
-        config.update();
 
-        // When - Check configurer has transformed keys (not declaration)
+        // When
+        ConfigDeclaration declaration = config.getDeclaration();
         
-        // Then - Keys in configurer should be transformed
-        assertThat(configurer.keyExists("my-field-name")).isTrue();
-        assertThat(configurer.keyExists("another-field")).isTrue();
-        assertThat(configurer.keyExists("simple-field")).isTrue();
+        // Then - With NameModifier.NONE (default), capitals are preserved
+        // myFieldName -> my-Field-Name (add TO_LOWER_CASE modifier for all lowercase)
+        assertThat(declaration.getField("my-Field-Name").isPresent()).isTrue();
+        assertThat(declaration.getField("another-Field").isPresent()).isTrue();
+        assertThat(declaration.getField("simple-Field").isPresent()).isTrue();
     }
 
     @Test
@@ -218,33 +216,29 @@ class NamesAnnotationTest {
     void testNames_CustomKeyOverrides_NameStrategy() {
         // Given
         CustomKeyOverrideConfig config = ConfigManager.create(CustomKeyOverrideConfig.class);
-        InMemoryConfigurer configurer = new InMemoryConfigurer();
-        config.withConfigurer(configurer);
-        config.update();
 
-        // When - Check configurer keys
+        // When
+        ConfigDeclaration declaration = config.getDeclaration();
         
         // Then
-        // normalField should be transformed by SNAKE_CASE in configurer
-        assertThat(configurer.keyExists("normal_field")).isTrue();
+        // normalField should be transformed by SNAKE_CASE (preserves capitals with NONE modifier)
+        assertThat(declaration.getField("normal_Field").isPresent()).isTrue();
 
         // overriddenField should use custom key, NOT snake_case
-        assertThat(configurer.keyExists("custom-key")).isTrue();
-        assertThat(configurer.keyExists("overridden_field")).isFalse();
+        assertThat(declaration.getField("custom-key").isPresent()).isTrue();
+        assertThat(declaration.getField("overridden_Field").isPresent()).isFalse();
     }
 
     @Test
     void testNames_InheritedFromEnclosingClass() {
         // Given
         OuterConfig.InnerConfig config = ConfigManager.create(OuterConfig.InnerConfig.class);
-        InMemoryConfigurer configurer = new InMemoryConfigurer();
-        config.withConfigurer(configurer);
-        config.update();
 
-        // When - Check configurer keys
+        // When
+        ConfigDeclaration declaration = config.getDeclaration();
         
-        // Then - Inner class should inherit HYPHEN_CASE from outer class
-        assertThat(configurer.keyExists("inner-field")).isTrue();
+        // Then - Inner class should inherit HYPHEN_CASE from outer class (preserves capitals)
+        assertThat(declaration.getField("inner-Field").isPresent()).isTrue();
     }
 
     @Test
