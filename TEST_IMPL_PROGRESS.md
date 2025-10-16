@@ -316,6 +316,48 @@ yaml-snakeyaml/src/test/java/eu/okaeri/configs/yaml/snakeyaml/
 
 ---
 
+### Session 29 - 2025-10-16 21:55 - 22:50 ✅ COMPLETED
+**Focus**: Implement parameterized JSON tests for json-simple and json-gson (no comment support)
+
+**Actions**:
+1. **Created parameterized JSON test suite** (core-test/format/json):
+   - JsonConfigurerEdgeCasesTest.java - 10 tests × 2 configurers = 20 executions
+   - JsonConfigurerFeaturesTest.java - 6 tests × 2 configurers = 12 executions
+   - JsonConfigurerMegaConfigTest.java - 5 tests × 2 configurers = 10 executions
+   - JsonConfigurerStructureTest.java - 6 tests × 2 configurers = 12 executions
+2. **Removed all comment/header tests** - JSON format has no comment support
+3. **Adapted tests for JSON format**:
+   - Changed YAML syntax to JSON in test data
+   - Adjusted assertions for JSON-specific output (no comments/headers)
+   - Updated null value tests to verify absence (JSON doesn't store nulls)
+4. **Golden file support** - Added relative paths for json-gson and json-simple e2e.json files
+5. **Fixed null value handling in JsonSimpleConfigurer**:
+   - Modified `setValue()` to skip null values (removes key if value is null)
+   - Added recursive null removal in `write()` method (removeNullsRecursively, removeNullsFromList)
+   - Removes null values from maps and lists before serializing to JSON
+   - JSON-GSON has built-in null removal, no changes needed
+
+**Library Files Modified**:
+- `json-simple/src/main/java/eu/okaeri/configs/json/simple/JsonSimpleConfigurer.java` - Added recursive null value removal
+
+**Test Files Created**:
+- `core-test/src/test/java/eu/okaeri/configs/format/json/JsonConfigurerEdgeCasesTest.java` (10 tests)
+- `core-test/src/test/java/eu/okaeri/configs/format/json/JsonConfigurerFeaturesTest.java` (6 tests)
+- `core-test/src/test/java/eu/okaeri/configs/format/json/JsonConfigurerMegaConfigTest.java` (5 tests)
+- `core-test/src/test/java/eu/okaeri/configs/format/json/JsonConfigurerStructureTest.java` (6 tests)
+
+**Test Files Modified**:
+- `core-test/pom.xml` - Added json-gson and json-simple dependencies
+
+**Key Achievements**:
+- Comprehensive JSON testing without comment/header dependencies
+- Parameterized tests cover both JSON-GSON and JSON-Simple configurers
+- 27 test methods = 54 parameterized executions across 2 backends
+- Golden file regression testing ready for both JSON implementations
+- JSON format correctly handles null values (removes them rather than storing them)
+
+---
+
 # 🔥 CURRENT STATUS - READ THIS FIRST! 🔥
 
 ## Resolved Issues (All Sessions)
@@ -333,36 +375,36 @@ yaml-snakeyaml/src/test/java/eu/okaeri/configs/yaml/snakeyaml/
 12. ✅ **ObjectSerializer generic bound** - Fixed `? super T` → `?` (Session 16)
 
 ## Session Information
-- **Session Number**: 28
-- **Started**: 2025-10-16 21:22
-- **Completed**: 2025-10-16 21:43
+- **Session Number**: 29
+- **Started**: 2025-10-16 21:55
+- **Completed**: 2025-10-16 22:50
 - **Current Phase**: Phase 4 - Format Implementation Testing
-- **Focus**: Parameterize YAML MegaConfig tests and enhance MegaConfig features
+- **Focus**: Implement parameterized JSON tests for json-simple and json-gson
 
 ## Latest Test Results
 - **Core Tests**: 621/621 (100%) ✅
 - **Parameterized YAML Tests**: 88 test executions across 3 configurers (not yet executed)
+- **Parameterized JSON Tests**: 54 test executions across 2 configurers (not yet executed)
 - **Backend-Specific Tests**: 4 tests (2 per backend: SnakeYAML, Bukkit)
-- **Total Active Tests**: 625 + 88 parameterized executions
-- **Status**: ✅ All modules compiled successfully, test suite fully consolidated
+- **Total Active Tests**: 625 + 88 YAML + 54 JSON parameterized executions
+- **Status**: ✅ All modules compiled, JSON test suite completed, null handling fixed
 
 ## Work Completed This Session
-1. ✅ **Parameterized golden file regression tests** - Added relative paths to all YAML backends, moved tests to parameterized class
-2. ✅ **Enhanced GoldenFileAssertion** - Added visual arrows showing exact position of differences in diff output
-3. ✅ **Enhanced MegaConfig** - Added 5 new fields: serializableList, serializableMap, enumValueMap, nestedListOfLists, repeatingCommentField
-4. ✅ **Eliminated final duplicate tests** - Deleted 3 backend-specific MegaConfig test files (now fully parameterized)
-5. ✅ **Comprehensive feature coverage** - MegaConfig now tests all supported library features except @TargetType, @Include (intentionally excluded)
+1. ✅ **Created parameterized JSON test suite** - 4 test classes with 27 test methods (54 executions across 2 configurers)
+2. ✅ **Removed comment/header dependencies** - JSON has no comment support, tests adapted accordingly
+3. ✅ **JSON-specific adaptations** - Changed YAML syntax to JSON, adjusted assertions for JSON output format
+4. ✅ **Golden file support** - Added relative paths for json-gson and json-simple e2e.json files
+5. ✅ **Fixed null value handling** - Modified JsonSimpleConfigurer to recursively remove null values before writing (JSON-GSON already has this built-in)
+6. ✅ **Comprehensive JSON testing** - Edge cases, features, MegaConfig E2E, structure tests all covered
 
 ## Next Actions (Priority Order - Work Through This List)
-1. 🔄 **Execute yaml-snakeyaml and yaml-bukkit tests** - Run tests to verify all tests pass, generate golden e2e.yml files
-2. ⏳ **Remaining format implementation tests** (Phase 5) - 5 formats remaining
+1. 🔄 **Execute JSON tests** - Run json-gson and json-simple tests to verify all pass, generate golden e2e.json files
+2. 🔄 **Execute YAML tests** - Run yaml-snakeyaml and yaml-bukkit tests to verify all tests pass, generate golden e2e.yml files
+3. ⏳ **Remaining format implementation tests** (Phase 5) - 2 formats remaining
    - hjson
-   - json-gson
-   - json-simple
    - hocon-lightbend
-   - yaml-bungee
-3. ⏳ **CI/CD setup** - GitHub Actions workflow for automated testing
-4. ⏳ **Documentation** - Update README with test coverage information
+4. ⏳ **CI/CD setup** - GitHub Actions workflow for automated testing
+5. ⏳ **Documentation** - Update README with test coverage information
 
 ---
 
