@@ -14,7 +14,7 @@ public class ComponentSerializer implements ObjectSerializer<Component> {
     private final net.kyori.adventure.text.serializer.ComponentSerializer<Component, ? extends Component, String> serializer;
 
     @Override
-    public boolean supports(@NonNull Class<? super Component> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Component.class.isAssignableFrom(type);
     }
 

@@ -10,7 +10,7 @@ import lombok.NonNull;
 public class DoubleRangeSerializer implements ObjectSerializer<DoubleRange> {
 
     @Override
-    public boolean supports(@NonNull Class<? super DoubleRange> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return DoubleRange.class.isAssignableFrom(type);
     }
 

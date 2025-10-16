@@ -131,7 +131,7 @@ class SerdesRegistryTest {
         // Create simple serializer for String
         ObjectSerializer<String> serializer = new ObjectSerializer<String>() {
             @Override
-            public boolean supports(@NonNull Class<? super String> type) {
+            public boolean supports(@NonNull Class<?> type) {
                 return String.class.equals(type);
             }
 
@@ -158,7 +158,7 @@ class SerdesRegistryTest {
         // Register first serializer
         ObjectSerializer<String> firstSerializer = new ObjectSerializer<String>() {
             @Override
-            public boolean supports(@NonNull Class<? super String> type) {
+            public boolean supports(@NonNull Class<?> type) {
                 return String.class.equals(type);
             }
 
@@ -178,7 +178,7 @@ class SerdesRegistryTest {
         // Register exclusive serializer (should replace first one)
         ObjectSerializer<String> exclusiveSerializer = new ObjectSerializer<String>() {
             @Override
-            public boolean supports(@NonNull Class<? super String> type) {
+            public boolean supports(@NonNull Class<?> type) {
                 return String.class.equals(type);
             }
 
@@ -287,7 +287,7 @@ class SerdesRegistryTest {
         // Create and register a custom serializer
         ObjectSerializer<String> customSerializer = new ObjectSerializer<String>() {
             @Override
-            public boolean supports(@NonNull Class<? super String> type) {
+            public boolean supports(@NonNull Class<?> type) {
                 return String.class.equals(type);
             }
 

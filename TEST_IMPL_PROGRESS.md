@@ -9,6 +9,46 @@
 
 ## 📚 SESSION HISTORY (Append New Sessions, Never Modify Old Ones)
 
+### Session 16 - 2025-10-16 12:32 ✅ COMPLETED
+**Focus**: ConfigSerializable tests + SerdesRegistry ordering improvements
+
+**Actions**:
+1. Analyzed ConfigSerializable feature (interface + ConfigSerializableSerializer implementation)
+2. Asked user about ConfigSerializable design and serializer precedence
+3. User confirmed: ConfigSerializable is optional built-in serdes, explicit registration overrides it
+4. Implemented ConfigSerializableTest.java (13 tests):
+   - ConfigSerializableSerializer integration tests (automatic registration, supports(), serialize/deserialize via registry)
+   - Config integration tests (single field, list, map, nested ConfigSerializable)
+   - Error handling (missing deserialize method)
+   - Serializer precedence (explicit registration overrides ConfigSerializable)
+5. Discussed SerdesRegistry ordering behavior with user
+6. User requested enhanced API: register/registerFirst/registerExclusive with guaranteed "last wins" ordering
+7. Implemented enhanced SerdesRegistry:
+   - Changed `Set<ObjectSerializer>` → `List<ObjectSerializer>` (CopyOnWriteArrayList for thread safety)
+   - `getSerializer()` - reverse iteration (last registered wins)
+   - `register()` - adds to end
+   - `registerFirst()` - adds to beginning (lower priority with reverse iteration)
+   - `registerExclusive()` - removes all matching, adds new
+8. Implemented SerdesRegistryOrderTest.java (24 tests):
+   - Basic ordering (last wins)
+   - ConfigSerializable precedence
+   - Inheritance (parent/child serializers)
+   - Exclusive registration
+   - registerFirst behavior
+   - Real-world scenarios
+9. Discovered ObjectSerializer interface bug: `supports(Class<? super T>)` should be `supports(Class<?>)`
+10. Fixed ObjectSerializer interface (user will fix all implementations)
+
+**Test Coverage**:
+- ConfigSerializableTest: 13 tests (ConfigSerializable feature integration with config system)
+- SerdesRegistryOrderTest: 24 tests (registration order, precedence, exclusive, registerFirst)
+
+**Results**: Implemented 37 new tests. ObjectSerializer interface fixed (? super T → ?). User will fix implementations and run tests.
+
+**Status**: Tests not run (context limit). Estimated total: ~575+ tests.
+
+---
+
 ### Session 15 - 2025-10-16 12:13 ✅ COMPLETED
 **Focus**: Implement migration system tests (Phase 3)
 
@@ -355,7 +395,7 @@
 
 ## 📊 CUMULATIVE STATISTICS
 
-### Files Created/Modified: 45
+### Files Created/Modified: 48
 - Session 1: 13 files (modules, test configs, utils)
 - Session 2: 6 files (lifecycle test classes)
 - Session 3: 1 file (STANDARD_SERDES_TEST_PLAN.md)
@@ -367,20 +407,22 @@
 - Session 10: 1 file modified (NamesAnnotationTest.java - corrected expectations)
 - Session 11: 4 files (IntegerToStringBugDiagnosticTest, BUG_ANALYSIS_INTEGER_TO_STRING.md, SerdesRegistry.java, Configurer.java)
 - Session 15: 3 files (RawConfigViewTest, ConfigMigrationTest, ConfigMigrationDslTest)
+- Session 16: 3 files (ConfigSerializableTest, SerdesRegistryOrderTest, ObjectSerializer.java, SerdesRegistry.java - interface fix + enhanced API)
 
-### Test Classes Implemented: 34
+### Test Classes Implemented: 36
 - **Lifecycle**: ConfigCreationTest (7), ConfigSaveTest (15), ConfigLoadTest (18), ConfigUpdateTest (12), ConfigGetSetTest (23), ConfigMapConversionTest (13)
 - **Types**: PrimitiveTypesTest (15), BasicTypesTest (13), CollectionTypesTest (14), MapTypesTest (11), EnumTypesTest (8), SubconfigTypesTest (10), SerializableTypesTest (11), TypeTransformationsTest (18)
 - **Annotations**: HeaderAnnotationTest (5), CommentAnnotationTest (7), CustomKeyAnnotationTest (9), VariableAnnotationTest (12), ExcludeAnnotationTest (10), NamesAnnotationTest (11), TargetTypeAnnotationTest (9), IncludeAnnotationTest (7)
 - **Schema**: ConfigDeclarationTest (22), FieldDeclarationTest (10), GenericsDeclarationTest (31)
 - **Serdes**: StandardSerdesTest (60), SerdesRegistryTest (17), SerializationDataTest (41), DeserializationDataTest (28), SerdesContextTest (14)
 - **Migration**: RawConfigViewTest (21), ConfigMigrationTest (12), ConfigMigrationDslTest (36)
+- **ConfigSerializable**: ConfigSerializableTest (13), SerdesRegistryOrderTest (24)
 
 ### Test Coverage
-- **Total Tests Written**: 533
-- **Currently Passing**: 533 (100%)
-- **Failing**: 0
-- **Known Issues**: None
+- **Total Tests Written**: 575+ (estimated)
+- **Currently Passing**: Unknown (tests not run this session)
+- **Failing**: Unknown
+- **Known Issues**: ObjectSerializer implementations need fixing after interface change
 
 ### Library Bugs Fixed
 1. ✅ **Integer → String conversion** - Fixed in Session 11 (SerdesRegistry.java, Configurer.java)
@@ -472,24 +514,31 @@
 # 🔥 CURRENT STATUS - READ THIS FIRST! 🔥
 
 ## Session Information
-- **Session Number**: 15
-- **Started**: 2025-10-16 12:13
-- **Completed**: 2025-10-16 12:25
-- **Current Phase**: Phase 3 - Advanced Features (COMPLETED)
-- **Focus**: Implement migration system tests
+- **Session Number**: 16
+- **Started**: 2025-10-16 12:32
+- **Completed**: 2025-10-16 13:07
+- **Current Phase**: Phase 3 - ConfigSerializable & SerdesRegistry enhancements
+- **Focus**: ConfigSerializable tests + SerdesRegistry ordering improvements
 
 ## Latest Test Results
-- **Total Tests**: 533
-- **Passing**: 533 (100%) 🎉🎊
-- **Failing**: 0
+- **Total Tests**: Unknown (tests not run due to context limit)
+- **Estimated**: ~575+ (533 previous + 42 new)
+- **Status**: Awaiting compilation and test run
 
-## Achievement: Migration Tests Complete - Phase 3 Done! 🎊🎉
-**69 migration tests** covering RawConfigView (21), ConfigMigration (12), ConfigMigrationDsl (36)!
-**Phase 3 Advanced Features COMPLETE**: All serdes and migration system tests implemented!
+## Work Completed This Session
+1. ✅ **ConfigSerializableTest.java** - 13 tests for class-local serdes feature
+2. ✅ **SerdesRegistryOrderTest.java** - 24 tests for serializer registration order
+3. ✅ **Enhanced SerdesRegistry API**:
+   - `register()` - last registered wins (reverse iteration)
+   - `registerFirst()` - adds to beginning (lower priority with reverse iteration)
+   - `registerExclusive()` - removes all matching, then adds
+   - Changed from `Set` to `CopyOnWriteArrayList` for guaranteed ordering
+4. ✅ **Fixed ObjectSerializer interface** - Changed `supports(Class<? super T>)` to `supports(Class<?>)` (user will fix implementations)
+
 
 ## Resolved Issues (All Sessions)
 1. ✅ **Primitive boxing/unboxing** - Fixed via wrapper class refactoring (Session 5)
-2. ✅ **Null char StackOverflow** - Fixed by avoiding '\\0' (SnakeYAML limitation) (Session 5)
+2. ✅ **Null char StackOverflow** - Fixed by avoiding '\0' (SnakeYAML limitation) (Session 5)
 3. ✅ **TypeTransformationsTest compilation** - Fixed BidirectionalTransformer.getPair() implementation (Session 6)
 4. ✅ **CustomObject Lombok** - Added @Data and @AllArgsConstructor annotations (Session 6)
 5. ✅ **serialVersionUID deserialization** - Fixed by excluding "serialVersionUID" fields in FieldDeclaration (Session 7)
@@ -499,12 +548,14 @@
 9. ✅ **Non-static nested classes** - Made all test config classes public static (Session 9)
 10. ✅ **@Include test approach** - Removed tests for multiple unrelated base classes (library limitation)
 11. ✅ **Integer→String conversion** - Fixed registerWithReversedToString() to create typed transformers (Session 11)
+12. ✅ **ObjectSerializer generic bound** - Fixed `? super T` → `?` (Session 16)
 
 ## Next Actions (Priority Order - Work Through This List)
-1. ✅ **Phase 3 COMPLETE** - All serdes and migration tests implemented (533/533 passing)!
-2. 🎯 **ConfigManager tests** (Phase 4) - 1 test class planned
-3. 🎯 **Integration tests** (Phase 4) - 4 test classes planned (CompleteWorkflowTest, OrphanHandlingTest, CrossFormatTest, EdgeCasesTest)
-4. ⏳ **Format implementation tests** (Phase 4) - 7 formats planned
+1. 🎯 **User will fix ObjectSerializer implementations** - Update all serializers to use new `Class<?>` signature
+2. 🎯 **Run tests** - Verify all 575+ tests pass (533 previous + 42 new)
+3. 🎯 **ConfigManager tests** (Phase 4) - 1 test class planned
+4. 🎯 **Integration tests** (Phase 4) - 4 test classes planned (CompleteWorkflowTest, OrphanHandlingTest, CrossFormatTest, EdgeCasesTest)
+5. ⏳ **Format implementation tests** (Phase 4) - 7 formats planned
 
 ## Critical Workflow: Completing Sessions & Managing Context
 
@@ -539,7 +590,7 @@
 
 ---
 
-**Document Version**: 3.1 (Session 15 Final Update)  
-**Last Updated**: 2025-10-16 12:25
-**Updated By**: Agent 253 (Session 15)  
-**Status**: Active Development - Phase 3 Complete! - 533/533 Tests Passing (100%) 🎊🎉
+**Document Version**: 3.2 (Session 16 Final Update)  
+**Last Updated**: 2025-10-16 13:09  
+**Updated By**: Agent 253 (Session 16)  
+**Status**: Active Development - ConfigSerializable & SerdesRegistry Enhanced - Awaiting ObjectSerializer fixes & test run

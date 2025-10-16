@@ -10,7 +10,7 @@ import lombok.NonNull;
 public class ShortRangeSerializer implements ObjectSerializer<ShortRange> {
 
     @Override
-    public boolean supports(@NonNull Class<? super ShortRange> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return ShortRange.class.isAssignableFrom(type);
     }
 

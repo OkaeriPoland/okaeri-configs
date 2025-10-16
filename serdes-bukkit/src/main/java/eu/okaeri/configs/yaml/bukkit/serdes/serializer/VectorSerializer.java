@@ -10,7 +10,7 @@ import org.bukkit.util.Vector;
 public class VectorSerializer implements ObjectSerializer<Vector> {
 
     @Override
-    public boolean supports(@NonNull Class<? super Vector> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Vector.class.isAssignableFrom(type);
     }
 

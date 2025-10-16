@@ -10,7 +10,7 @@ import lombok.NonNull;
 public class IntRangeSerializer implements ObjectSerializer<IntRange> {
 
     @Override
-    public boolean supports(@NonNull Class<? super IntRange> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return IntRange.class.isAssignableFrom(type);
     }
 

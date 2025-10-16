@@ -11,7 +11,7 @@ import org.bukkit.World;
 public class LocationSerializer implements ObjectSerializer<Location> {
 
     @Override
-    public boolean supports(@NonNull Class<? super Location> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Location.class.isAssignableFrom(type);
     }
 

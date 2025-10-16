@@ -39,7 +39,7 @@ import java.util.Optional;
 public class IndexedSetSerializer implements ObjectSerializer<IndexedSet> {
 
     @Override
-    public boolean supports(@NonNull Class<? super IndexedSet> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return IndexedSet.class.isAssignableFrom(type);
     }
 

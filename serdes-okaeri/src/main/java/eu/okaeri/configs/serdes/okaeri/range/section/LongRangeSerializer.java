@@ -10,7 +10,7 @@ import lombok.NonNull;
 public class LongRangeSerializer implements ObjectSerializer<LongRange> {
 
     @Override
-    public boolean supports(@NonNull Class<? super LongRange> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return LongRange.class.isAssignableFrom(type);
     }
 

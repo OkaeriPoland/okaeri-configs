@@ -13,7 +13,7 @@ import java.time.Duration;
 public class BandwidthSerializer implements ObjectSerializer<Bandwidth> {
 
     @Override
-    public boolean supports(@NonNull Class<? super Bandwidth> clazz) {
+    public boolean supports(@NonNull Class<?> clazz) {
         return Bandwidth.class.isAssignableFrom(clazz);
     }
 

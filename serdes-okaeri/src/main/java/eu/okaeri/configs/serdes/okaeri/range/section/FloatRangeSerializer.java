@@ -10,7 +10,7 @@ import lombok.NonNull;
 public class FloatRangeSerializer implements ObjectSerializer<FloatRange> {
 
     @Override
-    public boolean supports(@NonNull Class<? super FloatRange> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return FloatRange.class.isAssignableFrom(type);
     }
 

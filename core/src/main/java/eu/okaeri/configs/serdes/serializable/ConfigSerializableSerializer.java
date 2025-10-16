@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 public class ConfigSerializableSerializer implements ObjectSerializer<ConfigSerializable> {
 
     @Override
-    public boolean supports(@NonNull Class<? super ConfigSerializable> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return ConfigSerializable.class.isAssignableFrom(type);
     }
 

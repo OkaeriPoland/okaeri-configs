@@ -11,7 +11,7 @@ import java.util.Locale;
 public class TextColorSerializer implements ObjectSerializer<TextColor> {
 
     @Override
-    public boolean supports(@NonNull Class<? super TextColor> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return TextColor.class.isAssignableFrom(type);
     }
 
