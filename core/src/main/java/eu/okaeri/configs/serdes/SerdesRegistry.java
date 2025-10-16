@@ -2,7 +2,6 @@ package eu.okaeri.configs.serdes;
 
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.standard.ObjectToStringTransformer;
 import lombok.NonNull;
 
 import java.lang.annotation.Annotation;
@@ -52,8 +51,26 @@ public class SerdesRegistry {
     }
 
     public void registerWithReversedToString(@NonNull ObjectTransformer transformer) {
+        // Register forward transformer (e.g., String → Integer)
         this.transformerMap.put(transformer.getPair(), transformer);
-        this.transformerMap.put(transformer.getPair().reverse(), new ObjectToStringTransformer());
+        
+        // Register reverse transformer with CORRECT typing (e.g., Integer → String, not Object → String)
+        // This fixes the bug where all reverse transformers were registered as Object → String,
+        // which caused exact type matching to fail (Integer ≠ Object)
+        GenericsPair reversePair = transformer.getPair().reverse();
+        ObjectTransformer reverseTransformer = new ObjectTransformer() {
+            @Override
+            public GenericsPair getPair() {
+                return reversePair;  // Use the actual reversed pair (Integer → String)
+            }
+            
+            @Override
+            public Object transform(@NonNull Object data, @NonNull SerdesContext serdesContext) {
+                return data.toString();  // Same logic as ObjectToStringTransformer
+            }
+        };
+        
+        this.transformerMap.put(reversePair, reverseTransformer);
     }
 
     public void register(@NonNull ObjectSerializer serializer) {

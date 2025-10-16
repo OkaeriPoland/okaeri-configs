@@ -220,7 +220,13 @@ public abstract class Configurer {
         GenericsDeclaration source = (genericSource == null) ? GenericsDeclaration.of(object) : genericSource;
         GenericsDeclaration target = (genericTarget == null) ? GenericsDeclaration.of(targetClazz) : genericTarget;
 
-        // primitives - work with wrapper class throughout, auto-unboxing will handle conversion
+        // primitives
+        // work with wrapper class throughout, auto-unboxing will handle conversion
+        // wrap both source AND target if they are primitives
+        if (source.isPrimitive()) {
+            source = GenericsDeclaration.of(source.wrap());
+        }
+        
         Class<T> workingClazz = targetClazz;
         if (target.isPrimitive()) {
             target = GenericsDeclaration.of(target.wrap());
