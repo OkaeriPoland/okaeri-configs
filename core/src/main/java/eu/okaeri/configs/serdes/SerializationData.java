@@ -107,7 +107,7 @@ public class SerializationData {
      * @param collection  target collection
      * @param genericType type declaration of value for simplification process
      */
-    public void setValueCollection( Collection<?> collection, @NonNull GenericsDeclaration genericType) {
+    public void setValueCollection(Collection<?> collection, @NonNull GenericsDeclaration genericType) {
         this.addCollection(ObjectSerializer.VALUE, collection, genericType);
     }
 
@@ -231,6 +231,10 @@ public class SerializationData {
      * @param genericType type declaration of value for simplification process
      */
     public void addCollection(@NonNull String key, Collection<?> collection, @NonNull GenericsDeclaration genericType) {
+        if (collection == null) {
+            this.addRaw(key, null);
+            return;
+        }
         Object object = this.configurer.simplifyCollection(collection, genericType, SerdesContext.of(this.configurer), true);
         this.addRaw(key, object);
     }
@@ -252,6 +256,10 @@ public class SerializationData {
      * @param <T>                 type of collection values
      */
     public <T> void addCollection(@NonNull String key, Collection<?> collection, @NonNull Class<T> collectionValueType) {
+        if (collection == null) {
+            this.addRaw(key, null);
+            return;
+        }
         GenericsDeclaration genericType = GenericsDeclaration.of(collection, Collections.singletonList(collectionValueType));
         this.addCollection(key, collection, genericType);
     }
@@ -273,7 +281,11 @@ public class SerializationData {
      * @param <T>            type of array values
      */
     public <T> void addArray(@NonNull String key, T[] array, @NonNull Class<T> arrayValueType) {
-        this.addCollection(key, (array == null) ? null : Arrays.asList(array), arrayValueType);
+        if (array == null) {
+            this.addRaw(key, null);
+            return;
+        }
+        this.addCollection(key, Arrays.asList(array), arrayValueType);
     }
 
     /**
@@ -292,6 +304,10 @@ public class SerializationData {
      */
     @SuppressWarnings("unchecked")
     public void addAsMap(@NonNull String key, Map<?, ?> map, @NonNull GenericsDeclaration genericType) {
+        if (map == null) {
+            this.addRaw(key, null);
+            return;
+        }
         Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, SerdesContext.of(this.configurer), true);
         this.addRaw(key, object);
     }
@@ -316,6 +332,10 @@ public class SerializationData {
      */
     @SuppressWarnings("unchecked")
     public <K, V> void addAsMap(@NonNull String key, Map<K, V> map, @NonNull Class<K> mapKeyType, @NonNull Class<V> mapValueType) {
+        if (map == null) {
+            this.addRaw(key, null);
+            return;
+        }
         GenericsDeclaration genericType = GenericsDeclaration.of(map, Arrays.asList(mapKeyType, mapValueType));
         this.addAsMap(key, map, genericType);
     }
