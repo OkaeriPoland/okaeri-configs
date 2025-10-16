@@ -150,12 +150,11 @@ class IncludeAnnotationTest {
     @Test
     void testInclude_InvalidUsage_IncludeWithoutExtends_ThrowsException() {
         // Given / When / Then - Trying to @Include a class you don't extend should fail
-        // The library tries to read AnotherBase fields from the config instance, which fails
         assertThat(Assertions.catchThrowable(() -> {
-            ConfigManager.create(InvalidMultipleIncludesConfig.class);
+            ConfigDeclaration.of(InvalidMultipleIncludesConfig.class);
         }))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Can not get");
+        .hasMessageContaining("@Include can only include classes that");
     }
 
     @Test

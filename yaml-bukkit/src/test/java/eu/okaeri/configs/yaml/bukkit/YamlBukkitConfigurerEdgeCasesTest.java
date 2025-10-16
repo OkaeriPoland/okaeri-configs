@@ -1,9 +1,10 @@
-package eu.okaeri.configs.yaml.snakeyaml;
+package eu.okaeri.configs.yaml.bukkit;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -16,21 +17,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests YAML-specific edge cases and boundary conditions.
+ * Tests YAML-specific edge cases and boundary conditions for Bukkit configurer.
  */
-class YamlSnakeYamlConfigurerEdgeCasesTest {
+class YamlBukkitConfigurerEdgeCasesTest {
 
     @Test
     void testLoad_EmptyInputStream() throws Exception {
         // Given: Empty YAML content
         String yaml = "";
-        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
+        YamlBukkitConfigurer configurer = new YamlBukkitConfigurer();
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
         
         // When: Load from empty InputStream
         configurer.load(new ByteArrayInputStream(yaml.getBytes()), config.getDeclaration());
         
-        // Then: Internal map is initialized as empty LinkedHashMap
+        // Then: Internal map is initialized as empty
         assertThat(configurer.getAllKeys()).isEmpty();
     }
 
@@ -41,13 +42,13 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
             # Just comments
             # No actual content
             """;
-        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
+        YamlBukkitConfigurer configurer = new YamlBukkitConfigurer();
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
         
         // When: Load from InputStream with null document
         configurer.load(new ByteArrayInputStream(yaml.getBytes()), config.getDeclaration());
         
-        // Then: Internal map is reset to empty LinkedHashMap
+        // Then: Internal map is reset to empty
         assertThat(configurer.getAllKeys()).isEmpty();
     }
 
@@ -59,7 +60,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
             value: [unclosed bracket
             enabled: true
             """;
-        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
+        YamlBukkitConfigurer configurer = new YamlBukkitConfigurer();
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
         
         // When/Then: Loading malformed YAML throws exception
@@ -72,7 +73,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     void testWrite_EmptyConfig() throws Exception {
         // Given: Config with no fields
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -87,7 +88,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     void testWrite_VeryLargeValues() throws Exception {
         // Given: Config with very large string value
         LargeValueConfig config = ConfigManager.create(LargeValueConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         config.setLargeValue("x".repeat(10000)); // 10k characters
         
         // When: Write to OutputStream
@@ -104,7 +105,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     void testWrite_SpecialCharactersInStrings() throws Exception {
         // Given: Config with special characters
         SpecialCharsConfig config = ConfigManager.create(SpecialCharsConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         config.setQuotes("She said: \"Hello!\"");
         config.setBackslash("C:\\Users\\test\\path");
         config.setNewlines("Line 1\nLine 2\nLine 3");
@@ -137,7 +138,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
             """;
         
         DeepNestedConfig config = ConfigManager.create(DeepNestedConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         config.load(yaml);
         
         // When: Write to OutputStream
@@ -157,7 +158,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     void testWrite_VeryLargeCollection() throws Exception {
         // Given: Config with very large list
         LargeCollectionConfig config = ConfigManager.create(LargeCollectionConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         List<String> largeList = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             largeList.add("item-" + i);
@@ -176,10 +177,11 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     }
 
     @Test
+    @Disabled("Bukkit's YamlConfiguration has no way to differentiate between removing a top-level key and setting it to null")
     void testWrite_NullValues() throws Exception {
         // Given: Config with null values
         NullValueConfig config = ConfigManager.create(NullValueConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         config.setNullString(null);
         config.setNullList(null);
         config.setNullMap(null);
@@ -200,15 +202,15 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     void testWrite_NestedNullValues() throws Exception {
         // Given: Config with nested OkaeriConfig containing null values
         NestedNullConfig config = ConfigManager.create(NestedNullConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         config.getNested().setNestedNullString(null);
         config.getNested().setNestedNullList(null);
-
+        
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-
+        
         // Then: Nested null values are represented in YAML
         assertThat(yaml).contains("nested:");
         assertThat(yaml).containsAnyOf("nestedNullString: null", "nestedNullString:");
@@ -219,7 +221,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     void testRoundTrip_EmptyStrings() throws Exception {
         // Given: Config with empty strings
         EmptyStringConfig config = ConfigManager.create(EmptyStringConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         config.setEmptyString("");
         config.setWhitespaceString("   ");
         
@@ -228,7 +230,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
         config.save(output);
         
         EmptyStringConfig loaded = ConfigManager.create(EmptyStringConfig.class);
-        loaded.withConfigurer(new YamlSnakeYamlConfigurer());
+        loaded.withConfigurer(new YamlBukkitConfigurer());
         loaded.load(new ByteArrayInputStream(output.toByteArray()));
         
         // Then: Empty strings are preserved
@@ -240,7 +242,7 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     void testWrite_YamlReservedWords() throws Exception {
         // Given: Config with YAML reserved words as values
         ReservedWordsConfig config = ConfigManager.create(ReservedWordsConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBukkitConfigurer());
         config.setTrueString("true");
         config.setFalseString("false");
         config.setNullString("null");

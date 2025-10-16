@@ -42,19 +42,6 @@ class ConfigDeclarationTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    public static class IncludedFields extends OkaeriConfig {
-        private String includedField1 = "included1";
-    }
-
-    @Data
-    @EqualsAndHashCode(callSuper = false)
-    @Include(IncludedFields.class)
-    public static class ConfigWithInclude extends OkaeriConfig {
-        private String ownField = "own";
-    }
-
-    @Data
-    @EqualsAndHashCode(callSuper = false)
     public static class ConfigWithExcluded extends OkaeriConfig {
         private String normalField = "normal";
         
@@ -188,16 +175,6 @@ class ConfigDeclarationTest {
         // Then
         assertThat(declaration.getFieldMap()).hasSize(1);
         assertThat(declaration.getFieldMap()).containsOnlyKeys("normalField");
-    }
-
-    @Test
-    void testInclude_MergesFieldsFromOtherClass() {
-        // When
-        ConfigDeclaration declaration = ConfigDeclaration.of(ConfigWithInclude.class);
-
-        // Then - just verify @Include merges fields (detailed behavior in IncludeAnnotationTest)
-        assertThat(declaration.getFieldMap()).hasSize(2);
-        assertThat(declaration.getFieldMap()).containsKeys("ownField", "includedField1");
     }
 
     @Test

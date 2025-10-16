@@ -47,6 +47,12 @@ public class ConfigDeclaration {
 
         Include[] subs = clazz.getDeclaredAnnotationsByType(Include.class);
         for (Include sub : subs) {
+            if (!sub.value().isAssignableFrom(clazz)) {
+                throw new IllegalArgumentException(
+                    "@Include can only include classes that " + clazz.getName() + " extends. " +
+                    "Cannot include fields from " + sub.value().getName() + " because it is not a superclass of " + clazz.getName()
+                );
+            }
             Map<String, FieldDeclaration> subFields = readFields(sub.value(), declaration, object);
             subFields.forEach((key, value) -> {
                 if (declaration.getFieldMap().containsKey(key)) {

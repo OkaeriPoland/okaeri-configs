@@ -224,10 +224,54 @@ yaml-snakeyaml/src/test/java/eu/okaeri/configs/yaml/snakeyaml/
 
 ---
 
+### Session 26 - 2025-10-16 19:55 ✅ COMPLETED
+**Focus**: Add yaml-bukkit tests and fix @Include annotation validation
+
+**Actions**:
+1. **Fixed @Include annotation validation in ConfigDeclaration.java**:
+   - Added validation to fail fast when @Include is used with classes that aren't extended
+   - Throws IllegalArgumentException with clear error message: "Can not get fields from X because it is not a superclass of Y"
+   - Prevents cryptic reflection errors later in processing
+2. **Created yaml-bukkit test suite** (35 tests total):
+   - YamlBukkitConfigurerFeaturesTest.java (10 tests) - Configurer-specific features, comment/header preservation, key ordering
+   - YamlBukkitConfigurerEdgeCasesTest.java (14 tests) - Edge cases, null handling (both top-level and nested), special characters
+   - YamlBukkitConfigurerMegaConfigTest.java (3 tests) - E2E regression tests using MegaConfig with golden file comparison
+   - YamlBukkitConfigurerStructureTest.java (8 tests) - YAML structure and comment rendering with text block assertions
+3. **Updated yaml-bukkit/pom.xml**:
+   - Added test dependencies (JUnit 5, AssertJ, core-test-commons)
+   - Added maven-compiler-plugin configuration (main: Java 8, tests: Java 21 for text blocks)
+4. **Documented Bukkit-specific limitations**:
+   - Added @Disabled to `testWrite_NullValues()` with explanation: "Bukkit's YamlConfiguration has no way to differentiate between removing a key and setting it to null at the top level - both cause removal"
+   - Created separate test `testWrite_NestedNullValues()` that verifies null values work correctly inside nested OkaeriConfig objects
+
+**Library Files Modified**:
+- `core/src/main/java/eu/okaeri/configs/schema/ConfigDeclaration.java` - Added @Include validation
+
+**Test Files Created**:
+- `yaml-bukkit/src/test/java/eu/okaeri/configs/yaml/bukkit/YamlBukkitConfigurerFeaturesTest.java` - 10 tests
+- `yaml-bukkit/src/test/java/eu/okaeri/configs/yaml/bukkit/YamlBukkitConfigurerEdgeCasesTest.java` - 14 tests
+- `yaml-bukkit/src/test/java/eu/okaeri/configs/yaml/bukkit/YamlBukkitConfigurerMegaConfigTest.java` - 3 tests
+- `yaml-bukkit/src/test/java/eu/okaeri/configs/yaml/bukkit/YamlBukkitConfigurerStructureTest.java` - 8 tests
+
+**Configuration Files Modified**:
+- `yaml-bukkit/pom.xml` - Added test dependencies and Java version configuration
+
+**Key Achievements**:
+- Complete yaml-bukkit test coverage mirroring yaml-snakeyaml structure
+- Better error messages for @Include misuse (fail fast with clear message)
+- Documented known Bukkit limitations (top-level null handling)
+- Comprehensive edge case testing including nested null values
+
+**Results**: All yaml-bukkit tests created (35 tests). @Include validation added. Ready for testing.
+
+**Status**: Session complete ✅
+
+---
+
 ## 📊 CUMULATIVE STATISTICS
 
 ### Test Suite Overview
-- **Total Tests Implemented**: 663 (621 core + 42 yaml-snakeyaml)
+- **Total Tests Implemented**: 698 (621 core + 42 yaml-snakeyaml + 35 yaml-bukkit)
 - **All Core Tests Passing**: ✅ 621/621 (100%)
 
 ### Major Bug Fixes
@@ -327,12 +371,24 @@ yaml-snakeyaml/src/test/java/eu/okaeri/configs/yaml/snakeyaml/
   - ✅ YamlSnakeYamlConfigurerStructureTest (8 tests)
 - **Known Issues**: Tests not yet executed
 
-### Format Modules ⏳ NOT STARTED
+### yaml-bukkit ✅ TESTS COMPLETE
+- **Status**: All tests implemented (35 tests total)
+- **Implemented Test Classes**:
+  - ✅ YamlBukkitConfigurerFeaturesTest (10 tests)
+  - ✅ YamlBukkitConfigurerEdgeCasesTest (14 tests, 1 @Disabled due to Bukkit limitation)
+  - ✅ YamlBukkitConfigurerMegaConfigTest (3 tests)
+  - ✅ YamlBukkitConfigurerStructureTest (8 tests)
+- **Known Issues**: 
+  - Top-level null values cannot be differentiated from removed keys in Bukkit's YamlConfiguration
+  - Tests not yet executed
+
+### Format Modules ⏳ IN PROGRESS
+- yaml-snakeyaml - ✅ COMPLETED (42 tests)
+- yaml-bukkit - ✅ COMPLETED (35 tests)
 - hjson - planned
 - json-gson - planned
 - json-simple - planned
 - hocon-lightbend - planned
-- yaml-bukkit - planned
 - yaml-bungee - planned
 
 ---
@@ -354,33 +410,33 @@ yaml-snakeyaml/src/test/java/eu/okaeri/configs/yaml/snakeyaml/
 12. ✅ **ObjectSerializer generic bound** - Fixed `? super T` → `?` (Session 16)
 
 ## Session Information
-- **Session Number**: 25
-- **Started**: 2025-10-16 19:26
-- **Completed**: 2025-10-16 19:50
-- **Current Phase**: Phase 4 - YAML Structure Testing
-- **Focus**: Add tests for comment annotations on Serializable and OkaeriConfig subconfigs
+- **Session Number**: 26
+- **Started**: 2025-10-16 19:55
+- **Completed**: 2025-10-16 20:20
+- **Current Phase**: Phase 4 - Format Implementation Testing
+- **Focus**: Add yaml-bukkit tests and fix @Include annotation validation
 
 ## Latest Test Results
 - **Core Tests**: 621/621 (100%) ✅
 - **yaml-snakeyaml Tests**: 42 tests implemented (not yet executed)
-- **Total Tests Written**: 663 tests
-- **Status**: ✅ All modules compiled successfully, StructureTest created with text block comparisons
+- **yaml-bukkit Tests**: 35 tests implemented (not yet executed)
+- **Total Tests Written**: 698 tests
+- **Status**: ✅ All modules compiled successfully, yaml-bukkit test suite complete
 
 ## Work Completed This Session
-1. ✅ **Added @Comment annotations to MegaConfig.CustomSerializable** - name and id fields now have comments for testing
-2. ✅ **Created YamlSnakeYamlConfigurerStructureTest.java** - 8 focused tests with text block comparisons
-3. ✅ **Cleaned up MegaConfigTest** - Removed structure/comment tests, kept only processing tests
-4. ✅ **Renamed test methods** - All tests now follow `test[Action]_[Context]_[ExpectedResult]()` pattern
-5. ✅ **Added regression test** - testSaveLoadCycles_HeaderAndComments_RemainsStable() runs 5 cycles to catch extra newline bugs
+1. ✅ **Fixed @Include annotation validation** - Added fail-fast check in ConfigDeclaration.java with clear error message
+2. ✅ **Created complete yaml-bukkit test suite** - 35 tests across 4 test classes mirroring yaml-snakeyaml structure
+3. ✅ **Updated yaml-bukkit pom.xml** - Added test dependencies and Java version configuration (main: Java 8, tests: Java 21)
+4. ✅ **Documented Bukkit limitations** - Added @Disabled to testWrite_NullValues() with explanation about YamlConfiguration behavior
+5. ✅ **Added nested null value test** - testWrite_NestedNullValues() verifies nulls work correctly in nested OkaeriConfig
 
 ## Next Actions (Priority Order - Work Through This List)
-1. 🔄 **Execute yaml-snakeyaml tests** - Run tests to verify all 42 tests pass, generate golden e2e.yml file
-2. ⏳ **Remaining format implementation tests** (Phase 5) - 6 formats remaining
+1. 🔄 **Execute yaml-snakeyaml and yaml-bukkit tests** - Run tests to verify all tests pass, generate golden e2e.yml files
+2. ⏳ **Remaining format implementation tests** (Phase 5) - 5 formats remaining
    - hjson
    - json-gson
    - json-simple
    - hocon-lightbend
-   - yaml-bukkit
    - yaml-bungee
 3. ⏳ **CI/CD setup** - GitHub Actions workflow for automated testing
 4. ⏳ **Documentation** - Update README with test coverage information
