@@ -1642,7 +1642,7 @@ jobs:
     <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.24.2</version>
+        <version>3.27.6</version>
         <scope>test</scope>
     </dependency>
     
