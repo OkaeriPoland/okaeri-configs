@@ -8,6 +8,7 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -150,7 +151,7 @@ class IncludeAnnotationTest {
     void testInclude_InvalidUsage_IncludeWithoutExtends_ThrowsException() {
         // Given / When / Then - Trying to @Include a class you don't extend should fail
         // The library tries to read AnotherBase fields from the config instance, which fails
-        assertThat(org.assertj.core.api.Assertions.catchThrowable(() -> {
+        assertThat(Assertions.catchThrowable(() -> {
             ConfigManager.create(InvalidMultipleIncludesConfig.class);
         }))
         .isInstanceOf(IllegalArgumentException.class)

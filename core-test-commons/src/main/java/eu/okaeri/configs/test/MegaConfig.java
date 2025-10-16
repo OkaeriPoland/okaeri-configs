@@ -170,7 +170,11 @@ public class MegaConfig extends OkaeriConfig {
     @AllArgsConstructor
     public static class CustomSerializable implements Serializable {
         private static final long serialVersionUID = 1L;
+        
+        @Comment("Name field in serializable object")
         private String name;
+        
+        @Comment("ID field in serializable object")
         private int id;
     }
 }

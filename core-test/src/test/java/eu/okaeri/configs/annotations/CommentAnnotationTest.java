@@ -6,9 +6,15 @@ import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.Comments;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -197,5 +203,155 @@ class CommentAnnotationTest {
         assertThat(field1.getComment()).containsExactly("This is a single line comment");
         assertThat(field2).isNotNull();
         assertThat(field2.getComment()).containsExactly("This is a single line comment");
+    }
+
+    // Tests for Serializable and Subconfig comments
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SerializableCommentConfig extends OkaeriConfig {
+        @Comment("Comment on serializable field")
+        private CustomSerializable serializable = new CustomSerializable("test", 42);
+
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class CustomSerializable implements Serializable {
+            private static final long serialVersionUID = 1L;
+            
+            @Comment("Comment inside serializable")
+            private String name;
+            private int id;
+        }
+    }
+
+    @Test
+    void testComment_OnSerializableField_InDeclaration() {
+        // Given
+        SerializableCommentConfig config = ConfigManager.create(SerializableCommentConfig.class);
+
+        // When
+        ConfigDeclaration declaration = config.getDeclaration();
+        FieldDeclaration field = declaration.getField("serializable").orElse(null);
+
+        // Then
+        assertThat(field).isNotNull();
+        assertThat(field.getComment()).isNotNull();
+        assertThat(field.getComment()).containsExactly("Comment on serializable field");
+    }
+
+    @Test
+    void testComment_InsideSerializable_InDeclaration() {
+        // Given
+        SerializableCommentConfig config = ConfigManager.create(SerializableCommentConfig.class);
+
+        // When - Get the field declaration and check its type's declaration
+        ConfigDeclaration declaration = config.getDeclaration();
+        FieldDeclaration serializableField = declaration.getField("serializable").orElse(null);
+        assertThat(serializableField).isNotNull();
+
+        // Get declaration for the Serializable class
+        ConfigDeclaration serializableDeclaration = ConfigDeclaration.of(SerializableCommentConfig.CustomSerializable.class);
+        FieldDeclaration nameField = serializableDeclaration.getField("name").orElse(null);
+
+        // Then
+        assertThat(nameField).isNotNull();
+        assertThat(nameField.getComment()).isNotNull();
+        assertThat(nameField.getComment()).containsExactly("Comment inside serializable");
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SubconfigCommentConfig extends OkaeriConfig {
+        @Comment("Comment on subconfig field")
+        private NestedConfig nested = new NestedConfig();
+
+        @Data
+        @EqualsAndHashCode(callSuper = false)
+        public static class NestedConfig extends OkaeriConfig {
+            @Comment("Comment inside subconfig")
+            private String field = "value";
+            private int number = 123;
+        }
+    }
+
+    @Test
+    void testComment_OnSubconfigField_InDeclaration() {
+        // Given
+        SubconfigCommentConfig config = ConfigManager.create(SubconfigCommentConfig.class);
+
+        // When
+        ConfigDeclaration declaration = config.getDeclaration();
+        FieldDeclaration field = declaration.getField("nested").orElse(null);
+
+        // Then
+        assertThat(field).isNotNull();
+        assertThat(field.getComment()).isNotNull();
+        assertThat(field.getComment()).containsExactly("Comment on subconfig field");
+    }
+
+    @Test
+    void testComment_InsideSubconfig_InDeclaration() {
+        // Given
+        SubconfigCommentConfig config = ConfigManager.create(SubconfigCommentConfig.class);
+
+        // When - Access nested config's declaration
+        SubconfigCommentConfig.NestedConfig nestedInstance = config.getNested();
+        ConfigDeclaration nestedDeclaration = nestedInstance.getDeclaration();
+        FieldDeclaration field = nestedDeclaration.getField("field").orElse(null);
+
+        // Then
+        assertThat(field).isNotNull();
+        assertThat(field.getComment()).isNotNull();
+        assertThat(field.getComment()).containsExactly("Comment inside subconfig");
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SubconfigListCommentConfig extends OkaeriConfig {
+        @Comment("List of subconfigs with comments")
+        private List<CommentedSubConfig> subconfigs = Arrays.asList(
+            new CommentedSubConfig("item1", 10),
+            new CommentedSubConfig("item2", 20)
+        );
+
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @EqualsAndHashCode(callSuper = false)
+        public static class CommentedSubConfig extends OkaeriConfig {
+            @Comment("Name of the subconfig item")
+            private String name;
+            
+            @Comment("Value of the subconfig item")
+            private int value;
+        }
+    }
+
+    @Test
+    void testComment_SubconfigList_PreservesComments() {
+        // Given
+        SubconfigListCommentConfig config = ConfigManager.create(SubconfigListCommentConfig.class);
+
+        // When - Check parent field comment
+        ConfigDeclaration declaration = config.getDeclaration();
+        FieldDeclaration listField = declaration.getField("subconfigs").orElse(null);
+
+        // Then - Parent field has comment
+        assertThat(listField).isNotNull();
+        assertThat(listField.getComment()).isNotNull();
+        assertThat(listField.getComment()).containsExactly("List of subconfigs with comments");
+
+        // When - Check subconfig element comments
+        ConfigDeclaration subconfigDeclaration = ConfigDeclaration.of(SubconfigListCommentConfig.CommentedSubConfig.class);
+        FieldDeclaration nameField = subconfigDeclaration.getField("name").orElse(null);
+        FieldDeclaration valueField = subconfigDeclaration.getField("value").orElse(null);
+
+        // Then - Subconfig fields have comments
+        assertThat(nameField).isNotNull();
+        assertThat(nameField.getComment()).containsExactly("Name of the subconfig item");
+        
+        assertThat(valueField).isNotNull();
+        assertThat(valueField.getComment()).containsExactly("Value of the subconfig item");
     }
 }
