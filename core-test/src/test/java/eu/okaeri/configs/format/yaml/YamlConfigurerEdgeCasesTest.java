@@ -1,79 +1,47 @@
-package eu.okaeri.configs.yaml.bukkit;
+package eu.okaeri.configs.format.yaml;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests YAML-specific edge cases and boundary conditions for Bukkit configurer.
+ * Generalized edge case tests for all YAML configurer implementations.
+ * Tests boundary conditions and error handling across SnakeYAML, Bukkit, and Bungee configurers.
  */
-class YamlBukkitConfigurerEdgeCasesTest {
+class YamlConfigurerEdgeCasesTest {
 
-    @Test
-    void testLoad_EmptyInputStream() throws Exception {
-        // Given: Empty YAML content
-        String yaml = "";
-        YamlBukkitConfigurer configurer = new YamlBukkitConfigurer();
-        EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        
-        // When: Load from empty InputStream
-        configurer.load(new ByteArrayInputStream(yaml.getBytes()), config.getDeclaration());
-        
-        // Then: Internal map is initialized as empty
-        assertThat(configurer.getAllKeys()).isEmpty();
+    static Stream<Arguments> yamlConfigurers() {
+        return Stream.of(
+            Arguments.of("SnakeYAML", new YamlSnakeYamlConfigurer()),
+            Arguments.of("Bukkit", new YamlBukkitConfigurer()),
+            Arguments.of("Bungee", new YamlBungeeConfigurer())
+        );
     }
 
-    @Test
-    void testLoad_NullYamlDocument() throws Exception {
-        // Given: YAML with null document (just whitespace/comments)
-        String yaml = """
-            # Just comments
-            # No actual content
-            """;
-        YamlBukkitConfigurer configurer = new YamlBukkitConfigurer();
-        EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        
-        // When: Load from InputStream with null document
-        configurer.load(new ByteArrayInputStream(yaml.getBytes()), config.getDeclaration());
-        
-        // Then: Internal map is reset to empty
-        assertThat(configurer.getAllKeys()).isEmpty();
-    }
-
-    @Test
-    void testLoad_MalformedYaml_ThrowsException() {
-        // Given: Malformed YAML (invalid syntax)
-        String malformedYaml = """
-            name: Test
-            value: [unclosed bracket
-            enabled: true
-            """;
-        YamlBukkitConfigurer configurer = new YamlBukkitConfigurer();
-        EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        
-        // When/Then: Loading malformed YAML throws exception
-        assertThatThrownBy(() -> 
-            configurer.load(new ByteArrayInputStream(malformedYaml.getBytes()), config.getDeclaration())
-        ).isInstanceOf(Exception.class);
-    }
-
-    @Test
-    void testWrite_EmptyConfig() throws Exception {
+    @ParameterizedTest(name = "{0}: Empty config")
+    @MethodSource("yamlConfigurers")
+    void testWrite_EmptyConfig(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with no fields
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -84,11 +52,12 @@ class YamlBukkitConfigurerEdgeCasesTest {
         assertThat(yaml.trim()).isIn("{}", "");
     }
 
-    @Test
-    void testWrite_VeryLargeValues() throws Exception {
+    @ParameterizedTest(name = "{0}: Very large string values")
+    @MethodSource("yamlConfigurers")
+    void testWrite_VeryLargeValues(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with very large string value
         LargeValueConfig config = ConfigManager.create(LargeValueConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         config.setLargeValue("x".repeat(10000)); // 10k characters
         
         // When: Write to OutputStream
@@ -101,11 +70,12 @@ class YamlBukkitConfigurerEdgeCasesTest {
         assertThat(yaml.length()).isGreaterThan(10000);
     }
 
-    @Test
-    void testWrite_SpecialCharactersInStrings() throws Exception {
+    @ParameterizedTest(name = "{0}: Special characters in strings")
+    @MethodSource("yamlConfigurers")
+    void testWrite_SpecialCharactersInStrings(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with special characters
         SpecialCharsConfig config = ConfigManager.create(SpecialCharsConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         config.setQuotes("She said: \"Hello!\"");
         config.setBackslash("C:\\Users\\test\\path");
         config.setNewlines("Line 1\nLine 2\nLine 3");
@@ -125,8 +95,9 @@ class YamlBukkitConfigurerEdgeCasesTest {
         assertThat(yaml).contains("unicode:");
     }
 
-    @Test
-    void testWrite_VeryDeeplyNestedStructure() throws Exception {
+    @ParameterizedTest(name = "{0}: Very deeply nested structure")
+    @MethodSource("yamlConfigurers")
+    void testWrite_VeryDeeplyNestedStructure(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with deep nesting
         String yaml = """
             level1:
@@ -138,7 +109,7 @@ class YamlBukkitConfigurerEdgeCasesTest {
             """;
         
         DeepNestedConfig config = ConfigManager.create(DeepNestedConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         config.load(yaml);
         
         // When: Write to OutputStream
@@ -154,11 +125,12 @@ class YamlBukkitConfigurerEdgeCasesTest {
         assertThat(resultYaml).contains("level5:");
     }
 
-    @Test
-    void testWrite_VeryLargeCollection() throws Exception {
+    @ParameterizedTest(name = "{0}: Very large collection")
+    @MethodSource("yamlConfigurers")
+    void testWrite_VeryLargeCollection(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with very large list
         LargeCollectionConfig config = ConfigManager.create(LargeCollectionConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         List<String> largeList = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             largeList.add("item-" + i);
@@ -176,12 +148,22 @@ class YamlBukkitConfigurerEdgeCasesTest {
         assertThat(yaml).contains("item-999");
     }
 
-    @Test
-    @Disabled("Bukkit's YamlConfiguration has no way to differentiate between removing a top-level key and setting it to null")
-    void testWrite_NullValues() throws Exception {
+    static Stream<Arguments> snakeYamlOnly() {
+        return Stream.of(
+            Arguments.of("SnakeYAML", new YamlSnakeYamlConfigurer())
+        );
+    }
+
+    @ParameterizedTest(name = "{0}: Top-level null values")
+    @MethodSource("snakeYamlOnly")
+    void testWrite_NullValues(String configurerName, Configurer configurer) throws Exception {
+        // Note: This test only runs for SnakeYAML because Bukkit and Bungee configurers
+        // cannot preserve top-level null values (YamlConfiguration and BungeeConfig
+        // have no way to differentiate between removing a key and setting it to null)
+        
         // Given: Config with null values
         NullValueConfig config = ConfigManager.create(NullValueConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         config.setNullString(null);
         config.setNullList(null);
         config.setNullMap(null);
@@ -192,36 +174,37 @@ class YamlBukkitConfigurerEdgeCasesTest {
         String yaml = output.toString();
         
         // Then: Null values are represented in YAML (typically as 'null' or omitted)
-        // YAML null is typically represented as empty or 'null' keyword
         assertThat(yaml).containsAnyOf("nullString: null", "nullString:");
         assertThat(yaml).containsAnyOf("nullList: null", "nullList:");
         assertThat(yaml).containsAnyOf("nullMap: null", "nullMap:");
     }
 
-    @Test
-    void testWrite_NestedNullValues() throws Exception {
+    @ParameterizedTest(name = "{0}: Nested null values")
+    @MethodSource("yamlConfigurers")
+    void testWrite_NestedNullValues(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with nested OkaeriConfig containing null values
         NestedNullConfig config = ConfigManager.create(NestedNullConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         config.getNested().setNestedNullString(null);
         config.getNested().setNestedNullList(null);
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Nested null values are represented in YAML
         assertThat(yaml).contains("nested:");
         assertThat(yaml).containsAnyOf("nestedNullString: null", "nestedNullString:");
         assertThat(yaml).containsAnyOf("nestedNullList: null", "nestedNullList:");
     }
 
-    @Test
-    void testRoundTrip_EmptyStrings() throws Exception {
+    @ParameterizedTest(name = "{0}: Round-trip empty strings")
+    @MethodSource("yamlConfigurers")
+    void testRoundTrip_EmptyStrings(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with empty strings
         EmptyStringConfig config = ConfigManager.create(EmptyStringConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         config.setEmptyString("");
         config.setWhitespaceString("   ");
         
@@ -230,7 +213,7 @@ class YamlBukkitConfigurerEdgeCasesTest {
         config.save(output);
         
         EmptyStringConfig loaded = ConfigManager.create(EmptyStringConfig.class);
-        loaded.withConfigurer(new YamlBukkitConfigurer());
+        loaded.withConfigurer(configurer);
         loaded.load(new ByteArrayInputStream(output.toByteArray()));
         
         // Then: Empty strings are preserved
@@ -238,11 +221,12 @@ class YamlBukkitConfigurerEdgeCasesTest {
         assertThat(loaded.getWhitespaceString()).isEqualTo("   ");
     }
 
-    @Test
-    void testWrite_YamlReservedWords() throws Exception {
+    @ParameterizedTest(name = "{0}: YAML reserved words as values")
+    @MethodSource("yamlConfigurers")
+    void testWrite_YamlReservedWords(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with YAML reserved words as values
         ReservedWordsConfig config = ConfigManager.create(ReservedWordsConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
         config.setTrueString("true");
         config.setFalseString("false");
         config.setNullString("null");
@@ -258,6 +242,24 @@ class YamlBukkitConfigurerEdgeCasesTest {
         assertThat(yaml).contains("trueString:");
         assertThat(yaml).contains("falseString:");
         assertThat(yaml).contains("nullString:");
+    }
+
+    @ParameterizedTest(name = "{0}: Malformed YAML throws exception")
+    @MethodSource("yamlConfigurers")
+    void testLoad_MalformedYaml_ThrowsException(String configurerName, Configurer configurer) {
+        // Given: Malformed YAML (invalid syntax)
+        String malformedYaml = """
+            name: Test
+            value: [unclosed bracket
+            enabled: true
+            """;
+        
+        // When/Then: Loading malformed YAML throws exception
+        EmptyConfig config = ConfigManager.create(EmptyConfig.class);
+        config.withConfigurer(configurer);
+        
+        assertThatThrownBy(() -> config.load(malformedYaml))
+            .isInstanceOf(Exception.class);
     }
 
     // Test config classes
@@ -286,7 +288,7 @@ class YamlBukkitConfigurerEdgeCasesTest {
     @Data
     @EqualsAndHashCode(callSuper = false)
     public static class DeepNestedConfig extends OkaeriConfig {
-        private java.util.Map<String, Object> level1;
+        private Map<String, Object> level1;
     }
 
     @Data

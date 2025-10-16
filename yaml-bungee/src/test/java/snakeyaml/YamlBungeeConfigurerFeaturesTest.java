@@ -1,8 +1,9 @@
-package eu.okaeri.configs.yaml.bukkit;
+package snakeyaml;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
+import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
@@ -12,15 +13,15 @@ import java.io.ByteArrayOutputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests YamlBukkitConfigurer-specific features.
+ * Tests YamlSnakeYamlConfigurer-specific features.
  * Only tests for backend-specific functionality not covered by parameterized tests.
  */
-class YamlBukkitConfigurerFeaturesTest {
+class YamlBungeeConfigurerFeaturesTest {
 
     @Test
     void testCustomCommentPrefix() throws Exception {
         // Given: Configurer with custom comment prefix
-        YamlBukkitConfigurer configurer = new YamlBukkitConfigurer();
+        YamlBungeeConfigurer configurer = new YamlBungeeConfigurer();
         configurer.setCommentPrefix("#> ");
 
         CommentedConfig config = ConfigManager.create(CommentedConfig.class);

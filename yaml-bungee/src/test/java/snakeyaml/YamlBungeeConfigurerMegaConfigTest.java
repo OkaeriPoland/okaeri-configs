@@ -1,8 +1,9 @@
-package eu.okaeri.configs.yaml.snakeyaml;
+package snakeyaml;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.test.GoldenFileAssertion;
 import eu.okaeri.configs.test.MegaConfig;
+import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Backend-specific E2E tests for YamlSnakeYamlConfigurer.
  * Parameterized MegaConfig tests are in core-test/format/yaml.
  */
-class YamlSnakeYamlConfigurerMegaConfigTest {
+class YamlBungeeConfigurerMegaConfigTest {
 
     private static final String GOLDEN_FILE_PATH = "src/test/resources/e2e.yml";
 
@@ -28,7 +29,7 @@ class YamlSnakeYamlConfigurerMegaConfigTest {
         // When: Load MegaConfig from golden file
         MegaConfig config = ConfigManager.create(MegaConfig.class);
         config.populateNestedMegaConfig();
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBungeeConfigurer());
         config.withBindFile(goldenFilePath);
         config.saveDefaults();
         config.load();
@@ -43,7 +44,7 @@ class YamlSnakeYamlConfigurerMegaConfigTest {
     void testMegaConfig_RegressionTest() throws Exception {
         // Given: MegaConfig with all features
         MegaConfig config = ConfigManager.create(MegaConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withConfigurer(new YamlBungeeConfigurer());
         config.populateNestedMegaConfig();
 
         // When: Save to string

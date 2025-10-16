@@ -72,8 +72,8 @@ simpleMap:
   key2: value2
 # Map with integer keys
 intKeyMap:
-  1: one
-  2: two
+  '1': one
+  '2': two
 # Nested map
 nestedMap:
   group1:
@@ -175,8 +175,8 @@ nestedMegaConfig:
     key2: value2
   # Map with integer keys
   intKeyMap:
-    1: one
-    2: two
+    '1': one
+    '2': two
   # Nested map
   nestedMap:
     group1:

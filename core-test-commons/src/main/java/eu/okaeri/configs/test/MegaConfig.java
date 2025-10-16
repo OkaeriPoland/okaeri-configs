@@ -60,6 +60,15 @@ public class MegaConfig extends OkaeriConfig {
     private String unicodePolish = "Część świecie! Łódź, Gdańsk, Kraków, źdźbło";
     private String specialChars = "!@#$%^&*()_+-=[]{}|;':\"<>?,./";
     private String emptyString = "";
+    
+    @Comment("Long string without spaces (tests line wrapping)")
+    private String longStringNoSpaces = "a".repeat(200);
+    
+    @Comment("Long string with spaces (tests folding behavior)")
+    private String longStringWithSpaces = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+    
+    @Comment("Multiline string (tests literal/folded style)")
+    private String multilineString = "Line 1\nLine 2\nLine 3\nLine 4 with more text\nLine 5 final";
 
     // === BIG NUMBERS ===
     @Comment("Math types for precision")
@@ -123,6 +132,10 @@ public class MegaConfig extends OkaeriConfig {
             new SubConfig("sub2", 20)
     );
 
+    // === MULTI-LEVEL SELF-REFERENTIAL NESTING ===
+    @Comment({"Complex multi-level subconfig", "MegaConfig nested inside itself (2 levels deep)", "Note: Set to null by default to avoid infinite recursion", "Call populateNestedMegaConfig() after construction to initialize"})
+    private MegaConfig nestedMegaConfig = null;
+
     // === SERIALIZABLE ===
     @Comment("Serializable custom object")
     private CustomSerializable customObj = new CustomSerializable("test", 999);
@@ -148,6 +161,20 @@ public class MegaConfig extends OkaeriConfig {
 
     @Comment("Empty map")
     private Map<String, String> emptyMap = new LinkedHashMap<>();
+
+    // === FACTORY METHOD FOR NESTED MEGACONFIG ===
+    
+    /**
+     * Populates the nestedMegaConfig field with a full MegaConfig instance.
+     * This creates a 2-level deep nesting structure (the nested instance has nestedMegaConfig = null).
+     * Must be called after construction to avoid infinite recursion.
+     */
+    public void populateNestedMegaConfig() {
+        if (this.nestedMegaConfig == null) {
+            this.nestedMegaConfig = new MegaConfig();
+            // The nested instance keeps its nestedMegaConfig as null (no further nesting)
+        }
+    }
 
     // === NESTED CLASSES ===
 

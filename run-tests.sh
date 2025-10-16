@@ -47,6 +47,7 @@ INSTALL_MODULES=(
     "core-test-commons:Shared test utilities and configs"
     "yaml-snakeyaml:YAML format implementation"
     "yaml-bukkit:Bukkit's YAML format implementation"
+    "yaml-bungee:Bungee's YAML format implementation"
 )
 
 # Modules that need to have tests executed
@@ -54,6 +55,7 @@ TEST_MODULES=(
     "core-test:Core functionality tests"
     "yaml-snakeyaml:YAML format implementation tests"
     "yaml-bukkit:Bukkit's YAML format implementation tests"
+    "yaml-bungee:Bungee's YAML format implementation tests"
 )
 
 # Start

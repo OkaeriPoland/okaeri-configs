@@ -43,6 +43,34 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- YAML Bukkit for parameterized format testing -->
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-configs-yaml-bukkit</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- YAML Bungee for parameterized format testing -->
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-configs-yaml-bungee</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-api</artifactId>
+            <version>1.18-R0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -56,6 +84,12 @@
             <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- AssertJ -->
         <dependency>
@@ -65,5 +99,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>bungeecord-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
 
 </project>

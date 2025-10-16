@@ -1,36 +1,50 @@
-package eu.okaeri.configs.yaml.bukkit;
+package eu.okaeri.configs.format.yaml;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.Header;
+import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for YAML structure and comment rendering with YamlBukkitConfigurer.
- * 
- * Uses small, focused test configs compared against inline YAML text blocks.
- * MegaConfig E2E tests are in YamlBukkitConfigurerMegaConfigTest.
+ * Generalized structure tests for all YAML configurer implementations.
+ * Tests exact YAML formatting output with text block comparisons.
  */
-class YamlBukkitConfigurerStructureTest {
+class YamlConfigurerStructureTest {
 
-    @Test
-    void testSaveToString_SimpleFieldComments_MatchesExpectedYaml() throws Exception {
+    static Stream<Arguments> yamlConfigurers() {
+        return Stream.of(
+            Arguments.of("SnakeYAML", new YamlSnakeYamlConfigurer()),
+            Arguments.of("Bukkit", new YamlBukkitConfigurer()),
+            Arguments.of("Bungee", new YamlBungeeConfigurer())
+        );
+    }
+
+    @ParameterizedTest(name = "{0}: Simple field comments")
+    @MethodSource("yamlConfigurers")
+    void testSaveToString_SimpleFieldComments_MatchesExpectedYaml(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with simple commented fields
         CommentedConfig config = ConfigManager.create(CommentedConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
 
         // When: Save to YAML
         String yaml = config.saveToString();
@@ -47,11 +61,12 @@ class YamlBukkitConfigurerStructureTest {
         assertThat(yaml).isEqualTo(expected);
     }
 
-    @Test
-    void testSaveToString_HeaderAnnotation_MatchesExpectedYaml() throws Exception {
+    @ParameterizedTest(name = "{0}: Header annotation")
+    @MethodSource("yamlConfigurers")
+    void testSaveToString_HeaderAnnotation_MatchesExpectedYaml(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with header
         HeaderedConfig config = ConfigManager.create(HeaderedConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
 
         // When: Save to YAML
         String yaml = config.saveToString();
@@ -68,12 +83,13 @@ class YamlBukkitConfigurerStructureTest {
         assertThat(yaml).isEqualTo(expected);
     }
 
-    @Test
+    @ParameterizedTest(name = "{0}: Serializable with comments")
+    @MethodSource("yamlConfigurers")
     @Disabled("@Comment is not implemented for Serializable")
-    void testSaveToString_SerializableWithComments_MatchesExpectedYaml() throws Exception {
+    void testSaveToString_SerializableWithComments_MatchesExpectedYaml(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with Serializable object with commented fields
         SerializableConfig config = ConfigManager.create(SerializableConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
 
         // When: Save to YAML
         String yaml = config.saveToString();
@@ -91,11 +107,12 @@ class YamlBukkitConfigurerStructureTest {
         assertThat(yaml).isEqualTo(expected);
     }
 
-    @Test
-    void testSaveToString_SubConfigWithComments_MatchesExpectedYaml() throws Exception {
+    @ParameterizedTest(name = "{0}: SubConfig with comments")
+    @MethodSource("yamlConfigurers")
+    void testSaveToString_SubConfigWithComments_MatchesExpectedYaml(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with SubConfig with commented fields
         SubConfigConfig config = ConfigManager.create(SubConfigConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
 
         // When: Save to YAML
         String yaml = config.saveToString();
@@ -112,12 +129,13 @@ class YamlBukkitConfigurerStructureTest {
         assertThat(yaml).isEqualTo(expected);
     }
 
-    @Test
+    @ParameterizedTest(name = "{0}: SubConfig list comments")
+    @MethodSource("yamlConfigurers")
     @Disabled("@Comment is not implemented for lists")
-    void testSaveToString_SubConfigList_OnlyFirstItemHasComments() throws Exception {
+    void testSaveToString_SubConfigList_OnlyFirstItemHasComments(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with List<SubConfig> where SubConfig has commented fields
         SubConfigListConfig config = ConfigManager.create(SubConfigListConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
 
         // When: Save to YAML
         String yaml = config.saveToString();
@@ -136,11 +154,12 @@ class YamlBukkitConfigurerStructureTest {
         assertThat(yaml).isEqualTo(expected);
     }
 
-    @Test
-    void testSaveToString_UnicodeStrings_PreservedInYaml() throws Exception {
+    @ParameterizedTest(name = "{0}: Unicode strings preserved")
+    @MethodSource("yamlConfigurers")
+    void testSaveToString_UnicodeStrings_PreservedInYaml(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with unicode strings
         UnicodeConfig config = ConfigManager.create(UnicodeConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
 
         // When: Save to YAML
         String yaml = config.saveToString();
@@ -155,11 +174,12 @@ class YamlBukkitConfigurerStructureTest {
         assertThat(yaml).isEqualTo(expected);
     }
 
-    @Test
-    void testSaveToString_NestedCollections_MatchesExpectedStructure() throws Exception {
+    @ParameterizedTest(name = "{0}: Nested collections structure")
+    @MethodSource("yamlConfigurers")
+    void testSaveToString_NestedCollections_MatchesExpectedStructure(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with nested structures
         NestedStructureConfig config = ConfigManager.create(NestedStructureConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
 
         // When: Save to YAML
         String yaml = config.saveToString();
@@ -178,11 +198,12 @@ class YamlBukkitConfigurerStructureTest {
         assertThat(yaml).isEqualTo(expected);
     }
 
-    @Test
-    void testSaveLoadCycles_HeaderAndComments_RemainsStable() throws Exception {
+    @ParameterizedTest(name = "{0}: Header and comments stability")
+    @MethodSource("yamlConfigurers")
+    void testSaveLoadCycles_HeaderAndComments_RemainsStable(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with header and comments
         HeaderedCommentedConfig config = ConfigManager.create(HeaderedCommentedConfig.class);
-        config.withConfigurer(new YamlBukkitConfigurer());
+        config.withConfigurer(configurer);
 
         // When: Initial save
         String firstYaml = config.saveToString();
@@ -191,7 +212,7 @@ class YamlBukkitConfigurerStructureTest {
         String currentYaml = firstYaml;
         for (int i = 0; i < 5; i++) {
             HeaderedCommentedConfig reloaded = ConfigManager.create(HeaderedCommentedConfig.class);
-            reloaded.withConfigurer(new YamlBukkitConfigurer());
+            reloaded.withConfigurer(configurer);
             reloaded.load(currentYaml);
             currentYaml = reloaded.saveToString();
             
