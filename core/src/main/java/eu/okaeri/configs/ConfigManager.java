@@ -3,6 +3,7 @@ package eu.okaeri.configs;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.schema.ConfigDeclaration;
+import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.util.UnsafeUtil;
@@ -81,7 +82,10 @@ public final class ConfigManager {
     /**
      * Creates a copy of a config by transforming it to a target type.
      * <p>
-     * Copies field values from the source config's configurer to matching fields in the target config.
+     * Copies field values from the source config to matching fields in the target config.
+     * Values are read from source fields first (capturing programmatic changes), with fallback
+     * to configurer data (preserving orphans for wrapper pattern support).
+     * <p>
      * Useful for converting between different config types with overlapping fields (e.g., Document wrapper pattern in okaeri-persistence).
      * The source and target share the same configurer instance.
      * <p>
@@ -100,26 +104,48 @@ public final class ConfigManager {
 
         copy.withConfigurer(configurer);
         ConfigDeclaration copyDeclaration = copy.getDeclaration();
+        ConfigDeclaration sourceDeclaration = config.getDeclaration();
 
         if (config.getBindFile() != null) {
             copy.withBindFile(config.getBindFile());
         }
 
-        configurer.getAllKeys().stream()
-            .map(copyDeclaration::getField)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .forEach(field -> {
+        // Process each field in target declaration
+        copyDeclaration.getFields().forEach(targetField -> {
+            String fieldName = targetField.getName();
+            Object value;
+            GenericsDeclaration generics;
 
-                Object value = configurer.getValue(field.getName());
-                GenericsDeclaration generics = GenericsDeclaration.of(value);
-
-                if ((value != null) && ((field.getType().getType() != value.getClass()) || (!generics.isPrimitiveWrapper() && !generics.isPrimitive()))) {
-                    value = configurer.resolveType(value, generics, field.getType().getType(), field.getType(), SerdesContext.of(configurer, field));
+            // Try to read from source field first (captures programmatic changes)
+            Optional<FieldDeclaration> sourceField = sourceDeclaration.getField(fieldName);
+            if (sourceField.isPresent()) {
+                value = sourceField.get().getValue();
+                
+                // If value is OkaeriConfig or needs serialization, simplify it first
+                // This ensures nested objects are properly serialized before transformation
+                if (value != null && (value instanceof OkaeriConfig || !value.getClass().isPrimitive())) {
+                    value = configurer.simplify(value, sourceField.get().getType(), SerdesContext.of(configurer, sourceField.get()), false);
                 }
+                
+                generics = GenericsDeclaration.of(value);
+            }
+            // Fallback to configurer (preserves orphans for wrapper pattern)
+            else if (configurer.keyExists(fieldName)) {
+                value = configurer.getValue(fieldName);
+                generics = GenericsDeclaration.of(value);
+            }
+            // Field doesn't exist in source
+            else {
+                return; // Skip this field
+            }
 
-                field.updateValue(value);
-            });
+            // Apply type transformation if needed
+            if ((value != null) && ((targetField.getType().getType() != value.getClass()) || (!generics.isPrimitiveWrapper() && !generics.isPrimitive()))) {
+                value = configurer.resolveType(value, generics, targetField.getType().getType(), targetField.getType(), SerdesContext.of(configurer, targetField));
+            }
+
+            targetField.updateValue(value);
+        });
 
         return copy;
     }

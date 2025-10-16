@@ -323,4 +323,34 @@ class OrphanHandlingTest {
         assertThat(content).contains("field1");
         assertThat(content).contains("field2");
     }
+
+    /**
+     * Nested orphans without root-level orphans
+     * Regression test: ensures nested orphans are removed even when root has no orphans
+     */
+    @Test
+    void testOrphans_NestedOrphansWithoutRootOrphans_RemovesNestedOrphans() throws Exception {
+        File configFile = tempDir.resolve("orphans9.yml").toFile();
+        
+        // Create file with ONLY nested orphans (no root-level orphans)
+        String yaml = """
+            declaredNested:
+              nestedField: "nested value"
+              orphanInNested: "should be removed"
+            """;
+        TestUtils.writeFile(configFile, yaml);
+        
+        // Load
+        ParentConfig config = ConfigManager.create(ParentConfig.class);
+        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withBindFile(configFile);
+        config.withRemoveOrphans(true);
+        config.load();
+        config.save();
+        
+        // Verify nested orphan removed (even though there were no root-level orphans)
+        String content = TestUtils.readFile(configFile);
+        assertThat(content).doesNotContain("orphanInNested");
+        assertThat(content).contains("nestedField");
+    }
 }

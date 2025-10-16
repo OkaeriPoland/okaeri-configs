@@ -23,10 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -260,9 +257,9 @@ public abstract class OkaeriConfig {
      * Gets configuration value by its raw key. Attempts serialization/deserialization and other
      * transformation techniques if necessary to match provided class type (e.g. int = String).
      *
-     * @param key   target key
+     * @param key      target key
      * @param generics target type for value
-     * @param <T>   target value type
+     * @param <T>      target value type
      * @return the resolved value
      * @throws OkaeriException if {@link #configurer} is null or the value processing fails
      */
@@ -361,13 +358,26 @@ public abstract class OkaeriConfig {
         }
 
         try {
+            // sort (for formatting) + resolve orphans
             Set<String> orphans = this.getConfigurer().sort(this.getDeclaration());
-            if (!orphans.isEmpty() && this.isRemoveOrphans()) {
-                this.logger.warning("Removed orphaned (undeclared) keys: " + orphans);
-                orphans.forEach(orphan -> this.getConfigurer().remove(orphan));
+
+            // remove orphans if enabled
+            if (this.isRemoveOrphans()) {
+                Set<String> allOrphans = new LinkedHashSet<>();
+                if (!orphans.isEmpty()) {
+                    allOrphans.addAll(orphans);
+                    orphans.forEach(orphan -> this.getConfigurer().remove(orphan));
+                }
+                this.removeOrphansRecursively(this.getDeclaration(), "", allOrphans);
+                if (!allOrphans.isEmpty()) {
+                    this.logger.warning("Removed orphaned (undeclared) keys: " + allOrphans);
+                }
             }
+
+            // dump into the stream
             this.getConfigurer().write(outputStream, this.getDeclaration());
-        } catch (Exception exception) {
+        }
+        catch (Exception exception) {
             throw new OkaeriException("failed #write", exception);
         }
 
@@ -551,24 +561,24 @@ public abstract class OkaeriConfig {
      * @throws OkaeriException if {@link #configurer} is null or migration fails
      */
     public OkaeriConfig migrate(@NonNull ConfigMigration... migrations) throws OkaeriException {
-       return this.migrate(
-           (performed) -> {
-               try {
-                   this.load(this.saveToString());
-               } catch (OkaeriException exception) {
-                   throw new OkaeriException("failed #migrate due to load error after migrations (not saving)", exception);
-               }
-               this.save();
-           },
-           migrations
-       );
+        return this.migrate(
+            (performed) -> {
+                try {
+                    this.load(this.saveToString());
+                } catch (OkaeriException exception) {
+                    throw new OkaeriException("failed #migrate due to load error after migrations (not saving)", exception);
+                }
+                this.save();
+            },
+            migrations
+        );
     }
 
     /**
      * Performs migrations and invokes consumer if performed migrations
      * count is greater than zero.
      *
-     * @param callback performed migrations count consumer
+     * @param callback   performed migrations count consumer
      * @param migrations migrations to be performed
      * @return this instance
      * @throws OkaeriException if {@link #configurer} is null or migration fails
@@ -675,5 +685,46 @@ public abstract class OkaeriConfig {
     public OkaeriConfig updateDeclaration() {
         this.setDeclaration(ConfigDeclaration.of(this));
         return this;
+    }
+
+    /**
+     * Recursively removes orphaned keys from nested configs.
+     * Walks the configuration tree and removes undeclared keys at all levels.
+     *
+     * @param declaration the declaration to process
+     * @param keyPrefix   the key prefix for nested paths (empty for root)
+     * @param allOrphans  set to collect all removed orphan key paths
+     */
+    private void removeOrphansRecursively(@NonNull ConfigDeclaration declaration, @NonNull String keyPrefix, @NonNull Set<String> allOrphans) {
+        for (FieldDeclaration field : declaration.getFields()) {
+
+            String fieldName = field.getName();
+            String fullPath = keyPrefix.isEmpty() ? fieldName : (keyPrefix + "." + fieldName);
+
+            GenericsDeclaration fieldType = field.getType();
+            if (!fieldType.isConfig()) {
+                continue;
+            }
+
+            Object nestedValue = this.getConfigurer().getValue(fieldName);
+            if (!(nestedValue instanceof Map)) {
+                continue;
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> nestedMap = (Map<String, Object>) nestedValue;
+            ConfigDeclaration nestedDeclaration = ConfigDeclaration.of(fieldType.getType());
+
+            Set<String> declaredKeys = nestedDeclaration.getFieldMap().keySet();
+            Set<String> nestedOrphanedKeys = new LinkedHashSet<>(nestedMap.keySet());
+            nestedOrphanedKeys.removeAll(declaredKeys);
+
+            for (String orphanKey : nestedOrphanedKeys) {
+                nestedMap.remove(orphanKey);
+                allOrphans.add(fullPath + "." + orphanKey);
+            }
+
+            this.removeOrphansRecursively(nestedDeclaration, fullPath, allOrphans);
+        }
     }
 }

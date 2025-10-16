@@ -136,6 +136,47 @@
 
 ---
 
+### Session 22 - 2025-10-16 15:06 ✅ COMPLETED
+**Focus**: Fix 2 library bugs identified in Session 21
+
+**Actions**:
+1. Reviewed project status and LIBRARY_BUGS.md documentation
+2. **Bug #2 - transformCopy state sync** (fixed first):
+   - Analyzed the issue: Reading from configurer misses programmatic field changes
+   - User feedback: Hybrid approach - read from fields first (captures changes), fallback to configurer (preserves wrapper pattern orphans)
+   - Implementation: Modified `ConfigManager.transformCopy()` to:
+     - Read from source field declarations first
+     - Serialize nested objects (OkaeriConfig) via `simplify()` before transformation
+     - Fallback to configurer for orphan fields (wrapper pattern support)
+   - Fixed compilation error: Changed `.getFields().values()` to `.getFields()` (returns Collection directly)
+   - Test result: ✅ All CrossFormatTest tests passing
+3. **Bug #1 - Nested orphan removal** (fixed second):
+   - Analyzed YamlSnakeYamlConfigurer comment-walking pattern for reference
+   - Implementation: Added `removeOrphansRecursively()` method to `OkaeriConfig`:
+     - Walks declaration tree recursively
+     - For each nested config field, gets its map from configurer
+     - Compares map keys with nested declaration keys
+     - Removes orphans from nested maps
+     - Tracks full paths (e.g., "declaredNested.orphanInNested")
+   - Modified `save()` method to call recursive removal after root-level removal
+   - Test result: ✅ All OrphanHandlingTest tests passing
+4. Final test run: **621/621 tests passing (100%)** 🎉
+
+**Library Files Modified**:
+- `core/src/main/java/eu/okaeri/configs/ConfigManager.java` - transformCopy hybrid approach
+- `core/src/main/java/eu/okaeri/configs/OkaeriConfig.java` - recursive orphan removal
+
+**Key Insights**:
+- transformCopy needed to balance capturing programmatic changes vs preserving wrapper pattern orphans
+- Nested orphan removal required understanding that there's ONE configurer with nested maps, not nested configurers
+- Both fixes maintain backward compatibility while fixing edge cases
+
+**Results**: All 621 tests passing. Both library bugs fixed. Core test suite complete.
+
+**Status**: Library bugs fixed ✅
+
+---
+
 ## 📚 REFERENCE INFORMATION (Static Context)
 
 ### Testing Philosophy
@@ -281,7 +322,7 @@
   - ✅ `migration/` - 3 test classes, 69 tests
   - ✅ `manager/` - 1 test class, 17 tests
   - ✅ `integration/` - 4 test classes, 38 tests (2 failing intentionally)
-- **Known Issues**: 2 library bugs documented (see LIBRARY_BUGS.md)
+- **Known Issues**: None
 
 ### Format Modules ⏳ NOT STARTED
 - yaml-snakeyaml - planned
@@ -297,24 +338,24 @@
 # 🔥 CURRENT STATUS - READ THIS FIRST! 🔥
 
 ## Session Information
-- **Session Number**: 21
-- **Started**: 2025-10-16 14:34
-- **Completed**: 2025-10-16 14:46
-- **Current Phase**: Phase 4 - Integration Tests
-- **Focus**: Fix test failures, identify library bugs
+- **Session Number**: 22
+- **Started**: 2025-10-16 15:06
+- **Completed**: 2025-10-16 15:17
+- **Current Phase**: Phase 4 - Bug Fixes
+- **Focus**: Fix 2 library bugs (nested orphan removal + transformCopy state sync)
 
 ## Latest Test Results
 - **Total Tests**: 621 written
-- **Passing**: 619/621 (99.7%)
-- **Failing**: 2 (intentional - documenting library bugs)
-- **Status**: ✅ CORE TESTS COMPLETE
+- **Passing**: 621/621 (100%) 🎉
+- **Failing**: 0
+- **Status**: ✅ ALL TESTS PASSING
 
 ## Work Completed This Session
-1. ✅ **Fixed CompleteWorkflowTest** - Corrected migration API usage (migrate() not withMigration())
-2. ✅ **Fixed CrossFormatTest** - Added configurers to source configs, moved TestConfig2 to class level
-3. ✅ **Identified 2 library bugs** - Created detailed bug report document
-4. ✅ **619/621 tests passing** - Only 2 intentional failures remain (documenting bugs)
-5. ✅ **Updated TEST_IMPL_PROGRESS.md** - Session 21 complete, statistics updated
+1. ✅ **Fixed transformCopy state sync bug** - Hybrid approach: read fields first, fallback to configurer
+2. ✅ **Fixed nested orphan removal bug** - Recursive orphan detection and removal
+3. ✅ **Modified ConfigManager.java** - transformCopy now captures programmatic changes
+4. ✅ **Modified OkaeriConfig.java** - Added removeOrphansRecursively() method
+5. ✅ **All 621 tests passing** - Both library bugs fixed
 
 
 ## Resolved Issues (All Sessions)
@@ -332,14 +373,20 @@
 12. ✅ **ObjectSerializer generic bound** - Fixed `? super T` → `?` (Session 16)
 
 ## Next Actions (Priority Order - Work Through This List)
-1. 🎯 **Fix library bugs** - See LIBRARY_BUGS.md for detailed analysis and fix proposals
-   - Bug #1: Nested orphan removal
-   - Bug #2: transformCopy state synchronization
-2. ⏳ **Format implementation tests** (Phase 5) - 7 formats planned
-3. ⏳ **CI/CD setup** - GitHub Actions workflow for automated testing
+1. ⏳ **Format implementation tests** (Phase 5) - 7 formats planned
+   - yaml-snakeyaml (with MegaConfig E2E)
+   - hjson
+   - json-gson
+   - json-simple
+   - hocon-lightbend
+   - yaml-bukkit
+   - yaml-bungee
+2. ⏳ **CI/CD setup** - GitHub Actions workflow for automated testing
+3. ⏳ **Documentation** - Update README with test coverage information
 
-## Active Library Bugs (Blocking 2 Tests)
-See **LIBRARY_BUGS.md** for detailed analysis and proposed fixes.
+## Library Bugs Fixed in Session 22
+1. ✅ **Nested orphan removal** - `removeOrphansRecursively()` now walks nested config tree
+2. ✅ **transformCopy state sync** - Hybrid approach reads fields first, fallback to configurer for orphans
 
 ## Critical Workflow: Completing Sessions & Managing Context
 
@@ -374,7 +421,7 @@ See **LIBRARY_BUGS.md** for detailed analysis and proposed fixes.
 
 ---
 
-**Document Version**: 5.0 (Session 21 Complete)  
-**Last Updated**: 2025-10-16 14:46
-**Updated By**: Agent 253 (Session 21)  
-**Status**: Core Tests Complete (619/621 passing) - 2 Library Bugs Identified
+**Document Version**: 6.0 (Session 22 Complete)  
+**Last Updated**: 2025-10-16 15:17
+**Updated By**: Agent 253 (Session 22)  
+**Status**: Core Tests Complete (621/621 passing - 100%) - All Library Bugs Fixed! 🎉
