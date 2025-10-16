@@ -9,6 +9,25 @@
 
 ## 📚 SESSION HISTORY (Append New Sessions, Never Modify Old Ones)
 
+### Session 9 - 2025-10-16 01:44 ⏸️ PAUSED
+**Focus**: Fix annotation test failures from Session 8
+
+**Actions**:
+1. Fixed VariableAnnotationTest - added InMemoryConfigurer for all update() calls (8 tests)
+2. Fixed CommentAnnotationTest - made EmptyCommentConfig public static (1 test)
+3. Fixed NamesAnnotationTest - made NoNamesConfig public static + changed save() to update() (5 tests)
+4. Fixed IncludeAnnotationTest - corrected inheritance structure for @Include (partially)
+5. Discovered @Include library limitation: can only include one base class via extends
+6. Identified remaining failures:
+   - 3 IncludeAnnotationTest errors (library limitation - @Include with multiple unrelated bases)
+   - 1 ConfigGetSetTest error (known library limitation - Integer→String conversion)
+
+**Results**: Reduced failures from 24 to 4. Three @Include test failures remain due to library design (can't access fields from non-inherited classes). One known transformer limitation.
+
+**Status**: 254/258 tests passing (98.4%). Remaining failures are documented library limitations.
+
+---
+
 ### Session 1 - 2025-10-15 22:39 ✅ COMPLETED
 **Focus**: Foundation setup
 
@@ -287,20 +306,25 @@
 # 🔥 CURRENT STATUS - READ THIS FIRST! 🔥
 
 ## Session Information
-- **Session Number**: 8
-- **Started**: 2025-10-16 01:20
+- **Session Number**: 9
+- **Started**: 2025-10-16 01:44
 - **Current Phase**: Phase 2 - Core Features
-- **Focus**: Annotation Tests ✅
+- **Focus**: Fix annotation test failures ⏸️
 
 ## Latest Test Results
-- **Total Tests**: 259 (estimated)
-- **Passing**: 258 (99.6% expected)
-- **Failing**: 1 (known library limitation)
-- **Failing Test**:
-  1. `ConfigGetSetTest.testGet_WithClass_TypeConversion` - Integer→String conversion (no transformer exists, documented in STANDARD_SERDES_TEST_PLAN.md)
+- **Total Tests**: 258
+- **Passing**: 254 (98.4%)
+- **Failing**: 4 (documented library limitations)
+- **Failing Tests**:
+  1. `IncludeAnnotationTest.testInclude_MultipleIncludes_AllFieldsIncluded` - @Include library limitation
+  2. `IncludeAnnotationTest.testInclude_RepeatingAnnotations_AllIncluded` - @Include library limitation
+  3. `IncludeAnnotationTest.testInclude_FieldCount_Correct` - @Include library limitation
+  4. `ConfigGetSetTest.testGet_WithClass_TypeConversion` - Integer→String conversion (documented in STANDARD_SERDES_TEST_PLAN.md)
 
 ## Active Issues Blocking Progress
-None! Only 1 known library limitation remains (Integer→String conversion).
+**@Include Library Limitation**: @Include can only include fields from a single base class (via extends). Attempting to include fields from multiple unrelated base classes fails because Java reflection cannot access fields from non-inherited classes.
+
+**Impact**: 3 tests in IncludeAnnotationTest fail when trying to include from multiple unrelated base classes.
 
 ## Resolved Issues (All Sessions)
 1. ✅ **Primitive boxing/unboxing** - Fixed via wrapper class refactoring
@@ -309,9 +333,12 @@ None! Only 1 known library limitation remains (Integer→String conversion).
 4. ✅ **CustomObject Lombok** - Added @Data and @AllArgsConstructor annotations
 5. ✅ **serialVersionUID deserialization** - Fixed by excluding "serialVersionUID" fields in FieldDeclaration
 6. ✅ **asMap conservative mode** - Fixed by using conservative=true in tests to preserve number types
+7. ✅ **Variable annotation tests** - Added InMemoryConfigurer for update() calls
+8. ✅ **Names annotation tests** - Use update() instead of save() (no bindFile needed)
+9. ✅ **Non-static nested classes** - Made all test config classes public static
 
 ## Next Actions (Priority Order - Work Through This List)
-1. ⏳ Run full test suite to verify 259 tests pass
+1. 🔍 Review @Include test approach - may need to document as "tests expected behavior" or fix library
 2. ⏳ Consider schema tests (Phase 2) - 3 test classes planned
 3. ⏳ Consider serdes tests (Phase 3) - 5 test classes planned
 
@@ -348,7 +375,7 @@ None! Only 1 known library limitation remains (Integer→String conversion).
 
 ---
 
-**Document Version**: 2.4 (Session 8 Final Update)  
-**Last Updated**: 2025-10-16 01:42  
-**Updated By**: Agent 253 (Session 8)  
-**Status**: Active Development - Phase 2 Core Features - 259 Tests (99.6% expected) ✅
+**Document Version**: 2.5 (Session 9 Final Update)  
+**Last Updated**: 2025-10-16 02:01  
+**Updated By**: Agent 253 (Session 9)  
+**Status**: Active Development - Phase 2 Core Features - 254/258 Tests Passing (98.4%) ⏸️

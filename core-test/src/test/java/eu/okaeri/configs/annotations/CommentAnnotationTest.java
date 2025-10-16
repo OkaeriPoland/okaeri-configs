@@ -160,18 +160,19 @@ class CommentAnnotationTest {
         assertThat(field3.getComment()).containsExactly("Multi-line comment", "on field 3");
     }
 
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class EmptyCommentConfig extends OkaeriConfig {
+        @Comment
+        private String field = "value";
+    }
+
     @Test
     void testComment_EmptyValue_HandledCorrectly() {
         // Given
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class EmptyCommentConfig extends OkaeriConfig {
-            @Comment
-            private String field = "value";
-        }
-
-        // When
         EmptyCommentConfig config = ConfigManager.create(EmptyCommentConfig.class);
+        
+        // When
         ConfigDeclaration declaration = config.getDeclaration();
         FieldDeclaration field = declaration.getField("field").orElse(null);
 

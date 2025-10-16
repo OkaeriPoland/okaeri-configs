@@ -6,6 +6,7 @@ import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.NameModifier;
 import eu.okaeri.configs.annotation.NameStrategy;
 import eu.okaeri.configs.annotation.Names;
+import eu.okaeri.configs.configurer.InMemoryConfigurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import lombok.Data;
@@ -128,38 +129,33 @@ class NamesAnnotationTest {
     void testNames_SnakeCase_Transforms() {
         // Given
         SnakeCaseConfig config = ConfigManager.create(SnakeCaseConfig.class);
+        InMemoryConfigurer configurer = new InMemoryConfigurer();
+        config.withConfigurer(configurer);
+        config.update();
 
-        // When
-        ConfigDeclaration declaration = config.getDeclaration();
-
-        // Then
-        // Note: Testing actual (buggy) behavior
-        FieldDeclaration field1 = declaration.getField("my_field_name").orElse(null);
-        FieldDeclaration field2 = declaration.getField("another_field").orElse(null);
-        FieldDeclaration field3 = declaration.getField("simple_field").orElse(null);
+        // When - Check configurer has transformed keys (not declaration)
+        // Declaration always uses field names, @Names affects configurer keys
         
-        assertThat(field1).isNotNull();
-        assertThat(field2).isNotNull();
-        assertThat(field3).isNotNull();
+        // Then - Keys in configurer should be transformed
+        assertThat(configurer.keyExists("my_field_name")).isTrue();
+        assertThat(configurer.keyExists("another_field")).isTrue();
+        assertThat(configurer.keyExists("simple_field")).isTrue();
     }
 
     @Test
     void testNames_HyphenCase_Transforms() {
         // Given
         HyphenCaseConfig config = ConfigManager.create(HyphenCaseConfig.class);
+        InMemoryConfigurer configurer = new InMemoryConfigurer();
+        config.withConfigurer(configurer);
+        config.update();
 
-        // When
-        ConfigDeclaration declaration = config.getDeclaration();
-
-        // Then
-        // Note: Testing actual (buggy) behavior
-        FieldDeclaration field1 = declaration.getField("my-field-name").orElse(null);
-        FieldDeclaration field2 = declaration.getField("another-field").orElse(null);
-        FieldDeclaration field3 = declaration.getField("simple-field").orElse(null);
+        // When - Check configurer has transformed keys (not declaration)
         
-        assertThat(field1).isNotNull();
-        assertThat(field2).isNotNull();
-        assertThat(field3).isNotNull();
+        // Then - Keys in configurer should be transformed
+        assertThat(configurer.keyExists("my-field-name")).isTrue();
+        assertThat(configurer.keyExists("another-field")).isTrue();
+        assertThat(configurer.keyExists("simple-field")).isTrue();
     }
 
     @Test
@@ -222,33 +218,33 @@ class NamesAnnotationTest {
     void testNames_CustomKeyOverrides_NameStrategy() {
         // Given
         CustomKeyOverrideConfig config = ConfigManager.create(CustomKeyOverrideConfig.class);
+        InMemoryConfigurer configurer = new InMemoryConfigurer();
+        config.withConfigurer(configurer);
+        config.update();
 
-        // When
-        ConfigDeclaration declaration = config.getDeclaration();
-
+        // When - Check configurer keys
+        
         // Then
-        // normalField should be transformed by SNAKE_CASE
-        FieldDeclaration normalField = declaration.getField("normal_field").orElse(null);
-        assertThat(normalField).isNotNull();
+        // normalField should be transformed by SNAKE_CASE in configurer
+        assertThat(configurer.keyExists("normal_field")).isTrue();
 
         // overriddenField should use custom key, NOT snake_case
-        FieldDeclaration overriddenField = declaration.getField("custom-key").orElse(null);
-        assertThat(overriddenField).isNotNull();
-        assertThat(declaration.getField("overridden_field").isPresent()).isFalse();
+        assertThat(configurer.keyExists("custom-key")).isTrue();
+        assertThat(configurer.keyExists("overridden_field")).isFalse();
     }
 
     @Test
     void testNames_InheritedFromEnclosingClass() {
         // Given
         OuterConfig.InnerConfig config = ConfigManager.create(OuterConfig.InnerConfig.class);
+        InMemoryConfigurer configurer = new InMemoryConfigurer();
+        config.withConfigurer(configurer);
+        config.update();
 
-        // When
-        ConfigDeclaration declaration = config.getDeclaration();
-        FieldDeclaration field = declaration.getField("inner-field").orElse(null);
-
+        // When - Check configurer keys
+        
         // Then - Inner class should inherit HYPHEN_CASE from outer class
-        assertThat(field).isNotNull();
-        assertThat(field.getName()).isEqualTo("inner-field");
+        assertThat(configurer.keyExists("inner-field")).isTrue();
     }
 
     @Test
@@ -265,17 +261,18 @@ class NamesAnnotationTest {
         assertThat(declaration.getNameStrategy().modifier()).isEqualTo(NameModifier.NONE);
     }
 
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class NoNamesConfig extends OkaeriConfig {
+        private String myField = "value";
+    }
+
     @Test
     void testNames_NoAnnotation_NullInDeclaration() {
         // Given
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class NoNamesConfig extends OkaeriConfig {
-            private String myField = "value";
-        }
+        NoNamesConfig config = ConfigManager.create(NoNamesConfig.class);
 
         // When
-        NoNamesConfig config = ConfigManager.create(NoNamesConfig.class);
         ConfigDeclaration declaration = config.getDeclaration();
 
         // Then

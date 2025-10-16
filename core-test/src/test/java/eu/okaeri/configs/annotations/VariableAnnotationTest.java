@@ -4,6 +4,7 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Variable;
 import eu.okaeri.configs.annotation.VariableMode;
+import eu.okaeri.configs.configurer.InMemoryConfigurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import lombok.Data;
@@ -99,6 +100,7 @@ class VariableAnnotationTest {
         // Given
         System.setProperty("TEST_VAR", "from system property");
         SimpleVariableConfig config = ConfigManager.create(SimpleVariableConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
 
         // When
         config.update();
@@ -107,19 +109,21 @@ class VariableAnnotationTest {
         assertThat(config.getVariableField()).isEqualTo("from system property");
     }
 
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class EnvVarConfig extends OkaeriConfig {
+        @Variable("PATH")
+        private String pathVar = "default";
+    }
+
     @Test
     void testVariable_FromEnvironmentVariable_LoadedOnUpdate() {
         // Given - Assuming PATH exists in environment variables
         // We can't easily set env vars in tests, so we'll use an existing one
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class EnvVarConfig extends OkaeriConfig {
-            @Variable("PATH")
-            private String pathVar = "default";
-        }
+        EnvVarConfig config = ConfigManager.create(EnvVarConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
 
         // When
-        EnvVarConfig config = ConfigManager.create(EnvVarConfig.class);
         config.update();
 
         // Then - PATH should exist in environment
@@ -129,21 +133,22 @@ class VariableAnnotationTest {
         }
     }
 
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class PrecedenceConfig extends OkaeriConfig {
+        @Variable("PATH")
+        private String pathVar = "default";
+    }
+
     @Test
     void testVariable_SystemPropertyPrecedence_OverEnvVar() {
         // Given - Set both system property and assume PATH env var exists
         System.setProperty("PATH", "system property wins");
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class PrecedenceConfig extends OkaeriConfig {
-            @Variable("PATH")
-            private String pathVar = "default";
-        }
-
         try {
             // When
             PrecedenceConfig config = ConfigManager.create(PrecedenceConfig.class);
+            config.withConfigurer(new InMemoryConfigurer());
             config.update();
 
             // Then
@@ -157,6 +162,7 @@ class VariableAnnotationTest {
     void testVariable_NotSet_FallsBackToDefault() {
         // Given - No TEST_VAR set
         SimpleVariableConfig config = ConfigManager.create(SimpleVariableConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
 
         // When
         config.update();
@@ -170,6 +176,7 @@ class VariableAnnotationTest {
         // Given
         System.setProperty("TEST_INT_VAR", "999");
         TypeConversionVariableConfig config = ConfigManager.create(TypeConversionVariableConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
 
         // When
         config.update();
@@ -184,6 +191,7 @@ class VariableAnnotationTest {
         System.setProperty("TEST_VAR_1", "loaded1");
         System.setProperty("TEST_VAR_2", "loaded2");
         MultipleVariablesConfig config = ConfigManager.create(MultipleVariablesConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
 
         // When
         config.update();
@@ -198,6 +206,7 @@ class VariableAnnotationTest {
     void testVariable_NormalField_UnaffectedByUpdate() {
         // Given
         SimpleVariableConfig config = ConfigManager.create(SimpleVariableConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
         config.setNormalField("modified");
 
         // When
@@ -241,6 +250,7 @@ class VariableAnnotationTest {
     void testVariable_UpdateCalledMultipleTimes_AlwaysReloads() {
         // Given
         SimpleVariableConfig config = ConfigManager.create(SimpleVariableConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
 
         // When - Update with no system property
         config.update();
@@ -262,6 +272,7 @@ class VariableAnnotationTest {
         // Given
         System.setProperty("TEST_VAR", "");
         SimpleVariableConfig config = ConfigManager.create(SimpleVariableConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
 
         // When
         config.update();
