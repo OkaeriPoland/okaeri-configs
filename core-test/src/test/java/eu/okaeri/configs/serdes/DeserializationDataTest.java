@@ -20,8 +20,8 @@ class DeserializationDataTest {
 
     @BeforeEach
     void setUp() {
-        configurer = new YamlSnakeYamlConfigurer();
-        context = SerdesContext.of(configurer);
+        this.configurer = new YamlSnakeYamlConfigurer();
+        this.context = SerdesContext.of(this.configurer);
     }
 
     // === BASIC OPERATIONS TESTS ===
@@ -30,7 +30,7 @@ class DeserializationDataTest {
     void testAsMap_ReturnsUnmodifiableMap() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("key", "value");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         Map<String, Object> map = data.asMap();
 
@@ -43,7 +43,7 @@ class DeserializationDataTest {
     void testContainsKey_ExistingKey_ReturnsTrue() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("existingKey", "value");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         assertThat(data.containsKey("existingKey")).isTrue();
     }
@@ -51,7 +51,7 @@ class DeserializationDataTest {
     @Test
     void testContainsKey_NonExistingKey_ReturnsFalse() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         assertThat(data.containsKey("nonExistingKey")).isFalse();
     }
@@ -62,7 +62,7 @@ class DeserializationDataTest {
     void testIsValue_ValueKeyPresent_ReturnsTrue() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put(ObjectSerializer.VALUE, "test");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         assertThat(data.isValue()).isTrue();
     }
@@ -71,7 +71,7 @@ class DeserializationDataTest {
     void testIsValue_ValueKeyAbsent_ReturnsFalse() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("otherKey", "test");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         assertThat(data.isValue()).isFalse();
     }
@@ -80,7 +80,7 @@ class DeserializationDataTest {
     void testGetValueRaw_ReturnsRawValue() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put(ObjectSerializer.VALUE, "rawValue");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         Object value = data.getValueRaw();
 
@@ -91,7 +91,7 @@ class DeserializationDataTest {
     void testGetValue_WithClass_ReturnsTypedValue() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put(ObjectSerializer.VALUE, "test string");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         String value = data.getValue(String.class);
 
@@ -102,7 +102,7 @@ class DeserializationDataTest {
     void testGetValueDirect_WithGenericsDeclaration_ReturnsTypedValue() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put(ObjectSerializer.VALUE, 42);
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         GenericsDeclaration intType = GenericsDeclaration.of(Integer.class);
         Integer value = data.getValueDirect(intType);
@@ -114,7 +114,7 @@ class DeserializationDataTest {
     void testGetValueAsList_ReturnsListOfType() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put(ObjectSerializer.VALUE, Arrays.asList("a", "b", "c"));
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         List<String> list = data.getValueAsList(String.class);
 
@@ -125,7 +125,7 @@ class DeserializationDataTest {
     void testGetValueAsSet_ReturnsSetOfType() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put(ObjectSerializer.VALUE, Arrays.asList("x", "y", "z"));
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         Set<String> set = data.getValueAsSet(String.class);
 
@@ -136,7 +136,7 @@ class DeserializationDataTest {
     void testGetValueAsCollection_WithGenericsDeclaration_ReturnsCollection() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put(ObjectSerializer.VALUE, Arrays.asList(1, 2, 3));
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         GenericsDeclaration listType = GenericsDeclaration.of(List.class, Collections.singletonList(Integer.class));
         Collection<Integer> collection = data.getValueAsCollection(listType);
@@ -150,7 +150,7 @@ class DeserializationDataTest {
     void testGetRaw_ExistingKey_ReturnsValue() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("key", "value");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         Object value = data.getRaw("key");
 
@@ -160,7 +160,7 @@ class DeserializationDataTest {
     @Test
     void testGetRaw_NonExistingKey_ReturnsNull() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         Object value = data.getRaw("nonExisting");
 
@@ -172,7 +172,7 @@ class DeserializationDataTest {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("field1", "value1");
         sourceMap.put("field2", "value2");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         // When VALUE key is not present, getRaw(VALUE) returns the whole map
         Object value = data.getRaw(ObjectSerializer.VALUE);
@@ -190,7 +190,7 @@ class DeserializationDataTest {
     void testGet_WithClass_ResolvesType() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("number", "123");  // String that can be converted to Integer
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         Integer value = data.get("number", Integer.class);
 
@@ -201,7 +201,7 @@ class DeserializationDataTest {
     void testGetDirect_WithGenericsDeclaration_ResolvesType() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("flag", "true");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         GenericsDeclaration boolType = GenericsDeclaration.of(Boolean.class);
         Boolean value = data.getDirect("flag", boolType);
@@ -215,7 +215,7 @@ class DeserializationDataTest {
     void testGetAsList_ResolvesListOfType() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("items", Arrays.asList("alpha", "beta", "gamma"));
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         List<String> list = data.getAsList("items", String.class);
 
@@ -226,7 +226,7 @@ class DeserializationDataTest {
     void testGetAsSet_ResolvesSetOfType() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("items", Arrays.asList(10, 20, 30));
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         Set<Integer> set = data.getAsSet("items", Integer.class);
 
@@ -237,7 +237,7 @@ class DeserializationDataTest {
     void testGetAsCollection_WithGenericsDeclaration_ResolvesCollection() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("numbers", Arrays.asList(1, 2, 3, 4, 5));
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         GenericsDeclaration listType = GenericsDeclaration.of(List.class, Collections.singletonList(Integer.class));
         Collection<Integer> collection = data.getAsCollection("numbers", listType);
@@ -249,7 +249,7 @@ class DeserializationDataTest {
     void testGetAsCollection_NonCollectionType_ThrowsException() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("value", "not a collection");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         // Try to get as collection but with String type (not a Collection subclass)
         GenericsDeclaration stringType = GenericsDeclaration.of(String.class);
@@ -268,7 +268,7 @@ class DeserializationDataTest {
         innerMap.put("a", 1);
         innerMap.put("b", 2);
         sourceMap.put("mapping", innerMap);
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         Map<String, Integer> map = data.getAsMap("mapping", String.class, Integer.class);
 
@@ -283,7 +283,7 @@ class DeserializationDataTest {
         innerMap.put(1, "one");
         innerMap.put(2, "two");
         sourceMap.put("mapping", innerMap);
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         GenericsDeclaration mapType = GenericsDeclaration.of(Map.class, Arrays.asList(Integer.class, String.class));
         Map<Integer, String> map = data.getAsMap("mapping", mapType);
@@ -296,7 +296,7 @@ class DeserializationDataTest {
     void testGetAsMap_NonMapType_ThrowsException() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("value", "not a map");
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         // Try to get as map but with String type (not a Map subclass)
         GenericsDeclaration stringType = GenericsDeclaration.of(String.class);
@@ -320,7 +320,7 @@ class DeserializationDataTest {
         numbersMap.put("y", 20);
         sourceMap.put("numbers", numbersMap);
 
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         assertThat(data.get("name", String.class)).isEqualTo("TestConfig");
         assertThat(data.get("version", Integer.class)).isEqualTo(1);
@@ -334,17 +334,17 @@ class DeserializationDataTest {
     @Test
     void testGetConfigurer_ReturnsConfigurer() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
-        assertThat(data.getConfigurer()).isSameAs(configurer);
+        assertThat(data.getConfigurer()).isSameAs(this.configurer);
     }
 
     @Test
     void testGetContext_ReturnsContext() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
-        assertThat(data.getContext()).isSameAs(context);
+        assertThat(data.getContext()).isSameAs(this.context);
     }
 
     // === NULL HANDLING TESTS ===
@@ -353,7 +353,7 @@ class DeserializationDataTest {
     void testGet_NullValue_ReturnsNull() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("nullKey", null);
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         String value = data.get("nullKey", String.class);
 
@@ -364,7 +364,7 @@ class DeserializationDataTest {
     void testGetAsList_NullValue_ReturnsNull() {
         Map<String, Object> sourceMap = new LinkedHashMap<>();
         sourceMap.put("nullList", null);
-        DeserializationData data = new DeserializationData(sourceMap, configurer, context);
+        DeserializationData data = new DeserializationData(sourceMap, this.configurer, this.context);
 
         List<String> list = data.getAsList("nullList", String.class);
 

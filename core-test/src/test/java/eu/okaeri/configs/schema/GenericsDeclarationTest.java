@@ -81,7 +81,7 @@ class GenericsDeclarationTest {
     @Test
     void testOf_FromNull_ReturnsNull() {
         // When
-        GenericsDeclaration declaration = GenericsDeclaration.of((Object) null);
+        GenericsDeclaration declaration = GenericsDeclaration.of(null);
 
         // Then
         assertThat(declaration).isNull();
@@ -92,7 +92,7 @@ class GenericsDeclarationTest {
         // When
         GenericsDeclaration declaration = GenericsDeclaration.of(
             List.class,
-            Arrays.asList(String.class)
+            List.of(String.class)
         );
 
         // Then

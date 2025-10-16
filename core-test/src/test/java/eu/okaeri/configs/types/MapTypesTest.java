@@ -125,7 +125,7 @@ class MapTypesTest {
         Map<String, List<String>> testMap = new LinkedHashMap<>();
         testMap.put("group1", Arrays.asList("item1", "item2", "item3"));
         testMap.put("group2", Arrays.asList("item4", "item5"));
-        testMap.put("group3", Arrays.asList("item6"));
+        testMap.put("group3", List.of("item6"));
         config.setComplexValueMap(testMap);
         
         // Act

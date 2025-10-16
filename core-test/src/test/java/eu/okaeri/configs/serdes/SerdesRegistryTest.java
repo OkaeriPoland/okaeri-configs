@@ -20,7 +20,7 @@ class SerdesRegistryTest {
 
     @BeforeEach
     void setUp() {
-        registry = new SerdesRegistry();
+        this.registry = new SerdesRegistry();
     }
 
     // === TRANSFORMER REGISTRATION TESTS ===
@@ -40,12 +40,12 @@ class SerdesRegistryTest {
             }
         };
 
-        registry.register(transformer);
+        this.registry.register(transformer);
 
         // Verify transformer is registered
-        assertThat(registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
+        assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
                 .isTrue();
-        assertThat(registry.getTransformer(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
+        assertThat(this.registry.getTransformer(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
                 .isNotNull()
                 .isSameAs(transformer);
     }
@@ -70,12 +70,12 @@ class SerdesRegistryTest {
             }
         };
 
-        registry.register(biTransformer);
+        this.registry.register(biTransformer);
 
         // Verify both directions are registered
-        assertThat(registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
+        assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
                 .isTrue();
-        assertThat(registry.canTransform(GenericsDeclaration.of(Integer.class), GenericsDeclaration.of(String.class)))
+        assertThat(this.registry.canTransform(GenericsDeclaration.of(Integer.class), GenericsDeclaration.of(String.class)))
                 .isTrue();
     }
 
@@ -94,16 +94,16 @@ class SerdesRegistryTest {
             }
         };
 
-        registry.registerWithReversedToString(transformer);
+        this.registry.registerWithReversedToString(transformer);
 
         // Verify both directions are registered
-        assertThat(registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
+        assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
                 .isTrue();
-        assertThat(registry.canTransform(GenericsDeclaration.of(Integer.class), GenericsDeclaration.of(String.class)))
+        assertThat(this.registry.canTransform(GenericsDeclaration.of(Integer.class), GenericsDeclaration.of(String.class)))
                 .isTrue();
 
         // Verify reverse transformer returns toString() value
-        ObjectTransformer reverseTransformer = registry.getTransformer(
+        ObjectTransformer reverseTransformer = this.registry.getTransformer(
                 GenericsDeclaration.of(Integer.class),
                 GenericsDeclaration.of(String.class)
         );
@@ -113,14 +113,14 @@ class SerdesRegistryTest {
     @Test
     void testRegister_OkaeriSerdesPack_RegistersAllSerdes() {
         // Register StandardSerdes pack
-        registry.register(new StandardSerdes());
+        this.registry.register(new StandardSerdes());
 
         // Verify some transformers are registered
-        assertThat(registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
+        assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
                 .isTrue();
-        assertThat(registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Boolean.class)))
+        assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Boolean.class)))
                 .isTrue();
-        assertThat(registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Double.class)))
+        assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Double.class)))
                 .isTrue();
     }
 
@@ -146,10 +146,10 @@ class SerdesRegistryTest {
             }
         };
 
-        registry.register(serializer);
+        this.registry.register(serializer);
 
         // Verify serializer is registered
-        ObjectSerializer result = registry.getSerializer(String.class);
+        ObjectSerializer result = this.registry.getSerializer(String.class);
         assertThat(result).isNotNull().isSameAs(serializer);
     }
 
@@ -173,7 +173,7 @@ class SerdesRegistryTest {
             }
         };
 
-        registry.register(firstSerializer);
+        this.registry.register(firstSerializer);
 
         // Register exclusive serializer (should replace first one)
         ObjectSerializer<String> exclusiveSerializer = new ObjectSerializer<String>() {
@@ -193,10 +193,10 @@ class SerdesRegistryTest {
             }
         };
 
-        registry.registerExclusive(String.class, exclusiveSerializer);
+        this.registry.registerExclusive(String.class, exclusiveSerializer);
 
         // Verify exclusive serializer replaced the first one
-        ObjectSerializer result = registry.getSerializer(String.class);
+        ObjectSerializer result = this.registry.getSerializer(String.class);
         assertThat(result).isNotNull().isSameAs(exclusiveSerializer);
     }
 
@@ -204,9 +204,9 @@ class SerdesRegistryTest {
 
     @Test
     void testGetTransformer_ExistingPair_ReturnsTransformer() {
-        registry.register(new StandardSerdes());
+        this.registry.register(new StandardSerdes());
 
-        ObjectTransformer transformer = registry.getTransformer(
+        ObjectTransformer transformer = this.registry.getTransformer(
                 GenericsDeclaration.of(String.class),
                 GenericsDeclaration.of(Integer.class)
         );
@@ -218,9 +218,9 @@ class SerdesRegistryTest {
 
     @Test
     void testGetTransformer_NonExistingPair_ReturnsNull() {
-        registry.register(new StandardSerdes());
+        this.registry.register(new StandardSerdes());
 
-        ObjectTransformer transformer = registry.getTransformer(
+        ObjectTransformer transformer = this.registry.getTransformer(
                 GenericsDeclaration.of(String.class),
                 GenericsDeclaration.of(Void.class)  // No transformer for String → Void
         );
@@ -230,9 +230,9 @@ class SerdesRegistryTest {
 
     @Test
     void testGetTransformersFrom_ReturnsAllMatchingTransformers() {
-        registry.register(new StandardSerdes());
+        this.registry.register(new StandardSerdes());
 
-        List<ObjectTransformer> transformers = registry.getTransformersFrom(GenericsDeclaration.of(String.class));
+        List<ObjectTransformer> transformers = this.registry.getTransformersFrom(GenericsDeclaration.of(String.class));
 
         // StandardSerdes registers String → Integer, Boolean, Double, Long, etc.
         assertThat(transformers).isNotEmpty();
@@ -243,9 +243,9 @@ class SerdesRegistryTest {
 
     @Test
     void testGetTransformersTo_ReturnsAllMatchingTransformers() {
-        registry.register(new StandardSerdes());
+        this.registry.register(new StandardSerdes());
 
-        List<ObjectTransformer> transformers = registry.getTransformersTo(GenericsDeclaration.of(String.class));
+        List<ObjectTransformer> transformers = this.registry.getTransformersTo(GenericsDeclaration.of(String.class));
 
         // StandardSerdes registers Integer → String, Boolean → String, etc.
         assertThat(transformers).isNotEmpty();
@@ -256,9 +256,9 @@ class SerdesRegistryTest {
 
     @Test
     void testCanTransform_ExistingPair_ReturnsTrue() {
-        registry.register(new StandardSerdes());
+        this.registry.register(new StandardSerdes());
 
-        boolean canTransform = registry.canTransform(
+        boolean canTransform = this.registry.canTransform(
                 GenericsDeclaration.of(String.class),
                 GenericsDeclaration.of(Integer.class)
         );
@@ -268,9 +268,9 @@ class SerdesRegistryTest {
 
     @Test
     void testCanTransform_NonExistingPair_ReturnsFalse() {
-        registry.register(new StandardSerdes());
+        this.registry.register(new StandardSerdes());
 
-        boolean canTransform = registry.canTransform(
+        boolean canTransform = this.registry.canTransform(
                 GenericsDeclaration.of(String.class),
                 GenericsDeclaration.of(Void.class)
         );
@@ -301,10 +301,10 @@ class SerdesRegistryTest {
                 return data.getValue(String.class);
             }
         };
-        
-        registry.register(customSerializer);
 
-        ObjectSerializer serializer = registry.getSerializer(String.class);
+        this.registry.register(customSerializer);
+
+        ObjectSerializer serializer = this.registry.getSerializer(String.class);
 
         assertThat(serializer).isNotNull();
         assertThat(serializer.supports(String.class)).isTrue();
@@ -313,7 +313,7 @@ class SerdesRegistryTest {
     @Test
     void testGetSerializer_NonExistingType_ReturnsNull() {
         // No serializers registered
-        ObjectSerializer serializer = registry.getSerializer(Void.class);
+        ObjectSerializer serializer = this.registry.getSerializer(Void.class);
 
         assertThat(serializer).isNull();
     }
@@ -323,10 +323,10 @@ class SerdesRegistryTest {
     @Test
     void testAllSerdes_ReturnsPackWithAllRegisteredSerdes() {
         // Register some transformers and serializers
-        registry.register(new StandardSerdes());
+        this.registry.register(new StandardSerdes());
 
         // Get allSerdes pack
-        OkaeriSerdesPack allSerdes = registry.allSerdes();
+        OkaeriSerdesPack allSerdes = this.registry.allSerdes();
         assertThat(allSerdes).isNotNull();
 
         // Register to new registry

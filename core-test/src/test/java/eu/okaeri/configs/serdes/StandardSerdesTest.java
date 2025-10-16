@@ -157,10 +157,10 @@ class StandardSerdesTest {
 
     @Test
     void testTransform_StringToCharacter_MultipleChars_ThrowsException() {
-        ObjectTransformer<String, Character> transformer = getTransformer(String.class, Character.class);
+        ObjectTransformer<String, Character> transformer = this.getTransformer(String.class, Character.class);
         
         // StringToCharacterTransformer enforces single character strings
-        assertThatThrownBy(() -> transformer.transform("ABC", context))
+        assertThatThrownBy(() -> transformer.transform("ABC", this.context))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("too long");
     }

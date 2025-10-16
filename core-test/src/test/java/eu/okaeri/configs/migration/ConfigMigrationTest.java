@@ -214,7 +214,7 @@ class ConfigMigrationTest {
         ConfigMigration migration = (cfg, v) -> {
             // Only migrate if version is 1
             Integer version = (Integer) v.get("version");
-            if (version != null && version == 1) {
+            if ((version != null) && (version == 1)) {
                 v.set("version", 2);
                 v.set("newField", "auto-migrated");
                 return true;
@@ -242,7 +242,7 @@ class ConfigMigrationTest {
         ConfigMigration migration = (cfg, v) -> {
             // Only migrate if version is 1
             Integer version = (Integer) v.get("version");
-            if (version != null && version == 1) {
+            if ((version != null) && (version == 1)) {
                 v.set("version", 2);
                 return true;
             }

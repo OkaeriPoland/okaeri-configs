@@ -617,7 +617,7 @@ class ConfigMigrationDslTest {
 
         // When
         boolean result = when(
-            match("dynamicStatus", (String s) -> s.equals("inactive")),
+            match("dynamicStatus", (String s) -> "inactive".equals(s)),
             move("dynamicStatus", "state", value -> ((String) value).toUpperCase())
         ).migrate(config, view);
 

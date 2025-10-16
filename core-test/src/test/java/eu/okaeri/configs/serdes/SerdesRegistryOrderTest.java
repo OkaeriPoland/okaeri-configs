@@ -5,11 +5,12 @@ import eu.okaeri.configs.serdes.serializable.ConfigSerializable;
 import eu.okaeri.configs.serdes.serializable.ConfigSerializableSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for SerdesRegistry serializer registration order and precedence.
@@ -21,7 +22,7 @@ class SerdesRegistryOrderTest {
 
     @BeforeEach
     void setUp() {
-        registry = new SerdesRegistry();
+        this.registry = new SerdesRegistry();
     }
 
     // === TEST CLASSES ===
@@ -121,32 +122,32 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testRegistrationOrder_LastRegisteredWins() {
-        registry.register(new FirstSerializer());
-        registry.register(new SecondSerializer());
+        this.registry.register(new FirstSerializer());
+        this.registry.register(new SecondSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
 
         assertThat(serializer).isInstanceOf(SecondSerializer.class);
     }
 
     @Test
     void testRegistrationOrder_ThreeSerializers_LastWins() {
-        registry.register(new FirstSerializer());
-        registry.register(new SecondSerializer());
-        registry.register(new ThirdSerializer());
+        this.registry.register(new FirstSerializer());
+        this.registry.register(new SecondSerializer());
+        this.registry.register(new ThirdSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
 
         assertThat(serializer).isInstanceOf(ThirdSerializer.class);
     }
 
     @Test
     void testRegistrationOrder_ReverseOrder_LastWins() {
-        registry.register(new ThirdSerializer());
-        registry.register(new SecondSerializer());
-        registry.register(new FirstSerializer());
+        this.registry.register(new ThirdSerializer());
+        this.registry.register(new SecondSerializer());
+        this.registry.register(new FirstSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
 
         assertThat(serializer).isInstanceOf(FirstSerializer.class);
     }
@@ -155,29 +156,29 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testConfigSerializable_NoExplicitSerializer_UsesConfigSerializableSerializer() {
-        registry.register(new ConfigSerializableSerializer());
+        this.registry.register(new ConfigSerializableSerializer());
 
-        ObjectSerializer<ConfigSerializableType> serializer = registry.getSerializer(ConfigSerializableType.class);
+        ObjectSerializer<ConfigSerializableType> serializer = this.registry.getSerializer(ConfigSerializableType.class);
 
         assertThat(serializer).isInstanceOf(ConfigSerializableSerializer.class);
     }
 
     @Test
     void testConfigSerializable_ExplicitSerializerRegisteredAfter_OverridesConfigSerializable() {
-        registry.register(new ConfigSerializableSerializer());
-        registry.register(new ConfigSerializableOverrideSerializer());
+        this.registry.register(new ConfigSerializableSerializer());
+        this.registry.register(new ConfigSerializableOverrideSerializer());
 
-        ObjectSerializer<ConfigSerializableType> serializer = registry.getSerializer(ConfigSerializableType.class);
+        ObjectSerializer<ConfigSerializableType> serializer = this.registry.getSerializer(ConfigSerializableType.class);
 
         assertThat(serializer).isInstanceOf(ConfigSerializableOverrideSerializer.class);
     }
 
     @Test
     void testConfigSerializable_ExplicitSerializerRegisteredBefore_ConfigSerializableWins() {
-        registry.register(new ConfigSerializableOverrideSerializer());
-        registry.register(new ConfigSerializableSerializer());
+        this.registry.register(new ConfigSerializableOverrideSerializer());
+        this.registry.register(new ConfigSerializableSerializer());
 
-        ObjectSerializer<ConfigSerializableType> serializer = registry.getSerializer(ConfigSerializableType.class);
+        ObjectSerializer<ConfigSerializableType> serializer = this.registry.getSerializer(ConfigSerializableType.class);
 
         assertThat(serializer).isInstanceOf(ConfigSerializableSerializer.class);
     }
@@ -193,6 +194,7 @@ class SerdesRegistryOrderTest {
 
     @Data
     @NoArgsConstructor
+    @EqualsAndHashCode(callSuper = false)
     public static class ChildType extends ParentType {
         public ChildType(String value) {
             super(value);
@@ -235,39 +237,39 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testInheritance_ChildTypeWithParentSerializer_ParentSerializerSupportsIt() {
-        registry.register(new ParentSerializer());
+        this.registry.register(new ParentSerializer());
 
-        ObjectSerializer<?> serializer = registry.getSerializer(ChildType.class);
+        ObjectSerializer<?> serializer = this.registry.getSerializer(ChildType.class);
 
         assertThat(serializer).isInstanceOf(ParentSerializer.class);
     }
 
     @Test
     void testInheritance_BothSerializers_ChildSerializerWinsIfRegisteredLast() {
-        registry.register(new ParentSerializer());
-        registry.register(new ChildSerializer());
+        this.registry.register(new ParentSerializer());
+        this.registry.register(new ChildSerializer());
 
-        ObjectSerializer<?> serializer = registry.getSerializer(ChildType.class);
+        ObjectSerializer<?> serializer = this.registry.getSerializer(ChildType.class);
 
         assertThat(serializer).isInstanceOf(ChildSerializer.class);
     }
 
     @Test
     void testInheritance_BothSerializers_ParentSerializerWinsIfRegisteredLast() {
-        registry.register(new ChildSerializer());
-        registry.register(new ParentSerializer());
+        this.registry.register(new ChildSerializer());
+        this.registry.register(new ParentSerializer());
 
-        ObjectSerializer<?> serializer = registry.getSerializer(ChildType.class);
+        ObjectSerializer<?> serializer = this.registry.getSerializer(ChildType.class);
 
         assertThat(serializer).isInstanceOf(ParentSerializer.class);
     }
 
     @Test
     void testInheritance_ParentType_OnlyParentSerializerSupports() {
-        registry.register(new ParentSerializer());
-        registry.register(new ChildSerializer());
+        this.registry.register(new ParentSerializer());
+        this.registry.register(new ChildSerializer());
 
-        ObjectSerializer<?> serializer = registry.getSerializer(ParentType.class);
+        ObjectSerializer<?> serializer = this.registry.getSerializer(ParentType.class);
 
         assertThat(serializer).isInstanceOf(ParentSerializer.class);
     }
@@ -276,36 +278,36 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testExclusiveRegistration_SingleSerializer_Succeeds() {
-        registry.registerExclusive(TestType.class, new FirstSerializer());
+        this.registry.registerExclusive(TestType.class, new FirstSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
         assertThat(serializer).isInstanceOf(FirstSerializer.class);
     }
 
     @Test
     void testExclusiveRegistration_AlreadyRegistered_RemovesOldAddsNew() {
-        registry.registerExclusive(TestType.class, new FirstSerializer());
-        registry.registerExclusive(TestType.class, new SecondSerializer());
+        this.registry.registerExclusive(TestType.class, new FirstSerializer());
+        this.registry.registerExclusive(TestType.class, new SecondSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
         assertThat(serializer).isInstanceOf(SecondSerializer.class);
     }
 
     @Test
     void testExclusiveRegistration_AfterNormalRegistration_RemovesOldAddsNew() {
-        registry.register(new FirstSerializer());
-        registry.registerExclusive(TestType.class, new SecondSerializer());
+        this.registry.register(new FirstSerializer());
+        this.registry.registerExclusive(TestType.class, new SecondSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
         assertThat(serializer).isInstanceOf(SecondSerializer.class);
     }
 
     @Test
     void testNormalRegistration_AfterExclusiveRegistration_BothPresent_LastWins() {
-        registry.registerExclusive(TestType.class, new FirstSerializer());
-        registry.register(new SecondSerializer());
+        this.registry.registerExclusive(TestType.class, new FirstSerializer());
+        this.registry.register(new SecondSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
         assertThat(serializer).isInstanceOf(SecondSerializer.class);
     }
 
@@ -313,18 +315,18 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testGetSerializer_NoMatch_ReturnsNull() {
-        ObjectSerializer<?> serializer = registry.getSerializer(String.class);
+        ObjectSerializer<?> serializer = this.registry.getSerializer(String.class);
 
         assertThat(serializer).isNull();
     }
 
     @Test
     void testGetSerializer_MultipleMatches_ReturnsLastRegistered() {
-        registry.register(new FirstSerializer());
-        registry.register(new SecondSerializer());
-        registry.register(new ThirdSerializer());
+        this.registry.register(new FirstSerializer());
+        this.registry.register(new SecondSerializer());
+        this.registry.register(new ThirdSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
 
         assertThat(serializer).isInstanceOf(ThirdSerializer.class);
     }
@@ -333,20 +335,20 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testRealWorld_StandardSerdesThenCustom_CustomWins() {
-        registry.register(new ConfigSerializableSerializer());
-        registry.register(new ConfigSerializableOverrideSerializer());
+        this.registry.register(new ConfigSerializableSerializer());
+        this.registry.register(new ConfigSerializableOverrideSerializer());
 
-        ObjectSerializer<ConfigSerializableType> serializer = registry.getSerializer(ConfigSerializableType.class);
+        ObjectSerializer<ConfigSerializableType> serializer = this.registry.getSerializer(ConfigSerializableType.class);
 
         assertThat(serializer).isInstanceOf(ConfigSerializableOverrideSerializer.class);
     }
 
     @Test
     void testRealWorld_CustomThenStandardSerdes_StandardSerdesWins() {
-        registry.register(new ConfigSerializableOverrideSerializer());
-        registry.register(new ConfigSerializableSerializer());
+        this.registry.register(new ConfigSerializableOverrideSerializer());
+        this.registry.register(new ConfigSerializableSerializer());
 
-        ObjectSerializer<ConfigSerializableType> serializer = registry.getSerializer(ConfigSerializableType.class);
+        ObjectSerializer<ConfigSerializableType> serializer = this.registry.getSerializer(ConfigSerializableType.class);
 
         assertThat(serializer).isInstanceOf(ConfigSerializableSerializer.class);
     }
@@ -355,10 +357,10 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testRegisterFirst_SingleSerializer_AddedAtBeginning() {
-        registry.register(new SecondSerializer());
-        registry.registerFirst(new FirstSerializer());
+        this.registry.register(new SecondSerializer());
+        this.registry.registerFirst(new FirstSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
 
         // With reverse iteration, SecondSerializer at end is checked first
         assertThat(serializer).isInstanceOf(SecondSerializer.class);
@@ -366,11 +368,11 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testRegisterFirst_MultipleFirst_OrderPreserved() {
-        registry.register(new ThirdSerializer());
-        registry.registerFirst(new FirstSerializer());
-        registry.registerFirst(new SecondSerializer());
+        this.registry.register(new ThirdSerializer());
+        this.registry.registerFirst(new FirstSerializer());
+        this.registry.registerFirst(new SecondSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
 
         // With reverse iteration: checks Third (index 2), then First (index 1), then Second (index 0)
         assertThat(serializer).isInstanceOf(ThirdSerializer.class);
@@ -378,10 +380,10 @@ class SerdesRegistryOrderTest {
 
     @Test
     void testRegisterFirst_BeforeNormalRegister_NormalRegisterWins() {
-        registry.registerFirst(new FirstSerializer());
-        registry.register(new SecondSerializer());
+        this.registry.registerFirst(new FirstSerializer());
+        this.registry.register(new SecondSerializer());
 
-        ObjectSerializer<TestType> serializer = registry.getSerializer(TestType.class);
+        ObjectSerializer<TestType> serializer = this.registry.getSerializer(TestType.class);
 
         // With reverse iteration, SecondSerializer at end is checked first
         assertThat(serializer).isInstanceOf(SecondSerializer.class);

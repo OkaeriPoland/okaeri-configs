@@ -36,8 +36,8 @@ class ConfigSerializableTest {
 
         @Override
         public void serialize(SerializationData data, GenericsDeclaration generics) {
-            data.add("name", name);
-            data.add("value", value);
+            data.add("name", this.name);
+            data.add("value", this.value);
         }
 
         public static SimpleSerializable deserialize(DeserializationData data, GenericsDeclaration generics) {
@@ -56,8 +56,8 @@ class ConfigSerializableTest {
 
         @Override
         public void serialize(SerializationData data, GenericsDeclaration generics) {
-            data.add("id", id);
-            data.add("inner", inner, SimpleSerializable.class);
+            data.add("id", this.id);
+            data.add("inner", this.inner, SimpleSerializable.class);
         }
 
         public static NestedSerializable deserialize(DeserializationData data, GenericsDeclaration generics) {
@@ -86,8 +86,8 @@ class ConfigSerializableTest {
                 new SimpleSerializable("second", 2)
         );
         private Map<String, SimpleSerializable> map = new LinkedHashMap<String, SimpleSerializable>() {{
-            put("key1", new SimpleSerializable("value1", 10));
-            put("key2", new SimpleSerializable("value2", 20));
+            this.put("key1", new SimpleSerializable("value1", 10));
+            this.put("key2", new SimpleSerializable("value2", 20));
         }};
     }
 
@@ -129,7 +129,10 @@ class ConfigSerializableTest {
         SerdesContext context = SerdesContext.of(configurer);
 
         SimpleSerializable obj = new SimpleSerializable("test", 123);
-        Map<String, Object> map = configurer.simplify(obj, GenericsDeclaration.of(SimpleSerializable.class), context, false);
+        Object simplifiedObj = configurer.simplify(obj, GenericsDeclaration.of(SimpleSerializable.class), context, true);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) simplifiedObj;
 
         assertThat(map).containsEntry("name", "test");
         assertThat(map).containsEntry("value", 123);
@@ -144,7 +147,13 @@ class ConfigSerializableTest {
         map.put("name", "deserialized");
         map.put("value", 456);
 
-        SimpleSerializable obj = (SimpleSerializable) configurer.resolveType(map, GenericsDeclaration.of(SimpleSerializable.class), context);
+        SimpleSerializable obj = configurer.resolveType(
+            map,
+            GenericsDeclaration.of(map),
+            SimpleSerializable.class,
+            GenericsDeclaration.of(SimpleSerializable.class),
+            context
+        );
 
         assertThat(obj.getName()).isEqualTo("deserialized");
         assertThat(obj.getValue()).isEqualTo(456);
@@ -156,7 +165,10 @@ class ConfigSerializableTest {
         SerdesContext context = SerdesContext.of(configurer);
 
         NestedSerializable obj = new NestedSerializable("outer", new SimpleSerializable("inner", 999));
-        Map<String, Object> map = configurer.simplify(obj, GenericsDeclaration.of(NestedSerializable.class), context, false);
+        Object simplifiedObj = configurer.simplify(obj, GenericsDeclaration.of(NestedSerializable.class), context, true);
+        
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) simplifiedObj;
 
         assertThat(map).containsKey("id");
         assertThat(map).containsKey("inner");
@@ -257,9 +269,8 @@ class ConfigSerializableTest {
         loaded.withConfigurer(new YamlSnakeYamlConfigurer());
 
         assertThatThrownBy(() -> loaded.load(yaml))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("deserialize")
-                .hasMessageContaining("method missing");
+                .hasRootCauseInstanceOf(NoSuchMethodException.class)
+                .hasStackTraceContaining("deserialize");
     }
 
     // === SERIALIZER PRECEDENCE TESTS ===
