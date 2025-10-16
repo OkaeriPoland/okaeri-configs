@@ -40,64 +40,86 @@ print_section() {
 # Trap errors
 trap 'print_error "Script failed at line $LINENO"' ERR
 
+# Configuration
+# Modules that need to be installed (built without running tests)
+INSTALL_MODULES=(
+    "core:Core library"
+    "core-test-commons:Shared test utilities and configs"
+    "yaml-snakeyaml:YAML format implementation"
+)
+
+# Modules that need to have tests executed
+TEST_MODULES=(
+    "core-test:Core functionality tests"
+    "yaml-snakeyaml:YAML format implementation tests"
+)
+
 # Start
 print_section "Okaeri Configs - Test Suite Runner"
 print_info "Starting build and test process..."
 
-# Step 1: Build and install core module
-print_section "Step 1: Building and Installing core"
-print_info "This module contains the core library being tested"
+# Build and install modules
+step=1
+for module_info in "${INSTALL_MODULES[@]}"; do
+    IFS=':' read -r module_name module_desc <<< "$module_info"
+    
+    print_section "Step $step: Building and Installing $module_name"
+    print_info "$module_desc"
+    
+    cd "$module_name"
+    mvn clean install -DskipTests
+    if [ $? -eq 0 ]; then
+        print_success "$module_name installed successfully"
+    else
+        print_error "Failed to install $module_name"
+        exit 1
+    fi
+    cd ..
+    
+    ((step++))
+done
 
-cd core
-mvn clean install -DskipTests
-if [ $? -eq 0 ]; then
-    print_success "core installed successfully"
-else
-    print_error "Failed to install core"
-    exit 1
-fi
-cd ..
+# Run tests for test modules
+for module_info in "${TEST_MODULES[@]}"; do
+    IFS=':' read -r module_name module_desc <<< "$module_info"
+    
+    print_section "Step $step: Running $module_name Tests"
+    print_info "$module_desc"
+    
+    cd "$module_name"
+    mvn clean test
+    if [ $? -eq 0 ]; then
+        print_success "$module_name tests passed successfully"
+    else
+        print_error "$module_name tests failed"
+        exit 1
+    fi
+    cd ..
+    
+    ((step++))
+done
 
-# Step 2: Build and install core-test-commons
-print_section "Step 2: Building and Installing core-test-commons"
-print_info "This module provides shared test utilities and configs"
-
-cd core-test-commons
-mvn clean install -DskipTests
-if [ $? -eq 0 ]; then
-    print_success "core-test-commons installed successfully"
-else
-    print_error "Failed to install core-test-commons"
-    exit 1
-fi
-cd ..
-
-# Step 3: Run core-test tests
-print_section "Step 3: Running core-test Tests"
-print_info "This module contains core functionality tests"
-
-cd core-test
-mvn clean test
-if [ $? -eq 0 ]; then
-    print_success "core-test tests passed successfully"
-else
-    print_error "core-test tests failed"
-    exit 1
-fi
-cd ..
-
-# Step 4: Summary
+# Summary
 print_section "Test Summary"
 print_success "All tests completed successfully!"
-print_info "Modules built and tested:"
-print_info "  ✓ core (installed)"
-print_info "  ✓ core-test-commons (installed)"
-print_info "  ✓ core-test (tests passed)"
 
-# Optional: Print test statistics
+print_info "Modules built and tested:"
+for module_info in "${INSTALL_MODULES[@]}"; do
+    IFS=':' read -r module_name module_desc <<< "$module_info"
+    print_info "  ✓ $module_name (installed)"
+done
+for module_info in "${TEST_MODULES[@]}"; do
+    IFS=':' read -r module_name module_desc <<< "$module_info"
+    print_info "  ✓ $module_name (tests passed)"
+done
+
+# Test result locations
 print_info ""
 print_info "For detailed test results, check:"
-print_info "  - core-test/target/surefire-reports/"
+for module_info in "${TEST_MODULES[@]}"; do
+    IFS=':' read -r module_name module_desc <<< "$module_info"
+    print_info "  - $module_name/target/surefire-reports/"
+done
 
 echo ""
 print_success "Test run completed successfully! 🎉"

@@ -74,37 +74,37 @@ public class MegaConfig extends OkaeriConfig {
     private List<Integer> intList = List.of(1, 2, 3, 5, 8, 13);
 
     @Comment("Set of strings (order preserved)")
-    private Set<String> stringSet = Set.of("one", "two", "three");
+    private Set<String> stringSet = new LinkedHashSet<>(List.of("one", "two", "three"));
 
     @Comment("Set of enums")
-    private Set<TestEnum> enumSet = Set.of(TestEnum.FIRST, TestEnum.SECOND);
+    private Set<TestEnum> enumSet = new LinkedHashSet<>(List.of(TestEnum.FIRST, TestEnum.SECOND));
 
     // === MAPS ===
     @Comment("Simple string-to-string map")
-    private Map<String, String> simpleMap = Map.of(
-            "key1", "value1",
-            "key2", "value2"
-    );
+    private Map<String, String> simpleMap = new LinkedHashMap<>() {{
+        this.put("key1", "value1");
+        this.put("key2", "value2");
+    }};
 
     @Comment("Map with integer keys")
-    private Map<Integer, String> intKeyMap = Map.of(
-            1, "one",
-            2, "two"
-    );
+    private Map<Integer, String> intKeyMap = new LinkedHashMap<>() {{
+        this.put(1, "one");
+        this.put(2, "two");
+    }};
 
     @Comment("Nested map")
-    private Map<String, Map<String, Integer>> nestedMap = Map.of(
-            "group1", Map.of(
-                    "a", 1,
-                    "b", 2
-            )
-    );
+    private Map<String, Map<String, Integer>> nestedMap = new LinkedHashMap<>() {{
+        this.put("group1", new LinkedHashMap<>() {{
+            this.put("a", 1);
+            this.put("b", 2);
+        }});
+    }};
 
     @Comment("Map with enum keys")
-    private Map<TestEnum, String> enumKeyMap = Map.of(
-            TestEnum.FIRST, "first value",
-            TestEnum.SECOND, "second value"
-    );
+    private Map<TestEnum, String> enumKeyMap = new LinkedHashMap<>() {{
+        this.put(TestEnum.FIRST, "first value");
+        this.put(TestEnum.SECOND, "second value");
+    }};
 
     // === ENUMS ===
     @Comment("Simple enum")
@@ -147,7 +147,7 @@ public class MegaConfig extends OkaeriConfig {
     private List<String> emptyList = List.of();
 
     @Comment("Empty map")
-    private Map<String, String> emptyMap = Map.of();
+    private Map<String, String> emptyMap = new LinkedHashMap<>();
 
     // === NESTED CLASSES ===
 
