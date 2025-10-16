@@ -22,7 +22,6 @@ public final class ConfigManager {
 
     /**
      * Creates a new config instance using the default constructor.
-     * Automatically calls {@link #initialize(OkaeriConfig)} to set up the declaration.
      *
      * @param clazz the config class to instantiate
      * @param <T> the config type
@@ -39,13 +38,12 @@ public final class ConfigManager {
                 "make sure default constructor is available or if subconfig use new instead");
         }
 
-        return initialize(config);
+        return config;
     }
 
     /**
      * Creates a new config instance using unsafe allocation (bypasses constructor).
      * Useful for internal operations where constructor invocation is not needed.
-     * Automatically calls {@link #initialize(OkaeriConfig)} to set up the declaration.
      *
      * @param clazz the config class to instantiate
      * @param <T> the config type
@@ -53,7 +51,7 @@ public final class ConfigManager {
      * @throws OkaeriException if unsafe allocation fails
      */
     public static <T extends OkaeriConfig> T createUnsafe(@NonNull Class<T> clazz) throws OkaeriException {
-        return initialize(UnsafeUtil.allocateInstance(clazz));
+        return UnsafeUtil.allocateInstance(clazz);
     }
 
     /**
@@ -177,17 +175,23 @@ public final class ConfigManager {
     }
 
     /**
-     * Initializes a config instance by generating its field declaration metadata.
+     * Initializes a config instance.
      * Called automatically by {@link #create} methods.
      * <p>
      * Can be called explicitly if you manually instantiate a config class.
+     * <p>
+     * Note: Declaration is now initialized lazily via {@link OkaeriConfig#getDeclaration()},
+     * so this method now only returns the config for chaining purposes.
      *
      * @param config the config instance to initialize
      * @param <T> the config type
      * @return the same config instance (for chaining)
+     * @deprecated Declaration is now initialized lazily. This method is no longer needed
+     *             and will be removed in a future version.
      */
+    @Deprecated
     public static <T extends OkaeriConfig> T initialize(@NonNull T config) {
-        config.updateDeclaration();
+        // Declaration is now lazy-loaded via getDeclaration() - no explicit initialization needed
         return config;
     }
 }

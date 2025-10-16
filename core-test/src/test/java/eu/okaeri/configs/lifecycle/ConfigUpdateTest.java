@@ -231,17 +231,13 @@ class ConfigUpdateTest {
     }
 
     @Test
-    void testUpdateDeclaration_RegeneratesSchema() throws Exception {
-        // Arrange
+    void testDeclaration_LazyLoaded_CreatedOnFirstAccess() throws Exception {
+        // Arrange & Act
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
-        Object originalDeclaration = config.getDeclaration();
         
-        // Act
-        config.updateDeclaration();
-        
-        // Assert - new declaration should be created
+        // Assert - declaration should be initialized lazily when accessed
         assertThat(config.getDeclaration()).isNotNull();
-        assertThat(config.getDeclaration()).isNotSameAs(originalDeclaration);
+        assertThat(config.getDeclaration().getFields()).isNotEmpty();
         
         // Declaration should contain all fields
         assertThat(config.getDeclaration().getField("boolValue")).isPresent();
@@ -250,13 +246,19 @@ class ConfigUpdateTest {
     }
 
     @Test
-    void testUpdateDeclaration_CalledInConstructor() throws Exception {
-        // Arrange & Act
+    void testDeclaration_LazyLoaded_CachedAfterFirstAccess() throws Exception {
+        // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         
-        // Assert - declaration should be automatically created by constructor
-        assertThat(config.getDeclaration()).isNotNull();
-        assertThat(config.getDeclaration().getFields()).isNotEmpty();
+        // Act - access declaration multiple times
+        Object firstAccess = config.getDeclaration();
+        Object secondAccess = config.getDeclaration();
+        Object thirdAccess = config.getDeclaration();
+        
+        // Assert - same instance should be returned (cached)
+        assertThat(firstAccess).isNotNull();
+        assertThat(secondAccess).isSameAs(firstAccess);
+        assertThat(thirdAccess).isSameAs(firstAccess);
     }
 
     @Test

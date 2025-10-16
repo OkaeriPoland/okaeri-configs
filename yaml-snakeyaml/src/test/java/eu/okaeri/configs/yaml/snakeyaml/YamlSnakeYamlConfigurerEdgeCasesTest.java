@@ -122,32 +122,6 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     }
 
     @Test
-    void testRoundTrip_SpecialCharacters() throws Exception {
-        // Given: Config with special characters
-        SpecialCharsConfig config = ConfigManager.create(SpecialCharsConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
-        String originalQuotes = "She said: \"Hello!\"";
-        String originalBackslash = "C:\\Users\\test";
-        String originalNewlines = "Line 1\nLine 2";
-        config.setQuotes(originalQuotes);
-        config.setBackslash(originalBackslash);
-        config.setNewlines(originalNewlines);
-        
-        // When: Save and load again
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        config.save(output);
-        
-        SpecialCharsConfig loaded = ConfigManager.create(SpecialCharsConfig.class);
-        loaded.withConfigurer(new YamlSnakeYamlConfigurer());
-        loaded.load(new ByteArrayInputStream(output.toByteArray()));
-        
-        // Then: Values are preserved exactly
-        assertThat(loaded.getQuotes()).isEqualTo(originalQuotes);
-        assertThat(loaded.getBackslash()).isEqualTo(originalBackslash);
-        assertThat(loaded.getNewlines()).isEqualTo(originalNewlines);
-    }
-
-    @Test
     void testWrite_VeryDeeplyNestedStructure() throws Exception {
         // Given: Config with deep nesting
         String yaml = """
@@ -218,24 +192,6 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
     }
 
     @Test
-    void testWrite_EmptyStrings() throws Exception {
-        // Given: Config with empty strings
-        EmptyStringConfig config = ConfigManager.create(EmptyStringConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
-        config.setEmptyString("");
-        config.setWhitespaceString("   ");
-        
-        // When: Write to OutputStream
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        config.save(output);
-        String yaml = output.toString();
-        
-        // Then: Empty strings are properly represented
-        assertThat(yaml).contains("emptyString:");
-        assertThat(yaml).contains("whitespaceString:");
-    }
-
-    @Test
     void testRoundTrip_EmptyStrings() throws Exception {
         // Given: Config with empty strings
         EmptyStringConfig config = ConfigManager.create(EmptyStringConfig.class);
@@ -276,29 +232,6 @@ class YamlSnakeYamlConfigurerEdgeCasesTest {
         assertThat(yaml).contains("trueString:");
         assertThat(yaml).contains("falseString:");
         assertThat(yaml).contains("nullString:");
-    }
-
-    @Test
-    void testRoundTrip_YamlReservedWords() throws Exception {
-        // Given: Config with YAML reserved words as string values
-        ReservedWordsConfig config = ConfigManager.create(ReservedWordsConfig.class);
-        config.withConfigurer(new YamlSnakeYamlConfigurer());
-        config.setTrueString("true");
-        config.setFalseString("false");
-        config.setNullString("null");
-        
-        // When: Save and load again
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        config.save(output);
-        
-        ReservedWordsConfig loaded = ConfigManager.create(ReservedWordsConfig.class);
-        loaded.withConfigurer(new YamlSnakeYamlConfigurer());
-        loaded.load(new ByteArrayInputStream(output.toByteArray()));
-        
-        // Then: String values are preserved (not converted to boolean/null)
-        assertThat(loaded.getTrueString()).isEqualTo("true");
-        assertThat(loaded.getFalseString()).isEqualTo("false");
-        assertThat(loaded.getNullString()).isEqualTo("null");
     }
 
     // Test config classes

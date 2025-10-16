@@ -2,10 +2,15 @@ package eu.okaeri.configs.integration;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.DeserializationData;
+import eu.okaeri.configs.serdes.ObjectSerializer;
+import eu.okaeri.configs.serdes.SerializationData;
 import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -352,5 +357,115 @@ class OrphanHandlingTest {
         String content = TestUtils.readFile(configFile);
         assertThat(content).doesNotContain("orphanInNested");
         assertThat(content).contains("nestedField");
+    }
+
+    // Create self-referencing config
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SelfRefConfig extends OkaeriConfig {
+        private String name = "default";
+        private SelfRefConfig child = null;
+    }
+
+    /**
+     * Self-referencing config with orphan removal
+     * Regression test: ensures removeOrphansRecursively doesn't infinite loop on circular references
+     */
+    @Test
+    void testOrphans_SelfReferencingConfig_DoesNotInfiniteLoop() throws Exception {
+        File configFile = tempDir.resolve("orphans10.yml").toFile();
+
+        // Create file with orphans in self-referencing structure
+        String yaml = """
+            name: "parent"
+            orphanField: "should be removed"
+            """;
+        TestUtils.writeFile(configFile, yaml);
+        
+        // Load
+        SelfRefConfig config = ConfigManager.create(SelfRefConfig.class);
+        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.withBindFile(configFile);
+        config.withRemoveOrphans(true);
+        config.load();
+        
+        // This should not infinite loop
+        config.save();
+        
+        // Verify orphan removed
+        String content = TestUtils.readFile(configFile);
+        assertThat(content).doesNotContain("orphanField");
+        assertThat(content).contains("name: parent");
+        assertThat(content).contains("child: null");
+    }
+
+    // Custom object for serializer test
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class CustomObject extends OkaeriConfig {
+        private String value = "default";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ConfigWithCustomSerialized extends OkaeriConfig {
+        private CustomObject custom = new CustomObject();
+    }
+
+    /**
+     * Custom serializer fields with nested config
+     * Regression test: ensures removeOrphansRecursively doesn't remove fields added by custom serializers
+     */
+    @Test
+    void testOrphans_CustomSerializerFields_PreservedWithRemoveOrphans() throws Exception {
+        File configFile = tempDir.resolve("orphans11.yml").toFile();
+
+        // Create custom serializer that adds metadata fields
+        var customSerializer = new ObjectSerializer<CustomObject>() {
+            @Override
+            public boolean supports(@NonNull Class<?> type) {
+                return CustomObject.class.isAssignableFrom(type);
+            }
+
+            @Override
+            public void serialize(@NonNull CustomObject object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+                // Add metadata fields that serializer injects
+                data.add("__type", "CustomObject");
+                data.add("__version", 1);
+                data.add("value", object.getValue());
+            }
+
+            @Override
+            public CustomObject deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+                CustomObject obj = new CustomObject();
+                obj.setValue(data.get("value", String.class));
+                return obj;
+            }
+        };
+
+        // Create config with custom serializer
+        ConfigWithCustomSerialized config = ConfigManager.create(ConfigWithCustomSerialized.class);
+        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.getConfigurer().getRegistry().register(customSerializer);
+        config.withBindFile(configFile);
+        config.withRemoveOrphans(true);
+        
+        // Save (serializer adds __type and __version)
+        config.save();
+
+        // Load and save again with removeOrphans=true
+        ConfigWithCustomSerialized loaded = ConfigManager.create(ConfigWithCustomSerialized.class);
+        loaded.withConfigurer(new YamlSnakeYamlConfigurer());
+        loaded.getConfigurer().getRegistry().register(customSerializer);
+        loaded.withBindFile(configFile);
+        loaded.withRemoveOrphans(true);
+        loaded.load();
+        loaded.save();
+
+        // Verify serializer-added fields are preserved
+        String content = TestUtils.readFile(configFile);
+        assertThat(content).contains("__type");
+        assertThat(content).contains("__version");
+        assertThat(content).contains("value");
     }
 }

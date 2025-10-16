@@ -13,6 +13,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,13 +32,13 @@ class YamlSnakeYamlConfigurerFeaturesTest {
             value: 42
             enabled: true
             """;
-        
+
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
-        
+
         // When: Load from InputStream
         TestConfig config = ConfigManager.create(TestConfig.class);
         configurer.load(new ByteArrayInputStream(yaml.getBytes()), config.getDeclaration());
-        
+
         // Then: Internal map is populated correctly
         assertThat(configurer.getValue("name")).isEqualTo("Test Config");
         assertThat(configurer.getValue("value")).isEqualTo(42);
@@ -49,12 +51,12 @@ class YamlSnakeYamlConfigurerFeaturesTest {
         // Given: Fresh configurer
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
         TestConfig config = ConfigManager.create(TestConfig.class);
-        
+
         // When: Set values using configurer API
         configurer.setValue("key1", "value1", null, null);
         configurer.setValue("key2", 123, null, null);
         configurer.setValueUnsafe("key3", true);
-        
+
         // Then: Values are retrievable from internal map
         assertThat(configurer.getValue("key1")).isEqualTo("value1");
         assertThat(configurer.getValue("key2")).isEqualTo(123);
@@ -70,12 +72,12 @@ class YamlSnakeYamlConfigurerFeaturesTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setSimpleField("test value");
         config.setNumberField(999);
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Comments are present in YAML output
         assertThat(yaml).contains("# This is a simple field comment");
         assertThat(yaml).contains("# Multi-line comment");
@@ -89,12 +91,12 @@ class YamlSnakeYamlConfigurerFeaturesTest {
         // Given: Config with header
         HeaderedConfig config = ConfigManager.create(HeaderedConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Header is present at the top of YAML
         assertThat(yaml).startsWith("# ===================");
         assertThat(yaml).contains("# Test Configuration");
@@ -111,22 +113,22 @@ class YamlSnakeYamlConfigurerFeaturesTest {
             thirdField: third
             fourthField: fourth
             """;
-        
+
         OrderedConfig config = ConfigManager.create(OrderedConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.load(yaml);
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String resultYaml = output.toString();
-        
+
         // Then: Key ordering is preserved (LinkedHashMap behavior)
         int firstPos = resultYaml.indexOf("firstField");
         int secondPos = resultYaml.indexOf("secondField");
         int thirdPos = resultYaml.indexOf("thirdField");
         int fourthPos = resultYaml.indexOf("fourthField");
-        
+
         assertThat(firstPos).isLessThan(secondPos);
         assertThat(secondPos).isLessThan(thirdPos);
         assertThat(thirdPos).isLessThan(fourthPos);
@@ -138,12 +140,12 @@ class YamlSnakeYamlConfigurerFeaturesTest {
         NestedCommentConfig config = ConfigManager.create(NestedCommentConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.getNested().setNestedValue("nested test");
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Both top-level and nested comments are preserved
         assertThat(yaml).contains("# Top level field");
         assertThat(yaml).contains("# Nested configuration section");
@@ -154,18 +156,18 @@ class YamlSnakeYamlConfigurerFeaturesTest {
     void testCustomCommentPrefix() throws Exception {
         // Given: Configurer with custom comment prefix
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
-        configurer.setCommentPrefix("// ");
-        
+        configurer.setCommentPrefix("#> ");
+
         CommentedConfig config = ConfigManager.create(CommentedConfig.class);
         config.withConfigurer(configurer);
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Custom comment prefix is used
-        assertThat(yaml).contains("// This is a simple field comment");
+        assertThat(yaml).contains("#> This is a simple field comment");
         assertThat(yaml).doesNotContain("# This is a simple field comment");
     }
 
@@ -175,10 +177,10 @@ class YamlSnakeYamlConfigurerFeaturesTest {
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
         configurer.setValueUnsafe("key1", "value1");
         configurer.setValueUnsafe("key2", "value2");
-        
+
         // When: Remove a key
         Object removed = configurer.remove("key1");
-        
+
         // Then: Key is removed from internal map
         assertThat(removed).isEqualTo("value1");
         assertThat(configurer.keyExists("key1")).isFalse();
@@ -201,16 +203,16 @@ class YamlSnakeYamlConfigurerFeaturesTest {
               timeout: 30
               retries: 3
             """;
-        
+
         TestConfigWithStructure config = ConfigManager.create(TestConfigWithStructure.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.load(originalYaml);
-        
+
         // When: Save and load again
         Path file = tempDir.resolve("test.yml");
         config.save(file);
         String savedYaml = Files.readString(file);
-        
+
         // Then: Structure is maintained
         assertThat(savedYaml).contains("name:");
         assertThat(savedYaml).contains("enabled:");
@@ -239,7 +241,7 @@ class YamlSnakeYamlConfigurerFeaturesTest {
     public static class CommentedConfig extends OkaeriConfig {
         @Comment("This is a simple field comment")
         private String simpleField = "default";
-        
+
         @Comment({"Multi-line comment", "Line 2 of comment"})
         private int numberField = 42;
     }
@@ -268,7 +270,7 @@ class YamlSnakeYamlConfigurerFeaturesTest {
     public static class NestedCommentConfig extends OkaeriConfig {
         @Comment("Top level field")
         private String topLevel = "top";
-        
+
         @Comment("Nested configuration section")
         private NestedPart nested = new NestedPart();
     }
@@ -286,7 +288,7 @@ class YamlSnakeYamlConfigurerFeaturesTest {
         private String name;
         private boolean enabled;
         private int count;
-        private java.util.List<String> items;
-        private java.util.Map<String, Integer> settings;
+        private List<String> items;
+        private Map<String, Integer> settings;
     }
 }

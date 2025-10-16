@@ -7,10 +7,14 @@ import eu.okaeri.configs.annotation.VariableMode;
 import eu.okaeri.configs.configurer.InMemoryConfigurer;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.Serializable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -279,5 +283,223 @@ class VariableAnnotationTest {
 
         // Then
         assertThat(config.getVariableField()).isEmpty();
+    }
+
+    // Subconfig tests
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SubconfigWithVariable extends OkaeriConfig {
+        @Variable("NESTED_VAR")
+        private String nestedVar = "nested default";
+        
+        private String normalNestedField = "normal nested";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ConfigWithNestedVariable extends OkaeriConfig {
+        private String topLevelField = "top level";
+        
+        private SubconfigWithVariable nested = new SubconfigWithVariable();
+    }
+
+    @Test
+    void testVariable_InOkaeriConfigSubconfig_LoadedOnUpdate() {
+        // Given
+        System.setProperty("NESTED_VAR", "from system in nested");
+        ConfigWithNestedVariable config = ConfigManager.create(ConfigWithNestedVariable.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When
+        config.update();
+
+        // Then - Variable in nested config is loaded
+        assertThat(config.getNested().getNestedVar()).isEqualTo("from system in nested");
+        assertThat(config.getNested().getNormalNestedField()).isEqualTo("normal nested");
+        assertThat(config.getTopLevelField()).isEqualTo("top level");
+        
+        // Cleanup
+        System.clearProperty("NESTED_VAR");
+    }
+
+    @Test
+    void testVariable_InOkaeriConfigSubconfig_FallsBackToDefault() {
+        // Given - No NESTED_VAR set
+        ConfigWithNestedVariable config = ConfigManager.create(ConfigWithNestedVariable.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When
+        config.update();
+
+        // Then - Falls back to default
+        assertThat(config.getNested().getNestedVar()).isEqualTo("nested default");
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SerializableWithVariable implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
+        @Variable("SERIALIZABLE_VAR")
+        private String serializableVar = "serializable default";
+        
+        private String normalSerializableField = "normal serializable";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ConfigWithSerializableVariable extends OkaeriConfig {
+        private String topLevelField = "top level";
+        
+        private SerializableWithVariable serializable = new SerializableWithVariable();
+    }
+
+    @Test
+    void testVariable_InSerializableSubconfig_LoadedOnUpdate() {
+        // Given
+        System.setProperty("SERIALIZABLE_VAR", "from system in serializable");
+        ConfigWithSerializableVariable config = ConfigManager.create(ConfigWithSerializableVariable.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When
+        config.update();
+
+        // Then - Variable in serializable is loaded
+        assertThat(config.getSerializable().getSerializableVar()).isEqualTo("from system in serializable");
+        assertThat(config.getSerializable().getNormalSerializableField()).isEqualTo("normal serializable");
+        
+        // Cleanup
+        System.clearProperty("SERIALIZABLE_VAR");
+    }
+
+    @Test
+    void testVariable_InSerializableSubconfig_FallsBackToDefault() {
+        // Given - No SERIALIZABLE_VAR set
+        ConfigWithSerializableVariable config = ConfigManager.create(ConfigWithSerializableVariable.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When
+        config.update();
+
+        // Then - Falls back to default
+        assertThat(config.getSerializable().getSerializableVar()).isEqualTo("serializable default");
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class Level2Subconfig extends OkaeriConfig {
+        @Variable("LEVEL2_VAR")
+        private String level2Var = "level2 default";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class Level1Subconfig extends OkaeriConfig {
+        @Variable("LEVEL1_VAR")
+        private String level1Var = "level1 default";
+        
+        private Level2Subconfig level2 = new Level2Subconfig();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class DeepNestedVariableConfig extends OkaeriConfig {
+        @Variable("ROOT_VAR")
+        private String rootVar = "root default";
+        
+        private Level1Subconfig level1 = new Level1Subconfig();
+    }
+
+    @Test
+    void testVariable_InDeeplyNestedSubconfigs_AllLevelsLoaded() {
+        // Given
+        System.setProperty("ROOT_VAR", "root from system");
+        System.setProperty("LEVEL1_VAR", "level1 from system");
+        System.setProperty("LEVEL2_VAR", "level2 from system");
+        
+        DeepNestedVariableConfig config = ConfigManager.create(DeepNestedVariableConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When
+        config.update();
+
+        // Then - All levels are updated
+        assertThat(config.getRootVar()).isEqualTo("root from system");
+        assertThat(config.getLevel1().getLevel1Var()).isEqualTo("level1 from system");
+        assertThat(config.getLevel1().getLevel2().getLevel2Var()).isEqualTo("level2 from system");
+        
+        // Cleanup
+        System.clearProperty("ROOT_VAR");
+        System.clearProperty("LEVEL1_VAR");
+        System.clearProperty("LEVEL2_VAR");
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class MixedNestedConfig extends OkaeriConfig {
+        @Variable("TOP_VAR")
+        private String topVar = "top default";
+        
+        private SubconfigWithVariable okaeriNested = new SubconfigWithVariable();
+        private SerializableWithVariable serializableNested = new SerializableWithVariable();
+    }
+
+    @Test
+    void testVariable_InMixedNestedTypes_BothTypesWork() {
+        // Given
+        System.setProperty("TOP_VAR", "top from system");
+        System.setProperty("NESTED_VAR", "okaeri nested from system");
+        System.setProperty("SERIALIZABLE_VAR", "serializable nested from system");
+        
+        MixedNestedConfig config = ConfigManager.create(MixedNestedConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When
+        config.update();
+
+        // Then - All variables are loaded
+        assertThat(config.getTopVar()).isEqualTo("top from system");
+        assertThat(config.getOkaeriNested().getNestedVar()).isEqualTo("okaeri nested from system");
+        assertThat(config.getSerializableNested().getSerializableVar()).isEqualTo("serializable nested from system");
+        
+        // Cleanup
+        System.clearProperty("TOP_VAR");
+        System.clearProperty("NESTED_VAR");
+        System.clearProperty("SERIALIZABLE_VAR");
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SelfRefVariableConfig extends OkaeriConfig {
+        @Variable("SELF_REF_VAR")
+        private String varField = "default";
+        
+        private String normalField = "normal";
+        private SelfRefVariableConfig child = null;
+    }
+
+    /**
+     * Self-referencing config with @Variable
+     * Regression test: ensures processVariablesRecursively doesn't infinite loop on circular references
+     */
+    @Test
+    void testVariable_SelfReferencingConfig_DoesNotInfiniteLoop() {
+       
+        // Given - Create self-referencing config
+        System.setProperty("SELF_REF_VAR", "from system");
+        SelfRefVariableConfig config = ConfigManager.create(SelfRefVariableConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When - This should not infinite loop
+        config.update();
+
+        // Then - Variable is loaded
+        assertThat(config.getVarField()).isEqualTo("from system");
+        assertThat(config.getNormalField()).isEqualTo("normal");
+        
+        // Cleanup
+        System.clearProperty("SELF_REF_VAR");
     }
 }

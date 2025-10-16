@@ -36,28 +36,6 @@ class ConfigManagerTest {
     }
 
     @Test
-    void testInitialize_UpdatesDeclaration() {
-        // Given: A config created without initialization
-        PrimitivesTestConfig config = new PrimitivesTestConfig();
-        assertThat(config.getDeclaration()).isNotNull(); // Constructor calls updateDeclaration
-
-        // When: Calling initialize explicitly
-        PrimitivesTestConfig initialized = ConfigManager.initialize(config);
-
-        // Then: Should return same instance with declaration updated
-        assertThat(initialized).isSameAs(config);
-        assertThat(initialized.getDeclaration()).isNotNull();
-        assertThat(initialized.getDeclaration().getFields()).isNotEmpty();
-    }
-
-    @Test
-    void testInitialize_WithNullConfig_ThrowsException() {
-        // When/Then: Initializing null config should throw
-        assertThatThrownBy(() -> ConfigManager.initialize(null))
-                .isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
     void testTransformCopy_CopiesConfigToSameType() {
         // Given: Source config with values
         PrimitivesTestConfig source = ConfigManager.create(PrimitivesTestConfig.class);
