@@ -10,7 +10,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * Tests for ConfigMigration interface - basic migration implementation patterns.
@@ -31,7 +32,7 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         ConfigMigration migration = (cfg, v) -> {
             v.set("version", 2);
             return true;
@@ -51,7 +52,7 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         ConfigMigration migration = (cfg, v) -> {
             // Migration decides to skip
             return false;
@@ -70,7 +71,7 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         ConfigMigration migration = (cfg, v) -> {
             // Access config directly
             ((TestConfig) cfg).setNewField("migrated");
@@ -91,10 +92,10 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Add a dynamic key to test removal behavior
         view.set("dynamicOldField", "old value");
-        
+
         ConfigMigration migration = (cfg, v) -> {
             // Access via RawConfigView
             if (v.exists("dynamicOldField")) {
@@ -121,12 +122,12 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         ConfigMigration baseMigration = (cfg, v) -> {
             v.set("version", 2);
             return true;
         };
-        
+
         ConfigMigration namedMigration = new NamedMigration("UpdateVersion", baseMigration);
 
         // When
@@ -156,12 +157,12 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         ConfigMigration migration1 = (cfg, v) -> {
             v.set("version", 2);
             return true;
         };
-        
+
         ConfigMigration migration2 = (cfg, v) -> {
             v.set("newField", "updated");
             return true;
@@ -184,10 +185,10 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Setup nested structure
         view.set("section.subsection.value", "initial");
-        
+
         ConfigMigration migration = (cfg, v) -> {
             if (v.exists("section.subsection.value")) {
                 v.set("section.subsection.value", "migrated");
@@ -210,7 +211,7 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         ConfigMigration migration = (cfg, v) -> {
             // Only migrate if version is 1
             Integer version = (Integer) v.get("version");
@@ -238,7 +239,7 @@ class ConfigMigrationTest {
         config.withConfigurer(new InMemoryConfigurer());
         config.setVersion(3); // Already migrated
         RawConfigView view = new RawConfigView(config);
-        
+
         ConfigMigration migration = (cfg, v) -> {
             // Only migrate if version is 1
             Integer version = (Integer) v.get("version");
@@ -263,10 +264,10 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Setup old format (string version)
         view.set("versionString", "2");
-        
+
         ConfigMigration migration = (cfg, v) -> {
             if (v.exists("versionString")) {
                 String versionStr = (String) v.get("versionString");
@@ -293,7 +294,7 @@ class ConfigMigrationTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         ConfigMigration migration = (cfg, v) -> {
             try {
                 // Attempt risky operation

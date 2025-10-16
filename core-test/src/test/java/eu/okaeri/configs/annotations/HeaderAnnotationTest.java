@@ -13,14 +13,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for @Header and @Headers annotations.
- * 
+ * <p>
  * Verifies:
  * - Single @Header with one line
  * - Single @Header with multiple lines
  * - @Headers with multiple @Header annotations
  * - Header is included in declaration
  * - No header when annotation absent
- * 
+ * <p>
  * Note: YAML comment formatting tests (# prefix, positioning) are in yaml-snakeyaml module.
  */
 class HeaderAnnotationTest {

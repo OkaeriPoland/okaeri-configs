@@ -79,8 +79,8 @@ public class TestUtils {
         Map<String, Object> expectedMap = expected.asMap(configurer, true);
         Map<String, Object> actualMap = actual.asMap(configurer, true);
         assertThat(actualMap)
-                .as("Config maps should be equal")
-                .isEqualTo(expectedMap);
+            .as("Config maps should be equal")
+            .isEqualTo(expectedMap);
     }
 
     /**
@@ -118,9 +118,9 @@ public class TestUtils {
      */
     public static void assertFileExists(File file) {
         assertThat(file)
-                .as("File should exist: " + file.getAbsolutePath())
-                .exists()
-                .isFile();
+            .as("File should exist: " + file.getAbsolutePath())
+            .exists()
+            .isFile();
     }
 
     /**
@@ -128,8 +128,8 @@ public class TestUtils {
      */
     public static void assertFileNotExists(File file) {
         assertThat(file)
-                .as("File should not exist: " + file.getAbsolutePath())
-                .doesNotExist();
+            .as("File should not exist: " + file.getAbsolutePath())
+            .doesNotExist();
     }
 
     /**

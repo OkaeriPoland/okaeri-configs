@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for DeserializationData - extracting data from maps for ObjectSerializer implementations.
@@ -36,7 +37,7 @@ class DeserializationDataTest {
 
         assertThat(map).containsEntry("key", "value");
         assertThatThrownBy(() -> map.put("newKey", "newValue"))
-                .isInstanceOf(UnsupportedOperationException.class);
+            .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
@@ -255,8 +256,8 @@ class DeserializationDataTest {
         GenericsDeclaration stringType = GenericsDeclaration.of(String.class);
 
         assertThatThrownBy(() -> data.getAsCollection("value", stringType))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("must be a superclass of Collection");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("must be a superclass of Collection");
     }
 
     // === GET MAP TESTS ===
@@ -302,8 +303,8 @@ class DeserializationDataTest {
         GenericsDeclaration stringType = GenericsDeclaration.of(String.class);
 
         assertThatThrownBy(() -> data.getAsMap("value", stringType))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("must be a superclass of Map");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("must be a superclass of Map");
     }
 
     // === COMPLEX SCENARIOS TESTS ===
@@ -314,7 +315,7 @@ class DeserializationDataTest {
         sourceMap.put("name", "TestConfig");
         sourceMap.put("version", 1);
         sourceMap.put("items", Arrays.asList("a", "b", "c"));
-        
+
         Map<String, Integer> numbersMap = new LinkedHashMap<>();
         numbersMap.put("x", 10);
         numbersMap.put("y", 20);
@@ -325,7 +326,7 @@ class DeserializationDataTest {
         assertThat(data.get("name", String.class)).isEqualTo("TestConfig");
         assertThat(data.get("version", Integer.class)).isEqualTo(1);
         assertThat(data.getAsList("items", String.class)).containsExactly("a", "b", "c");
-        
+
         Map<String, Integer> numbers = data.getAsMap("numbers", String.class, Integer.class);
         assertThat(numbers).containsEntry("x", 10);
         assertThat(numbers).containsEntry("y", 20);

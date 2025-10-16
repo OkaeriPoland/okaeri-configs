@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for OkaeriConfig load operations.
- * 
+ * <p>
  * Scenarios tested:
  * - Load from file (File, Path, String pathname)
  * - Load from InputStream
@@ -47,13 +47,13 @@ class ConfigLoadTest {
             doubleValue: 3.14
             """;
         File tempFile = TestUtils.createTempFile(yamlContent, ".yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(tempFile);
-        
+
         // Assert
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(999);
@@ -71,13 +71,13 @@ class ConfigLoadTest {
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("test-config.yml");
         Files.writeString(tempFile, yamlContent);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(tempFile);
-        
+
         // Assert
         assertThat(config.getByteValue()).isEqualTo((byte) 42);
         assertThat(config.getShortValue()).isEqualTo((short) 1234);
@@ -94,14 +94,14 @@ class ConfigLoadTest {
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("bound-config.yml");
         Files.writeString(tempFile, yamlContent);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile);
-        
+            .withBindFile(tempFile);
+
         // Act
         config.load();
-        
+
         // Assert
         assertThat(config.getFloatValue()).isEqualTo(2.71f);
         assertThat(config.getCharValue()).isEqualTo('X');
@@ -115,13 +115,13 @@ class ConfigLoadTest {
             boolValue: false
             """;
         ByteArrayInputStream inputStream = new ByteArrayInputStream(yamlContent.getBytes());
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(inputStream);
-        
+
         // Assert
         assertThat(config.getIntValue()).isEqualTo(555);
         assertThat(config.isBoolValue()).isFalse();
@@ -135,13 +135,13 @@ class ConfigLoadTest {
             intValue: 777
             doubleValue: 9.87654
             """;
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(yamlContent);
-        
+
         // Assert
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(777);
@@ -155,13 +155,13 @@ class ConfigLoadTest {
         data.put("boolValue", false);
         data.put("intValue", 123);
         data.put("doubleValue", 4.56);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(data);
-        
+
         // Assert
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(123);
@@ -176,13 +176,13 @@ class ConfigLoadTest {
         sourceConfig.setBoolValue(false);
         sourceConfig.setIntValue(999);
         sourceConfig.setDoubleValue(1.414);
-        
+
         PrimitivesTestConfig targetConfig = ConfigManager.create(PrimitivesTestConfig.class);
         targetConfig.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         targetConfig.load(sourceConfig);
-        
+
         // Assert
         assertThat(targetConfig.isBoolValue()).isFalse();
         assertThat(targetConfig.getIntValue()).isEqualTo(999);
@@ -199,18 +199,18 @@ class ConfigLoadTest {
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("update-test.yml");
         Files.writeString(tempFile, yamlContent);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile);
-        
+            .withBindFile(tempFile);
+
         // Modify file timestamp to detect if saved
         long originalModified = Files.getLastModifiedTime(tempFile).toMillis();
         Thread.sleep(10); // Ensure timestamp difference
-        
+
         // Act
         config.load(true);
-        
+
         // Assert
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(42);
@@ -228,17 +228,17 @@ class ConfigLoadTest {
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("no-update-test.yml");
         Files.writeString(tempFile, yamlContent);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile);
-        
+            .withBindFile(tempFile);
+
         long originalModified = Files.getLastModifiedTime(tempFile).toMillis();
         Thread.sleep(10);
-        
+
         // Act
         config.load(false);
-        
+
         // Assert
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(42);
@@ -251,19 +251,19 @@ class ConfigLoadTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Initial values from class defaults
         assertThat(config.isBoolValue()).isTrue();
         assertThat(config.getIntValue()).isEqualTo(42);
-        
+
         String yamlContent = """
             boolValue: false
             intValue: 999
             """;
-        
+
         // Act
         config.load(yamlContent);
-        
+
         // Assert - values should be updated
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(999);
@@ -275,13 +275,13 @@ class ConfigLoadTest {
         String yamlContent = """
             boolValue: false
             """;
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(yamlContent);
-        
+
         // Assert - only boolValue should change, others keep defaults
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(42); // default from class
@@ -297,17 +297,17 @@ class ConfigLoadTest {
             orphanKey: orphan value
             anotherOrphan: 123
             """;
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act - should not throw exception
         assertThatCode(() -> config.load(yamlContent)).doesNotThrowAnyException();
-        
+
         // Assert - declared fields are loaded
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(999);
-        
+
         // Orphans should be accessible through configurer
         assertThat(config.get("orphanKey")).isEqualTo("orphan value");
         assertThat(config.get("anotherOrphan")).isEqualTo(123);
@@ -318,7 +318,7 @@ class ConfigLoadTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         String yamlContent = "boolValue: false";
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.load(yamlContent))
             .isInstanceOf(IllegalStateException.class)
@@ -331,7 +331,7 @@ class ConfigLoadTest {
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         File nonExistent = new File("/tmp/does-not-exist-" + System.nanoTime() + ".yml");
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.load(nonExistent))
             .isInstanceOf(OkaeriException.class)
@@ -346,10 +346,10 @@ class ConfigLoadTest {
             intValue: [this is not valid
             unclosed: {bracket
             """;
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.load(malformedYaml))
             .isInstanceOf(OkaeriException.class)
@@ -364,13 +364,13 @@ class ConfigLoadTest {
             doubleValue: "4.56"
             boolValue: "false"
             """;
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(yamlContent);
-        
+
         // Assert - type conversion should work
         assertThat(config.getIntValue()).isEqualTo(123);
         assertThat(config.getDoubleValue()).isEqualTo(4.56);
@@ -382,24 +382,24 @@ class ConfigLoadTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("workflow.yml");
-        
+
         // Create and save
         PrimitivesTestConfig config1 = ConfigManager.create(PrimitivesTestConfig.class);
         config1.withConfigurer(new YamlSnakeYamlConfigurer())
-               .withBindFile(tempFile);
+            .withBindFile(tempFile);
         config1.setBoolValue(false);
         config1.setIntValue(777);
         config1.setDoubleValue(9.99);
         config1.save();
-        
+
         // Load in new instance
         PrimitivesTestConfig config2 = ConfigManager.create(PrimitivesTestConfig.class);
         config2.withConfigurer(new YamlSnakeYamlConfigurer())
-               .withBindFile(tempFile);
-        
+            .withBindFile(tempFile);
+
         // Act
         config2.load();
-        
+
         // Assert - all values should match
         assertThat(config2.isBoolValue()).isEqualTo(config1.isBoolValue());
         assertThat(config2.getIntValue()).isEqualTo(config1.getIntValue());
@@ -416,7 +416,7 @@ class ConfigLoadTest {
         private String name = "default";
         private int value = 0;
         private SubConfig nested = new SubConfig();
-        
+
         @Data
         @NoArgsConstructor
         @EqualsAndHashCode(callSuper = false)
@@ -436,13 +436,13 @@ class ConfigLoadTest {
               subName: "nested-test"
               subValue: 99
             """;
-        
+
         NestedLoadTestConfig config = ConfigManager.create(NestedLoadTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(yamlContent);
-        
+
         // Assert
         assertThat(config.getName()).isEqualTo("test");
         assertThat(config.getValue()).isEqualTo(42);

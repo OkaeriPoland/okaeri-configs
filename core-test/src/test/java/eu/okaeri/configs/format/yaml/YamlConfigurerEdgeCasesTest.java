@@ -42,12 +42,12 @@ class YamlConfigurerEdgeCasesTest {
         // Given: Config with no fields
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
         config.withConfigurer(configurer);
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: YAML output is minimal (just {} or empty)
         assertThat(yaml.trim()).isIn("{}", "");
     }
@@ -59,12 +59,12 @@ class YamlConfigurerEdgeCasesTest {
         LargeValueConfig config = ConfigManager.create(LargeValueConfig.class);
         config.withConfigurer(configurer);
         config.setLargeValue("x".repeat(10000)); // 10k characters
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Large value is written correctly
         assertThat(yaml).contains("largeValue:");
         assertThat(yaml.length()).isGreaterThan(10000);
@@ -81,12 +81,12 @@ class YamlConfigurerEdgeCasesTest {
         config.setNewlines("Line 1\nLine 2\nLine 3");
         config.setTabs("Column1\tColumn2\tColumn3");
         config.setUnicode("Emoji: 🎉 Japanese: こんにちは Russian: Привет Polish: Łódź");
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Special characters are properly escaped/encoded
         assertThat(yaml).contains("quotes:");
         assertThat(yaml).contains("backslash:");
@@ -107,16 +107,16 @@ class YamlConfigurerEdgeCasesTest {
                     level5:
                       value: deep
             """;
-        
+
         DeepNestedConfig config = ConfigManager.create(DeepNestedConfig.class);
         config.withConfigurer(configurer);
         config.load(yaml);
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String resultYaml = output.toString();
-        
+
         // Then: Nesting structure is maintained
         assertThat(resultYaml).contains("level1:");
         assertThat(resultYaml).contains("level2:");
@@ -136,12 +136,12 @@ class YamlConfigurerEdgeCasesTest {
             largeList.add("item-" + i);
         }
         config.setLargeList(largeList);
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: All items are written
         assertThat(yaml).contains("largeList:");
         assertThat(yaml).contains("item-0");
@@ -160,19 +160,19 @@ class YamlConfigurerEdgeCasesTest {
         // Note: This test only runs for SnakeYAML because Bukkit and Bungee configurers
         // cannot preserve top-level null values (YamlConfiguration and BungeeConfig
         // have no way to differentiate between removing a key and setting it to null)
-        
+
         // Given: Config with null values
         NullValueConfig config = ConfigManager.create(NullValueConfig.class);
         config.withConfigurer(configurer);
         config.setNullString(null);
         config.setNullList(null);
         config.setNullMap(null);
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Null values are represented in YAML (typically as 'null' or omitted)
         assertThat(yaml).containsAnyOf("nullString: null", "nullString:");
         assertThat(yaml).containsAnyOf("nullList: null", "nullList:");
@@ -207,15 +207,15 @@ class YamlConfigurerEdgeCasesTest {
         config.withConfigurer(configurer);
         config.setEmptyString("");
         config.setWhitespaceString("   ");
-        
+
         // When: Save and load again
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
-        
+
         EmptyStringConfig loaded = ConfigManager.create(EmptyStringConfig.class);
         loaded.withConfigurer(configurer);
         loaded.load(new ByteArrayInputStream(output.toByteArray()));
-        
+
         // Then: Empty strings are preserved
         assertThat(loaded.getEmptyString()).isEqualTo("");
         assertThat(loaded.getWhitespaceString()).isEqualTo("   ");
@@ -232,12 +232,12 @@ class YamlConfigurerEdgeCasesTest {
         config.setNullString("null");
         config.setYesString("yes");
         config.setNoString("no");
-        
+
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String yaml = output.toString();
-        
+
         // Then: Reserved words are properly quoted or handled
         assertThat(yaml).contains("trueString:");
         assertThat(yaml).contains("falseString:");
@@ -253,11 +253,11 @@ class YamlConfigurerEdgeCasesTest {
             value: [unclosed bracket
             enabled: true
             """;
-        
+
         // When/Then: Loading malformed YAML throws exception
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
         config.withConfigurer(configurer);
-        
+
         assertThatThrownBy(() -> config.load(malformedYaml))
             .isInstanceOf(Exception.class);
     }

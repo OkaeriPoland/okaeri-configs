@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for OkaeriConfig update operations.
- * 
+ * <p>
  * Scenarios tested:
  * - update() synchronizes configurer data to fields
  * - update() respects @Variable annotation
@@ -37,20 +37,20 @@ class ConfigUpdateTest {
             intValue: 999
             doubleValue: 7.77
             """;
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Load data into configurer
         config.getConfigurer().load(Files.newInputStream(TestUtils.createTempFile(yamlContent, ".yml").toPath()), config.getDeclaration());
-        
+
         // Fields still have defaults at this point
         assertThat(config.isBoolValue()).isTrue();
         assertThat(config.getIntValue()).isEqualTo(42);
-        
+
         // Act
         config.update();
-        
+
         // Assert - fields should now match configurer data
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(999);
@@ -62,19 +62,19 @@ class ConfigUpdateTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Initial state
         assertThat(config.isBoolValue()).isTrue();
         assertThat(config.getIntValue()).isEqualTo(42);
-        
+
         String yamlContent = """
             boolValue: false
             intValue: 555
             """;
-        
+
         // Act - load() calls update() internally
         config.load(yamlContent);
-        
+
         // Assert - update() was called, fields should be updated
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(555);
@@ -89,10 +89,10 @@ class ConfigUpdateTest {
     public static class VariableTestConfig extends OkaeriConfig {
         @Variable("TEST_VAR_STRING")
         private String varString = "default";
-        
+
         @Variable("TEST_VAR_INT")
         private int varInt = 0;
-        
+
         private String normalField = "normal";
     }
 
@@ -101,20 +101,20 @@ class ConfigUpdateTest {
         // Arrange
         System.setProperty("TEST_VAR_STRING", "from-system-property");
         System.setProperty("TEST_VAR_INT", "999");
-        
+
         try {
             String yamlContent = """
                 varString: from-yaml
                 varInt: 123
                 normalField: yaml-value
                 """;
-            
+
             VariableTestConfig config = ConfigManager.create(VariableTestConfig.class);
             config.withConfigurer(new YamlSnakeYamlConfigurer());
-            
+
             // Act
             config.load(yamlContent);
-            
+
             // Assert - @Variable fields should use system property, normal field uses YAML
             assertThat(config.getVarString()).isEqualTo("from-system-property");
             assertThat(config.getVarInt()).isEqualTo(999);
@@ -129,19 +129,19 @@ class ConfigUpdateTest {
     void testUpdate_WithVariable_LoadsFromEnvironment() throws Exception {
         // Arrange - we can't easily set env vars, but we can test the fallback behavior
         // When system property is not set, it falls back to the config value
-        
+
         String yamlContent = """
             varString: from-yaml
             varInt: 123
             normalField: yaml-value
             """;
-        
+
         VariableTestConfig config = ConfigManager.create(VariableTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(yamlContent);
-        
+
         // Assert - should use YAML values when no system property or env var exists
         assertThat(config.getVarString()).isEqualTo("from-yaml");
         assertThat(config.getVarInt()).isEqualTo(123);
@@ -151,18 +151,18 @@ class ConfigUpdateTest {
     void testUpdate_WithVariable_SystemPropertyTakesPrecedence() throws Exception {
         // Arrange
         System.setProperty("TEST_VAR_STRING", "system-wins");
-        
+
         try {
             String yamlContent = """
                 varString: from-yaml
                 """;
-            
+
             VariableTestConfig config = ConfigManager.create(VariableTestConfig.class);
             config.withConfigurer(new YamlSnakeYamlConfigurer());
-            
+
             // Act
             config.load(yamlContent);
-            
+
             // Assert - system property should override YAML
             assertThat(config.getVarString()).isEqualTo("system-wins");
         } finally {
@@ -174,12 +174,12 @@ class ConfigUpdateTest {
     void testUpdate_WithVariable_TypeConversion() throws Exception {
         // Arrange
         System.setProperty("TEST_VAR_INT", "777");
-        
+
         try {
             VariableTestConfig config = ConfigManager.create(VariableTestConfig.class);
             config.withConfigurer(new YamlSnakeYamlConfigurer());
             config.load("{}");
-            
+
             // Act & Assert - String "777" should convert to int 777
             assertThat(config.getVarInt()).isEqualTo(777);
         } finally {
@@ -197,14 +197,14 @@ class ConfigUpdateTest {
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("starting-values.yml");
         Files.writeString(tempFile, yamlContent);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile);
-        
+            .withBindFile(tempFile);
+
         // Act
         config.load();
-        
+
         // Assert - starting values should be set from loaded data
         // (starting values are used for migration detection)
         assertThat(config.getDeclaration().getField("boolValue").get().getStartingValue()).isEqualTo(false);
@@ -217,13 +217,13 @@ class ConfigUpdateTest {
         String yamlContent = """
             boolValue: false
             """;
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(yamlContent);
-        
+
         // Assert - fields not in YAML keep their default values
         assertThat(config.isBoolValue()).isFalse(); // from YAML
         assertThat(config.getIntValue()).isEqualTo(42); // default from class
@@ -234,11 +234,11 @@ class ConfigUpdateTest {
     void testDeclaration_LazyLoaded_CreatedOnFirstAccess() throws Exception {
         // Arrange & Act
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
-        
+
         // Assert - declaration should be initialized lazily when accessed
         assertThat(config.getDeclaration()).isNotNull();
         assertThat(config.getDeclaration().getFields()).isNotEmpty();
-        
+
         // Declaration should contain all fields
         assertThat(config.getDeclaration().getField("boolValue")).isPresent();
         assertThat(config.getDeclaration().getField("intValue")).isPresent();
@@ -249,12 +249,12 @@ class ConfigUpdateTest {
     void testDeclaration_LazyLoaded_CachedAfterFirstAccess() throws Exception {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
-        
+
         // Act - access declaration multiple times
         Object firstAccess = config.getDeclaration();
         Object secondAccess = config.getDeclaration();
         Object thirdAccess = config.getDeclaration();
-        
+
         // Assert - same instance should be returned (cached)
         assertThat(firstAccess).isNotNull();
         assertThat(secondAccess).isSameAs(firstAccess);
@@ -274,13 +274,13 @@ class ConfigUpdateTest {
             longValue: 123456789
             shortValue: 999
             """;
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.load(yamlContent);
-        
+
         // Assert - all fields should be updated
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getByteValue()).isEqualTo((byte) 99);
@@ -297,30 +297,30 @@ class ConfigUpdateTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("workflow.yml");
-        
+
         String initialContent = """
             boolValue: true
             intValue: 100
             """;
         Files.writeString(tempFile, initialContent);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile);
-        
+            .withBindFile(tempFile);
+
         // Act - Load, modify, save
         config.load();
         assertThat(config.getIntValue()).isEqualTo(100);
-        
+
         config.setIntValue(200);
         config.save();
-        
+
         // Load in new instance to verify
         PrimitivesTestConfig config2 = ConfigManager.create(PrimitivesTestConfig.class);
         config2.withConfigurer(new YamlSnakeYamlConfigurer())
-               .withBindFile(tempFile);
+            .withBindFile(tempFile);
         config2.load();
-        
+
         // Assert
         assertThat(config2.getIntValue()).isEqualTo(200);
     }

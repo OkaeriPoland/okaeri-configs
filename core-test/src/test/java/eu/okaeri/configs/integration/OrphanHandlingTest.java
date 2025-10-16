@@ -66,7 +66,7 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_LoadWithExtraFields_KeepsOrphansInConfigurer() throws Exception {
         File configFile = tempDir.resolve("orphans1.yml").toFile();
-        
+
         // Create file with extra fields
         String yaml = """
             declaredField: "value1"
@@ -74,16 +74,16 @@ class OrphanHandlingTest {
             orphanField2: 42
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.load();
-        
+
         // Declared field should be loaded
         assertThat(config.getDeclaredField()).isEqualTo("value1");
-        
+
         // Orphans should be in configurer
         assertThat(config.get("orphanField1")).isEqualTo("orphan value 1");
         assertThat(config.get("orphanField2")).isEqualTo(42);
@@ -95,27 +95,27 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_SaveWithRemoveOrphansFalse_KeepsOrphans() throws Exception {
         File configFile = tempDir.resolve("orphans2.yml").toFile();
-        
+
         // Create file with orphans
         String yaml = """
             declaredField: "value1"
             orphanField: "orphan value"
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.load();
-        
+
         // Modify declared field
         config.setDeclaredField("modified");
-        
+
         // Save with orphan removal disabled
         config.withRemoveOrphans(false);
         config.save();
-        
+
         // Read file and verify orphan is still there
         String content = TestUtils.readFile(configFile);
         assertThat(content).contains("orphanField");
@@ -128,24 +128,24 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_SaveWithRemoveOrphansTrue_RemovesOrphans() throws Exception {
         File configFile = tempDir.resolve("orphans3.yml").toFile();
-        
+
         // Create file with orphans
         String yaml = """
             declaredField: "value1"
             orphanField: "orphan value"
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.load();
-        
+
         // Save with orphan removal enabled (default)
         config.withRemoveOrphans(true);
         config.save();
-        
+
         // Read file and verify orphan is gone
         String content = TestUtils.readFile(configFile);
         assertThat(content).doesNotContain("orphanField");
@@ -159,7 +159,7 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_AsMapIncludesOrphans_WhenPresent() throws Exception {
         File configFile = tempDir.resolve("orphans4.yml").toFile();
-        
+
         // Create file with orphans
         String yaml = """
             declaredField: "value1"
@@ -167,16 +167,16 @@ class OrphanHandlingTest {
             orphan2: 42
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.load();
-        
+
         // Get as map - should include orphans
         var map = config.asMap(config.getConfigurer(), true);
-        
+
         assertThat(map).containsKey("declaredField");
         assertThat(map).containsKey("orphan1");
         assertThat(map).containsKey("orphan2");
@@ -190,7 +190,7 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_PreservationAcrossMultipleSaves_WorksCorrectly() throws Exception {
         File configFile = tempDir.resolve("orphans5.yml").toFile();
-        
+
         // Create file with orphans
         String yaml = """
             declaredField: "value1"
@@ -198,32 +198,32 @@ class OrphanHandlingTest {
             orphan2: 42
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.withRemoveOrphans(false);
         config.load();
-        
+
         // First save
         config.setDeclaredField("modified1");
         config.save();
-        
+
         // Second save
         config.setDeclaredField("modified2");
         config.save();
-        
+
         // Third save
         config.setDeclaredField("modified3");
         config.save();
-        
+
         // Load fresh copy and verify orphans still exist
         SimpleConfig loaded = ConfigManager.create(SimpleConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer());
         loaded.withBindFile(configFile);
         loaded.load();
-        
+
         assertThat(loaded.getDeclaredField()).isEqualTo("modified3");
         assertThat(loaded.get("orphan1")).isEqualTo("orphan value 1");
         assertThat(loaded.get("orphan2")).isEqualTo(42);
@@ -235,7 +235,7 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_NestedOrphans_HandledCorrectly() throws Exception {
         File configFile = tempDir.resolve("orphans6.yml").toFile();
-        
+
         // Create file with nested orphans
         String yaml = """
             declaredNested:
@@ -244,23 +244,23 @@ class OrphanHandlingTest {
             orphanAtRoot: "orphan at root"
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         ParentConfig config = ConfigManager.create(ParentConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.withRemoveOrphans(false);
         config.load();
-        
+
         // Verify declared nested field loaded
         assertThat(config.getDeclaredNested().getNestedField()).isEqualTo("nested value");
-        
+
         // Verify root-level orphan
         assertThat(config.get("orphanAtRoot")).isEqualTo("orphan at root");
-        
+
         // Save and verify orphans preserved
         config.save();
-        
+
         String content = TestUtils.readFile(configFile);
         assertThat(content).contains("orphanAtRoot");
         assertThat(content).contains("orphanInNested");
@@ -272,7 +272,7 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_RemovalWithNestedConfigs_RemovesAllOrphans() throws Exception {
         File configFile = tempDir.resolve("orphans7.yml").toFile();
-        
+
         // Create file with nested orphans
         String yaml = """
             declaredNested:
@@ -281,7 +281,7 @@ class OrphanHandlingTest {
             orphanAtRoot: "should be removed"
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         ParentConfig config = ConfigManager.create(ParentConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -289,7 +289,7 @@ class OrphanHandlingTest {
         config.withRemoveOrphans(true);
         config.load();
         config.save();
-        
+
         // Verify orphans removed
         String content = TestUtils.readFile(configFile);
         assertThat(content).doesNotContain("orphanAtRoot");
@@ -303,27 +303,27 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_DeclaredFieldBecomesOrphan_HandleCorrectly() throws Exception {
         File configFile = tempDir.resolve("orphans8.yml").toFile();
-        
+
         // Create config with two fields and save
         ConfigV1 v1 = ConfigManager.create(ConfigV1.class);
         v1.withConfigurer(new YamlSnakeYamlConfigurer());
         v1.withBindFile(configFile);
         v1.save();
-        
+
         // Now use config with only one field (field2 becomes orphan)
         ConfigV2 v2 = ConfigManager.create(ConfigV2.class);
         v2.withConfigurer(new YamlSnakeYamlConfigurer());
         v2.withBindFile(configFile);
         v2.withRemoveOrphans(false);
         v2.load();
-        
+
         // field1 should be loaded, field2 should be orphan
         assertThat(v2.getField1()).isEqualTo("value1");
         assertThat(v2.get("field2")).isEqualTo("value2");
-        
+
         // Save and verify field2 still exists
         v2.save();
-        
+
         String content = TestUtils.readFile(configFile);
         assertThat(content).contains("field1");
         assertThat(content).contains("field2");
@@ -336,7 +336,7 @@ class OrphanHandlingTest {
     @Test
     void testOrphans_NestedOrphansWithoutRootOrphans_RemovesNestedOrphans() throws Exception {
         File configFile = tempDir.resolve("orphans9.yml").toFile();
-        
+
         // Create file with ONLY nested orphans (no root-level orphans)
         String yaml = """
             declaredNested:
@@ -344,7 +344,7 @@ class OrphanHandlingTest {
               orphanInNested: "should be removed"
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         ParentConfig config = ConfigManager.create(ParentConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -352,7 +352,7 @@ class OrphanHandlingTest {
         config.withRemoveOrphans(true);
         config.load();
         config.save();
-        
+
         // Verify nested orphan removed (even though there were no root-level orphans)
         String content = TestUtils.readFile(configFile);
         assertThat(content).doesNotContain("orphanInNested");
@@ -381,17 +381,17 @@ class OrphanHandlingTest {
             orphanField: "should be removed"
             """;
         TestUtils.writeFile(configFile, yaml);
-        
+
         // Load
         SelfRefConfig config = ConfigManager.create(SelfRefConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.withRemoveOrphans(true);
         config.load();
-        
+
         // This should not infinite loop
         config.save();
-        
+
         // Verify orphan removed
         String content = TestUtils.readFile(configFile);
         assertThat(content).doesNotContain("orphanField");
@@ -449,7 +449,7 @@ class OrphanHandlingTest {
         config.getConfigurer().getRegistry().register(customSerializer);
         config.withBindFile(configFile);
         config.withRemoveOrphans(true);
-        
+
         // Save (serializer adds __type and __version)
         config.save();
 

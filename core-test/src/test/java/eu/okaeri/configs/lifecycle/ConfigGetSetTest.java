@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for OkaeriConfig get/set operations.
- * 
+ * <p>
  * Scenarios tested:
  * - set(key, value) updates field
  * - set(key, value) updates configurer
@@ -32,13 +32,13 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Initial value
         assertThat(config.getIntValue()).isEqualTo(42);
-        
+
         // Act
         config.set("intValue", 999);
-        
+
         // Assert
         assertThat(config.getIntValue()).isEqualTo(999);
     }
@@ -48,10 +48,10 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.set("intValue", 777);
-        
+
         // Assert - configurer should also have the value
         assertThat(config.getConfigurer().getValue("intValue")).isEqualTo(777);
     }
@@ -61,10 +61,10 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act - set String value for int field
         config.set("intValue", "555");
-        
+
         // Assert - should convert String to int
         assertThat(config.getIntValue()).isEqualTo(555);
     }
@@ -74,10 +74,10 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.set("boolValue", "false");
-        
+
         // Assert
         assertThat(config.isBoolValue()).isFalse();
     }
@@ -87,10 +87,10 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.set("doubleValue", "9.87654");
-        
+
         // Assert
         assertThat(config.getDoubleValue()).isEqualTo(9.87654);
     }
@@ -100,10 +100,10 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act - set key that's not a field
         config.set("customKey", "custom value");
-        
+
         // Assert - should be stored in configurer
         assertThat(config.getConfigurer().getValue("customKey")).isEqualTo("custom value");
     }
@@ -114,10 +114,10 @@ class ConfigGetSetTest {
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setIntValue(999);
-        
+
         // Act
         Object value = config.get("intValue");
-        
+
         // Assert
         assertThat(value).isEqualTo(999);
     }
@@ -128,10 +128,10 @@ class ConfigGetSetTest {
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.getConfigurer().setValue("orphanKey", "orphan value", null, null);
-        
+
         // Act
         Object value = config.get("orphanKey");
-        
+
         // Assert
         assertThat(value).isEqualTo("orphan value");
     }
@@ -142,10 +142,10 @@ class ConfigGetSetTest {
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setIntValue(123);
-        
+
         // Act - get int value as String
         String value = config.get("intValue", String.class);
-        
+
         // Assert - should convert int to String
         assertThat(value).isEqualTo("123");
     }
@@ -156,10 +156,10 @@ class ConfigGetSetTest {
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setIntValue(999);
-        
+
         // Act
         Long value = config.get("intValue", Long.class);
-        
+
         // Assert
         assertThat(value).isEqualTo(999L);
     }
@@ -170,10 +170,10 @@ class ConfigGetSetTest {
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.getConfigurer().setValue("stringBool", "true", null, null);
-        
+
         // Act
         Boolean value = config.get("stringBool", Boolean.class);
-        
+
         // Assert
         assertThat(value).isTrue();
     }
@@ -184,10 +184,10 @@ class ConfigGetSetTest {
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setIntValue(777);
-        
+
         // Act
         Integer value = config.get("intValue", GenericsDeclaration.of(Integer.class));
-        
+
         // Assert
         assertThat(value).isEqualTo(777);
     }
@@ -197,14 +197,14 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         List<String> testList = Arrays.asList("a", "b", "c");
         config.set("testList", testList);
-        
+
         // Act - get with generic type
         @SuppressWarnings("unchecked")
         List<String> value = config.get("testList", GenericsDeclaration.of(List.class));
-        
+
         // Assert
         assertThat(value).containsExactly("a", "b", "c");
     }
@@ -214,12 +214,12 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.set("intValue", 100);
         config.set("boolValue", false);
         config.set("doubleValue", 1.23);
-        
+
         // Assert
         assertThat(config.getIntValue()).isEqualTo(100);
         assertThat(config.isBoolValue()).isFalse();
@@ -231,13 +231,13 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.set("intValue", 100);
         assertThat(config.getIntValue()).isEqualTo(100);
-        
+
         config.set("intValue", 200);
-        
+
         // Assert
         assertThat(config.getIntValue()).isEqualTo(200);
     }
@@ -246,7 +246,7 @@ class ConfigGetSetTest {
     void testSet_WithoutConfigurer_ThrowsException() {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.set("intValue", 999))
             .isInstanceOf(IllegalStateException.class)
@@ -257,7 +257,7 @@ class ConfigGetSetTest {
     void testGet_WithoutConfigurer_ThrowsException() {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.get("intValue"))
             .isInstanceOf(IllegalStateException.class)
@@ -268,7 +268,7 @@ class ConfigGetSetTest {
     void testGet_WithClass_WithoutConfigurer_ThrowsException() {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.get("intValue", Integer.class))
             .isInstanceOf(IllegalStateException.class)
@@ -279,7 +279,7 @@ class ConfigGetSetTest {
     void testGet_WithGenericsDeclaration_WithoutConfigurer_ThrowsException() {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.get("intValue", GenericsDeclaration.of(Integer.class)))
             .isInstanceOf(IllegalStateException.class)
@@ -291,11 +291,11 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.set("intValue", 555);
         Object retrieved = config.get("intValue");
-        
+
         // Assert
         assertThat(retrieved).isEqualTo(555);
     }
@@ -305,11 +305,11 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.set("doubleValue", 3.14159);
         Double retrieved = config.get("doubleValue", Double.class);
-        
+
         // Assert
         assertThat(retrieved).isEqualTo(3.14159);
     }
@@ -319,10 +319,10 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act - set null for wrapper type
         config.set("intWrapper", null);
-        
+
         // Assert
         assertThat(config.getIntWrapper()).isNull();
     }
@@ -332,7 +332,7 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         config.setBoolValue(false);
         config.setByteValue((byte) 99);
         config.setCharValue('X');
@@ -341,7 +341,7 @@ class ConfigGetSetTest {
         config.setIntValue(777);
         config.setLongValue(999999L);
         config.setShortValue((short) 555);
-        
+
         // Act & Assert
         assertThat(config.get("boolValue")).isEqualTo(false);
         assertThat(config.get("byteValue")).isEqualTo((byte) 99);

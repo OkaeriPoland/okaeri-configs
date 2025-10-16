@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for @Exclude annotation.
- * 
+ * <p>
  * Verifies:
  * - Excluded field is not in declaration
  * - Excluded field is not saved
@@ -28,7 +28,7 @@ class ExcludeAnnotationTest {
     @EqualsAndHashCode(callSuper = false)
     public static class SimpleExcludeConfig extends OkaeriConfig {
         private String normalField = "normal";
-        
+
         @Exclude
         private String excludedField = "excluded";
     }
@@ -37,15 +37,15 @@ class ExcludeAnnotationTest {
     @EqualsAndHashCode(callSuper = false)
     public static class MultipleExcludeConfig extends OkaeriConfig {
         private String field1 = "value1";
-        
+
         @Exclude
         private String excluded1 = "excluded1";
-        
+
         private String field2 = "value2";
-        
+
         @Exclude
         private String excluded2 = "excluded2";
-        
+
         @Exclude
         private int excluded3 = 999;
     }
@@ -55,7 +55,7 @@ class ExcludeAnnotationTest {
     public static class AllExcludedConfig extends OkaeriConfig {
         @Exclude
         private String field1 = "value1";
-        
+
         @Exclude
         private String field2 = "value2";
     }
@@ -64,10 +64,10 @@ class ExcludeAnnotationTest {
     @EqualsAndHashCode(callSuper = false)
     public static class NestedExcludeConfig extends OkaeriConfig {
         private String normalField = "normal";
-        
+
         @Exclude
         private SubConfig excludedSubConfig = new SubConfig();
-        
+
         @Data
         @EqualsAndHashCode(callSuper = false)
         public static class SubConfig extends OkaeriConfig {

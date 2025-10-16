@@ -25,7 +25,6 @@ import java.util.*;
 @Header("  Okaeri Configs - Mega Test Config")
 @Header("  Tests ALL features comprehensively")
 @Header("===========================================")
-@Names(strategy = NameStrategy.IDENTITY, modifier = NameModifier.NONE)
 public class MegaConfig extends OkaeriConfig {
 
     // === PRIMITIVES ===
@@ -60,13 +59,13 @@ public class MegaConfig extends OkaeriConfig {
     private String unicodePolish = "Część świecie! Łódź, Gdańsk, Kraków, źdźbło";
     private String specialChars = "!@#$%^&*()_+-=[]{}|;':\"<>?,./";
     private String emptyString = "";
-    
+
     @Comment("Long string without spaces (tests line wrapping)")
     private String longStringNoSpaces = "a".repeat(200);
-    
+
     @Comment("Long string with spaces (tests folding behavior)")
     private String longStringWithSpaces = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
-    
+
     @Comment("Multiline string (tests literal/folded style)")
     private String multilineString = "Line 1\nLine 2\nLine 3\nLine 4 with more text\nLine 5 final";
 
@@ -87,6 +86,12 @@ public class MegaConfig extends OkaeriConfig {
 
     @Comment("Set of enums")
     private Set<TestEnum> enumSet = new LinkedHashSet<>(List.of(TestEnum.FIRST, TestEnum.SECOND));
+
+    @Comment("Nested collection - list of lists")
+    private List<List<String>> nestedListOfLists = List.of(
+        List.of("a", "b"),
+        List.of("c", "d", "e")
+    );
 
     // === MAPS ===
     @Comment("Simple string-to-string map")
@@ -115,6 +120,12 @@ public class MegaConfig extends OkaeriConfig {
         this.put(TestEnum.SECOND, "second value");
     }};
 
+    @Comment("Map with enum values")
+    private Map<String, TestEnum> enumValueMap = new LinkedHashMap<>() {{
+        this.put("a", TestEnum.FIRST);
+        this.put("b", TestEnum.THIRD);
+    }};
+
     // === ENUMS ===
     @Comment("Simple enum")
     private TestEnum singleEnum = TestEnum.THIRD;
@@ -128,8 +139,8 @@ public class MegaConfig extends OkaeriConfig {
 
     @Comment("List of nested configs")
     private List<SubConfig> subConfigList = List.of(
-            new SubConfig("sub1", 10),
-            new SubConfig("sub2", 20)
+        new SubConfig("sub1", 10),
+        new SubConfig("sub2", 20)
     );
 
     // === MULTI-LEVEL SELF-REFERENTIAL NESTING ===
@@ -139,6 +150,19 @@ public class MegaConfig extends OkaeriConfig {
     // === SERIALIZABLE ===
     @Comment("Serializable custom object")
     private CustomSerializable customObj = new CustomSerializable("test", 999);
+
+    @Comment("List of serializable objects")
+    private List<CustomSerializable> serializableList = List.of(
+        new CustomSerializable("item1", 1),
+        new CustomSerializable("item2", 2),
+        new CustomSerializable("item3", 3)
+    );
+
+    @Comment("Map of serializable objects")
+    private Map<String, CustomSerializable> serializableMap = new LinkedHashMap<>() {{
+        this.put("obj1", new CustomSerializable("first", 100));
+        this.put("obj2", new CustomSerializable("second", 200));
+    }};
 
     // === ANNOTATIONS ===
     @CustomKey("custom-key-field")
@@ -162,8 +186,13 @@ public class MegaConfig extends OkaeriConfig {
     @Comment("Empty map")
     private Map<String, String> emptyMap = new LinkedHashMap<>();
 
+    @Comment("Field with repeating comments")
+    @Comment("This tests multiple @Comment annotations")
+    @Comment("on the same field")
+    private String repeatingCommentField = "test value";
+
     // === FACTORY METHOD FOR NESTED MEGACONFIG ===
-    
+
     /**
      * Populates the nestedMegaConfig field with a full MegaConfig instance.
      * This creates a 2-level deep nesting structure (the nested instance has nestedMegaConfig = null).
@@ -197,10 +226,10 @@ public class MegaConfig extends OkaeriConfig {
     @AllArgsConstructor
     public static class CustomSerializable implements Serializable {
         private static final long serialVersionUID = 1L;
-        
+
         @Comment("Name field in serializable object")
         private String name;
-        
+
         @Comment("ID field in serializable object")
         private int id;
     }

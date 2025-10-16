@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for @TargetType annotation.
- * 
+ * <p>
  * Verifies:
  * - Collection with non-default implementation (List → LinkedList, Vector)
  * - Map with non-default implementation (Map → TreeMap)
@@ -29,7 +29,7 @@ class TargetTypeAnnotationTest {
     public static class SimpleTargetTypeConfig extends OkaeriConfig {
         @TargetType(LinkedList.class)
         private List<String> linkedList = new LinkedList<>();
-        
+
         private List<String> defaultList = new ArrayList<>();
     }
 
@@ -38,7 +38,7 @@ class TargetTypeAnnotationTest {
     public static class MapTargetTypeConfig extends OkaeriConfig {
         @TargetType(TreeMap.class)
         private Map<String, String> treeMap = new TreeMap<>();
-        
+
         private Map<String, Integer> defaultMap = new LinkedHashMap<>();
     }
 
@@ -47,7 +47,7 @@ class TargetTypeAnnotationTest {
     public static class SetTargetTypeConfig extends OkaeriConfig {
         @TargetType(TreeSet.class)
         private Set<String> treeSet = new TreeSet<>();
-        
+
         private Set<Integer> defaultSet = new LinkedHashSet<>();
     }
 
@@ -56,10 +56,10 @@ class TargetTypeAnnotationTest {
     public static class MultipleTargetTypesConfig extends OkaeriConfig {
         @TargetType(LinkedList.class)
         private List<String> linkedList = new LinkedList<>();
-        
+
         @TargetType(TreeSet.class)
         private Set<String> treeSet = new TreeSet<>();
-        
+
         @TargetType(TreeMap.class)
         private Map<String, String> treeMap = new TreeMap<>();
     }
@@ -87,7 +87,7 @@ class TargetTypeAnnotationTest {
         // Then - @TargetType should create LinkedList (not default ArrayList)
         assertThat(config.getLinkedList()).isInstanceOf(LinkedList.class);
         assertThat(config.getLinkedList()).containsExactly("item1", "item2", "item3");
-        
+
         // defaultList should use ArrayList (default for List)
         assertThat(config.getDefaultList()).isInstanceOf(ArrayList.class);
     }
@@ -113,7 +113,7 @@ class TargetTypeAnnotationTest {
         assertThat(config.getTreeMap()).isInstanceOf(TreeMap.class);
         assertThat(config.getTreeMap()).containsEntry("key1", "value1");
         assertThat(config.getTreeMap()).containsEntry("key2", "value2");
-        
+
         // defaultMap should use LinkedHashMap (default for Map)
         assertThat(config.getDefaultMap()).isInstanceOf(LinkedHashMap.class);
         assertThat(config.getDefaultMap()).containsEntry("keyA", 1);
@@ -142,7 +142,7 @@ class TargetTypeAnnotationTest {
         // Then - @TargetType should create TreeSet (not default LinkedHashSet)
         assertThat(config.getTreeSet()).isInstanceOf(TreeSet.class);
         assertThat(config.getTreeSet()).containsExactly("item1", "item2", "item3");
-        
+
         // defaultSet should use LinkedHashSet (default for Set)
         assertThat(config.getDefaultSet()).isInstanceOf(LinkedHashSet.class);
         assertThat(config.getDefaultSet()).contains(10, 20, 30);

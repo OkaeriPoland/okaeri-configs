@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for OkaeriConfig save operations.
- * 
+ * <p>
  * Scenarios tested:
  * - Save to file (File, Path, String pathname)
  * - Save to OutputStream
@@ -37,10 +37,10 @@ class ConfigSaveTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setBoolValue(false);
         config.setIntValue(999);
-        
+
         // Act
         config.save(tempFile);
-        
+
         // Assert
         assertThat(tempFile).exists();
         String content = Files.readString(tempFile.toPath());
@@ -57,10 +57,10 @@ class ConfigSaveTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setByteValue((byte) 42);
         config.setShortValue((short) 1234);
-        
+
         // Act
         config.save(tempFile);
-        
+
         // Assert
         assertThat(tempFile).exists();
         String content = Files.readString(tempFile);
@@ -75,12 +75,12 @@ class ConfigSaveTest {
         Path tempFile = tempDir.resolve("bound-config.yml");
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile);
+            .withBindFile(tempFile);
         config.setDoubleValue(3.14159);
-        
+
         // Act
         config.save();
-        
+
         // Assert
         assertThat(tempFile).exists();
         String content = Files.readString(tempFile);
@@ -95,10 +95,10 @@ class ConfigSaveTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setCharValue('X');
         config.setLongValue(9876543210L);
-        
+
         // Act
         config.save(outputStream);
-        
+
         // Assert
         String result = outputStream.toString("UTF-8");
         assertThat(result).contains("charValue: X");
@@ -112,10 +112,10 @@ class ConfigSaveTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setFloatValue(2.71f);
         config.setIntWrapper(12345);
-        
+
         // Act
         String result = config.saveToString();
-        
+
         // Assert
         assertThat(result).isNotEmpty();
         assertThat(result).contains("floatValue: 2.71");
@@ -129,11 +129,11 @@ class ConfigSaveTest {
         Path tempFile = tempDir.resolve("defaults.yml");
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile);
-        
+            .withBindFile(tempFile);
+
         // Act
         config.saveDefaults();
-        
+
         // Assert
         assertThat(tempFile).exists();
     }
@@ -144,15 +144,15 @@ class ConfigSaveTest {
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("existing.yml");
         Files.writeString(tempFile, "existing: content");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile);
+            .withBindFile(tempFile);
         config.setIntValue(999);
-        
+
         // Act
         config.saveDefaults();
-        
+
         // Assert
         String content = Files.readString(tempFile);
         assertThat(content).isEqualTo("existing: content");
@@ -166,10 +166,10 @@ class ConfigSaveTest {
         Path nestedFile = tempDir.resolve("nested/deep/config.yml");
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act
         config.save(nestedFile.toFile());
-        
+
         // Assert
         assertThat(nestedFile).exists();
         assertThat(nestedFile.getParent()).exists();
@@ -182,14 +182,14 @@ class ConfigSaveTest {
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("overwrite.yml");
         Files.writeString(tempFile, "old: content\nstays: here");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setIntValue(777);
-        
+
         // Act
         config.save(tempFile.toFile());
-        
+
         // Assert
         String content = Files.readString(tempFile);
         assertThat(content).contains("intValue: 777");
@@ -201,7 +201,7 @@ class ConfigSaveTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("orphans.yml");
-        
+
         // Create config with extra field
         String initialData = """
             boolValue: true
@@ -209,16 +209,16 @@ class ConfigSaveTest {
             orphanKey: should be removed
             """;
         Files.writeString(tempFile, initialData);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile)
-              .withRemoveOrphans(true);
+            .withBindFile(tempFile)
+            .withRemoveOrphans(true);
         config.load();
-        
+
         // Act
         config.save();
-        
+
         // Assert
         String content = Files.readString(tempFile);
         assertThat(content).doesNotContain("orphanKey");
@@ -229,7 +229,7 @@ class ConfigSaveTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("keep-orphans.yml");
-        
+
         // Create config with extra field
         String initialData = """
             boolValue: true
@@ -237,16 +237,16 @@ class ConfigSaveTest {
             orphanKey: should be kept
             """;
         Files.writeString(tempFile, initialData);
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
-              .withBindFile(tempFile)
-              .withRemoveOrphans(false);
+            .withBindFile(tempFile)
+            .withRemoveOrphans(false);
         config.load();
-        
+
         // Act
         config.save();
-        
+
         // Assert
         String content = Files.readString(tempFile);
         assertThat(content).contains("orphanKey");
@@ -257,7 +257,7 @@ class ConfigSaveTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         File tempFile = new File("/tmp/test.yml");
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.save(tempFile))
             .isInstanceOf(IllegalStateException.class)
@@ -269,7 +269,7 @@ class ConfigSaveTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.save())
             .isInstanceOf(IllegalStateException.class)
@@ -281,7 +281,7 @@ class ConfigSaveTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Act & Assert
         assertThatThrownBy(() -> config.saveDefaults())
             .isInstanceOf(IllegalStateException.class)
@@ -301,10 +301,10 @@ class ConfigSaveTest {
         config.setIntValue(555);
         config.setLongValue(999999L);
         config.setShortValue((short) 777);
-        
+
         // Act
         String result = config.saveToString();
-        
+
         // Assert
         assertThat(result).contains("boolValue: false");
         assertThat(result).contains("byteValue: 100");

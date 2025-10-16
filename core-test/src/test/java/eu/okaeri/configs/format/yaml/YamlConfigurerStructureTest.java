@@ -57,7 +57,7 @@ class YamlConfigurerStructureTest {
             # Line 2 of comment
             numberField: 42
             """;
-        
+
         assertThat(yaml).isEqualTo(expected);
     }
 
@@ -79,7 +79,7 @@ class YamlConfigurerStructureTest {
             # ===================
             field: value
             """;
-        
+
         assertThat(yaml).isEqualTo(expected);
     }
 
@@ -103,7 +103,7 @@ class YamlConfigurerStructureTest {
               # ID field in serializable object
               id: 999
             """;
-        
+
         assertThat(yaml).isEqualTo(expected);
     }
 
@@ -125,7 +125,7 @@ class YamlConfigurerStructureTest {
               subField: default sub
               subNumber: 42
             """;
-        
+
         assertThat(yaml).isEqualTo(expected);
     }
 
@@ -150,7 +150,7 @@ class YamlConfigurerStructureTest {
             - subField: sub2
               subNumber: 20
             """;
-        
+
         assertThat(yaml).isEqualTo(expected);
     }
 
@@ -170,7 +170,7 @@ class YamlConfigurerStructureTest {
             russian: Привет мир! Тестирование кириллицы
             polish: Część świecie! Łódź, Gdańsk
             """;
-        
+
         assertThat(yaml).isEqualTo(expected);
     }
 
@@ -194,7 +194,7 @@ class YamlConfigurerStructureTest {
               key1: value1
               key2: value2
             """;
-        
+
         assertThat(yaml).isEqualTo(expected);
     }
 
@@ -215,7 +215,7 @@ class YamlConfigurerStructureTest {
             reloaded.withConfigurer(configurer);
             reloaded.load(currentYaml);
             currentYaml = reloaded.saveToString();
-            
+
             assertThat(currentYaml)
                 .as("Cycle %d: YAML should remain stable", i + 1)
                 .isEqualTo(firstYaml);
@@ -231,7 +231,7 @@ class YamlConfigurerStructureTest {
             # Comment on field2
             field2: value2
             """;
-        
+
         assertThat(firstYaml).isEqualTo(expected);
     }
 

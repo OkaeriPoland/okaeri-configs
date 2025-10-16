@@ -33,7 +33,7 @@ class ConfigCreationTest {
     void testCreate_WithInitializer_AppliesInitialization() throws Exception {
         // Given: A configurer
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
-        
+
         // When: Creating config with initializer (for OkaeriConfig API methods)
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class, cfg -> {
             cfg.withConfigurer(configurer);
@@ -48,7 +48,7 @@ class ConfigCreationTest {
     void testCreate_WithBindFile_SetsBindFile() throws Exception {
         // Given: A temporary file (using TestUtils)
         File testFile = TestUtils.createTempFile("", ".yml");
-        
+
         // When: Creating config with initializer to set bind file
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class, cfg -> {
             cfg.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -77,7 +77,7 @@ class ConfigCreationTest {
 
         // When: Using fluent API
         OkaeriConfig config = ConfigManager.create(PrimitivesTestConfig.class)
-                .withConfigurer(configurer);
+            .withConfigurer(configurer);
 
         // Then: Fluent API should work
         assertThat(config).isNotNull();
@@ -89,13 +89,13 @@ class ConfigCreationTest {
     void testCreate_WithNullClass_ThrowsException() {
         // When/Then: Creating config with null class should throw
         assertThatThrownBy(() -> ConfigManager.create(null))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
     }
 
     @Test
     void testCreate_WithNullInitializer_ThrowsException() {
         // When/Then: Creating config with null initializer should throw
         assertThatThrownBy(() -> ConfigManager.create(PrimitivesTestConfig.class, null))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
     }
 }

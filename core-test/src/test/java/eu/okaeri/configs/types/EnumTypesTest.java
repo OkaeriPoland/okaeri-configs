@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Tests for enum types.
- * 
+ * <p>
  * Scenarios tested:
  * - Simple enum serialization/deserialization
  * - Enum.valueOf() exact match
@@ -30,17 +30,17 @@ class EnumTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("single-enum.yml");
-        
+
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setSingleEnum(EnumsTestConfig.TestEnum.THIRD);
-        
+
         // Act
         config.save();
         EnumsTestConfig loaded = ConfigManager.create(EnumsTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getSingleEnum()).isEqualTo(EnumsTestConfig.TestEnum.THIRD);
     }
@@ -50,7 +50,7 @@ class EnumTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("enum-list.yml");
-        
+
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setEnumList(Arrays.asList(
@@ -58,13 +58,13 @@ class EnumTypesTest {
             EnumsTestConfig.TestEnum.THIRD,
             EnumsTestConfig.TestEnum.SECOND
         ));
-        
+
         // Act
         config.save();
         EnumsTestConfig loaded = ConfigManager.create(EnumsTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getEnumList()).containsExactly(
             EnumsTestConfig.TestEnum.FIRST,
@@ -78,21 +78,21 @@ class EnumTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("enum-set.yml");
-        
+
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
-        
+
         Set<EnumsTestConfig.TestEnum> enumSet = new LinkedHashSet<>();
         enumSet.add(EnumsTestConfig.TestEnum.FIRST);
         enumSet.add(EnumsTestConfig.TestEnum.SECOND);
         config.setEnumSet(enumSet);
-        
+
         // Act
         config.save();
         EnumsTestConfig loaded = ConfigManager.create(EnumsTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getEnumSet()).containsExactly(
             EnumsTestConfig.TestEnum.FIRST,
@@ -105,21 +105,21 @@ class EnumTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("enum-key-map.yml");
-        
+
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
-        
+
         Map<EnumsTestConfig.TestEnum, String> map = new LinkedHashMap<>();
         map.put(EnumsTestConfig.TestEnum.FIRST, "first value");
         map.put(EnumsTestConfig.TestEnum.SECOND, "second value");
         config.setEnumKeyMap(map);
-        
+
         // Act
         config.save();
         EnumsTestConfig loaded = ConfigManager.create(EnumsTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getEnumKeyMap()).containsExactly(
             entry(EnumsTestConfig.TestEnum.FIRST, "first value"),
@@ -132,21 +132,21 @@ class EnumTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("enum-value-map.yml");
-        
+
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
-        
+
         Map<String, EnumsTestConfig.TestEnum> map = new LinkedHashMap<>();
         map.put("a", EnumsTestConfig.TestEnum.FIRST);
         map.put("b", EnumsTestConfig.TestEnum.THIRD);
         config.setEnumValueMap(map);
-        
+
         // Act
         config.save();
         EnumsTestConfig loaded = ConfigManager.create(EnumsTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getEnumValueMap()).containsExactly(
             entry("a", EnumsTestConfig.TestEnum.FIRST),
@@ -159,7 +159,7 @@ class EnumTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("enum-string.yml");
-        
+
         // Write YAML manually with enum as string
         String yaml = """
             singleEnum: FIRST
@@ -177,12 +177,12 @@ class EnumTypesTest {
               y: FIRST
             """;
         Files.writeString(tempFile, yaml);
-        
+
         // Act
         EnumsTestConfig loaded = ConfigManager.create(EnumsTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getSingleEnum()).isEqualTo(EnumsTestConfig.TestEnum.FIRST);
         assertThat(loaded.getEnumList()).containsExactly(
@@ -200,7 +200,7 @@ class EnumTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("enum-case.yml");
-        
+
         // Write YAML with different cases
         String yaml = """
             singleEnum: first
@@ -215,12 +215,12 @@ class EnumTypesTest {
               x: THIRD
             """;
         Files.writeString(tempFile, yaml);
-        
+
         // Act
         EnumsTestConfig loaded = ConfigManager.create(EnumsTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert - case-insensitive enum parsing should work
         assertThat(loaded.getSingleEnum()).isEqualTo(EnumsTestConfig.TestEnum.FIRST);
         assertThat(loaded.getEnumList()).containsExactly(
@@ -235,38 +235,38 @@ class EnumTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("all-enums.yml");
-        
+
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
-        
+
         // Set all enum fields
         config.setSingleEnum(EnumsTestConfig.TestEnum.SECOND);
         config.setEnumList(Arrays.asList(
             EnumsTestConfig.TestEnum.FIRST,
             EnumsTestConfig.TestEnum.THIRD
         ));
-        
+
         Set<EnumsTestConfig.TestEnum> enumSet = new LinkedHashSet<>();
         enumSet.add(EnumsTestConfig.TestEnum.FIRST);
         enumSet.add(EnumsTestConfig.TestEnum.SECOND);
         config.setEnumSet(enumSet);
-        
+
         Map<EnumsTestConfig.TestEnum, String> keyMap = new LinkedHashMap<>();
         keyMap.put(EnumsTestConfig.TestEnum.FIRST, "first");
         keyMap.put(EnumsTestConfig.TestEnum.SECOND, "second");
         config.setEnumKeyMap(keyMap);
-        
+
         Map<String, EnumsTestConfig.TestEnum> valueMap = new LinkedHashMap<>();
         valueMap.put("a", EnumsTestConfig.TestEnum.FIRST);
         valueMap.put("b", EnumsTestConfig.TestEnum.THIRD);
         config.setEnumValueMap(valueMap);
-        
+
         // Act
         config.save();
         EnumsTestConfig loaded = ConfigManager.create(EnumsTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert all
         assertThat(loaded.getSingleEnum()).isEqualTo(EnumsTestConfig.TestEnum.SECOND);
         assertThat(loaded.getEnumList()).hasSize(2);

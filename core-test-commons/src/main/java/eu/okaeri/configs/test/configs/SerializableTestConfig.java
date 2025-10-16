@@ -7,7 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Test config for Serializable custom objects.
@@ -18,12 +19,12 @@ public class SerializableTestConfig extends OkaeriConfig {
 
     private CustomSerializable singleObject = new CustomSerializable("test", 999);
     private List<CustomSerializable> objectList = List.of(
-            new CustomSerializable("item1", 1),
-            new CustomSerializable("item2", 2)
+        new CustomSerializable("item1", 1),
+        new CustomSerializable("item2", 2)
     );
     private Map<String, CustomSerializable> objectMap = Map.of(
-            "obj1", new CustomSerializable("first", 10),
-            "obj2", new CustomSerializable("second", 20)
+        "obj1", new CustomSerializable("first", 10),
+        "obj2", new CustomSerializable("second", 20)
     );
 
     @Data

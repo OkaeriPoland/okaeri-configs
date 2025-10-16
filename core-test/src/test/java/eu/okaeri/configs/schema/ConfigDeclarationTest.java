@@ -44,10 +44,10 @@ class ConfigDeclarationTest {
     @EqualsAndHashCode(callSuper = false)
     public static class ConfigWithExcluded extends OkaeriConfig {
         private String normalField = "normal";
-        
+
         @Exclude
         private String excludedField = "excluded";
-        
+
         private transient String transientField = "transient";
     }
 

@@ -15,21 +15,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for @Include and @Includes annotations.
- * 
+ * <p>
  * Verifies:
  * - Include fields from parent/base classes
  * - Multiple @Include annotations
  * - Include doesn't override existing fields
  * - Include with same field names (child wins)
  * - Declaration contains included fields
- * 
+ * <p>
  * Note: @Include is used when the library doesn't automatically scan
  * parent classes, so you explicitly include them.
  */
 class IncludeAnnotationTest {
 
     // ===== Base Classes =====
-    
+
     @Data
     @EqualsAndHashCode(callSuper = false)
     public static class BaseConfig extends OkaeriConfig {
@@ -153,8 +153,8 @@ class IncludeAnnotationTest {
         assertThat(Assertions.catchThrowable(() -> {
             ConfigDeclaration.of(InvalidMultipleIncludesConfig.class);
         }))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("@Include can only include classes that");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("@Include can only include classes that");
     }
 
     @Test

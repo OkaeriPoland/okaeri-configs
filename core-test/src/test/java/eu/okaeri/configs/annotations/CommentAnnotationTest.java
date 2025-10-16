@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for @Comment and @Comments annotations.
- * 
+ * <p>
  * Verifies:
  * - Single @Comment with one line
  * - Single @Comment with multiple lines
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Comment is included in field declaration
  * - Repeating @Comment on same field
  * - No comment when annotation absent
- * 
+ * <p>
  * Note: YAML comment formatting tests (# prefix, positioning) are in yaml-snakeyaml module.
  */
 class CommentAnnotationTest {
@@ -40,7 +40,7 @@ class CommentAnnotationTest {
     public static class SingleLineCommentConfig extends OkaeriConfig {
         @Comment("This is a single line comment")
         private String commentedField = "value1";
-        
+
         private String uncommentedField = "value2";
     }
 
@@ -67,9 +67,9 @@ class CommentAnnotationTest {
     public static class MixedCommentsConfig extends OkaeriConfig {
         @Comment("Comment on field 1")
         private String field1 = "value1";
-        
+
         private String field2 = "value2";
-        
+
         @Comment({"Multi-line comment", "on field 3"})
         private String field3 = "value3";
     }
@@ -177,7 +177,7 @@ class CommentAnnotationTest {
     void testComment_EmptyValue_HandledCorrectly() {
         // Given
         EmptyCommentConfig config = ConfigManager.create(EmptyCommentConfig.class);
-        
+
         // When
         ConfigDeclaration declaration = config.getDeclaration();
         FieldDeclaration field = declaration.getField("field").orElse(null);
@@ -218,7 +218,7 @@ class CommentAnnotationTest {
         @AllArgsConstructor
         public static class CustomSerializable implements Serializable {
             private static final long serialVersionUID = 1L;
-            
+
             @Comment("Comment inside serializable")
             private String name;
             private int id;
@@ -322,7 +322,7 @@ class CommentAnnotationTest {
         public static class CommentedSubConfig extends OkaeriConfig {
             @Comment("Name of the subconfig item")
             private String name;
-            
+
             @Comment("Value of the subconfig item")
             private int value;
         }
@@ -350,7 +350,7 @@ class CommentAnnotationTest {
         // Then - Subconfig fields have comments
         assertThat(nameField).isNotNull();
         assertThat(nameField.getComment()).containsExactly("Name of the subconfig item");
-        
+
         assertThat(valueField).isNotNull();
         assertThat(valueField.getComment()).containsExactly("Value of the subconfig item");
     }

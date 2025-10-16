@@ -79,7 +79,7 @@ class CrossFormatTest {
     @Test
     void testCrossFormat_TransformCopyBetweenConfigurers_PreservesData() throws Exception {
         File yamlFile = tempDir.resolve("source.yml").toFile();
-        
+
         // Create and save YAML config
         PrimitivesTestConfig yamlConfig = ConfigManager.create(PrimitivesTestConfig.class);
         yamlConfig.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -87,10 +87,10 @@ class CrossFormatTest {
         yamlConfig.setIntValue(999);
         yamlConfig.setIntWrapper(888);
         yamlConfig.save();
-        
+
         // Transform copy to new config (no configurer - in-memory only)
         PrimitivesTestConfig memoryConfig = ConfigManager.transformCopy(yamlConfig, PrimitivesTestConfig.class);
-        
+
         // Verify data preserved
         assertThat(memoryConfig.getIntValue()).isEqualTo(999);
         assertThat(memoryConfig.getIntWrapper()).isEqualTo(888);
@@ -105,30 +105,30 @@ class CrossFormatTest {
     void testCrossFormat_DeepCopyWithNewConfigurer_CreatesIndependentCopy() throws Exception {
         File sourceFile = tempDir.resolve("source.yml").toFile();
         File targetFile = tempDir.resolve("target.yml").toFile();
-        
+
         // Create source config
         PrimitivesTestConfig source = ConfigManager.create(PrimitivesTestConfig.class);
         source.withConfigurer(new YamlSnakeYamlConfigurer());
         source.withBindFile(sourceFile);
         source.setIntValue(111);
         source.save();
-        
+
         // Deep copy with new configurer
         YamlSnakeYamlConfigurer newConfigurer = new YamlSnakeYamlConfigurer();
         PrimitivesTestConfig copy = ConfigManager.deepCopy(source, newConfigurer, PrimitivesTestConfig.class);
         copy.withBindFile(targetFile);
-        
+
         // Modify copy
         copy.setIntValue(222);
         copy.save();
-        
+
         // Verify source unchanged
         assertThat(source.getIntValue()).isEqualTo(111);
-        
+
         // Verify files are different
         source.load(); // Reload from file
         assertThat(source.getIntValue()).isEqualTo(111);
-        
+
         copy.load();
         assertThat(copy.getIntValue()).isEqualTo(222);
     }
@@ -139,25 +139,25 @@ class CrossFormatTest {
     @Test
     void testCrossFormat_DataIntegrityAcrossOperations_Maintained() throws Exception {
         File file1 = tempDir.resolve("file1.yml").toFile();
-        
+
         // Save to YAML
         TestConfig config1 = ConfigManager.create(TestConfig.class);
         config1.withConfigurer(new YamlSnakeYamlConfigurer());
         config1.withBindFile(file1);
         config1.save();
-        
+
         // Load from YAML
         TestConfig config2 = ConfigManager.create(TestConfig.class);
         config2.withConfigurer(new YamlSnakeYamlConfigurer());
         config2.withBindFile(file1);
         config2.load();
-        
+
         // Transform copy
         TestConfig config3 = ConfigManager.transformCopy(config2, TestConfig.class);
-        
+
         // Deep copy
         TestConfig config4 = ConfigManager.deepCopy(config3, new YamlSnakeYamlConfigurer(), TestConfig.class);
-        
+
         // Verify all configs have same data
         assertThat(config4.getStringVal()).isEqualTo("test");
         assertThat(config4.getIntVal()).isEqualTo(42);
@@ -171,20 +171,20 @@ class CrossFormatTest {
     @Test
     void testCrossFormat_ViaMapConversion_PreservesData() throws Exception {
         File sourceFile = tempDir.resolve("source.yml").toFile();
-        
+
         SimpleConfig config1 = ConfigManager.create(SimpleConfig.class);
         config1.withConfigurer(new YamlSnakeYamlConfigurer());
         config1.withBindFile(sourceFile);
         config1.save();
-        
+
         // Convert to map
         Map<String, Object> map = config1.asMap(config1.getConfigurer(), true);
-        
+
         // Create new config and load from map
         SimpleConfig config2 = ConfigManager.create(SimpleConfig.class);
         config2.withConfigurer(new YamlSnakeYamlConfigurer());
         config2.load(map);
-        
+
         // Verify data preserved
         assertThat(config2.getField1()).isEqualTo("value1");
         assertThat(config2.getField2()).isEqualTo(123);
@@ -201,14 +201,14 @@ class CrossFormatTest {
         original.withConfigurer(new YamlSnakeYamlConfigurer());
         original.setOuterField("modified");
         original.getNested().setInnerField("modified nested");
-        
+
         // Transform copy
         Outer copy1 = ConfigManager.transformCopy(original, Outer.class);
         assertThat(copy1.getOuterField()).isEqualTo("modified");
         assertThat(copy1.getNested().getInnerField()).isEqualTo("modified nested");
         assertThat(copy1.getNestedMap()).hasSize(1);
         assertThat(copy1.getNestedMap().get("first").getInnerNum()).isEqualTo(99);
-        
+
         // Deep copy with configurer
         Outer copy2 = ConfigManager.deepCopy(original, new YamlSnakeYamlConfigurer(), Outer.class);
         assertThat(copy2.getOuterField()).isEqualTo("modified");
@@ -223,7 +223,7 @@ class CrossFormatTest {
     void testCrossFormat_TypeConversionsDuringOperations_WorkCorrectly() throws Exception {
         Config1 source = ConfigManager.create(Config1.class);
         source.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Transform copy - types should be preserved
         Config1 copy = ConfigManager.transformCopy(source, Config1.class);
         assertThat(copy.getIntField()).isEqualTo(42);
@@ -237,13 +237,13 @@ class CrossFormatTest {
     void testCrossFormat_EmptyAndNullValues_PreservedCorrectly() throws Exception {
         EmptyConfig source = ConfigManager.create(EmptyConfig.class);
         source.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Transform copy
         EmptyConfig copy1 = ConfigManager.transformCopy(source, EmptyConfig.class);
         assertThat(copy1.getNullString()).isNull();
         assertThat(copy1.getEmptyString()).isEmpty();
         assertThat(copy1.getEmptyMap()).isEmpty();
-        
+
         // Deep copy
         EmptyConfig copy2 = ConfigManager.deepCopy(source, new YamlSnakeYamlConfigurer(), EmptyConfig.class);
         assertThat(copy2.getNullString()).isNull();
@@ -268,12 +268,12 @@ class CrossFormatTest {
         TestConfig2 source = ConfigManager.create(TestConfig2.class);
         source.setField1("modified");
         source.setField2(999);
-        
+
         // Create target and load from source
         TestConfig2 target = ConfigManager.create(TestConfig2.class);
         target.withConfigurer(new YamlSnakeYamlConfigurer());
         target.load(source);
-        
+
         // Verify data copied
         assertThat(target.getField1()).isEqualTo("modified");
         assertThat(target.getField2()).isEqualTo(999);

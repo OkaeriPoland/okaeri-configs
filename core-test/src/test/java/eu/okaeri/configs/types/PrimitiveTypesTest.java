@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for primitive types and their wrappers.
- * 
+ * <p>
  * Scenarios tested:
  * - Save/load cycle maintains values for all primitive types
  * - Primitive ↔ Wrapper conversion works correctly
@@ -28,18 +28,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("boolean-test.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setBoolValue(false);
         config.setBoolWrapper(true);
-        
+
         // Act - save and reload
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.isBoolValue()).isFalse();
         assertThat(loaded.getBoolWrapper()).isTrue();
@@ -50,18 +50,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("byte-test.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setByteValue((byte) 100);
         config.setByteWrapper((byte) -50);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getByteValue()).isEqualTo((byte) 100);
         assertThat(loaded.getByteWrapper()).isEqualTo((byte) -50);
@@ -72,18 +72,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("byte-edge.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setByteValue(Byte.MAX_VALUE); // 127
         config.setByteWrapper(Byte.MIN_VALUE); // -128
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getByteValue()).isEqualTo(Byte.MAX_VALUE);
         assertThat(loaded.getByteWrapper()).isEqualTo(Byte.MIN_VALUE);
@@ -94,18 +94,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("char-test.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setCharValue('X');
         config.setCharWrapper('€');
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getCharValue()).isEqualTo('X');
         assertThat(loaded.getCharWrapper()).isEqualTo('€');
@@ -116,18 +116,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("double-test.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setDoubleValue(3.141592653589793);
         config.setDoubleWrapper(-2.718281828459045);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getDoubleValue()).isEqualTo(3.141592653589793);
         assertThat(loaded.getDoubleWrapper()).isEqualTo(-2.718281828459045);
@@ -138,18 +138,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("float-test.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setFloatValue(1.234f);
         config.setFloatWrapper(-5.678f);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getFloatValue()).isEqualTo(1.234f);
         assertThat(loaded.getFloatWrapper()).isEqualTo(-5.678f);
@@ -160,18 +160,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("int-test.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setIntValue(999999);
         config.setIntWrapper(-123456);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getIntValue()).isEqualTo(999999);
         assertThat(loaded.getIntWrapper()).isEqualTo(-123456);
@@ -182,18 +182,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("int-edge.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setIntValue(Integer.MAX_VALUE);
         config.setIntWrapper(Integer.MIN_VALUE);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getIntValue()).isEqualTo(Integer.MAX_VALUE);
         assertThat(loaded.getIntWrapper()).isEqualTo(Integer.MIN_VALUE);
@@ -204,18 +204,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("long-test.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setLongValue(9876543210L);
         config.setLongWrapper(-1234567890L);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getLongValue()).isEqualTo(9876543210L);
         assertThat(loaded.getLongWrapper()).isEqualTo(-1234567890L);
@@ -226,18 +226,18 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("short-test.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         config.setShortValue((short) 30000);
         config.setShortWrapper((short) -15000);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.getShortValue()).isEqualTo((short) 30000);
         assertThat(loaded.getShortWrapper()).isEqualTo((short) -15000);
@@ -248,10 +248,10 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("all-primitives.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
-        
+
         // Set all primitive values
         config.setBoolValue(false);
         config.setByteValue((byte) 99);
@@ -261,7 +261,7 @@ class PrimitiveTypesTest {
         config.setIntValue(777777);
         config.setLongValue(999999999L);
         config.setShortValue((short) 12345);
-        
+
         // Set all wrapper values
         config.setBoolWrapper(true);
         config.setByteWrapper((byte) -99);
@@ -271,13 +271,13 @@ class PrimitiveTypesTest {
         config.setIntWrapper(-777777);
         config.setLongWrapper(-999999999L);
         config.setShortWrapper((short) -12345);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert primitives
         assertThat(loaded.isBoolValue()).isFalse();
         assertThat(loaded.getByteValue()).isEqualTo((byte) 99);
@@ -287,7 +287,7 @@ class PrimitiveTypesTest {
         assertThat(loaded.getIntValue()).isEqualTo(777777);
         assertThat(loaded.getLongValue()).isEqualTo(999999999L);
         assertThat(loaded.getShortValue()).isEqualTo((short) 12345);
-        
+
         // Assert wrappers
         assertThat(loaded.getBoolWrapper()).isTrue();
         assertThat(loaded.getByteWrapper()).isEqualTo((byte) -99);
@@ -304,7 +304,7 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("string-conversion.yml");
-        
+
         // Create YAML with string values
         String yaml = """
             boolValue: true
@@ -325,12 +325,12 @@ class PrimitiveTypesTest {
             shortWrapper: 555
             """;
         Files.writeString(tempFile, yaml);
-        
+
         // Act
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert - strings should be converted to numbers
         assertThat(loaded.getByteValue()).isEqualTo((byte) 123);
         assertThat(loaded.getDoubleValue()).isEqualTo(3.14159);
@@ -345,15 +345,15 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("defaults.yml");
-        
+
         // Create empty YAML
         Files.writeString(tempFile, "");
-        
+
         // Act
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert - defaults from PrimitivesTestConfig should be present
         assertThat(loaded.isBoolValue()).isTrue();
         assertThat(loaded.getByteValue()).isEqualTo((byte) 127);
@@ -370,10 +370,10 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("zeros.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
-        
+
         config.setBoolValue(false);
         config.setByteValue((byte) 0);
         config.setCharValue('A'); // NOTE: SnakeYAML serializes '\0' as byte array, use non-null char
@@ -382,13 +382,13 @@ class PrimitiveTypesTest {
         config.setIntValue(0);
         config.setLongValue(0L);
         config.setShortValue((short) 0);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert
         assertThat(loaded.isBoolValue()).isFalse();
         assertThat(loaded.getByteValue()).isEqualTo((byte) 0);
@@ -405,10 +405,10 @@ class PrimitiveTypesTest {
         // Arrange
         Path tempDir = TestUtils.createTempTestDir();
         Path tempFile = tempDir.resolve("nulls.yml");
-        
+
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
-        
+
         config.setBoolWrapper(null);
         config.setByteWrapper(null);
         config.setCharWrapper(null);
@@ -417,13 +417,13 @@ class PrimitiveTypesTest {
         config.setIntWrapper(null);
         config.setLongWrapper(null);
         config.setShortWrapper(null);
-        
+
         // Act
         config.save();
         PrimitivesTestConfig loaded = ConfigManager.create(PrimitivesTestConfig.class);
         loaded.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
         loaded.load();
-        
+
         // Assert - all wrappers should be null
         assertThat(loaded.getBoolWrapper()).isNull();
         assertThat(loaded.getByteWrapper()).isNull();

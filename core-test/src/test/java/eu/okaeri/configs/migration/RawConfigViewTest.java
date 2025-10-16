@@ -222,7 +222,7 @@ class RawConfigViewTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Add a dynamic (undeclared) key to test removal
         view.set("dynamicKey", "dynamic value");
 
@@ -240,7 +240,7 @@ class RawConfigViewTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Add a dynamic nested key to test removal
         view.set("dynamic.nested.key", "nested value");
 

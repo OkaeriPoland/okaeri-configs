@@ -47,7 +47,7 @@ class SerializationDataTest {
 
         assertThat(map).containsEntry("key", "value");
         assertThatThrownBy(() -> map.put("newKey", "newValue"))
-                .isInstanceOf(UnsupportedOperationException.class);
+            .isInstanceOf(UnsupportedOperationException.class);
     }
 
     // === SET VALUE TESTS ===
@@ -407,7 +407,7 @@ class SerializationDataTest {
         this.data.add("name", "TestConfig");
         this.data.add("version", 1);
         this.data.addCollection("items", Arrays.asList("a", "b", "c"), String.class);
-        
+
         Map<String, Integer> numbersMap = new LinkedHashMap<>();
         numbersMap.put("x", 10);
         numbersMap.put("y", 20);
@@ -419,7 +419,7 @@ class SerializationDataTest {
         assertThat(map).containsEntry("version", 1);
         assertThat(map).containsKey("items");
         assertThat(map).containsKey("numbers");
-        
+
         // Verify the numbers map was added correctly
         @SuppressWarnings("unchecked")
         Map<String, Integer> addedNumbers = (Map<String, Integer>) map.get("numbers");

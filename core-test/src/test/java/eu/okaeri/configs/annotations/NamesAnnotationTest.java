@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for @Names annotation.
- * 
+ * <p>
  * Verifies:
  * - IDENTITY strategy (no change)
  * - SNAKE_CASE strategy (camelCase → camel_Case with default NameModifier.NONE)
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Combined strategy + modifier
  * - @CustomKey overrides @Names strategy
  * - Names annotation inheritance from enclosing class
- * 
+ * <p>
  * Note: @Names is deprecated. Without an explicit modifier, the regex transformations
  * preserve original capitalization (e.g., myFieldName → my_Field_Name, not my_field_name).
  * This is documented as "buggy behavior" but is the expected result of NameModifier.NONE.
@@ -93,7 +93,7 @@ class NamesAnnotationTest {
     @Names(strategy = NameStrategy.SNAKE_CASE)
     public static class CustomKeyOverrideConfig extends OkaeriConfig {
         private String normalField = "value1";
-        
+
         @CustomKey("custom-key")
         private String overriddenField = "value2";
     }
@@ -103,7 +103,7 @@ class NamesAnnotationTest {
     @Names(strategy = NameStrategy.HYPHEN_CASE)
     public static class OuterConfig extends OkaeriConfig {
         private String outerField = "outer";
-        
+
         @Data
         @EqualsAndHashCode(callSuper = false)
         public static class InnerConfig extends OkaeriConfig {
@@ -133,7 +133,7 @@ class NamesAnnotationTest {
 
         // When
         ConfigDeclaration declaration = config.getDeclaration();
-        
+
         // Then - With NameModifier.NONE (default), capitals are preserved
         // myFieldName -> my_Field_Name (add TO_LOWER_CASE modifier for all lowercase)
         assertThat(declaration.getField("my_Field_Name").isPresent()).isTrue();
@@ -148,7 +148,7 @@ class NamesAnnotationTest {
 
         // When
         ConfigDeclaration declaration = config.getDeclaration();
-        
+
         // Then - With NameModifier.NONE (default), capitals are preserved
         // myFieldName -> my-Field-Name (add TO_LOWER_CASE modifier for all lowercase)
         assertThat(declaration.getField("my-Field-Name").isPresent()).isTrue();
@@ -219,7 +219,7 @@ class NamesAnnotationTest {
 
         // When
         ConfigDeclaration declaration = config.getDeclaration();
-        
+
         // Then
         // normalField should be transformed by SNAKE_CASE (preserves capitals with NONE modifier)
         assertThat(declaration.getField("normal_Field").isPresent()).isTrue();
@@ -236,7 +236,7 @@ class NamesAnnotationTest {
 
         // When
         ConfigDeclaration declaration = config.getDeclaration();
-        
+
         // Then - Inner class should inherit HYPHEN_CASE from outer class (preserves capitals)
         assertThat(declaration.getField("inner-Field").isPresent()).isTrue();
     }
@@ -271,7 +271,7 @@ class NamesAnnotationTest {
 
         // Then
         assertThat(declaration.getNameStrategy()).isNull();
-        
+
         // Field should use original name
         FieldDeclaration field = declaration.getField("myField").orElse(null);
         assertThat(field).isNotNull();

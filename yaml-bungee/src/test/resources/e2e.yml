@@ -66,6 +66,13 @@ stringSet:
 enumSet:
 - FIRST
 - SECOND
+# Nested collection - list of lists
+nestedListOfLists:
+- - a
+  - b
+- - c
+  - d
+  - e
 # Simple string-to-string map
 simpleMap:
   key1: value1
@@ -83,6 +90,10 @@ nestedMap:
 enumKeyMap:
   FIRST: first value
   SECOND: second value
+# Map with enum values
+enumValueMap:
+  a: FIRST
+  b: THIRD
 # Simple enum
 singleEnum: THIRD
 # List of enums
@@ -169,6 +180,13 @@ nestedMegaConfig:
   enumSet:
   - FIRST
   - SECOND
+  # Nested collection - list of lists
+  nestedListOfLists:
+  - - a
+    - b
+  - - c
+    - d
+    - e
   # Simple string-to-string map
   simpleMap:
     key1: value1
@@ -186,6 +204,10 @@ nestedMegaConfig:
   enumKeyMap:
     FIRST: first value
     SECOND: second value
+  # Map with enum values
+  enumValueMap:
+    a: FIRST
+    b: THIRD
   # Simple enum
   singleEnum: THIRD
   # List of enums
@@ -212,6 +234,22 @@ nestedMegaConfig:
   customObj:
     name: test
     id: 999
+  # List of serializable objects
+  serializableList:
+  - name: item1
+    id: 1
+  - name: item2
+    id: 2
+  - name: item3
+    id: 3
+  # Map of serializable objects
+  serializableMap:
+    obj1:
+      name: first
+      id: 100
+    obj2:
+      name: second
+      id: 200
   # Field with custom key
   custom-key-field: custom value
   # Field backed by environment variable
@@ -222,10 +260,30 @@ nestedMegaConfig:
   emptyList: []
   # Empty map
   emptyMap: {}
+  # Field with repeating comments
+  # This tests multiple @Comment annotations
+  # on the same field
+  repeatingCommentField: test value
 # Serializable custom object
 customObj:
   name: test
   id: 999
+# List of serializable objects
+serializableList:
+- name: item1
+  id: 1
+- name: item2
+  id: 2
+- name: item3
+  id: 3
+# Map of serializable objects
+serializableMap:
+  obj1:
+    name: first
+    id: 100
+  obj2:
+    name: second
+    id: 200
 # Field with custom key
 custom-key-field: custom value
 # Field backed by environment variable
@@ -234,3 +292,7 @@ variableField: default
 emptyList: []
 # Empty map
 emptyMap: {}
+# Field with repeating comments
+# This tests multiple @Comment annotations
+# on the same field
+repeatingCommentField: test value

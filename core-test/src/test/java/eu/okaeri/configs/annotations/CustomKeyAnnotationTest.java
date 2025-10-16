@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for @CustomKey annotation.
- * 
+ * <p>
  * Verifies:
  * - Field with custom key name
  * - Custom key is used in serialization
@@ -30,7 +30,7 @@ class CustomKeyAnnotationTest {
     public static class SimpleCustomKeyConfig extends OkaeriConfig {
         @CustomKey("custom-field-name")
         private String myField = "value1";
-        
+
         private String normalField = "value2";
     }
 
@@ -39,10 +39,10 @@ class CustomKeyAnnotationTest {
     public static class MultipleCustomKeysConfig extends OkaeriConfig {
         @CustomKey("first-custom")
         private String field1 = "value1";
-        
+
         @CustomKey("second-custom")
         private String field2 = "value2";
-        
+
         @CustomKey("third-custom")
         private int field3 = 42;
     }
@@ -59,10 +59,10 @@ class CustomKeyAnnotationTest {
     public static class NestedCustomKeyConfig extends OkaeriConfig {
         @CustomKey("outer-field")
         private String outerField = "outer";
-        
+
         @CustomKey("nested-config")
         private SubConfig subConfig = new SubConfig();
-        
+
         @Data
         @EqualsAndHashCode(callSuper = false)
         public static class SubConfig extends OkaeriConfig {

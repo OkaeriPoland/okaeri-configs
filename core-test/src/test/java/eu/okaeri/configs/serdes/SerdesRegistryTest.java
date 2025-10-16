@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for SerdesRegistry - registration and querying of serializers and transformers.
@@ -44,10 +44,10 @@ class SerdesRegistryTest {
 
         // Verify transformer is registered
         assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
-                .isTrue();
+            .isTrue();
         assertThat(this.registry.getTransformer(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
-                .isNotNull()
-                .isSameAs(transformer);
+            .isNotNull()
+            .isSameAs(transformer);
     }
 
     @Test
@@ -74,9 +74,9 @@ class SerdesRegistryTest {
 
         // Verify both directions are registered
         assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
-                .isTrue();
+            .isTrue();
         assertThat(this.registry.canTransform(GenericsDeclaration.of(Integer.class), GenericsDeclaration.of(String.class)))
-                .isTrue();
+            .isTrue();
     }
 
     @Test
@@ -98,14 +98,14 @@ class SerdesRegistryTest {
 
         // Verify both directions are registered
         assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
-                .isTrue();
+            .isTrue();
         assertThat(this.registry.canTransform(GenericsDeclaration.of(Integer.class), GenericsDeclaration.of(String.class)))
-                .isTrue();
+            .isTrue();
 
         // Verify reverse transformer returns toString() value
         ObjectTransformer reverseTransformer = this.registry.getTransformer(
-                GenericsDeclaration.of(Integer.class),
-                GenericsDeclaration.of(String.class)
+            GenericsDeclaration.of(Integer.class),
+            GenericsDeclaration.of(String.class)
         );
         assertThat(reverseTransformer).isNotNull();
     }
@@ -117,11 +117,11 @@ class SerdesRegistryTest {
 
         // Verify some transformers are registered
         assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
-                .isTrue();
+            .isTrue();
         assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Boolean.class)))
-                .isTrue();
+            .isTrue();
         assertThat(this.registry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Double.class)))
-                .isTrue();
+            .isTrue();
     }
 
     // === SERIALIZER REGISTRATION TESTS ===
@@ -207,8 +207,8 @@ class SerdesRegistryTest {
         this.registry.register(new StandardSerdes());
 
         ObjectTransformer transformer = this.registry.getTransformer(
-                GenericsDeclaration.of(String.class),
-                GenericsDeclaration.of(Integer.class)
+            GenericsDeclaration.of(String.class),
+            GenericsDeclaration.of(Integer.class)
         );
 
         assertThat(transformer).isNotNull();
@@ -221,8 +221,8 @@ class SerdesRegistryTest {
         this.registry.register(new StandardSerdes());
 
         ObjectTransformer transformer = this.registry.getTransformer(
-                GenericsDeclaration.of(String.class),
-                GenericsDeclaration.of(Void.class)  // No transformer for String → Void
+            GenericsDeclaration.of(String.class),
+            GenericsDeclaration.of(Void.class)  // No transformer for String → Void
         );
 
         assertThat(transformer).isNull();
@@ -237,7 +237,7 @@ class SerdesRegistryTest {
         // StandardSerdes registers String → Integer, Boolean, Double, Long, etc.
         assertThat(transformers).isNotEmpty();
         assertThat(transformers).allSatisfy(transformer ->
-                assertThat(transformer.getPair().getFrom()).isEqualTo(GenericsDeclaration.of(String.class))
+            assertThat(transformer.getPair().getFrom()).isEqualTo(GenericsDeclaration.of(String.class))
         );
     }
 
@@ -250,7 +250,7 @@ class SerdesRegistryTest {
         // StandardSerdes registers Integer → String, Boolean → String, etc.
         assertThat(transformers).isNotEmpty();
         assertThat(transformers).allSatisfy(transformer ->
-                assertThat(transformer.getPair().getTo()).isEqualTo(GenericsDeclaration.of(String.class))
+            assertThat(transformer.getPair().getTo()).isEqualTo(GenericsDeclaration.of(String.class))
         );
     }
 
@@ -259,8 +259,8 @@ class SerdesRegistryTest {
         this.registry.register(new StandardSerdes());
 
         boolean canTransform = this.registry.canTransform(
-                GenericsDeclaration.of(String.class),
-                GenericsDeclaration.of(Integer.class)
+            GenericsDeclaration.of(String.class),
+            GenericsDeclaration.of(Integer.class)
         );
 
         assertThat(canTransform).isTrue();
@@ -271,8 +271,8 @@ class SerdesRegistryTest {
         this.registry.register(new StandardSerdes());
 
         boolean canTransform = this.registry.canTransform(
-                GenericsDeclaration.of(String.class),
-                GenericsDeclaration.of(Void.class)
+            GenericsDeclaration.of(String.class),
+            GenericsDeclaration.of(Void.class)
         );
 
         assertThat(canTransform).isFalse();
@@ -335,6 +335,6 @@ class SerdesRegistryTest {
 
         // Verify transformers are copied
         assertThat(newRegistry.canTransform(GenericsDeclaration.of(String.class), GenericsDeclaration.of(Integer.class)))
-                .isTrue();
+            .isTrue();
     }
 }

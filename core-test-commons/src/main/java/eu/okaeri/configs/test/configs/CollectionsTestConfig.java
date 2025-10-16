@@ -4,7 +4,8 @@ import eu.okaeri.configs.OkaeriConfig;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Test config for collection types (List, Set).
@@ -24,7 +25,7 @@ public class CollectionsTestConfig extends OkaeriConfig {
 
     // Nested collections
     private List<List<String>> nestedList = List.of(
-            List.of("a", "b"),
-            List.of("c", "d")
+        List.of("a", "b"),
+        List.of("c", "d")
     );
 }

@@ -82,8 +82,8 @@ class ConfigSerializableTest {
     public static class SerializableConfig extends OkaeriConfig {
         private SimpleSerializable single = new SimpleSerializable("default", 42);
         private List<SimpleSerializable> list = Arrays.asList(
-                new SimpleSerializable("first", 1),
-                new SimpleSerializable("second", 2)
+            new SimpleSerializable("first", 1),
+            new SimpleSerializable("second", 2)
         );
         private Map<String, SimpleSerializable> map = new LinkedHashMap<String, SimpleSerializable>() {{
             this.put("key1", new SimpleSerializable("value1", 10));
@@ -166,13 +166,13 @@ class ConfigSerializableTest {
 
         NestedSerializable obj = new NestedSerializable("outer", new SimpleSerializable("inner", 999));
         Object simplifiedObj = configurer.simplify(obj, GenericsDeclaration.of(NestedSerializable.class), context, true);
-        
+
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) simplifiedObj;
 
         assertThat(map).containsKey("id");
         assertThat(map).containsKey("inner");
-        
+
         @SuppressWarnings("unchecked")
         Map<String, Object> innerMap = (Map<String, Object>) map.get("inner");
         assertThat(innerMap).containsEntry("name", "inner");
@@ -185,7 +185,7 @@ class ConfigSerializableTest {
     void testConfigSerializable_InConfig_SingleField_WorksCorrectly() throws Exception {
         SerializableConfig config = new SerializableConfig();
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         config.setSingle(new SimpleSerializable("custom", 777));
 
         String yaml = config.saveToString();
@@ -269,8 +269,8 @@ class ConfigSerializableTest {
         loaded.withConfigurer(new YamlSnakeYamlConfigurer());
 
         assertThatThrownBy(() -> loaded.load(yaml))
-                .hasRootCauseInstanceOf(NoSuchMethodException.class)
-                .hasStackTraceContaining("deserialize");
+            .hasRootCauseInstanceOf(NoSuchMethodException.class)
+            .hasStackTraceContaining("deserialize");
     }
 
     // === SERIALIZER PRECEDENCE TESTS ===
@@ -327,7 +327,7 @@ class ConfigSerializableTest {
         YamlSnakeYamlConfigurer configurer2 = new YamlSnakeYamlConfigurer();
         configurer2.getRegistry().register(new CustomOverrideSerializer());
         config2.withConfigurer(configurer2);
-        
+
         String yaml2 = config2.saveToString();
         assertThat(yaml2).contains("from-custom-serializer");
         assertThat(yaml2).doesNotContain("from-configserializable");

@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for @Variable annotation.
- * 
+ * <p>
  * Verifies:
  * - Load from system property
  * - Load from environment variable
@@ -48,7 +48,7 @@ class VariableAnnotationTest {
     public static class SimpleVariableConfig extends OkaeriConfig {
         @Variable("TEST_VAR")
         private String variableField = "default value";
-        
+
         private String normalField = "normal value";
     }
 
@@ -64,10 +64,10 @@ class VariableAnnotationTest {
     public static class MultipleVariablesConfig extends OkaeriConfig {
         @Variable("TEST_VAR_1")
         private String var1 = "default1";
-        
+
         @Variable("TEST_VAR_2")
         private String var2 = "default2";
-        
+
         private String normalField = "normal";
     }
 
@@ -76,7 +76,7 @@ class VariableAnnotationTest {
     public static class VariableModeConfig extends OkaeriConfig {
         @Variable(value = "RUNTIME_VAR", mode = VariableMode.RUNTIME)
         private String runtimeVar = "runtime default";
-        
+
         @Variable(value = "WRITE_VAR", mode = VariableMode.WRITE)
         private String writeVar = "write default";
     }
@@ -148,7 +148,7 @@ class VariableAnnotationTest {
     void testVariable_SystemPropertyPrecedence_OverEnvVar() {
         // Given - Set both system property and assume PATH env var exists
         System.setProperty("PATH", "system property wins");
-        
+
         try {
             // When
             PrecedenceConfig config = ConfigManager.create(PrecedenceConfig.class);
@@ -292,7 +292,7 @@ class VariableAnnotationTest {
     public static class SubconfigWithVariable extends OkaeriConfig {
         @Variable("NESTED_VAR")
         private String nestedVar = "nested default";
-        
+
         private String normalNestedField = "normal nested";
     }
 
@@ -300,7 +300,7 @@ class VariableAnnotationTest {
     @EqualsAndHashCode(callSuper = false)
     public static class ConfigWithNestedVariable extends OkaeriConfig {
         private String topLevelField = "top level";
-        
+
         private SubconfigWithVariable nested = new SubconfigWithVariable();
     }
 
@@ -318,7 +318,7 @@ class VariableAnnotationTest {
         assertThat(config.getNested().getNestedVar()).isEqualTo("from system in nested");
         assertThat(config.getNested().getNormalNestedField()).isEqualTo("normal nested");
         assertThat(config.getTopLevelField()).isEqualTo("top level");
-        
+
         // Cleanup
         System.clearProperty("NESTED_VAR");
     }
@@ -341,10 +341,10 @@ class VariableAnnotationTest {
     @NoArgsConstructor
     public static class SerializableWithVariable implements Serializable {
         private static final long serialVersionUID = 1L;
-        
+
         @Variable("SERIALIZABLE_VAR")
         private String serializableVar = "serializable default";
-        
+
         private String normalSerializableField = "normal serializable";
     }
 
@@ -352,7 +352,7 @@ class VariableAnnotationTest {
     @EqualsAndHashCode(callSuper = false)
     public static class ConfigWithSerializableVariable extends OkaeriConfig {
         private String topLevelField = "top level";
-        
+
         private SerializableWithVariable serializable = new SerializableWithVariable();
     }
 
@@ -369,7 +369,7 @@ class VariableAnnotationTest {
         // Then - Variable in serializable is loaded
         assertThat(config.getSerializable().getSerializableVar()).isEqualTo("from system in serializable");
         assertThat(config.getSerializable().getNormalSerializableField()).isEqualTo("normal serializable");
-        
+
         // Cleanup
         System.clearProperty("SERIALIZABLE_VAR");
     }
@@ -399,7 +399,7 @@ class VariableAnnotationTest {
     public static class Level1Subconfig extends OkaeriConfig {
         @Variable("LEVEL1_VAR")
         private String level1Var = "level1 default";
-        
+
         private Level2Subconfig level2 = new Level2Subconfig();
     }
 
@@ -408,7 +408,7 @@ class VariableAnnotationTest {
     public static class DeepNestedVariableConfig extends OkaeriConfig {
         @Variable("ROOT_VAR")
         private String rootVar = "root default";
-        
+
         private Level1Subconfig level1 = new Level1Subconfig();
     }
 
@@ -418,7 +418,7 @@ class VariableAnnotationTest {
         System.setProperty("ROOT_VAR", "root from system");
         System.setProperty("LEVEL1_VAR", "level1 from system");
         System.setProperty("LEVEL2_VAR", "level2 from system");
-        
+
         DeepNestedVariableConfig config = ConfigManager.create(DeepNestedVariableConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
 
@@ -429,7 +429,7 @@ class VariableAnnotationTest {
         assertThat(config.getRootVar()).isEqualTo("root from system");
         assertThat(config.getLevel1().getLevel1Var()).isEqualTo("level1 from system");
         assertThat(config.getLevel1().getLevel2().getLevel2Var()).isEqualTo("level2 from system");
-        
+
         // Cleanup
         System.clearProperty("ROOT_VAR");
         System.clearProperty("LEVEL1_VAR");
@@ -441,7 +441,7 @@ class VariableAnnotationTest {
     public static class MixedNestedConfig extends OkaeriConfig {
         @Variable("TOP_VAR")
         private String topVar = "top default";
-        
+
         private SubconfigWithVariable okaeriNested = new SubconfigWithVariable();
         private SerializableWithVariable serializableNested = new SerializableWithVariable();
     }
@@ -452,7 +452,7 @@ class VariableAnnotationTest {
         System.setProperty("TOP_VAR", "top from system");
         System.setProperty("NESTED_VAR", "okaeri nested from system");
         System.setProperty("SERIALIZABLE_VAR", "serializable nested from system");
-        
+
         MixedNestedConfig config = ConfigManager.create(MixedNestedConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
 
@@ -463,7 +463,7 @@ class VariableAnnotationTest {
         assertThat(config.getTopVar()).isEqualTo("top from system");
         assertThat(config.getOkaeriNested().getNestedVar()).isEqualTo("okaeri nested from system");
         assertThat(config.getSerializableNested().getSerializableVar()).isEqualTo("serializable nested from system");
-        
+
         // Cleanup
         System.clearProperty("TOP_VAR");
         System.clearProperty("NESTED_VAR");
@@ -475,7 +475,7 @@ class VariableAnnotationTest {
     public static class SelfRefVariableConfig extends OkaeriConfig {
         @Variable("SELF_REF_VAR")
         private String varField = "default";
-        
+
         private String normalField = "normal";
         private SelfRefVariableConfig child = null;
     }
@@ -486,7 +486,7 @@ class VariableAnnotationTest {
      */
     @Test
     void testVariable_SelfReferencingConfig_DoesNotInfiniteLoop() {
-       
+
         // Given - Create self-referencing config
         System.setProperty("SELF_REF_VAR", "from system");
         SelfRefVariableConfig config = ConfigManager.create(SelfRefVariableConfig.class);
@@ -498,7 +498,7 @@ class VariableAnnotationTest {
         // Then - Variable is loaded
         assertThat(config.getVarField()).isEqualTo("from system");
         assertThat(config.getNormalField()).isEqualTo("normal");
-        
+
         // Cleanup
         System.clearProperty("SELF_REF_VAR");
     }

@@ -32,7 +32,7 @@ class ConfigManagerTest {
     void testCreateUnsafe_WithNullClass_ThrowsException() {
         // When/Then: Creating unsafe config with null class should throw
         assertThatThrownBy(() -> ConfigManager.createUnsafe(null))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -130,7 +130,7 @@ class ConfigManagerTest {
     void testTransformCopy_WithNullSource_ThrowsException() {
         // When/Then: Transforming null source should throw
         assertThatThrownBy(() -> ConfigManager.transformCopy(null, PrimitivesTestConfig.class))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -141,7 +141,7 @@ class ConfigManagerTest {
 
         // When/Then: Transforming to null class should throw
         assertThatThrownBy(() -> ConfigManager.transformCopy(source, null))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -186,7 +186,7 @@ class ConfigManagerTest {
         PrimitivesTestConfig source = ConfigManager.create(PrimitivesTestConfig.class);
         YamlSnakeYamlConfigurer originalConfigurer = new YamlSnakeYamlConfigurer();
         source.withConfigurer(originalConfigurer);
-        
+
         // Register a dummy serializer
         DummySerializer dummySerializer = new DummySerializer();
         originalConfigurer.getRegistry().register(dummySerializer);
@@ -205,7 +205,7 @@ class ConfigManagerTest {
     void testDeepCopy_WithNullSource_ThrowsException() {
         // When/Then: Deep copying null source should throw
         assertThatThrownBy(() -> ConfigManager.deepCopy(null, new YamlSnakeYamlConfigurer(), PrimitivesTestConfig.class))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -216,7 +216,7 @@ class ConfigManagerTest {
 
         // When/Then: Deep copying with null configurer should throw
         assertThatThrownBy(() -> ConfigManager.deepCopy(source, null, PrimitivesTestConfig.class))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -227,7 +227,7 @@ class ConfigManagerTest {
 
         // When/Then: Deep copying to null class should throw
         assertThatThrownBy(() -> ConfigManager.deepCopy(source, new YamlSnakeYamlConfigurer(), null))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
     }
 
     // === Test Config Classes ===

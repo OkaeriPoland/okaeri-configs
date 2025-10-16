@@ -4,7 +4,9 @@ import eu.okaeri.configs.OkaeriConfig;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Test config for enum types.
@@ -22,12 +24,12 @@ public class EnumsTestConfig extends OkaeriConfig {
     private Set<TestEnum> enumSet = Set.of(TestEnum.FIRST, TestEnum.SECOND);
 
     private Map<TestEnum, String> enumKeyMap = Map.of(
-            TestEnum.FIRST, "first value",
-            TestEnum.SECOND, "second value"
+        TestEnum.FIRST, "first value",
+        TestEnum.SECOND, "second value"
     );
 
     private Map<String, TestEnum> enumValueMap = Map.of(
-            "a", TestEnum.FIRST,
-            "b", TestEnum.THIRD
+        "a", TestEnum.FIRST,
+        "b", TestEnum.THIRD
     );
 }

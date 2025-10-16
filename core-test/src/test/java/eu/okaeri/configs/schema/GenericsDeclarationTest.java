@@ -6,11 +6,11 @@ import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for GenericsDeclaration - comprehensive type information and generic parameter handling.
@@ -227,11 +227,11 @@ class GenericsDeclarationTest {
 
         // Then
         assertThat(declaration.getType()).isEqualTo(Map.class);
-        
+
         // Map key type
         GenericsDeclaration keyType = declaration.getSubtypeAtOrNull(0);
         assertThat(keyType.getType()).isEqualTo(String.class);
-        
+
         // Map value type (List<Integer>)
         GenericsDeclaration valueType = declaration.getSubtypeAtOrNull(1);
         assertThat(valueType.getType()).isEqualTo(List.class);

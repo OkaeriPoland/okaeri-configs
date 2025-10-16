@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for type transformations and conversions.
- * 
+ * <p>
  * Validates:
  * - String → Integer conversion
  * - String → Boolean conversion
@@ -49,10 +49,10 @@ class TypeTransformationsTest {
         // Create config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Set string value to int field (should transform)
         config.set("intValue", "42");
-        
+
         // Verify conversion
         assertThat(config.getIntValue()).isEqualTo(42);
     }
@@ -64,12 +64,12 @@ class TypeTransformationsTest {
         map.put("intValue", 0);
         map.put("stringValue", "");
         map.put("boolValue", "true");  // String instead of boolean
-        
+
         // Load config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.load(map);
-        
+
         // Verify conversion
         assertThat(config.isBoolValue()).isTrue();
     }
@@ -81,12 +81,12 @@ class TypeTransformationsTest {
         map.put("intValue", 0);
         map.put("stringValue", 12345);  // Integer instead of String
         map.put("boolValue", false);
-        
+
         // Load config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.load(map);
-        
+
         // Verify conversion
         assertThat(config.getStringValue()).isEqualTo("12345");
     }
@@ -104,10 +104,10 @@ class TypeTransformationsTest {
         // Create config
         NumericConversionConfig config = ConfigManager.create(NumericConversionConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Set integer value to long field
         config.set("longValue", 999);
-        
+
         // Verify conversion
         assertThat(config.getLongValue()).isEqualTo(999L);
     }
@@ -117,10 +117,10 @@ class TypeTransformationsTest {
         // Create config
         NumericConversionConfig config = ConfigManager.create(NumericConversionConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Set long value to int field
         config.set("intValue", 123L);
-        
+
         // Verify conversion
         assertThat(config.getIntValue()).isEqualTo(123);
     }
@@ -130,10 +130,10 @@ class TypeTransformationsTest {
         // Create config
         NumericConversionConfig config = ConfigManager.create(NumericConversionConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Set integer value to double field
         config.set("doubleValue", 42);
-        
+
         // Verify conversion
         assertThat(config.getDoubleValue()).isEqualTo(42.0);
     }
@@ -155,12 +155,12 @@ class TypeTransformationsTest {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("enumValue", "SECOND");
         map.put("stringValue", "");
-        
+
         // Load config
         EnumConfig config = ConfigManager.create(EnumConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.load(map);
-        
+
         // Verify conversion
         assertThat(config.getEnumValue()).isEqualTo(TestEnum.SECOND);
     }
@@ -171,12 +171,12 @@ class TypeTransformationsTest {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("enumValue", "third");  // lowercase
         map.put("stringValue", "");
-        
+
         // Load config
         EnumConfig config = ConfigManager.create(EnumConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.load(map);
-        
+
         // Verify conversion (should work with case-insensitive fallback)
         assertThat(config.getEnumValue()).isEqualTo(TestEnum.THIRD);
     }
@@ -187,16 +187,16 @@ class TypeTransformationsTest {
         EnumConfig config = ConfigManager.create(EnumConfig.class);
         config.setEnumValue(TestEnum.SECOND);
         config.setStringValue("test");
-        
+
         // Save to file
         Path configFile = tempDir.resolve("enum-config.yml");
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.save();
-        
+
         // Convert to map
         Map<String, Object> map = config.asMap(new YamlSnakeYamlConfigurer(), false);
-        
+
         // Verify enum is saved as string
         assertThat(map.get("enumValue")).isInstanceOf(String.class);
         assertThat(map.get("enumValue")).isEqualTo("SECOND");
@@ -207,10 +207,10 @@ class TypeTransformationsTest {
         // Create config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Set primitive int (should auto-box to Integer internally)
         config.setIntValue(42);
-        
+
         // Get as object (should return Integer)
         Object value = config.get("intValue");
         assertThat(value).isInstanceOf(Integer.class);
@@ -222,10 +222,10 @@ class TypeTransformationsTest {
         // Create config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Set Integer object (should auto-unbox to primitive int)
         config.set("intValue", Integer.valueOf(99));
-        
+
         // Verify primitive field is set
         assertThat(config.getIntValue()).isEqualTo(99);
     }
@@ -244,12 +244,12 @@ class TypeTransformationsTest {
         public GenericsPair<String, CustomObject> getPair() {
             return this.genericsPair(String.class, CustomObject.class);
         }
-        
+
         @Override
         public CustomObject leftToRight(String data, SerdesContext serdesContext) {
             return new CustomObject(data);
         }
-        
+
         @Override
         public String rightToLeft(CustomObject data, SerdesContext serdesContext) {
             return data.getValue();
@@ -267,16 +267,16 @@ class TypeTransformationsTest {
         // Create configurer with custom transformer
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
         configurer.getRegistry().register(new CustomObjectTransformer());
-        
+
         // Create map with string value
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("customObj", "test-value");
-        
+
         // Load config
         CustomObjectConfig config = ConfigManager.create(CustomObjectConfig.class);
         config.withConfigurer(configurer);
         config.load(map);
-        
+
         // Verify conversion using custom transformer
         assertThat(config.getCustomObj()).isNotNull();
         assertThat(config.getCustomObj().getValue()).isEqualTo("test-value");
@@ -287,17 +287,17 @@ class TypeTransformationsTest {
         // Create configurer with custom transformer
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
         configurer.getRegistry().register(new CustomObjectTransformer());
-        
+
         // Create config with custom object
         CustomObjectConfig config = ConfigManager.create(CustomObjectConfig.class);
         config.setCustomObj(new CustomObject("original-value"));
         config.withConfigurer(configurer);
-        
+
         // Save to file
         Path configFile = tempDir.resolve("custom-object.yml");
         config.withBindFile(configFile);
         config.save();
-        
+
         // Load in new config
         CustomObjectConfig loaded = ConfigManager.create(CustomObjectConfig.class);
         YamlSnakeYamlConfigurer loadConfigurer = new YamlSnakeYamlConfigurer();
@@ -305,7 +305,7 @@ class TypeTransformationsTest {
         loaded.withConfigurer(loadConfigurer);
         loaded.withBindFile(configFile);
         loaded.load();
-        
+
         // Verify round-trip
         assertThat(loaded.getCustomObj()).isNotNull();
         assertThat(loaded.getCustomObj().getValue()).isEqualTo("original-value");
@@ -316,7 +316,7 @@ class TypeTransformationsTest {
         // Create config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Attempt to set invalid string to int field
         assertThatThrownBy(() -> config.set("intValue", "not-a-number"))
             .isInstanceOf(Exception.class);  // NumberFormatException wrapped in transformation exception
@@ -328,11 +328,11 @@ class TypeTransformationsTest {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("enumValue", "INVALID_VALUE");
         map.put("stringValue", "");
-        
+
         // Attempt to load config
         EnumConfig config = ConfigManager.create(EnumConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         assertThatThrownBy(() -> config.load(map))
             .isInstanceOf(Exception.class);  // Enum conversion should fail
     }
@@ -344,12 +344,12 @@ class TypeTransformationsTest {
         map.put("intValue", "123");       // String → int
         map.put("stringValue", "test");   // String → String (no conversion)
         map.put("boolValue", "false");    // String → boolean
-        
+
         // Load config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.load(map);
-        
+
         // Verify all conversions
         assertThat(config.getIntValue()).isEqualTo(123);
         assertThat(config.getStringValue()).isEqualTo("test");
@@ -363,12 +363,12 @@ class TypeTransformationsTest {
         map.put("intValue", "0");         // String "0" → int 0
         map.put("stringValue", null);     // null value
         map.put("boolValue", "false");    // String "false" → boolean false
-        
+
         // Load config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.load(map);
-        
+
         // Verify conversions
         assertThat(config.getIntValue()).isEqualTo(0);
         assertThat(config.getStringValue()).isNull();
@@ -380,10 +380,10 @@ class TypeTransformationsTest {
         // Create config
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        
+
         // Set negative number as string
         config.set("intValue", "-999");
-        
+
         // Verify conversion
         assertThat(config.getIntValue()).isEqualTo(-999);
     }

@@ -81,7 +81,7 @@ class ConfigMigrationDslTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Add dynamic key to test deletion
         view.set("dynamicKey", "value");
 
@@ -113,7 +113,7 @@ class ConfigMigrationDslTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Add dynamic key to test move
         view.set("dynamicFrom", "old value");
 
@@ -242,7 +242,7 @@ class ConfigMigrationDslTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Add dynamic key for testing move
         view.set("dynamicFrom", "old value");
 
@@ -562,7 +562,7 @@ class ConfigMigrationDslTest {
         TestConfig config = ConfigManager.create(TestConfig.class);
         config.withConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
-        
+
         // Add dynamic key
         view.set("dynamicSource", "old value");
 
