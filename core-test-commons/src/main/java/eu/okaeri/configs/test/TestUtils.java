@@ -135,7 +135,7 @@ public class TestUtils {
     /**
      * Reads file content as String.
      */
-    public static String readFileAsString(File file) throws IOException {
+    public static String readFile(File file) throws IOException {
         StringBuilder content = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -146,10 +146,11 @@ public class TestUtils {
         return content.toString();
     }
 
+
     /**
      * Writes string content to file.
      */
-    public static void writeStringToFile(File file, String content) throws IOException {
+    public static void writeFile(File file, String content) throws IOException {
         file.getParentFile().mkdirs();
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(content);
