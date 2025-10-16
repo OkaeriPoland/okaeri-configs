@@ -118,22 +118,23 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        Map<String, Object> cleanedMap = this.removeNullsRecursively(this.map);
-        JSONObject object = new JSONObject(cleanedMap);
-        ConfigPostprocessor.of(object.toJSONString()).write(outputStream);
+        Map<Object, Object> cleanedMap = this.removeNullsRecursively(this.map);
+        String jsonString = JSONObject.toJSONString(cleanedMap);
+        ConfigPostprocessor.of(jsonString).write(outputStream);
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> removeNullsRecursively(Map<String, Object> map) {
-        Map<String, Object> result = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
+    private Map<Object, Object> removeNullsRecursively(Map<?, ?> map) {
+        Map<Object, Object> result = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
             Object value = entry.getValue();
             if (value == null) {
                 continue;
             }
             if (value instanceof Map) {
-                result.put(entry.getKey(), this.removeNullsRecursively((Map<String, Object>) value));
+                result.put(entry.getKey(), this.removeNullsRecursively((Map<?, ?>) value));
             } else if (value instanceof List) {
                 result.put(entry.getKey(), this.removeNullsFromList((List<?>) value));
             } else {
@@ -151,7 +152,7 @@ public class JsonSimpleConfigurer extends Configurer {
                 continue;
             }
             if (item instanceof Map) {
-                result.add(this.removeNullsRecursively((Map<String, Object>) item));
+                result.add(this.removeNullsRecursively((Map<?, ?>) item));
             } else {
                 result.add(item);
             }
