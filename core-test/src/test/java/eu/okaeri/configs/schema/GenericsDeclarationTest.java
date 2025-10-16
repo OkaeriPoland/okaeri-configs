@@ -48,54 +48,54 @@ class GenericsDeclarationTest {
 
     @Test
     void testOf_FromClass_CreatesDeclaration() {
-        // when
+        // When
         GenericsDeclaration declaration = GenericsDeclaration.of(String.class);
 
-        // then
+        // Then
         assertThat(declaration).isNotNull();
         assertThat(declaration.getType()).isEqualTo(String.class);
     }
 
     @Test
     void testOf_FromObject_CreatesDeclaration() {
-        // when
+        // When
         GenericsDeclaration declaration = GenericsDeclaration.of("test string");
 
-        // then
+        // Then
         assertThat(declaration).isNotNull();
         assertThat(declaration.getType()).isEqualTo(String.class);
     }
 
     @Test
     void testOf_FromGenericsDeclaration_ReturnsSame() {
-        // given
+        // Given
         GenericsDeclaration original = GenericsDeclaration.of(String.class);
 
-        // when
+        // When
         GenericsDeclaration result = GenericsDeclaration.of(original);
 
-        // then
+        // Then
         assertThat(result).isSameAs(original);
     }
 
     @Test
     void testOf_FromNull_ReturnsNull() {
-        // when
+        // When
         GenericsDeclaration declaration = GenericsDeclaration.of((Object) null);
 
-        // then
+        // Then
         assertThat(declaration).isNull();
     }
 
     @Test
     void testOf_WithSubtypes_CreatesDeclarationWithGenerics() {
-        // when
+        // When
         GenericsDeclaration declaration = GenericsDeclaration.of(
             List.class,
             Arrays.asList(String.class)
         );
 
-        // then
+        // Then
         assertThat(declaration.getType()).isEqualTo(List.class);
         assertThat(declaration.hasSubtypes()).isTrue();
         assertThat(declaration.getSubtypeAtOrNull(0).getType()).isEqualTo(String.class);
@@ -105,30 +105,30 @@ class GenericsDeclarationTest {
 
     @Test
     void testIsPrimitive_PrimitiveTypes_ReturnsTrue() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("primitiveInt");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // then
+        // Then
         assertThat(declaration.isPrimitive()).isTrue();
     }
 
     @Test
     void testIsPrimitive_WrapperTypes_ReturnsFalse() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("wrapperInt");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // then
+        // Then
         assertThat(declaration.isPrimitive()).isFalse();
     }
 
     @Test
     void testIsPrimitiveWrapper_WrapperTypes_ReturnsTrue() {
-        // given
+        // Given
         GenericsDeclaration declaration = GenericsDeclaration.of(Integer.class);
 
-        // then
+        // Then
         assertThat(declaration.isPrimitiveWrapper()).isTrue();
     }
 
@@ -146,48 +146,48 @@ class GenericsDeclarationTest {
 
     @Test
     void testIsPrimitiveWrapper_NonWrapper_ReturnsFalse() {
-        // given
+        // Given
         GenericsDeclaration declaration = GenericsDeclaration.of(String.class);
 
-        // then
+        // Then
         assertThat(declaration.isPrimitiveWrapper()).isFalse();
     }
 
     @Test
     void testIsEnum_EnumType_ReturnsTrue() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("enumField");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // then
+        // Then
         assertThat(declaration.isEnum()).isTrue();
     }
 
     @Test
     void testIsEnum_NonEnumType_ReturnsFalse() {
-        // given
+        // Given
         GenericsDeclaration declaration = GenericsDeclaration.of(String.class);
 
-        // then
+        // Then
         assertThat(declaration.isEnum()).isFalse();
     }
 
     @Test
     void testIsConfig_OkaeriConfigSubclass_ReturnsTrue() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("subConfig");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // then
+        // Then
         assertThat(declaration.isConfig()).isTrue();
     }
 
     @Test
     void testIsConfig_NonConfig_ReturnsFalse() {
-        // given
+        // Given
         GenericsDeclaration declaration = GenericsDeclaration.of(String.class);
 
-        // then
+        // Then
         assertThat(declaration.isConfig()).isFalse();
     }
 
@@ -195,11 +195,11 @@ class GenericsDeclarationTest {
 
     @Test
     void testGenericParameters_SimpleList_CapturesTypeParameter() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("stringList");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // then
+        // Then
         assertThat(declaration.getType()).isEqualTo(List.class);
         assertThat(declaration.hasSubtypes()).isTrue();
         assertThat(declaration.getSubtypeAtOrNull(0)).isNotNull();
@@ -208,11 +208,11 @@ class GenericsDeclarationTest {
 
     @Test
     void testGenericParameters_SimpleMap_CapturesBothTypeParameters() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("stringIntMap");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // then
+        // Then
         assertThat(declaration.getType()).isEqualTo(Map.class);
         assertThat(declaration.hasSubtypes()).isTrue();
         assertThat(declaration.getSubtypeAtOrNull(0).getType()).isEqualTo(String.class);
@@ -221,11 +221,11 @@ class GenericsDeclarationTest {
 
     @Test
     void testGenericParameters_NestedGenerics_CapturesNestedStructure() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("nestedGenericMap");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // then
+        // Then
         assertThat(declaration.getType()).isEqualTo(Map.class);
         
         // Map key type
@@ -240,84 +240,84 @@ class GenericsDeclarationTest {
 
     @Test
     void testGetSubtypeAtOrNull_ValidIndex_ReturnsSubtype() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("stringList");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // when
+        // When
         GenericsDeclaration subtype = declaration.getSubtypeAtOrNull(0);
 
-        // then
+        // Then
         assertThat(subtype).isNotNull();
         assertThat(subtype.getType()).isEqualTo(String.class);
     }
 
     @Test
     void testGetSubtypeAtOrNull_InvalidIndex_ReturnsNull() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("stringList");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // when
+        // When
         GenericsDeclaration subtype = declaration.getSubtypeAtOrNull(99);
 
-        // then
+        // Then
         assertThat(subtype).isNull();
     }
 
     @Test
     void testGetSubtypeAtOrNull_NoSubtypes_ReturnsNull() {
-        // given
+        // Given
         GenericsDeclaration declaration = GenericsDeclaration.of(String.class);
 
-        // when
+        // When
         GenericsDeclaration subtype = declaration.getSubtypeAtOrNull(0);
 
-        // then
+        // Then
         assertThat(subtype).isNull();
     }
 
     @Test
     void testGetSubtypeAtOrThrow_ValidIndex_ReturnsSubtype() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("stringList");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // when
+        // When
         GenericsDeclaration subtype = declaration.getSubtypeAtOrThrow(0);
 
-        // then
+        // Then
         assertThat(subtype).isNotNull();
         assertThat(subtype.getType()).isEqualTo(String.class);
     }
 
     @Test
     void testGetSubtypeAtOrThrow_InvalidIndex_ThrowsException() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("stringList");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // when/then
+        // When/then
         assertThatThrownBy(() -> declaration.getSubtypeAtOrThrow(99))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void testHasSubtypes_WithGenerics_ReturnsTrue() throws Exception {
-        // given
+        // Given
         Field field = GenericTypesConfig.class.getDeclaredField("stringList");
         GenericsDeclaration declaration = GenericsDeclaration.of(field.getGenericType());
 
-        // then
+        // Then
         assertThat(declaration.hasSubtypes()).isTrue();
     }
 
     @Test
     void testHasSubtypes_WithoutGenerics_ReturnsFalse() {
-        // given
+        // Given
         GenericsDeclaration declaration = GenericsDeclaration.of(String.class);
 
-        // then
+        // Then
         assertThat(declaration.hasSubtypes()).isFalse();
     }
 
@@ -337,13 +337,13 @@ class GenericsDeclarationTest {
 
     @Test
     void testWrap_NonPrimitive_ReturnsNull() {
-        // given
+        // Given
         GenericsDeclaration declaration = GenericsDeclaration.of(String.class);
 
-        // when
+        // When
         Class<?> wrapped = declaration.wrap();
 
-        // then
+        // Then
         assertThat(wrapped).isNull();
     }
 
@@ -351,7 +351,7 @@ class GenericsDeclarationTest {
 
     @Test
     void testDoBoxTypesMatch_PrimitiveAndWrapper_ReturnsTrue() {
-        // when/then
+        // When/then
         assertThat(GenericsDeclaration.doBoxTypesMatch(int.class, Integer.class)).isTrue();
         assertThat(GenericsDeclaration.doBoxTypesMatch(Integer.class, int.class)).isTrue();
     }
@@ -369,20 +369,20 @@ class GenericsDeclarationTest {
 
     @Test
     void testDoBoxTypesMatch_DifferentTypes_ReturnsFalse() {
-        // when/then
+        // When/then
         assertThat(GenericsDeclaration.doBoxTypesMatch(int.class, Long.class)).isFalse();
         assertThat(GenericsDeclaration.doBoxTypesMatch(String.class, Integer.class)).isFalse();
     }
 
     @Test
     void testIsUnboxedCompatibleWithBoxed_MatchingPair_ReturnsTrue() {
-        // when/then
+        // When/then
         assertThat(GenericsDeclaration.isUnboxedCompatibleWithBoxed(int.class, Integer.class)).isTrue();
     }
 
     @Test
     void testIsUnboxedCompatibleWithBoxed_MismatchedPair_ReturnsFalse() {
-        // when/then
+        // When/then
         assertThat(GenericsDeclaration.isUnboxedCompatibleWithBoxed(int.class, Long.class)).isFalse();
     }
 }

@@ -39,15 +39,15 @@ class FieldDeclarationTest {
 
     @Test
     void testOf_CreatesFieldDeclaration() throws Exception {
-        // given
+        // Given
         SimpleConfig config = new SimpleConfig();
         ConfigDeclaration configDecl = ConfigDeclaration.of(config);
         Field javaField = SimpleConfig.class.getDeclaredField("stringField");
 
-        // when
+        // When
         FieldDeclaration fieldDecl = FieldDeclaration.of(configDecl, javaField, config);
 
-        // then
+        // Then
         assertThat(fieldDecl).isNotNull();
         assertThat(fieldDecl.getName()).isEqualTo("stringField");
         assertThat(fieldDecl.getField()).isEqualTo(javaField);
@@ -56,30 +56,30 @@ class FieldDeclarationTest {
 
     @Test
     void testOf_WithoutInstance_NullObject() throws Exception {
-        // given
+        // Given
         ConfigDeclaration configDecl = ConfigDeclaration.of(SimpleConfig.class);
         Field javaField = SimpleConfig.class.getDeclaredField("stringField");
 
-        // when
+        // When
         FieldDeclaration fieldDecl = FieldDeclaration.of(configDecl, javaField, null);
 
-        // then
+        // Then
         assertThat(fieldDecl.getObject()).isNull();
         assertThat(fieldDecl.getStartingValue()).isNull();
     }
 
     @Test
     void testCaching_SharesTemplate() throws Exception {
-        // given
+        // Given
         SimpleConfig config = new SimpleConfig();
         ConfigDeclaration configDecl = ConfigDeclaration.of(config);
         Field javaField = SimpleConfig.class.getDeclaredField("stringField");
 
-        // when
+        // When
         FieldDeclaration fieldDecl1 = FieldDeclaration.of(configDecl, javaField, config);
         FieldDeclaration fieldDecl2 = FieldDeclaration.of(configDecl, javaField, config);
 
-        // then - not same instance, but template data matches
+        // Then - not same instance, but template data matches
         assertThat(fieldDecl1).isNotSameAs(fieldDecl2);
         assertThat(fieldDecl1.getName()).isEqualTo(fieldDecl2.getName());
         assertThat(fieldDecl1.getType()).isEqualTo(fieldDecl2.getType());
@@ -87,99 +87,99 @@ class FieldDeclarationTest {
 
     @Test
     void testGetValue_ReturnsCurrentFieldValue() throws Exception {
-        // given
+        // Given
         SimpleConfig config = new SimpleConfig();
         config.setStringField("modified");
         ConfigDeclaration configDecl = ConfigDeclaration.of(config);
         FieldDeclaration fieldDecl = configDecl.getField("stringField").get();
 
-        // when
+        // When
         Object value = fieldDecl.getValue();
 
-        // then
+        // Then
         assertThat(value).isEqualTo("modified");
     }
 
     @Test
     void testUpdateValue_SetsFieldValue() throws Exception {
-        // given
+        // Given
         SimpleConfig config = new SimpleConfig();
         ConfigDeclaration configDecl = ConfigDeclaration.of(config);
         FieldDeclaration fieldDecl = configDecl.getField("stringField").get();
 
-        // when
+        // When
         fieldDecl.updateValue("updated");
 
-        // then
+        // Then
         assertThat(config.getStringField()).isEqualTo("updated");
     }
 
     @Test
     void testGetAnnotation_ExistingAnnotation_ReturnsOptional() {
-        // given
+        // Given
         AnnotatedConfig config = new AnnotatedConfig();
         ConfigDeclaration configDecl = ConfigDeclaration.of(config);
         FieldDeclaration fieldDecl = configDecl.getField("commentedField").get();
 
-        // when
+        // When
         Optional<Comment> annotation = fieldDecl.getAnnotation(Comment.class);
 
-        // then
+        // Then
         assertThat(annotation).isPresent();
     }
 
     @Test
     void testGetAnnotation_NonExistingAnnotation_ReturnsEmpty() {
-        // given
+        // Given
         SimpleConfig config = new SimpleConfig();
         ConfigDeclaration configDecl = ConfigDeclaration.of(config);
         FieldDeclaration fieldDecl = configDecl.getField("stringField").get();
 
-        // when
+        // When
         Optional<Comment> annotation = fieldDecl.getAnnotation(Comment.class);
 
-        // then
+        // Then
         assertThat(annotation).isEmpty();
     }
 
     @Test
     void testReadStaticAnnotations_ReturnsAttachments() {
-        // given
+        // Given
         AnnotatedConfig config = new AnnotatedConfig();
         ConfigDeclaration configDecl = ConfigDeclaration.of(config);
         FieldDeclaration fieldDecl = configDecl.getField("commentedField").get();
         InMemoryConfigurer configurer = new InMemoryConfigurer();
 
-        // when
+        // When
         SerdesContextAttachments attachments = fieldDecl.readStaticAnnotations(configurer);
 
-        // then
+        // Then
         assertThat(attachments).isNotNull();
     }
 
     @Test
     void testStartingValue_WithInstance_CapturesValue() {
-        // given
+        // Given
         SimpleConfig config = new SimpleConfig();
         config.setStringField("custom starting value");
         ConfigDeclaration configDecl = ConfigDeclaration.of(config);
 
-        // when
+        // When
         FieldDeclaration fieldDecl = configDecl.getField("stringField").get();
 
-        // then
+        // Then
         assertThat(fieldDecl.getStartingValue()).isEqualTo("custom starting value");
     }
 
     @Test
     void testStartingValue_WithoutInstance_ReturnsNull() {
-        // given
+        // Given
         ConfigDeclaration configDecl = ConfigDeclaration.of(SimpleConfig.class);
 
-        // when
+        // When
         FieldDeclaration fieldDecl = configDecl.getField("stringField").get();
 
-        // then
+        // Then
         assertThat(fieldDecl.getStartingValue()).isNull();
     }
 
