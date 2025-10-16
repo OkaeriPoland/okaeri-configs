@@ -26,18 +26,155 @@ class EdgeCasesTest {
     @TempDir
     Path tempDir;
 
+    // Test config classes
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class EmptyConfig extends OkaeriConfig {
+        // No fields
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class ExcludedOnlyConfig extends OkaeriConfig {
+        @Exclude
+        private String excluded1 = "value1";
+        
+        @Exclude
+        private int excluded2 = 42;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class L5 extends OkaeriConfig {
+        private String level5 = "L5";
+    }
+    
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class L4 extends OkaeriConfig {
+        private String level4 = "L4";
+        private L5 l5 = new L5();
+    }
+    
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class L3 extends OkaeriConfig {
+        private String level3 = "L3";
+        private L4 l4 = new L4();
+    }
+    
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class L2 extends OkaeriConfig {
+        private String level2 = "L2";
+        private L3 l3 = new L3();
+    }
+    
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class L1 extends OkaeriConfig {
+        private String level1 = "L1";
+        private L2 l2 = new L2();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class LargeConfig extends OkaeriConfig {
+        private List<Integer> largeList = new ArrayList<>();
+        private Map<String, String> largeMap = new LinkedHashMap<>();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class UnicodeConfig extends OkaeriConfig {
+        private String japanese = "こんにちは世界 🌍";
+        private String russian = "Привет мир! 🎉";
+        private String emoji = "🚀 🎨 🔥 ⭐ 💎";
+        private Map<String, String> unicodeMap = new LinkedHashMap<>(Map.of(
+            "日本語", "にほんご",
+            "Русский", "русский",
+            "emoji_key", "🎯"
+        ));
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class SpecialCharsConfig extends OkaeriConfig {
+        private String quotes = "This has \"double quotes\" and 'single quotes'";
+        private String backslashes = "Path: C:\\Users\\Test\\file.txt";
+        private String mixed = "Special: !@#$%^&*()_+-=[]{}|;':<>?,./";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class NullConfig extends OkaeriConfig {
+        private String nullString = null;
+        private Integer nullInteger = null;
+        private List<String> nullList = null;
+        private Map<String, String> nullMap = null;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class SimpleConfig extends OkaeriConfig {
+        private String field = "value";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class SimpleConfig2 extends OkaeriConfig {
+        private String field1 = "default";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class ExtremeConfig extends OkaeriConfig {
+        private byte maxByte = Byte.MAX_VALUE;
+        private byte minByte = Byte.MIN_VALUE;
+        private short maxShort = Short.MAX_VALUE;
+        private short minShort = Short.MIN_VALUE;
+        private int maxInt = Integer.MAX_VALUE;
+        private int minInt = Integer.MIN_VALUE;
+        private long maxLong = Long.MAX_VALUE;
+        private long minLong = Long.MIN_VALUE;
+        private float maxFloat = Float.MAX_VALUE;
+        private float minFloat = Float.MIN_VALUE;
+        private double maxDouble = Double.MAX_VALUE;
+        private double minDouble = Double.MIN_VALUE;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class EmptyNullConfig extends OkaeriConfig {
+        private String emptyString = "";
+        private String nullString = null;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class ZeroConfig extends OkaeriConfig {
+        private int zeroInt = 0;
+        private long zeroLong = 0L;
+        private double zeroDouble = 0.0;
+        private float zeroFloat = 0.0f;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class BooleanConfig extends OkaeriConfig {
+        private boolean primitiveTrue = true;
+        private boolean primitiveFalse = false;
+        private Boolean wrapperTrue = Boolean.TRUE;
+        private Boolean wrapperFalse = Boolean.FALSE;
+        private Boolean wrapperNull = null;
+    }
+
     /**
      * Empty config (no fields)
      */
     @Test
     void testEdgeCase_EmptyConfig_HandlesCorrectly() throws Exception {
         File configFile = tempDir.resolve("empty.yml").toFile();
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class EmptyConfig extends OkaeriConfig {
-            // No fields
-        }
         
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -63,16 +200,6 @@ class EdgeCasesTest {
     void testEdgeCase_OnlyExcludedFields_HandlesCorrectly() throws Exception {
         File configFile = tempDir.resolve("excluded.yml").toFile();
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class ExcludedOnlyConfig extends OkaeriConfig {
-            @Exclude
-            private String excluded1 = "value1";
-            
-            @Exclude
-            private int excluded2 = 42;
-        }
-        
         ExcludedOnlyConfig config = ConfigManager.create(ExcludedOnlyConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
@@ -92,40 +219,6 @@ class EdgeCasesTest {
     @Test
     void testEdgeCase_VeryDeepNesting_HandlesCorrectly() throws Exception {
         File configFile = tempDir.resolve("deep.yml").toFile();
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class L static class L5 extends extends OkaeriConfig {
-            private String level5 = "L5";
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class L static class L4 extends extends OkaeriConfig {
-            private String level4 = "L4";
-            private L5 l5 = new L5();
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class L static class L3 extends extends OkaeriConfig {
-            private String level3 = "L3";
-            private L4 l4 = new L4();
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class L static class L2 extends extends OkaeriConfig {
-            private String level2 = "L2";
-            private L3 l3 = new L3();
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class L static class L1 extends extends OkaeriConfig {
-            private String level1 = "L1";
-            private L2 l2 = new L2();
-        }
         
         L1 config = ConfigManager.create(L1.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -151,13 +244,6 @@ class EdgeCasesTest {
     @Test
     void testEdgeCase_VeryLargeCollections_HandlesCorrectly() throws Exception {
         File configFile = tempDir.resolve("large.yml").toFile();
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class LargeConfig extends OkaeriConfig {
-            private List<Integer> largeList = new ArrayList<>();
-            private Map<String, String> largeMap = new LinkedHashMap<>();
-        }
         
         LargeConfig config = ConfigManager.create(LargeConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -192,19 +278,6 @@ class EdgeCasesTest {
     void testEdgeCase_UnicodeInKeysAndValues_HandlesCorrectly() throws Exception {
         File configFile = tempDir.resolve("unicode.yml").toFile();
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class UnicodeConfig extends OkaeriConfig {
-            private String japanese = "こんにちは世界 🌍";
-            private String russian = "Привет мир! 🎉";
-            private String emoji = "🚀 🎨 🔥 ⭐ 💎";
-            private Map<String, String> unicodeMap = new LinkedHashMap<String, String>() {{
-                put("日本語", "にほんご");
-                put("Русский", "русский");
-                put("emoji_key", "🎯");
-            }};
-        }
-        
         UnicodeConfig config = ConfigManager.create(UnicodeConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
@@ -231,14 +304,6 @@ class EdgeCasesTest {
     void testEdgeCase_SpecialCharactersInStrings_HandlesCorrectly() throws Exception {
         File configFile = tempDir.resolve("special.yml").toFile();
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SpecialCharsConfig extends OkaeriConfig {
-            private String quotes = "This has \"double quotes\" and 'single quotes'";
-            private String backslashes = "Path: C:\\Users\\Test\\file.txt";
-            private String mixed = "Special: !@#$%^&*()_+-=[]{}|;':<>?,./";
-        }
-        
         SpecialCharsConfig config = ConfigManager.create(SpecialCharsConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
@@ -261,15 +326,6 @@ class EdgeCasesTest {
     @Test
     void testEdgeCase_NullHandling_WorksCorrectly() throws Exception {
         File configFile = tempDir.resolve("nulls.yml").toFile();
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class NullConfig extends OkaeriConfig {
-            private String nullString = null;
-            private Integer nullInteger = null;
-            private List<String> nullList = null;
-            private Map<String, String> nullMap = null;
-        }
         
         NullConfig config = ConfigManager.create(NullConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -295,12 +351,6 @@ class EdgeCasesTest {
     void testEdgeCase_LoadNonExistentFile_ThrowsException() throws Exception {
         File nonExistent = tempDir.resolve("does-not-exist.yml").toFile();
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SimpleConfig extends OkaeriConfig {
-            private String field = "value";
-        }
-        
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(nonExistent);
@@ -324,13 +374,7 @@ class EdgeCasesTest {
             """;
         TestUtils.writeFile(malformedFile, malformed);
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SimpleConfig extends OkaeriConfig {
-            private String field1 = "default";
-        }
-        
-        SimpleConfig config = ConfigManager.create(SimpleConfig.class);
+        SimpleConfig2 config = ConfigManager.create(SimpleConfig2.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(malformedFile);
         
@@ -344,23 +388,6 @@ class EdgeCasesTest {
     @Test
     void testEdgeCase_ExtremeNumericValues_HandlesCorrectly() throws Exception {
         File configFile = tempDir.resolve("extreme.yml").toFile();
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class ExtremeConfig extends OkaeriConfig {
-            private byte maxByte = Byte.MAX_VALUE;
-            private byte minByte = Byte.MIN_VALUE;
-            private short maxShort = Short.MAX_VALUE;
-            private short minShort = Short.MIN_VALUE;
-            private int maxInt = Integer.MAX_VALUE;
-            private int minInt = Integer.MIN_VALUE;
-            private long maxLong = Long.MAX_VALUE;
-            private long minLong = Long.MIN_VALUE;
-            private float maxFloat = Float.MAX_VALUE;
-            private float minFloat = Float.MIN_VALUE;
-            private double maxDouble = Double.MAX_VALUE;
-            private double minDouble = Double.MIN_VALUE;
-        }
         
         ExtremeConfig config = ConfigManager.create(ExtremeConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -390,13 +417,6 @@ class EdgeCasesTest {
     void testEdgeCase_EmptyStringVsNull_DistinguishedCorrectly() throws Exception {
         File configFile = tempDir.resolve("empty-vs-null.yml").toFile();
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class EmptyNullConfig extends OkaeriConfig {
-            private String emptyString = "";
-            private String nullString = null;
-        }
-        
         EmptyNullConfig config = ConfigManager.create(EmptyNullConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
@@ -419,15 +439,6 @@ class EdgeCasesTest {
     @Test
     void testEdgeCase_ZeroValues_HandledCorrectly() throws Exception {
         File configFile = tempDir.resolve("zeros.yml").toFile();
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class ZeroConfig extends OkaeriConfig {
-            private int zeroInt = 0;
-            private long zeroLong = 0L;
-            private double zeroDouble = 0.0;
-            private float zeroFloat = 0.0f;
-        }
         
         ZeroConfig config = ConfigManager.create(ZeroConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -452,16 +463,6 @@ class EdgeCasesTest {
     @Test
     void testEdgeCase_BooleanValues_HandledCorrectly() throws Exception {
         File configFile = tempDir.resolve("booleans.yml").toFile();
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class BooleanConfig extends OkaeriConfig {
-            private boolean primitiveTrue = true;
-            private boolean primitiveFalse = false;
-            private Boolean wrapperTrue = Boolean.TRUE;
-            private Boolean wrapperFalse = Boolean.FALSE;
-            private Boolean wrapperNull = null;
-        }
         
         BooleanConfig config = ConfigManager.create(BooleanConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());

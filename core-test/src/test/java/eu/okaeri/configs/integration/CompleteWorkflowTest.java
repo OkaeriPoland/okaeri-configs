@@ -26,6 +26,80 @@ class CompleteWorkflowTest {
     @TempDir
     Path tempDir;
 
+    // Test config classes
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class MigratableConfig extends OkaeriConfig {
+        private String newName = "default";
+        private int newNumber = 0;
+        
+        // Migration to rename fields
+        public ConfigMigration migration() {
+            return (config, view) -> {
+                boolean changed = false;
+                
+                if (view.exists("oldName")) {
+                    view.set("newName", view.get("oldName"));
+                    view.remove("oldName");
+                    changed = true;
+                }
+                
+                if (view.exists("oldNumber")) {
+                    view.set("newNumber", view.get("oldNumber"));
+                    view.remove("oldNumber");
+                    changed = true;
+                }
+                
+                return changed;
+            };
+        }
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class AllTypesConfig extends OkaeriConfig {
+        // Primitives
+        private int intVal = 42;
+        private String stringVal = "test";
+        
+        // Collections
+        private List<String> stringList = Arrays.asList("a", "b", "c");
+        private Set<Integer> intSet = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
+        
+        // Maps
+        private Map<String, String> stringMap = new LinkedHashMap<>(Map.of("k1", "v1"));
+        private Map<Integer, List<String>> complexMap = new LinkedHashMap<>(Map.of(1, Arrays.asList("a", "b")));
+        
+        // Nested
+        private Nested nested = new Nested();
+        
+        @Data
+        @EqualsAndHashCode(callSuper = false)
+        public static class Nested extends OkaeriConfig {
+            private String nestedField = "nested";
+        }
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class Level3 extends OkaeriConfig {
+        private String level3Field = "L3";
+    }
+    
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class Level2 extends OkaeriConfig {
+        private String level2Field = "L2";
+        private Level3 level3 = new Level3();
+    }
+    
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class Level1 extends OkaeriConfig {
+        private String level1Field = "L1";
+        private Level2 level2 = new Level2();
+    }
+
     /**
      * Basic workflow: Create → Save → Load → Verify
      */
@@ -133,35 +207,6 @@ class CompleteWorkflowTest {
             """;
         TestUtils.writeFile(configFile, oldYaml);
         
-        // Define config with migration
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class MigratableConfig extends OkaeriConfig {
-            private String newName = "default";
-            private int newNumber = 0;
-            
-            // Migration to rename fields
-            public ConfigMigration migration() {
-                return (config, view) -> {
-                    boolean changed = false;
-                    
-                    if (view.exists("oldName")) {
-                        view.set("newName", view.get("oldName"));
-                        view.remove("oldName");
-                        changed = true;
-                    }
-                    
-                    if (view.exists("oldNumber")) {
-                        view.set("newNumber", view.get("oldNumber"));
-                        view.remove("oldNumber");
-                        changed = true;
-                    }
-                    
-                    return changed;
-                };
-            }
-        }
-        
         // Load with migration
         MigratableConfig config = ConfigManager.create(MigratableConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -222,36 +267,6 @@ class CompleteWorkflowTest {
     void testWorkflow_AllTypeCombinations_SaveLoadCorrectly() throws Exception {
         File configFile = tempDir.resolve("workflow6.yml").toFile();
         
-        // Create config with all types
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class AllTypesConfig extends OkaeriConfig {
-            // Primitives
-            private int intVal = 42;
-            private String stringVal = "test";
-            
-            // Collections
-            private List<String> stringList = Arrays.asList("a", "b", "c");
-            private Set<Integer> intSet = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
-            
-            // Maps
-            private Map<String, String> stringMap = new LinkedHashMap<String, String>() {{
-                put("k1", "v1");
-            }};
-            private Map<Integer, List<String>> complexMap = new LinkedHashMap<Integer, List<String>>() {{
-                put(1, Arrays.asList("a", "b"));
-            }};
-            
-            // Nested
-            @Data
-            @EqualsAndHashCode(callSuper = false)
-            public static class Nested extends OkaeriConfig {
-                private String nestedField = "nested";
-            }
-            
-            private Nested nested = new Nested();
-        }
-        
         AllTypesConfig config = ConfigManager.create(AllTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
@@ -310,27 +325,6 @@ class CompleteWorkflowTest {
     @Test
     void testWorkflow_NestedConfigHierarchy_SaveLoadCorrectly() throws Exception {
         File configFile = tempDir.resolve("workflow8.yml").toFile();
-        
-        // Create deeply nested config
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class Level3 extends OkaeriConfig {
-            private String level3Field = "L3";
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class Level2 extends OkaeriConfig {
-            private String level2Field = "L2";
-            private Level3 level3 = new Level3();
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class Level1 extends OkaeriConfig {
-            private String level1Field = "L1";
-            private Level2 level2 = new Level2();
-        }
         
         Level1 config = ConfigManager.create(Level1.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());

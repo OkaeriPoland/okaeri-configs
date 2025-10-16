@@ -23,6 +23,38 @@ class OrphanHandlingTest {
     @TempDir
     Path tempDir;
 
+    // Test config classes
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class SimpleConfig extends OkaeriConfig {
+        private String declaredField = "default";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class NestedConfig extends OkaeriConfig {
+        private String nestedField = "default";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class ParentConfig extends OkaeriConfig {
+        private NestedConfig declaredNested = new NestedConfig();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class ConfigV1 extends OkaeriConfig {
+        private String field1 = "value1";
+        private String field2 = "value2";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class ConfigV2 extends OkaeriConfig {
+        private String field1 = "default1";
+    }
+
     /**
      * Load config with extra fields (orphans)
      */
@@ -37,13 +69,6 @@ class OrphanHandlingTest {
             orphanField2: 42
             """;
         TestUtils.writeFile(configFile, yaml);
-        
-        // Define config with only one declared field
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SimpleConfig extends OkaeriConfig {
-            private String declaredField = "default";
-        }
         
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
@@ -72,12 +97,6 @@ class OrphanHandlingTest {
             orphanField: "orphan value"
             """;
         TestUtils.writeFile(configFile, yaml);
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SimpleConfig extends OkaeriConfig {
-            private String declaredField = "default";
-        }
         
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
@@ -112,12 +131,6 @@ class OrphanHandlingTest {
             """;
         TestUtils.writeFile(configFile, yaml);
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SimpleConfig extends OkaeriConfig {
-            private String declaredField = "default";
-        }
-        
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -150,12 +163,6 @@ class OrphanHandlingTest {
             """;
         TestUtils.writeFile(configFile, yaml);
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SimpleConfig extends OkaeriConfig {
-            private String declaredField = "default";
-        }
-        
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -186,12 +193,6 @@ class OrphanHandlingTest {
             orphan2: 42
             """;
         TestUtils.writeFile(configFile, yaml);
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SimpleConfig extends OkaeriConfig {
-            private String declaredField = "default";
-        }
         
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
@@ -239,18 +240,6 @@ class OrphanHandlingTest {
             """;
         TestUtils.writeFile(configFile, yaml);
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class NestedConfig extends OkaeriConfig {
-            private String nestedField = "default";
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class ParentConfig extends OkaeriConfig {
-            private NestedConfig declaredNested = new NestedConfig();
-        }
-        
         // Load
         ParentConfig config = ConfigManager.create(ParentConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -288,18 +277,6 @@ class OrphanHandlingTest {
             """;
         TestUtils.writeFile(configFile, yaml);
         
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class NestedConfig extends OkaeriConfig {
-            private String nestedField = "default";
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class ParentConfig extends OkaeriConfig {
-            private NestedConfig declaredNested = new NestedConfig();
-        }
-        
         // Load
         ParentConfig config = ConfigManager.create(ParentConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -323,25 +300,12 @@ class OrphanHandlingTest {
         File configFile = tempDir.resolve("orphans8.yml").toFile();
         
         // Create config with two fields and save
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class ConfigV1 extends OkaeriConfig {
-            private String field1 = "value1";
-            private String field2 = "value2";
-        }
-        
         ConfigV1 v1 = ConfigManager.create(ConfigV1.class);
         v1.withConfigurer(new YamlSnakeYamlConfigurer());
         v1.withBindFile(configFile);
         v1.save();
         
         // Now use config with only one field (field2 becomes orphan)
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class ConfigV2 extends OkaeriConfig {
-            private String field1 = "default1";
-        }
-        
         ConfigV2 v2 = ConfigManager.create(ConfigV2.class);
         v2.withConfigurer(new YamlSnakeYamlConfigurer());
         v2.withBindFile(configFile);

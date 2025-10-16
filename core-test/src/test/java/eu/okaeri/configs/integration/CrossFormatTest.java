@@ -25,6 +25,54 @@ class CrossFormatTest {
     @TempDir
     Path tempDir;
 
+    // Test config classes
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class TestConfig extends OkaeriConfig {
+        private String stringVal = "test";
+        private int intVal = 42;
+        private double doubleVal = 3.14;
+        private Map<String, String> mapVal = new LinkedHashMap<>(Map.of("k1", "v1", "k2", "v2"));
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class SimpleConfig extends OkaeriConfig {
+        private String field1 = "value1";
+        private int field2 = 123;
+        private Map<String, Integer> field3 = new LinkedHashMap<>(Map.of("a", 1, "b", 2));
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class Inner extends OkaeriConfig {
+        private String innerField = "inner";
+        private int innerNum = 99;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class Outer extends OkaeriConfig {
+        private String outerField = "outer";
+        private Inner nested = new Inner();
+        private Map<String, Inner> nestedMap = new LinkedHashMap<>(Map.of("first", new Inner()));
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class Config1 extends OkaeriConfig {
+        private int intField = 42;
+        private String stringField = "123";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    static class EmptyConfig extends OkaeriConfig {
+        private String nullString = null;
+        private String emptyString = "";
+        private Map<String, String> emptyMap = new LinkedHashMap<>();
+    }
+
     /**
      * transformCopy between different configurers (YAML to InMemory)
      */
@@ -92,19 +140,6 @@ class CrossFormatTest {
     void testCrossFormat_DataIntegrityAcrossOperations_Maintained() throws Exception {
         File file1 = tempDir.resolve("file1.yml").toFile();
         
-        // Create test config with various data types
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class TestConfig extends OkaeriConfig {
-            private String stringVal = "test";
-            private int intVal = 42;
-            private double doubleVal = 3.14;
-            private Map<String, String> mapVal = new LinkedHashMap<String, String>() {{
-                put("k1", "v1");
-                put("k2", "v2");
-            }};
-        }
-        
         // Save to YAML
         TestConfig config1 = ConfigManager.create(TestConfig.class);
         config1.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -137,18 +172,6 @@ class CrossFormatTest {
     void testCrossFormat_ViaMapConversion_PreservesData() throws Exception {
         File sourceFile = tempDir.resolve("source.yml").toFile();
         
-        // Create and save config
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class SimpleConfig extends OkaeriConfig {
-            private String field1 = "value1";
-            private int field2 = 123;
-            private Map<String, Integer> field3 = new LinkedHashMap<String, Integer>() {{
-                put("a", 1);
-                put("b", 2);
-            }};
-        }
-        
         SimpleConfig config1 = ConfigManager.create(SimpleConfig.class);
         config1.withConfigurer(new YamlSnakeYamlConfigurer());
         config1.withBindFile(sourceFile);
@@ -173,24 +196,6 @@ class CrossFormatTest {
      */
     @Test
     void testCrossFormat_ComplexNestedStructures_PreservedInOperations() throws Exception {
-        // Create complex config
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class Inner extends OkaeriConfig {
-            private String innerField = "inner";
-            private int innerNum = 99;
-        }
-        
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class Outer extends OkaeriConfig {
-            private String outerField = "outer";
-            private Inner nested = new Inner();
-            private Map<String, Inner> nestedMap = new LinkedHashMap<String, Inner>() {{
-                put("first", new Inner());
-            }};
-        }
-        
         // Original config
         Outer original = ConfigManager.create(Outer.class);
         original.setOuterField("modified");
@@ -215,13 +220,6 @@ class CrossFormatTest {
      */
     @Test
     void testCrossFormat_TypeConversionsDuringOperations_WorkCorrectly() throws Exception {
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class Config1 extends OkaeriConfig {
-            private int intField = 42;
-            private String stringField = "123";
-        }
-        
         Config1 source = ConfigManager.create(Config1.class);
         
         // Transform copy - types should be preserved
@@ -235,14 +233,6 @@ class CrossFormatTest {
      */
     @Test
     void testCrossFormat_EmptyAndNullValues_PreservedCorrectly() throws Exception {
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        static class EmptyConfig extends OkaeriConfig {
-            private String nullString = null;
-            private String emptyString = "";
-            private Map<String, String> emptyMap = new LinkedHashMap<>();
-        }
-        
         EmptyConfig source = ConfigManager.create(EmptyConfig.class);
         
         // Transform copy
@@ -263,20 +253,22 @@ class CrossFormatTest {
      */
     @Test
     void testCrossFormat_LoadFromAnotherConfig_CopiesData() throws Exception {
+        // Create source config (reusing TestConfig but with different field names)
         @Data
         @EqualsAndHashCode(callSuper = false)
-        static class TestConfig extends OkaeriConfig {
+        class TestConfig2 extends OkaeriConfig {
             private String field1 = "value1";
             private int field2 = 100;
         }
         
         // Create source config
-        TestConfig source = ConfigManager.create(TestConfig.class);
+        // Create source config
+        TestConfig2 source = ConfigManager.create(TestConfig2.class);
         source.setField1("modified");
         source.setField2(999);
         
         // Create target and load from source
-        TestConfig target = ConfigManager.create(TestConfig.class);
+        TestConfig2 target = ConfigManager.create(TestConfig2.class);
         target.withConfigurer(new YamlSnakeYamlConfigurer());
         target.load(source);
         
