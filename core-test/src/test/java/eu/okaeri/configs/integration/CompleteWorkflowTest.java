@@ -29,7 +29,7 @@ class CompleteWorkflowTest {
     // Test config classes
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class MigratableConfig extends OkaeriConfig {
+    public static class MigratableConfig extends OkaeriConfig {
         private String newName = "default";
         private int newNumber = 0;
         
@@ -57,7 +57,7 @@ class CompleteWorkflowTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class AllTypesConfig extends OkaeriConfig {
+    public static class AllTypesConfig extends OkaeriConfig {
         // Primitives
         private int intVal = 42;
         private String stringVal = "test";
@@ -82,20 +82,20 @@ class CompleteWorkflowTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class Level3 extends OkaeriConfig {
+    public static class Level3 extends OkaeriConfig {
         private String level3Field = "L3";
     }
     
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class Level2 extends OkaeriConfig {
+    public static class Level2 extends OkaeriConfig {
         private String level2Field = "L2";
         private Level3 level3 = new Level3();
     }
     
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class Level1 extends OkaeriConfig {
+    public static class Level1 extends OkaeriConfig {
         private String level1Field = "L1";
         private Level2 level2 = new Level2();
     }
@@ -212,6 +212,7 @@ class CompleteWorkflowTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.withBindFile(configFile);
         config.load();
+        config.migrate(config.migration()); // Perform migration after load
         
         // Verify migration worked
         assertThat(config.getNewName()).isEqualTo("Old Value");

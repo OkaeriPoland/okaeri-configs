@@ -28,7 +28,7 @@ class CrossFormatTest {
     // Test config classes
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class TestConfig extends OkaeriConfig {
+    public static class TestConfig extends OkaeriConfig {
         private String stringVal = "test";
         private int intVal = 42;
         private double doubleVal = 3.14;
@@ -37,7 +37,7 @@ class CrossFormatTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class SimpleConfig extends OkaeriConfig {
+    public static class SimpleConfig extends OkaeriConfig {
         private String field1 = "value1";
         private int field2 = 123;
         private Map<String, Integer> field3 = new LinkedHashMap<>(Map.of("a", 1, "b", 2));
@@ -45,14 +45,14 @@ class CrossFormatTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class Inner extends OkaeriConfig {
+    public static class Inner extends OkaeriConfig {
         private String innerField = "inner";
         private int innerNum = 99;
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class Outer extends OkaeriConfig {
+    public static class Outer extends OkaeriConfig {
         private String outerField = "outer";
         private Inner nested = new Inner();
         private Map<String, Inner> nestedMap = new LinkedHashMap<>(Map.of("first", new Inner()));
@@ -60,14 +60,14 @@ class CrossFormatTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class Config1 extends OkaeriConfig {
+    public static class Config1 extends OkaeriConfig {
         private int intField = 42;
         private String stringField = "123";
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class EmptyConfig extends OkaeriConfig {
+    public static class EmptyConfig extends OkaeriConfig {
         private String nullString = null;
         private String emptyString = "";
         private Map<String, String> emptyMap = new LinkedHashMap<>();
@@ -198,6 +198,7 @@ class CrossFormatTest {
     void testCrossFormat_ComplexNestedStructures_PreservedInOperations() throws Exception {
         // Original config
         Outer original = ConfigManager.create(Outer.class);
+        original.withConfigurer(new YamlSnakeYamlConfigurer());
         original.setOuterField("modified");
         original.getNested().setInnerField("modified nested");
         
@@ -208,8 +209,8 @@ class CrossFormatTest {
         assertThat(copy1.getNestedMap()).hasSize(1);
         assertThat(copy1.getNestedMap().get("first").getInnerNum()).isEqualTo(99);
         
-        // Deep copy
-        Outer copy2 = ConfigManager.deepCopy(copy1, new YamlSnakeYamlConfigurer(), Outer.class);
+        // Deep copy with configurer
+        Outer copy2 = ConfigManager.deepCopy(original, new YamlSnakeYamlConfigurer(), Outer.class);
         assertThat(copy2.getOuterField()).isEqualTo("modified");
         assertThat(copy2.getNested().getInnerField()).isEqualTo("modified nested");
         assertThat(copy2.getNestedMap()).hasSize(1);
@@ -221,6 +222,7 @@ class CrossFormatTest {
     @Test
     void testCrossFormat_TypeConversionsDuringOperations_WorkCorrectly() throws Exception {
         Config1 source = ConfigManager.create(Config1.class);
+        source.withConfigurer(new YamlSnakeYamlConfigurer());
         
         // Transform copy - types should be preserved
         Config1 copy = ConfigManager.transformCopy(source, Config1.class);
@@ -234,6 +236,7 @@ class CrossFormatTest {
     @Test
     void testCrossFormat_EmptyAndNullValues_PreservedCorrectly() throws Exception {
         EmptyConfig source = ConfigManager.create(EmptyConfig.class);
+        source.withConfigurer(new YamlSnakeYamlConfigurer());
         
         // Transform copy
         EmptyConfig copy1 = ConfigManager.transformCopy(source, EmptyConfig.class);
@@ -248,20 +251,19 @@ class CrossFormatTest {
         assertThat(copy2.getEmptyMap()).isEmpty();
     }
 
+    // Test config for load-from-config test
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class TestConfig2 extends OkaeriConfig {
+        private String field1 = "value1";
+        private int field2 = 100;
+    }
+
     /**
      * Load from another OkaeriConfig (direct config-to-config)
      */
     @Test
     void testCrossFormat_LoadFromAnotherConfig_CopiesData() throws Exception {
-        // Create source config (reusing TestConfig but with different field names)
-        @Data
-        @EqualsAndHashCode(callSuper = false)
-        class TestConfig2 extends OkaeriConfig {
-            private String field1 = "value1";
-            private int field2 = 100;
-        }
-        
-        // Create source config
         // Create source config
         TestConfig2 source = ConfigManager.create(TestConfig2.class);
         source.setField1("modified");

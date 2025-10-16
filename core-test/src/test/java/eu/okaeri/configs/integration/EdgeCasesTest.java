@@ -29,13 +29,13 @@ class EdgeCasesTest {
     // Test config classes
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class EmptyConfig extends OkaeriConfig {
+    public static class EmptyConfig extends OkaeriConfig {
         // No fields
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class ExcludedOnlyConfig extends OkaeriConfig {
+    public static class ExcludedOnlyConfig extends OkaeriConfig {
         @Exclude
         private String excluded1 = "value1";
         
@@ -45,48 +45,48 @@ class EdgeCasesTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class L5 extends OkaeriConfig {
+    public static class L5 extends OkaeriConfig {
         private String level5 = "L5";
     }
     
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class L4 extends OkaeriConfig {
+    public static class L4 extends OkaeriConfig {
         private String level4 = "L4";
         private L5 l5 = new L5();
     }
     
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class L3 extends OkaeriConfig {
+    public static class L3 extends OkaeriConfig {
         private String level3 = "L3";
         private L4 l4 = new L4();
     }
     
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class L2 extends OkaeriConfig {
+    public static class L2 extends OkaeriConfig {
         private String level2 = "L2";
         private L3 l3 = new L3();
     }
     
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class L1 extends OkaeriConfig {
+    public static class L1 extends OkaeriConfig {
         private String level1 = "L1";
         private L2 l2 = new L2();
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class LargeConfig extends OkaeriConfig {
+    public static class LargeConfig extends OkaeriConfig {
         private List<Integer> largeList = new ArrayList<>();
         private Map<String, String> largeMap = new LinkedHashMap<>();
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class UnicodeConfig extends OkaeriConfig {
+    public static class UnicodeConfig extends OkaeriConfig {
         private String japanese = "こんにちは世界 🌍";
         private String russian = "Привет мир! 🎉";
         private String emoji = "🚀 🎨 🔥 ⭐ 💎";
@@ -99,7 +99,7 @@ class EdgeCasesTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class SpecialCharsConfig extends OkaeriConfig {
+    public static class SpecialCharsConfig extends OkaeriConfig {
         private String quotes = "This has \"double quotes\" and 'single quotes'";
         private String backslashes = "Path: C:\\Users\\Test\\file.txt";
         private String mixed = "Special: !@#$%^&*()_+-=[]{}|;':<>?,./";
@@ -107,7 +107,7 @@ class EdgeCasesTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class NullConfig extends OkaeriConfig {
+    public static class NullConfig extends OkaeriConfig {
         private String nullString = null;
         private Integer nullInteger = null;
         private List<String> nullList = null;
@@ -116,19 +116,19 @@ class EdgeCasesTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class SimpleConfig extends OkaeriConfig {
+    public static class SimpleConfig extends OkaeriConfig {
         private String field = "value";
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class SimpleConfig2 extends OkaeriConfig {
+    public static class SimpleConfig2 extends OkaeriConfig {
         private String field1 = "default";
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class ExtremeConfig extends OkaeriConfig {
+    public static class ExtremeConfig extends OkaeriConfig {
         private byte maxByte = Byte.MAX_VALUE;
         private byte minByte = Byte.MIN_VALUE;
         private short maxShort = Short.MAX_VALUE;
@@ -145,14 +145,14 @@ class EdgeCasesTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class EmptyNullConfig extends OkaeriConfig {
+    public static class EmptyNullConfig extends OkaeriConfig {
         private String emptyString = "";
         private String nullString = null;
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class ZeroConfig extends OkaeriConfig {
+    public static class ZeroConfig extends OkaeriConfig {
         private int zeroInt = 0;
         private long zeroLong = 0L;
         private double zeroDouble = 0.0;
@@ -161,7 +161,7 @@ class EdgeCasesTest {
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class BooleanConfig extends OkaeriConfig {
+    public static class BooleanConfig extends OkaeriConfig {
         private boolean primitiveTrue = true;
         private boolean primitiveFalse = false;
         private Boolean wrapperTrue = Boolean.TRUE;

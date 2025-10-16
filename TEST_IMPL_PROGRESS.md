@@ -109,6 +109,33 @@
 
 ---
 
+### Session 21 - 2025-10-16 14:34 ✅ COMPLETED
+**Focus**: Fix test failures from Session 20 - 6 failures down to 2
+
+**Actions**:
+1. Ran test suite - found 6 failures (615/621 passing)
+2. Fixed CompleteWorkflowTest migration issue:
+   - Changed from `withMigration()` (doesn't exist) to `migrate()` method
+   - Correct API: load() first, then call migrate() with migration instance
+3. Fixed CrossFormatTest issues:
+   - Added `withConfigurer()` to all source configs before transformCopy/deepCopy
+   - Moved TestConfig2 from method-local to class-level static inner class
+   - Fixed NullPointerException by ensuring all configs have configurers
+4. Left 2 tests failing intentionally (library bugs to fix):
+   - **OrphanHandlingTest.testOrphans_RemovalWithNestedConfigs_RemovesAllOrphans** - Nested orphans not removed (library limitation)
+   - **CrossFormatTest.testCrossFormat_ComplexNestedStructures_PreservedInOperations** - transformCopy() doesn't sync field state before copying
+5. Updated user on status - 619/621 tests passing
+
+**Library Bugs Identified**:
+1. **Nested orphan removal**: `withRemoveOrphans(true)` only removes root-level orphans, not orphans inside nested configs
+2. **transformCopy state sync**: `ConfigManager.transformCopy()` should call `update()` internally to ensure latest field values are in configurer before copying
+
+**Results**: 619/621 tests passing. 2 intentional failures documenting library bugs that need fixing.
+
+**Status**: Integration tests complete, 2 library bugs identified for future fix ✅
+
+---
+
 ## 📚 REFERENCE INFORMATION (Static Context)
 
 ### Testing Philosophy
@@ -159,7 +186,7 @@
 - Session 15: 3 files (RawConfigViewTest, ConfigMigrationTest, ConfigMigrationDslTest)
 - Session 16: 3 files (ConfigSerializableTest, SerdesRegistryOrderTest, ObjectSerializer.java, SerdesRegistry.java - interface fix + enhanced API)
 
-### Test Classes Implemented: 36
+### Test Classes Implemented: 40
 - **Lifecycle**: ConfigCreationTest (7), ConfigSaveTest (15), ConfigLoadTest (18), ConfigUpdateTest (12), ConfigGetSetTest (23), ConfigMapConversionTest (13)
 - **Types**: PrimitiveTypesTest (15), BasicTypesTest (13), CollectionTypesTest (14), MapTypesTest (11), EnumTypesTest (8), SubconfigTypesTest (10), SerializableTypesTest (11), TypeTransformationsTest (18)
 - **Annotations**: HeaderAnnotationTest (5), CommentAnnotationTest (7), CustomKeyAnnotationTest (9), VariableAnnotationTest (12), ExcludeAnnotationTest (10), NamesAnnotationTest (11), TargetTypeAnnotationTest (9), IncludeAnnotationTest (7)
@@ -167,12 +194,14 @@
 - **Serdes**: StandardSerdesTest (60), SerdesRegistryTest (17), SerializationDataTest (41), DeserializationDataTest (28), SerdesContextTest (14)
 - **Migration**: RawConfigViewTest (21), ConfigMigrationTest (12), ConfigMigrationDslTest (36)
 - **ConfigSerializable**: ConfigSerializableTest (13), SerdesRegistryOrderTest (24)
+- **Manager**: ConfigManagerTest (17)
+- **Integration**: CompleteWorkflowTest (9), OrphanHandlingTest (8), CrossFormatTest (8), EdgeCasesTest (13)
 
 ### Test Coverage
-- **Total Tests Written**: 575+ (estimated)
-- **Currently Passing**: Unknown (tests not run this session)
-- **Failing**: Unknown
-- **Known Issues**: ObjectSerializer implementations need fixing after interface change
+- **Total Tests Written**: 621
+- **Currently Passing**: 619/621 (99.7%)
+- **Failing**: 2 (intentional - documenting library bugs)
+- **Known Library Bugs**: 2 (nested orphan removal, transformCopy state sync)
 
 ### Library Bugs Fixed
 1. ✅ **Integer → String conversion** - Fixed in Session 11 (SerdesRegistry.java, Configurer.java)
@@ -216,11 +245,15 @@
 - [ ] ConfigManager tests (1 test class) - MOVED TO PHASE 4
 - [ ] Cross-format tests - MOVED TO PHASE 4
 
-### Phase 4: Integration & Polish ⏳ NOT STARTED
-- [ ] Complete workflow integration tests (4 test classes)
-- [ ] Edge case tests
-- [ ] Remaining format implementation tests (6 formats)
-- [ ] CI/CD finalization
+### Phase 4: Integration & Polish ✅ COMPLETED
+- [x] ConfigManager tests (1 test class, 17 tests)
+- [x] Complete workflow integration tests (4 test classes, 38 tests)
+  - [x] CompleteWorkflowTest (9 tests)
+  - [x] OrphanHandlingTest (8 tests)
+  - [x] CrossFormatTest (8 tests)
+  - [x] EdgeCasesTest (13 tests)
+- [ ] Remaining format implementation tests (7 formats) - NEXT PHASE
+- [ ] CI/CD finalization - NEXT PHASE
 
 ### Phase 5: Coverage Review ⏳ NOT STARTED
 - [ ] Identify gaps in feature coverage
@@ -237,8 +270,8 @@
 - **Java Version**: 21
 - **Components**: 9 classes (TestUtils + 8 test configs + MegaConfig)
 
-### core-test ⚠️ IN PROGRESS
-- **Status**: Lifecycle + Type + Annotation + Schema + Serdes + Migration tests implemented
+### core-test ✅ CORE TESTS COMPLETE
+- **Status**: All core functionality tests implemented (619/621 passing)
 - **Implemented Packages**:
   - ✅ `lifecycle/` - 6 test classes, 88 tests
   - ✅ `types/` - 8 test classes, 98 tests
@@ -246,9 +279,9 @@
   - ✅ `schema/` - 3 test classes, 63 tests
   - ✅ `serdes/` - 5 test classes, 160 tests
   - ✅ `migration/` - 3 test classes, 69 tests
-- **Pending Packages**:
-  - `manager/` - 1 test class planned
-  - `integration/` - 4 test classes planned
+  - ✅ `manager/` - 1 test class, 17 tests
+  - ✅ `integration/` - 4 test classes, 38 tests (2 failing intentionally)
+- **Known Issues**: 2 library bugs documented (see LIBRARY_BUGS.md)
 
 ### Format Modules ⏳ NOT STARTED
 - yaml-snakeyaml - planned
@@ -264,25 +297,24 @@
 # 🔥 CURRENT STATUS - READ THIS FIRST! 🔥
 
 ## Session Information
-- **Session Number**: 20
-- **Started**: 2025-10-16 14:18
-- **Completed**: 2025-10-16 14:30
+- **Session Number**: 21
+- **Started**: 2025-10-16 14:34
+- **Completed**: 2025-10-16 14:46
 - **Current Phase**: Phase 4 - Integration Tests
-- **Focus**: Fixed Session 19 test failures - refactored inner classes
+- **Focus**: Fix test failures, identify library bugs
 
 ## Latest Test Results
 - **Total Tests**: 621 written
-- **Passing**: Unknown (tests not run yet)
-- **Failing**: 0 (all fixes applied)
-- **Status**: ✅ READY FOR TESTING
+- **Passing**: 619/621 (99.7%)
+- **Failing**: 2 (intentional - documenting library bugs)
+- **Status**: ✅ CORE TESTS COMPLETE
 
 ## Work Completed This Session
-1. ✅ **Fixed CompleteWorkflowTest.java** - Moved 3 inner classes to static, refactored Map.of()
-2. ✅ **Fixed OrphanHandlingTest.java** - Moved 5 inner classes to static
-3. ✅ **Fixed CrossFormatTest.java** - Moved 6 inner classes to static, refactored Map.of()
-4. ✅ **Fixed EdgeCasesTest.java** - Moved 13 inner classes to static, fixed syntax errors, refactored Map.of()
-5. ✅ **Code modernization** - Refactored all anonymous inner class map initializers to Map.of() patterns
-6. ✅ **Updated TEST_IMPL_PROGRESS.md** - Session 20 entry added
+1. ✅ **Fixed CompleteWorkflowTest** - Corrected migration API usage (migrate() not withMigration())
+2. ✅ **Fixed CrossFormatTest** - Added configurers to source configs, moved TestConfig2 to class level
+3. ✅ **Identified 2 library bugs** - Created detailed bug report document
+4. ✅ **619/621 tests passing** - Only 2 intentional failures remain (documenting bugs)
+5. ✅ **Updated TEST_IMPL_PROGRESS.md** - Session 21 complete, statistics updated
 
 
 ## Resolved Issues (All Sessions)
@@ -300,9 +332,14 @@
 12. ✅ **ObjectSerializer generic bound** - Fixed `? super T` → `?` (Session 16)
 
 ## Next Actions (Priority Order - Work Through This List)
-1. 🎯 **RUN TESTS** - Execute ./run-tests.sh to verify all 621 integration tests pass
-2. ⏳ **Format implementation tests** (Phase 4) - 7 formats planned
+1. 🎯 **Fix library bugs** - See LIBRARY_BUGS.md for detailed analysis and fix proposals
+   - Bug #1: Nested orphan removal
+   - Bug #2: transformCopy state synchronization
+2. ⏳ **Format implementation tests** (Phase 5) - 7 formats planned
 3. ⏳ **CI/CD setup** - GitHub Actions workflow for automated testing
+
+## Active Library Bugs (Blocking 2 Tests)
+See **LIBRARY_BUGS.md** for detailed analysis and proposed fixes.
 
 ## Critical Workflow: Completing Sessions & Managing Context
 
@@ -337,7 +374,7 @@
 
 ---
 
-**Document Version**: 4.0 (Session 20 Complete)  
-**Last Updated**: 2025-10-16 14:30
-**Updated By**: Agent 253 (Session 20)  
-**Status**: Active Development - Phase 4 / Integration Tests - Ready for Testing
+**Document Version**: 5.0 (Session 21 Complete)  
+**Last Updated**: 2025-10-16 14:46
+**Updated By**: Agent 253 (Session 21)  
+**Status**: Core Tests Complete (619/621 passing) - 2 Library Bugs Identified

@@ -26,32 +26,32 @@ class OrphanHandlingTest {
     // Test config classes
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class SimpleConfig extends OkaeriConfig {
+    public static class SimpleConfig extends OkaeriConfig {
         private String declaredField = "default";
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class NestedConfig extends OkaeriConfig {
+    public static class NestedConfig extends OkaeriConfig {
         private String nestedField = "default";
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class ParentConfig extends OkaeriConfig {
+    public static class ParentConfig extends OkaeriConfig {
         private NestedConfig declaredNested = new NestedConfig();
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class ConfigV1 extends OkaeriConfig {
+    public static class ConfigV1 extends OkaeriConfig {
         private String field1 = "value1";
         private String field2 = "value2";
     }
 
     @Data
     @EqualsAndHashCode(callSuper = false)
-    static class ConfigV2 extends OkaeriConfig {
+    public static class ConfigV2 extends OkaeriConfig {
         private String field1 = "default1";
     }
 
