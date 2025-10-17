@@ -32,6 +32,7 @@ public abstract class Configurer {
     @Getter
     @NonNull
     private SerdesRegistry registry = new SerdesRegistry();
+
     {
         this.registry.register(new StandardSerdes());
     }
@@ -226,7 +227,7 @@ public abstract class Configurer {
         if (source.isPrimitive()) {
             source = GenericsDeclaration.of(source.wrap());
         }
-        
+
         Class<T> workingClazz = targetClazz;
         if (target.isPrimitive()) {
             target = GenericsDeclaration.of(target.wrap());
@@ -336,7 +337,7 @@ public abstract class Configurer {
             }
 
             // transform primitives/primitive wrappers through String (int -> long, Integer -> Long)
-            if ((GenericsDeclaration.of(objectClazz).isPrimitiveWrapper() || objectClazz.isPrimitive()) 
+            if ((GenericsDeclaration.of(objectClazz).isPrimitiveWrapper() || objectClazz.isPrimitive())
                 && (GenericsDeclaration.of(workingClazz).isPrimitiveWrapper() || workingClazz.isPrimitive())) {
                 Object simplified = this.simplify(object, GenericsDeclaration.of(objectClazz), serdesContext, false);
                 return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz), serdesContext);
@@ -482,14 +483,15 @@ public abstract class Configurer {
     public Set<String> sort(@NonNull ConfigDeclaration declaration) {
 
         // extract current data in declaration order
-        Map<String, Object> reordered = declaration.getFields().stream().collect(
-            LinkedHashMap::new,
-            (map, field) -> {
-                Object oldValue = this.getValueUnsafe(field.getName());
-                this.remove(field.getName());
-                map.put(field.getName(), oldValue);
-            },
-            LinkedHashMap::putAll);
+        Map<String, Object> reordered = declaration.getFields().stream()
+            .collect(
+                LinkedHashMap::new,
+                (map, field) -> {
+                    Object oldValue = this.getValueUnsafe(field.getName());
+                    this.remove(field.getName());
+                    map.put(field.getName(), oldValue);
+                },
+                LinkedHashMap::putAll);
 
         // save the orphans!
         Set<String> orphans = new LinkedHashSet<>(this.getAllKeys());

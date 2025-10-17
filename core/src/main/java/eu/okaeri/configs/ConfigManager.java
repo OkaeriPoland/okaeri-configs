@@ -24,7 +24,7 @@ public final class ConfigManager {
      * Creates a new config instance using the default constructor.
      *
      * @param clazz the config class to instantiate
-     * @param <T> the config type
+     * @param <T>   the config type
      * @return initialized config instance
      * @throws OkaeriException if the class cannot be instantiated (no default constructor or other instantiation error)
      */
@@ -38,16 +38,21 @@ public final class ConfigManager {
                 "make sure default constructor is available or if subconfig use new instead");
         }
 
-        return config;
+        return initialize(config);
     }
 
     /**
      * Creates a new config instance using unsafe allocation (bypasses constructor).
+     * <p>
+     * <b>Note:</b> This method does NOT automatically initialize the declaration.
+     * If you need the declaration initialized (e.g., for @ReadOnly to work correctly),
+     * call {@link #initialize(OkaeriConfig)} after creation.
+     * <p>
      * Useful for internal operations where constructor invocation is not needed.
      *
      * @param clazz the config class to instantiate
-     * @param <T> the config type
-     * @return initialized config instance
+     * @param <T>   the config type
+     * @return uninitialized config instance
      * @throws OkaeriException if unsafe allocation fails
      */
     public static <T extends OkaeriConfig> T createUnsafe(@NonNull Class<T> clazz) throws OkaeriException {
@@ -58,9 +63,9 @@ public final class ConfigManager {
      * Creates a new config instance and applies custom initialization logic.
      * The initializer is typically used to configure the instance (e.g., set configurer, bind file).
      *
-     * @param clazz the config class to instantiate
+     * @param clazz       the config class to instantiate
      * @param initializer function to customize the config after creation
-     * @param <T> the config type
+     * @param <T>         the config type
      * @return initialized and customized config instance
      * @throws OkaeriException if creation or initialization fails
      */
@@ -90,14 +95,14 @@ public final class ConfigManager {
      * Type transformations are applied automatically when field types don't match.
      *
      * @param config the source config to copy from
-     * @param into the target config class
-     * @param <T> the target config type
+     * @param into   the target config class
+     * @param <T>    the target config type
      * @return new config instance of target type with copied values
      * @throws OkaeriException if transformation fails
      */
     public static <T extends OkaeriConfig> T transformCopy(@NonNull OkaeriConfig config, @NonNull Class<T> into) throws OkaeriException {
 
-        T copy = ConfigManager.createUnsafe(into);
+        T copy = initialize(ConfigManager.createUnsafe(into));
         Configurer configurer = config.getConfigurer();
 
         copy.withConfigurer(configurer);
@@ -118,13 +123,13 @@ public final class ConfigManager {
             Optional<FieldDeclaration> sourceField = sourceDeclaration.getField(fieldName);
             if (sourceField.isPresent()) {
                 value = sourceField.get().getValue();
-                
+
                 // If value is OkaeriConfig or needs serialization, simplify it first
                 // This ensures nested objects are properly serialized before transformation
                 if (value != null && (value instanceof OkaeriConfig || !value.getClass().isPrimitive())) {
                     value = configurer.simplify(value, sourceField.get().getType(), SerdesContext.of(configurer, sourceField.get()), false);
                 }
-                
+
                 generics = GenericsDeclaration.of(value);
             }
             // Fallback to configurer (preserves orphans for wrapper pattern)
@@ -157,15 +162,15 @@ public final class ConfigManager {
      * Useful for creating independent copies with different backing storage while preserving all data.
      * Both configurers must support the same format (use same serialization format).
      *
-     * @param config the source config to copy from
+     * @param config        the source config to copy from
      * @param newConfigurer the configurer instance for the copy (must support same format as source)
-     * @param into the target config class
-     * @param <T> the target config type
+     * @param into          the target config class
+     * @param <T>           the target config type
      * @return new config instance with copied data and new configurer
      * @throws OkaeriException if serialization or deserialization fails
      */
     public static <T extends OkaeriConfig> T deepCopy(@NonNull OkaeriConfig config, @NonNull Configurer newConfigurer, @NonNull Class<T> into) throws OkaeriException {
-        T copy = ConfigManager.createUnsafe(into);
+        T copy = initialize(ConfigManager.createUnsafe(into));
         copy.withConfigurer(newConfigurer, config.getConfigurer().getRegistry().allSerdes());
         if (config.getBindFile() != null) {
             copy.withBindFile(config.getBindFile());
@@ -175,23 +180,20 @@ public final class ConfigManager {
     }
 
     /**
-     * Initializes a config instance.
-     * Called automatically by {@link #create} methods.
+     * Initializes a config instance by eagerly loading its declaration.
      * <p>
+     * This ensures that field starting values (used by @ReadOnly) are captured
+     * at the correct time - immediately after construction, before any modifications.
+     * <p>
+     * Called automatically by all {@link #create} methods.
      * Can be called explicitly if you manually instantiate a config class.
-     * <p>
-     * Note: Declaration is now initialized lazily via {@link OkaeriConfig#getDeclaration()},
-     * so this method now only returns the config for chaining purposes.
      *
      * @param config the config instance to initialize
-     * @param <T> the config type
+     * @param <T>    the config type
      * @return the same config instance (for chaining)
-     * @deprecated Declaration is now initialized lazily. This method is no longer needed
-     *             and will be removed in a future version.
      */
-    @Deprecated
     public static <T extends OkaeriConfig> T initialize(@NonNull T config) {
-        // Declaration is now lazy-loaded via getDeclaration() - no explicit initialization needed
+        config.getDeclaration();
         return config;
     }
 }

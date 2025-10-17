@@ -1,5 +1,6 @@
 package eu.okaeri.configs;
 
+import eu.okaeri.configs.annotation.ReadOnly;
 import eu.okaeri.configs.annotation.Variable;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
@@ -13,11 +14,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.SerdesRegistry;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -353,11 +350,17 @@ public abstract class OkaeriConfig {
         }
 
         for (FieldDeclaration field : this.getDeclaration().getFields()) {
-            if (!this.getConfigurer().isValid(field, field.getValue())) {
+
+            Object valueToSave = field.getAnnotation(ReadOnly.class).isPresent()
+                ? field.getStartingValue()
+                : field.getValue();
+
+            if (!this.getConfigurer().isValid(field, valueToSave)) {
                 throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
             }
+
             try {
-                this.getConfigurer().setValue(field.getName(), field.getValue(), field.getType(), field);
+                this.getConfigurer().setValue(field.getName(), valueToSave, field.getType(), field);
             } catch (Exception exception) {
                 throw new OkaeriException("failed to #setValue for " + field.getName(), exception);
             }
@@ -382,8 +385,7 @@ public abstract class OkaeriConfig {
 
             // dump into the stream
             this.getConfigurer().write(outputStream, this.getDeclaration());
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             throw new OkaeriException("failed #write", exception);
         }
 
@@ -619,7 +621,7 @@ public abstract class OkaeriConfig {
      *
      * @return this instance
      * @deprecated Declaration is now initialized lazily via {@link #getDeclaration()}.
-     *             This method is no longer needed and will be removed in a future version.
+     * This method is no longer needed and will be removed in a future version.
      */
     @Deprecated
     public OkaeriConfig updateDeclaration() {
@@ -683,9 +685,9 @@ public abstract class OkaeriConfig {
      * Recursively processes @Variable annotations in all fields of the given declaration,
      * including nested objects (both OkaeriConfig and Serializable).
      *
-     * @param declaration the declaration to process
+     * @param declaration    the declaration to process
      * @param configInstance the config instance containing the fields
-     * @param visited set of already visited objects to prevent infinite recursion
+     * @param visited        set of already visited objects to prevent infinite recursion
      */
     private void processVariablesRecursively(@NonNull ConfigDeclaration declaration, @NonNull Object configInstance, @NonNull Set<Object> visited) {
         // Prevent infinite recursion on circular references
@@ -772,13 +774,13 @@ public abstract class OkaeriConfig {
 
             @SuppressWarnings("unchecked")
             Map<String, Object> nestedMap = (Map<String, Object>) nestedValue;
-            
+
             // Check if this field type has a custom serializer
             // If it does, don't remove any keys - they were added by the serializer
             if (this.getConfigurer().getRegistry().getSerializer(fieldType.getType()) != null) {
                 continue;
             }
-            
+
             ConfigDeclaration nestedDeclaration = ConfigDeclaration.of(fieldType.getType());
 
             Set<String> declaredKeys = nestedDeclaration.getFieldMap().keySet();
