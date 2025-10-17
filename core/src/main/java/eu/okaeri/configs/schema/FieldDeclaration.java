@@ -3,6 +3,7 @@ package eu.okaeri.configs.schema;
 import eu.okaeri.configs.annotation.*;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
+import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerdesAnnotationResolver;
 import eu.okaeri.configs.serdes.SerdesContextAttachment;
 import eu.okaeri.configs.serdes.SerdesContextAttachments;
@@ -33,6 +34,7 @@ public class FieldDeclaration {
     private boolean variableHide;
     private Field field;
     private Object object;
+    private ObjectSerializer<?> customSerializer;
 
     @SneakyThrows
     public static FieldDeclaration of(@NonNull ConfigDeclaration config, @NonNull Field field, Object object) {
@@ -41,7 +43,7 @@ public class FieldDeclaration {
         FieldDeclaration template = DECLARATION_CACHE.computeIfAbsent(cache, (entry) -> {
 
             FieldDeclaration declaration = new FieldDeclaration();
-            
+
             // Try to make field accessible - return null if not possible (e.g., java.base module fields)
             try {
                 field.setAccessible(true);
@@ -88,6 +90,24 @@ public class FieldDeclaration {
             declaration.setType(GenericsDeclaration.of(field.getGenericType()));
             declaration.setField(field);
 
+            Serdes serdesAnnotation = field.getAnnotation(Serdes.class);
+            if (serdesAnnotation != null) {
+                try {
+                    ObjectSerializer<?> serializer = serdesAnnotation.serializer().newInstance();
+                    Class<?> fieldType = declaration.getType().getType();
+                    if (!serializer.supports(fieldType)) {
+                        throw new OkaeriException("Serializer " + serdesAnnotation.serializer().getName() +
+                            " does not support field type " + fieldType.getName() +
+                            " for field " + field.getName());
+                    }
+                    declaration.setCustomSerializer(serializer);
+                } catch (InstantiationException | IllegalAccessException exception) {
+                    throw new OkaeriException("Failed to instantiate serializer " +
+                        serdesAnnotation.serializer().getName() + " for field " + field.getName() +
+                        ". Ensure it has a public no-args constructor.", exception);
+                }
+            }
+
             return declaration;
         });
 
@@ -105,6 +125,7 @@ public class FieldDeclaration {
         declaration.setVariable(template.getVariable());
         declaration.setField(template.getField());
         declaration.setObject(object);
+        declaration.setCustomSerializer(template.getCustomSerializer());
 
         return declaration;
     }

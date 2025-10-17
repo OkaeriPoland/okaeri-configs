@@ -136,7 +136,17 @@ public abstract class Configurer {
         }
 
         Class<?> serializerType = (genericType != null) ? genericType.getType() : value.getClass();
-        ObjectSerializer serializer = this.registry.getSerializer(serializerType);
+
+        // check for field-level @Serdes override first
+        ObjectSerializer serializer = null;
+        if ((serdesContext.getField() != null) && (serdesContext.getField().getCustomSerializer() != null)) {
+            serializer = serdesContext.getField().getCustomSerializer();
+        }
+
+        // fallback to registry if no custom serializer
+        if (serializer == null) {
+            serializer = this.registry.getSerializer(serializerType);
+        }
 
         if (serializer == null) {
 
@@ -235,7 +245,17 @@ public abstract class Configurer {
         }
 
         // deserialization
-        ObjectSerializer objectSerializer = this.registry.getSerializer(workingClazz);
+        // check for field-level @Serdes override first
+        ObjectSerializer objectSerializer = null;
+        if ((serdesContext.getField() != null) && (serdesContext.getField().getCustomSerializer() != null)) {
+            objectSerializer = serdesContext.getField().getCustomSerializer();
+        }
+
+        // fallback to registry if no custom serializer
+        if (objectSerializer == null) {
+            objectSerializer = this.registry.getSerializer(workingClazz);
+        }
+
         if (objectSerializer != null) {
             Configurer configurer = (this.getParent() == null) ? this : this.getParent().getConfigurer();
             DeserializationData deserializationData = (object instanceof Map)
