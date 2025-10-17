@@ -113,12 +113,24 @@ See **[Getting Started](Getting-Started)** for detailed installation instruction
 
 ### Common Configurations
 
-| Use Case | Format | Additional Dependencies |
-|----------|--------|------------------------|
-| **Standalone Apps** | HJSON (~193kB total) | `okaeri-configs-hjson` + `okaeri-configs-validator-okaeri` |
-| **Bukkit Plugins** | YAML (Bukkit) | `okaeri-configs-yaml-bukkit` + `okaeri-configs-serdes-bukkit` |
-| **Bungee Plugins** | YAML (Bungee) | `okaeri-configs-yaml-bungee` |
-| **General Purpose** | YAML (SnakeYAML) | `okaeri-configs-yaml-snakeyaml` |
+| Use Case              | Format            | Additional Dependencies                                       |
+|-----------------------|-------------------|---------------------------------------------------------------|
+| **Bukkit Plugins**    | YAML (Bukkit)     | `okaeri-configs-yaml-bukkit` + `okaeri-configs-serdes-bukkit` |
+| **Bungee Plugins**    | YAML (Bungee)     | `okaeri-configs-yaml-bungee`                                  |
+| **General Purpose**   | YAML (SnakeYAML)  | `okaeri-configs-yaml-snakeyaml`                               |
+| **Standalone Apps**   | HJSON (~193kB)    | `okaeri-configs-hjson` + `okaeri-configs-validator-okaeri`    |
+
+### All Format Modules
+
+| Format               | Artifact ID                       | Notes                                                                      |
+|----------------------|-----------------------------------|----------------------------------------------------------------------------|
+| **YAML (SnakeYAML)** | `okaeri-configs-yaml-snakeyaml`   | General-purpose YAML. Good balance of features and compatibility.          |
+| **YAML (Bukkit)**    | `okaeri-configs-yaml-bukkit`      | Uses Bukkit's built-in YAML library. Useful for Bukkit plugins.            |
+| **YAML (Bungee)**    | `okaeri-configs-yaml-bungee`      | Uses BungeeCord's YAML library. Useful for Bungee plugins.                 |
+| **JSON (Gson)**      | `okaeri-configs-json-gson`        | Based on Google's Gson. No comment support.                                |
+| **JSON (Simple)**    | `okaeri-configs-json-simple`      | Based on json-simple. No indentation, no comments.                         |
+| **HJSON**            | `okaeri-configs-hjson`            | Human-friendly JSON. Supports comments. Recommended for standalone apps.   |
+| **HOCON**            | `okaeri-configs-hocon-lightbend`  | Based on Lightbend Config. Limited comments/ordering. **Not recommended.** |
 
 ## Community & Support
 
