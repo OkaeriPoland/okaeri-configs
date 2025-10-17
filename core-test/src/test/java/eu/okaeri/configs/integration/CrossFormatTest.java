@@ -78,7 +78,7 @@ class CrossFormatTest {
      */
     @Test
     void testCrossFormat_TransformCopyBetweenConfigurers_PreservesData() throws Exception {
-        File yamlFile = tempDir.resolve("source.yml").toFile();
+        File yamlFile = this.tempDir.resolve("source.yml").toFile();
 
         // Create and save YAML config
         PrimitivesTestConfig yamlConfig = ConfigManager.create(PrimitivesTestConfig.class);
@@ -103,8 +103,8 @@ class CrossFormatTest {
      */
     @Test
     void testCrossFormat_DeepCopyWithNewConfigurer_CreatesIndependentCopy() throws Exception {
-        File sourceFile = tempDir.resolve("source.yml").toFile();
-        File targetFile = tempDir.resolve("target.yml").toFile();
+        File sourceFile = this.tempDir.resolve("source.yml").toFile();
+        File targetFile = this.tempDir.resolve("target.yml").toFile();
 
         // Create source config
         PrimitivesTestConfig source = ConfigManager.create(PrimitivesTestConfig.class);
@@ -138,7 +138,7 @@ class CrossFormatTest {
      */
     @Test
     void testCrossFormat_DataIntegrityAcrossOperations_Maintained() throws Exception {
-        File file1 = tempDir.resolve("file1.yml").toFile();
+        File file1 = this.tempDir.resolve("file1.yml").toFile();
 
         // Save to YAML
         TestConfig config1 = ConfigManager.create(TestConfig.class);
@@ -170,7 +170,7 @@ class CrossFormatTest {
      */
     @Test
     void testCrossFormat_ViaMapConversion_PreservesData() throws Exception {
-        File sourceFile = tempDir.resolve("source.yml").toFile();
+        File sourceFile = this.tempDir.resolve("source.yml").toFile();
 
         SimpleConfig config1 = ConfigManager.create(SimpleConfig.class);
         config1.withConfigurer(new YamlSnakeYamlConfigurer());

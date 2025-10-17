@@ -65,7 +65,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_LoadWithExtraFields_KeepsOrphansInConfigurer() throws Exception {
-        File configFile = tempDir.resolve("orphans1.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans1.yml").toFile();
 
         // Create file with extra fields
         String yaml = """
@@ -94,7 +94,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_SaveWithRemoveOrphansFalse_KeepsOrphans() throws Exception {
-        File configFile = tempDir.resolve("orphans2.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans2.yml").toFile();
 
         // Create file with orphans
         String yaml = """
@@ -127,7 +127,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_SaveWithRemoveOrphansTrue_RemovesOrphans() throws Exception {
-        File configFile = tempDir.resolve("orphans3.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans3.yml").toFile();
 
         // Create file with orphans
         String yaml = """
@@ -158,7 +158,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_AsMapIncludesOrphans_WhenPresent() throws Exception {
-        File configFile = tempDir.resolve("orphans4.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans4.yml").toFile();
 
         // Create file with orphans
         String yaml = """
@@ -189,7 +189,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_PreservationAcrossMultipleSaves_WorksCorrectly() throws Exception {
-        File configFile = tempDir.resolve("orphans5.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans5.yml").toFile();
 
         // Create file with orphans
         String yaml = """
@@ -234,7 +234,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_NestedOrphans_HandledCorrectly() throws Exception {
-        File configFile = tempDir.resolve("orphans6.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans6.yml").toFile();
 
         // Create file with nested orphans
         String yaml = """
@@ -271,7 +271,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_RemovalWithNestedConfigs_RemovesAllOrphans() throws Exception {
-        File configFile = tempDir.resolve("orphans7.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans7.yml").toFile();
 
         // Create file with nested orphans
         String yaml = """
@@ -302,7 +302,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_DeclaredFieldBecomesOrphan_HandleCorrectly() throws Exception {
-        File configFile = tempDir.resolve("orphans8.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans8.yml").toFile();
 
         // Create config with two fields and save
         ConfigV1 v1 = ConfigManager.create(ConfigV1.class);
@@ -335,7 +335,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_NestedOrphansWithoutRootOrphans_RemovesNestedOrphans() throws Exception {
-        File configFile = tempDir.resolve("orphans9.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans9.yml").toFile();
 
         // Create file with ONLY nested orphans (no root-level orphans)
         String yaml = """
@@ -373,7 +373,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_SelfReferencingConfig_DoesNotInfiniteLoop() throws Exception {
-        File configFile = tempDir.resolve("orphans10.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans10.yml").toFile();
 
         // Create file with orphans in self-referencing structure
         String yaml = """
@@ -418,7 +418,7 @@ class OrphanHandlingTest {
      */
     @Test
     void testOrphans_CustomSerializerFields_PreservedWithRemoveOrphans() throws Exception {
-        File configFile = tempDir.resolve("orphans11.yml").toFile();
+        File configFile = this.tempDir.resolve("orphans11.yml").toFile();
 
         // Create custom serializer that adds metadata fields
         var customSerializer = new ObjectSerializer<CustomObject>() {

@@ -177,7 +177,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_EmptyConfig_HandlesCorrectly() throws Exception {
-        File configFile = tempDir.resolve("empty.yml").toFile();
+        File configFile = this.tempDir.resolve("empty.yml").toFile();
 
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -201,7 +201,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_OnlyExcludedFields_HandlesCorrectly() throws Exception {
-        File configFile = tempDir.resolve("excluded.yml").toFile();
+        File configFile = this.tempDir.resolve("excluded.yml").toFile();
 
         ExcludedOnlyConfig config = ConfigManager.create(ExcludedOnlyConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -221,7 +221,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_VeryDeepNesting_HandlesCorrectly() throws Exception {
-        File configFile = tempDir.resolve("deep.yml").toFile();
+        File configFile = this.tempDir.resolve("deep.yml").toFile();
 
         L1 config = ConfigManager.create(L1.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -246,7 +246,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_VeryLargeCollections_HandlesCorrectly() throws Exception {
-        File configFile = tempDir.resolve("large.yml").toFile();
+        File configFile = this.tempDir.resolve("large.yml").toFile();
 
         LargeConfig config = ConfigManager.create(LargeConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -279,7 +279,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_UnicodeInKeysAndValues_HandlesCorrectly() throws Exception {
-        File configFile = tempDir.resolve("unicode.yml").toFile();
+        File configFile = this.tempDir.resolve("unicode.yml").toFile();
 
         UnicodeConfig config = ConfigManager.create(UnicodeConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -305,7 +305,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_SpecialCharactersInStrings_HandlesCorrectly() throws Exception {
-        File configFile = tempDir.resolve("special.yml").toFile();
+        File configFile = this.tempDir.resolve("special.yml").toFile();
 
         SpecialCharsConfig config = ConfigManager.create(SpecialCharsConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -328,7 +328,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_NullHandling_WorksCorrectly() throws Exception {
-        File configFile = tempDir.resolve("nulls.yml").toFile();
+        File configFile = this.tempDir.resolve("nulls.yml").toFile();
 
         NullConfig config = ConfigManager.create(NullConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -352,7 +352,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_LoadNonExistentFile_ThrowsException() throws Exception {
-        File nonExistent = tempDir.resolve("does-not-exist.yml").toFile();
+        File nonExistent = this.tempDir.resolve("does-not-exist.yml").toFile();
 
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -367,7 +367,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_LoadMalformedYaml_ThrowsException() throws Exception {
-        File malformedFile = tempDir.resolve("malformed.yml").toFile();
+        File malformedFile = this.tempDir.resolve("malformed.yml").toFile();
 
         // Write malformed YAML
         String malformed = """
@@ -390,7 +390,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_ExtremeNumericValues_HandlesCorrectly() throws Exception {
-        File configFile = tempDir.resolve("extreme.yml").toFile();
+        File configFile = this.tempDir.resolve("extreme.yml").toFile();
 
         ExtremeConfig config = ConfigManager.create(ExtremeConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -418,7 +418,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_EmptyStringVsNull_DistinguishedCorrectly() throws Exception {
-        File configFile = tempDir.resolve("empty-vs-null.yml").toFile();
+        File configFile = this.tempDir.resolve("empty-vs-null.yml").toFile();
 
         EmptyNullConfig config = ConfigManager.create(EmptyNullConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -441,7 +441,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_ZeroValues_HandledCorrectly() throws Exception {
-        File configFile = tempDir.resolve("zeros.yml").toFile();
+        File configFile = this.tempDir.resolve("zeros.yml").toFile();
 
         ZeroConfig config = ConfigManager.create(ZeroConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -465,7 +465,7 @@ class EdgeCasesTest {
      */
     @Test
     void testEdgeCase_BooleanValues_HandledCorrectly() throws Exception {
-        File configFile = tempDir.resolve("booleans.yml").toFile();
+        File configFile = this.tempDir.resolve("booleans.yml").toFile();
 
         BooleanConfig config = ConfigManager.create(BooleanConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());

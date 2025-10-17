@@ -106,7 +106,7 @@ class CompleteWorkflowTest {
     @Test
     void testWorkflow_CreateSaveLoadVerify_WorksCorrectly() throws Exception {
         // Create config with values
-        File configFile = tempDir.resolve("workflow1.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow1.yml").toFile();
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -138,7 +138,7 @@ class CompleteWorkflowTest {
     @Test
     void testWorkflow_CreateLoadModifySaveLoadVerify_WorksCorrectly() throws Exception {
         // Create and save initial config
-        File configFile = tempDir.resolve("workflow2.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow2.yml").toFile();
 
         CollectionsTestConfig config1 = ConfigManager.create(CollectionsTestConfig.class);
         config1.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -170,7 +170,7 @@ class CompleteWorkflowTest {
      */
     @Test
     void testWorkflow_SaveDefaults_CreatesFileWithDefaults() throws Exception {
-        File configFile = tempDir.resolve("workflow3.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow3.yml").toFile();
 
         // First saveDefaults - should create file
         EnumsTestConfig config1 = ConfigManager.create(EnumsTestConfig.class);
@@ -198,7 +198,7 @@ class CompleteWorkflowTest {
      */
     @Test
     void testWorkflow_LoadMigrateSave_UpdatesConfig() throws Exception {
-        File configFile = tempDir.resolve("workflow4.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow4.yml").toFile();
 
         // Create initial config with old structure
         String oldYaml = """
@@ -236,7 +236,7 @@ class CompleteWorkflowTest {
      */
     @Test
     void testWorkflow_MultipleConfigsSameFile_LastWriteWins() throws Exception {
-        File configFile = tempDir.resolve("workflow5.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow5.yml").toFile();
 
         // Create first config and save
         PrimitivesTestConfig config1 = ConfigManager.create(PrimitivesTestConfig.class);
@@ -266,7 +266,7 @@ class CompleteWorkflowTest {
      */
     @Test
     void testWorkflow_AllTypeCombinations_SaveLoadCorrectly() throws Exception {
-        File configFile = tempDir.resolve("workflow6.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow6.yml").toFile();
 
         AllTypesConfig config = ConfigManager.create(AllTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -293,7 +293,7 @@ class CompleteWorkflowTest {
      */
     @Test
     void testWorkflow_AllAnnotations_PreservedInSaveLoad() throws Exception {
-        File configFile = tempDir.resolve("workflow7.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow7.yml").toFile();
 
         AnnotationsTestConfig config = ConfigManager.create(AnnotationsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -325,7 +325,7 @@ class CompleteWorkflowTest {
      */
     @Test
     void testWorkflow_NestedConfigHierarchy_SaveLoadCorrectly() throws Exception {
-        File configFile = tempDir.resolve("workflow8.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow8.yml").toFile();
 
         Level1 config = ConfigManager.create(Level1.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -350,7 +350,7 @@ class CompleteWorkflowTest {
      */
     @Test
     void testWorkflow_ComplexLifecycle_HandlesAllOperations() throws Exception {
-        File configFile = tempDir.resolve("workflow9.yml").toFile();
+        File configFile = this.tempDir.resolve("workflow9.yml").toFile();
 
         // 1. Create with defaults
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);

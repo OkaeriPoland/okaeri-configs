@@ -187,8 +187,8 @@ class JsonConfigurerStructureTest {
     public static class NestedStructureConfig extends OkaeriConfig {
         private List<String> stringList = Arrays.asList("alpha", "beta", "gamma");
         private java.util.Map<String, String> simpleMap = new LinkedHashMap<String, String>() {{
-            put("key1", "value1");
-            put("key2", "value2");
+            this.put("key1", "value1");
+            this.put("key2", "value2");
         }};
     }
 
