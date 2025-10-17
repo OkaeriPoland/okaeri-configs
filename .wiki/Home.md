@@ -81,6 +81,7 @@ config.save();
 - **[Advanced Topics](Advanced-Topics)** - Custom serializers, transformers, post-processing
 
 ### Help & Reference
+- **[Using Lombok](Using-Lombok)** - Reduce boilerplate with Project Lombok
 - **[Troubleshooting](Troubleshooting)** - Common issues and solutions
 - **[Examples & Recipes](Examples-and-Recipes)** - Real-world usage patterns
 
@@ -98,14 +99,14 @@ config.save();
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-yaml-snakeyaml</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 ```kotlin
 maven("https://storehouse.okaeri.eu/repository/maven-public/")
-implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:5.0.13")
+implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:{VERSION}")
 ```
 
 See **[Getting Started](Getting-Started)** for detailed installation instructions.

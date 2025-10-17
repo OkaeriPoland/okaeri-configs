@@ -47,18 +47,18 @@ Okaeri Validator is a lightweight validation library (~15kB) with Jakarta EE-lik
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-validator-okaeri</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-validator-okaeri:5.0.13")
+implementation("eu.okaeri:okaeri-configs-validator-okaeri:{VERSION}")
 ```
 
 **Gradle (Groovy DSL):**
 ```groovy
-implementation 'eu.okaeri:okaeri-configs-validator-okaeri:5.0.13'
+implementation 'eu.okaeri:okaeri-configs-validator-okaeri:{VERSION}'
 ```
 
 ### Usage
@@ -131,13 +131,13 @@ For projects that already use Hibernate Validator or need full Jakarta Bean Vali
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-validator-jakartaee</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-validator-jakartaee:5.0.13")
+implementation("eu.okaeri:okaeri-configs-validator-jakartaee:{VERSION}")
 ```
 
 ### Usage

@@ -79,13 +79,13 @@ Common Java types not included in the core library.
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-serdes-commons</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-serdes-commons:5.0.13")
+implementation("eu.okaeri:okaeri-configs-serdes-commons:{VERSION}")
 ```
 
 ### Usage
@@ -146,103 +146,26 @@ usernamePattern: '[a-zA-Z0-9_]{3,16}'
 
 ## SerdesBukkit
 
-Serializers for Minecraft Bukkit/Spigot/Paper types.
+Serializers for Minecraft Bukkit/Spigot/Paper types including `ItemStack`, `Location`, `PotionEffect`, `Vector`, and more.
 
-### Installation
+**See the dedicated guide:** **[Platform Integration - Bukkit](Platform-Bukkit)** for:
+- Complete installation and setup instructions
+- Detailed ItemStack serialization (@ItemStackSpec, formats, failsafe modes)
+- Location, Vector, and PotionEffect usage
+- Bukkit-specific transformers (Enchantment, World, Biome, Tag)
+- Complete plugin examples and best practices
 
-**Maven:**
-```xml
-<dependency>
-    <groupId>eu.okaeri</groupId>
-    <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-    <version>5.0.13</version>
-</dependency>
-```
-
-### Usage
+### Quick Example
 
 ```java
-it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
-```
+import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+import eu.okaeri.configs.yaml.bukkit.serdes.SerdesBukkit;
 
-### Supported Types
-
-#### Serializers
-
-| Type | Properties | Description |
-|------|------------|-------------|
-| `ItemStack` | material, amount, durability, item-meta | Items with metadata |
-| `ItemMeta` | display-name, lore, enchantments, item-flags | Item metadata |
-| `Location` | world, x, y, z, yaw, pitch | World positions |
-| `PotionEffect` | type, duration, amplifier | Potion effects |
-| `Vector` | x, y, z | 3D vectors |
-| `ShapedRecipe`* | key, shape, ingredients, result | Custom recipes |
-
-*Not registered by default
-
-#### Transformers
-
-| Type | Description |
-|------|-------------|
-| `Enchantment` | Enchantment types (`SHARPNESS`, etc.) |
-| `PotionEffectType` | Potion types (`SPEED`, `REGENERATION`, etc.) |
-| `Tag` | Bukkit tags |
-| `World` | World names |
-
-### Example
-
-```java
-import org.bukkit.Location;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.util.Vector;
-
-@Getter
-@Setter
-public class ServerConfig extends OkaeriConfig {
-
-    @Comment("Spawn location")
-    private Location spawnLocation;
-
-    @Comment("Starter items")
-    private List<ItemStack> starterItems = new ArrayList<>();
-
-    @Comment("Spawn effects")
-    private List<PotionEffect> spawnEffects = new ArrayList<>();
-
-    @Comment("Jump boost vector")
-    private Vector jumpBoost = new Vector(0, 1.5, 0);
-}
-```
-
-**Output (YAML):**
-```yaml
-# Spawn location
-spawnLocation:
-  world: world
-  x: 0.0
-  y: 64.0
-  z: 0.0
-  yaw: 0.0
-  pitch: 0.0
-
-# Starter items
-starterItems:
-  - material: DIAMOND_SWORD
-    amount: 1
-    durability: 0
-    item-meta:
-      display-name: 'Starter Sword'
-      lore:
-        - 'A basic sword'
-      enchantments:
-        SHARPNESS: 1
-
-# Jump boost vector
-jumpBoost:
-  x: 0.0
-  y: 1.5
-  z: 0.0
+config = ConfigManager.create(PluginConfig.class, (it) -> {
+    it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+    it.withBindFile(new File(getDataFolder(), "config.yml"));
+    it.load(true);
+});
 ```
 
 ## SerdesBungee
@@ -256,7 +179,7 @@ Serializers for BungeeCord/Waterfall types.
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-serdes-bungee</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
@@ -300,7 +223,7 @@ Serializers for Kyori Adventure text components.
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-serdes-adventure</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
@@ -348,7 +271,7 @@ Serializers for Bucket4j rate limiting.
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-serdes-bucket4j</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
@@ -408,7 +331,7 @@ Serializers for Okaeri Commons types.
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-serdes-okaeri</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
@@ -436,7 +359,7 @@ Serializers for Okaeri Commons Bukkit types.
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-serdes-okaeri-bukkit</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 

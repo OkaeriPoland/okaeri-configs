@@ -42,7 +42,7 @@ Okaeri Configs supports multiple configuration formats. Choose the one that best
     <dependency>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs-yaml-snakeyaml</artifactId>
-        <version>5.0.13</version>
+        <version>{VERSION}</version>
     </dependency>
 </dependencies>
 ```
@@ -61,7 +61,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:5.0.13")
+    implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:{VERSION}")
 }
 ```
 
@@ -79,7 +79,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation 'eu.okaeri:okaeri-configs-yaml-snakeyaml:5.0.13'
+    implementation 'eu.okaeri:okaeri-configs-yaml-snakeyaml:{VERSION}'
 }
 ```
 
@@ -112,7 +112,7 @@ public class MyConfig extends OkaeriConfig {
 }
 ```
 
-> 💡 **Tip**: Using [Lombok](https://projectlombok.org/) with `@Getter` and `@Setter` annotations can reduce boilerplate significantly! All examples in this wiki use Lombok.
+> 💡 **Tip**: Using Lombok with `@Getter` and `@Setter` annotations can reduce boilerplate significantly! All examples in this wiki use Lombok. See **[Using Lombok](Using-Lombok)** for installation and setup guide.
 
 ### Step 2: Initialize and Use the Config
 

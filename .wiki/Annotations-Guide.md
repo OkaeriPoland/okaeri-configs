@@ -166,8 +166,8 @@ public class ProductionConfig extends OkaeriConfig {
 
 When resolving variables:
 
-1. **Environment variable** (e.g., `API_KEY`)
-2. **JVM system property** (e.g., `-DAPI_KEY=value`)
+1. **JVM system property** (e.g., `-DAPI_KEY=value`)
+2. **Environment variable** (e.g., `API_KEY`)
 3. **Default value** from field initializer
 
 ## @Exclude

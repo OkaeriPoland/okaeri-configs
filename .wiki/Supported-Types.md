@@ -553,7 +553,7 @@ Common Java types:
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-serdes-commons</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
@@ -580,7 +580,7 @@ Minecraft Bukkit types:
 <dependency>
     <groupId>eu.okaeri</groupId>
     <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-    <version>5.0.13</version>
+    <version>{VERSION}</version>
 </dependency>
 ```
 
