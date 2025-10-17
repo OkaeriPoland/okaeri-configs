@@ -19,10 +19,10 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-validator-okaeri:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-validator-okaeri:5.0.13")
 ```
 
 ## Usage

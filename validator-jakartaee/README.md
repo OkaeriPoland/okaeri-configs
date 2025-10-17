@@ -5,7 +5,7 @@ of additional ~2MB in the final jar size. All supported annotations (`@NotNull`,
 at [eclipse-ee4j/jakartaee-tutorial](https://github.com/eclipse-ee4j/jakartaee-tutorial/blob/569bf35a26f8965936ebd02cde84a2dcc11291f7/src/main/asciidoc/bean-validation/bean-validation002.adoc).
 
 It is highly recommended to use [validator-okaeri](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri)
-instead if no hibernate-validator 7.x is present in the current environment (eg. Minecraft plugins, other small apps).
+instead if no hibernate-validator 7.x is present in the current environment (e.g., Minecraft plugins, other small apps).
 
 ## Installation
 
@@ -23,10 +23,10 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-validator-jakartaee:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-validator-jakartaee:5.0.13")
 ```
 
 ## Usage

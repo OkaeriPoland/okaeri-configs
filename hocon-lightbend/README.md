@@ -26,30 +26,30 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
 Add repository to the `repositories` section:
 
-```groovy
-maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
+```kotlin
+maven("https://storehouse.okaeri.eu/repository/maven-public/")
 ```
 
-Add dependency to the `maven` section:
+Add dependency to the `dependencies` section:
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-hocon-lightbend:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-hocon-lightbend:5.0.13")
 ```
 
 ## Limitations
 
-Lightbend's config at the time of implementing has poor support for dynamically generated configs and is missing features in general:
+Lightbend's config has poor support for dynamically generated configs and is missing features:
 
-- Only top level comments and header are available (through standard ConfigPostprocessor hack), see in lightbend/config:
+- Only top-level comments and headers are available (through standard ConfigPostprocessor hack), see lightbend/config:
     - [Allow comment on root element (or header comment) #481 from Jul 20, 2017](https://github.com/lightbend/config/issues/481)
     - [multi-line comments #152 from Mar 18, 2014](https://github.com/lightbend/config/issues/152)
-- Only top root is guaranteed to be ordered (current Lightbend's HOCON stores configs as unordered maps), see in lightbend/config:
+- Only the top root is guaranteed to be ordered (Lightbend's HOCON stores configs as unordered maps), see lightbend/config:
     - [Keep config item order in ConfigObject #365 from Dec 28, 2015](https://github.com/lightbend/config/issues/365)
-- HOCON features like includes and substitutions were not tested and are not expected to be working
+- HOCON features like includes and substitutions have not been tested and are not expected to work
 
 ## Usage
 

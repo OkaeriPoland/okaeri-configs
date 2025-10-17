@@ -25,18 +25,18 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
 Add repository to the `repositories` section:
 
-```groovy
-maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
+```kotlin
+maven("https://storehouse.okaeri.eu/repository/maven-public/")
 ```
 
-Add dependency to the `maven` section:
+Add dependency to the `dependencies` section:
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-yaml-bungee:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-yaml-bungee:5.0.13")
 ```
 
 ## Limitations

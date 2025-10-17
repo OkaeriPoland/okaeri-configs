@@ -1,6 +1,6 @@
 # Okaeri Configs | JSON (json-simple)
 
-Based on [fangyidong/json-simple](https://github.com/fangyidong/json-simple). Not recommended as configuration file provider due to heavy limitations.
+Based on [fangyidong/json-simple](https://github.com/fangyidong/json-simple). Not recommended as a configuration file provider due to heavy limitations.
 
 ## Installation
 
@@ -25,24 +25,24 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
 Add repository to the `repositories` section:
 
-```groovy
-maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
+```kotlin
+maven("https://storehouse.okaeri.eu/repository/maven-public/")
 ```
 
-Add dependency to the `maven` section:
+Add dependency to the `dependencies` section:
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-json-simple:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-json-simple:5.0.13")
 ```
 
 ## Limitations
 
-- The `com.googlecode.json-simple:json-simple` is in fact `simple` and does not allow for pretty print (intent) to be applied.
-- JSON does not support comments. All `@Header` and `@Comment` values would not be added to the output configuration file.
+- The `com.googlecode.json-simple:json-simple` library is simple and does not allow for pretty print (indentation) to be applied.
+- JSON does not support comments. All `@Header` and `@Comment` values will not be added to the output configuration file.
 
 ## Usage
 

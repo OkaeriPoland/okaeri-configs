@@ -1,14 +1,14 @@
 # Okaeri Configs | SnakeYAML
 
-Based on [asomov/snakeyaml](https://github.com/asomov/snakeyaml), a popular yaml library.
+Based on [asomov/snakeyaml](https://github.com/asomov/snakeyaml), a popular YAML library.
 
-Can be used as a replacement for platform dependant
+Can be used as a replacement for platform-dependent
 [yaml-bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit) or
-[yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee), but is a lot more prone to version compatibility issues on these platforms (e.g. underlying snakeyaml version
-changing in the runtime environment). Please use environment specific implementation if you are not sure if this one suits your needs.
+[yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee), but is more prone to version compatibility issues on these platforms (e.g., underlying SnakeYAML version
+changing in the runtime environment). Please use the environment-specific implementation if you are not sure if this one suits your needs.
 
-**Warning:** When using in non-standalone environment like bukkit or bungee modules were indented to, it is highly recommended to not shade snakeyaml into the resulting plugin or, if required to do
-so, use relocation. Ignoring this may and will result in incompatibilities.
+**Warning:** When using in non-standalone environments like Bukkit or Bungee modules were intended for, it is highly recommended to not shade SnakeYAML into the resulting plugin or, if required to do
+so, use relocation. Ignoring this may result in incompatibilities.
 
 ## Installation
 
@@ -33,18 +33,18 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
 Add repository to the `repositories` section:
 
-```groovy
-maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
+```kotlin
+maven("https://storehouse.okaeri.eu/repository/maven-public/")
 ```
 
-Add dependency to the `maven` section:
+Add dependency to the `dependencies` section:
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-yaml-snakeyaml:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:5.0.13")
 ```
 
 ## Limitations

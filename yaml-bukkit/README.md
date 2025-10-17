@@ -1,6 +1,6 @@
 # Okaeri Configs | Bukkit
 
-An example plugin is available in [bukkit-example](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit-example). For more real-life usage examples
+An example plugin is available in [yaml-bukkit-example](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit-example). For more real-life usage examples
 see [okaeri-minecraft](https://github.com/OkaeriPoland/okaeri-minecraft) repository.
 
 ## Installation
@@ -26,7 +26,7 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-Additionally if you want to serialize/deserialize [supported bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit):
+Additionally, if you want to serialize/deserialize [supported Bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit):
 
 ```xml
 <dependency>
@@ -36,18 +36,24 @@ Additionally if you want to serialize/deserialize [supported bukkit objects](htt
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
 Add repository to the `repositories` section:
 
-```groovy
-maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
+```kotlin
+maven("https://storehouse.okaeri.eu/repository/maven-public/")
 ```
 
-Add dependency to the `maven` section:
+Add dependency to the `dependencies` section:
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-yaml-bukkit:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-yaml-bukkit:5.0.13")
+```
+
+Additionally, if you want to serialize/deserialize [supported Bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit):
+
+```kotlin
+implementation("eu.okaeri:okaeri-configs-serdes-bukkit:5.0.13")
 ```
 
 ## Limitations

@@ -24,12 +24,12 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
-Add dependency to the `maven` section:
+Add dependency to the `dependencies` section:
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-serdes-bucket4j:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-serdes-bucket4j:5.0.13")
 ```
 
 ## Supported types

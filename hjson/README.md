@@ -1,6 +1,6 @@
 # Okaeri Configs | HJSON (hjson-java)
 
-Based on [OkaeriPoland/okaeri-hjson](https://github.com/OkaeriPoland/okaeri-hjson), modification of official hjson implementation for java.
+Based on [OkaeriPoland/okaeri-hjson](https://github.com/OkaeriPoland/okaeri-hjson), a modification of the official HJSON implementation for Java.
 
 ## Installation
 
@@ -25,18 +25,18 @@ Add dependency to the `dependencies` section:
 </dependency>
 ```
 
-### Gradle
+### Gradle (Kotlin)
 
 Add repository to the `repositories` section:
 
-```groovy
-maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
+```kotlin
+maven("https://storehouse.okaeri.eu/repository/maven-public/")
 ```
 
-Add dependency to the `maven` section:
+Add dependency to the `dependencies` section:
 
-```groovy
-implementation 'eu.okaeri:okaeri-configs-hjson:5.0.13'
+```kotlin
+implementation("eu.okaeri:okaeri-configs-hjson:5.0.13")
 ```
 
 ## Usage
