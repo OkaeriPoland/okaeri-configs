@@ -34,7 +34,7 @@ public class ShapedRecipeSerializer implements ObjectSerializer<ShapedRecipe> {
     private final Plugin plugin;
 
     @Override
-    public boolean supports(@NonNull Class<? super ShapedRecipe> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return ShapedRecipe.class.isAssignableFrom(type);
     }
 

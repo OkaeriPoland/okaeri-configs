@@ -15,7 +15,7 @@ import java.util.List;
 public class TagMaterialSetSerializer implements ObjectSerializer<TagMaterialSet> {
 
     @Override
-    public boolean supports(@NonNull Class<? super TagMaterialSet> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return TagMaterialSet.class.isAssignableFrom(type);
     }
 

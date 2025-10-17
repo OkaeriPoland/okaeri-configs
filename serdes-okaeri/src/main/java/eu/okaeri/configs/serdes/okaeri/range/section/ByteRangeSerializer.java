@@ -10,7 +10,7 @@ import lombok.NonNull;
 public class ByteRangeSerializer implements ObjectSerializer<ByteRange> {
 
     @Override
-    public boolean supports(@NonNull Class<? super ByteRange> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return ByteRange.class.isAssignableFrom(type);
     }
 

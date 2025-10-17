@@ -1,0 +1,298 @@
+# ===========================================
+#   Okaeri Configs - Mega Test Config
+#   Tests ALL features comprehensively
+# ===========================================
+# Boolean primitive and wrapper
+primBool: true
+wrapBool: false
+# Numeric primitives
+primByte: 127
+primShort: 32000
+primInt: 2147483647
+primLong: 9223372036854775807
+primFloat: 3.14159
+primDouble: 2.718281828
+primChar: Ω
+# Wrapper types
+wrapByte: 100
+wrapShort: 30000
+wrapInt: 123456
+wrapLong: 987654321
+wrapFloat: 1.414
+wrapDouble: 1.732
+wrapChar: €
+# String tests
+# including unicode and special chars
+simpleString: Hello, World!
+unicodeJapanese: こんにちは世界 🌍
+unicodeRussian: Привет мир! Тестирование кириллицы
+unicodePolish: Część świecie! Łódź, Gdańsk, Kraków, źdźbło
+specialChars: '!@#$%^&*()_+-=[]{}|;'':"<>?,./'
+emptyString: ''
+# Long string without spaces (tests line wrapping)
+longStringNoSpaces: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+# Long string with spaces (tests folding behavior)
+longStringWithSpaces: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+  do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+  veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+  consequat.
+# Multiline string (tests literal/folded style)
+multilineString: |-
+  Line 1
+  Line 2
+  Line 3
+  Line 4 with more text
+  Line 5 final
+bigInt: '999999999999999999999999999999'
+bigDec: '123.456789012345678901234567890'
+stringList:
+- alpha
+- beta
+- gamma
+# List of integers
+intList:
+- 1
+- 2
+- 3
+- 5
+- 8
+- 13
+# Set of strings (order preserved)
+stringSet:
+- one
+- two
+- three
+# Set of enums
+enumSet:
+- FIRST
+- SECOND
+# Nested collection - list of lists
+nestedListOfLists:
+- - a
+  - b
+- - c
+  - d
+  - e
+# Simple string-to-string map
+simpleMap:
+  key1: value1
+  key2: value2
+# Map with integer keys
+intKeyMap:
+  1: one
+  2: two
+# Nested map
+nestedMap:
+  group1:
+    a: 1
+    b: 2
+# Map with enum keys
+enumKeyMap:
+  FIRST: first value
+  SECOND: second value
+# Map with enum values
+enumValueMap:
+  a: FIRST
+  b: THIRD
+# Simple enum
+singleEnum: THIRD
+# List of enums
+enumList:
+- FIRST
+- THIRD
+# Nested subconfig
+subConfig:
+  # Subconfig field
+  subField: default sub
+  subNumber: 42
+# List of nested configs
+subConfigList:
+- subField: sub1
+  subNumber: 10
+- subField: sub2
+  subNumber: 20
+# Complex multi-level subconfig
+# MegaConfig nested inside itself (2 levels deep)
+# Note: Set to null by default to avoid infinite recursion
+# Call populateNestedMegaConfig() after construction to initialize
+nestedMegaConfig:
+  # Boolean primitive and wrapper
+  primBool: true
+  wrapBool: false
+  # Numeric primitives
+  primByte: 127
+  primShort: 32000
+  primInt: 2147483647
+  primLong: 9223372036854775807
+  primFloat: 3.14159
+  primDouble: 2.718281828
+  primChar: Ω
+  # Wrapper types
+  wrapByte: 100
+  wrapShort: 30000
+  wrapInt: 123456
+  wrapLong: 987654321
+  wrapFloat: 1.414
+  wrapDouble: 1.732
+  wrapChar: €
+  # String tests
+  # including unicode and special chars
+  simpleString: Hello, World!
+  unicodeJapanese: こんにちは世界 🌍
+  unicodeRussian: Привет мир! Тестирование кириллицы
+  unicodePolish: Część świecie! Łódź, Gdańsk, Kraków, źdźbło
+  specialChars: '!@#$%^&*()_+-=[]{}|;'':"<>?,./'
+  emptyString: ''
+  # Long string without spaces (tests line wrapping)
+  longStringNoSpaces: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  # Long string with spaces (tests folding behavior)
+  longStringWithSpaces: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+    do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+    veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat.
+  # Multiline string (tests literal/folded style)
+  multilineString: |-
+    Line 1
+    Line 2
+    Line 3
+    Line 4 with more text
+    Line 5 final
+  bigInt: '999999999999999999999999999999'
+  bigDec: '123.456789012345678901234567890'
+  stringList:
+  - alpha
+  - beta
+  - gamma
+  # List of integers
+  intList:
+  - 1
+  - 2
+  - 3
+  - 5
+  - 8
+  - 13
+  # Set of strings (order preserved)
+  stringSet:
+  - one
+  - two
+  - three
+  # Set of enums
+  enumSet:
+  - FIRST
+  - SECOND
+  # Nested collection - list of lists
+  nestedListOfLists:
+  - - a
+    - b
+  - - c
+    - d
+    - e
+  # Simple string-to-string map
+  simpleMap:
+    key1: value1
+    key2: value2
+  # Map with integer keys
+  intKeyMap:
+    1: one
+    2: two
+  # Nested map
+  nestedMap:
+    group1:
+      a: 1
+      b: 2
+  # Map with enum keys
+  enumKeyMap:
+    FIRST: first value
+    SECOND: second value
+  # Map with enum values
+  enumValueMap:
+    a: FIRST
+    b: THIRD
+  # Simple enum
+  singleEnum: THIRD
+  # List of enums
+  enumList:
+  - FIRST
+  - THIRD
+  # Nested subconfig
+  subConfig:
+    # Subconfig field
+    subField: default sub
+    subNumber: 42
+  # List of nested configs
+  subConfigList:
+  - subField: sub1
+    subNumber: 10
+  - subField: sub2
+    subNumber: 20
+  # Complex multi-level subconfig
+  # MegaConfig nested inside itself (2 levels deep)
+  # Note: Set to null by default to avoid infinite recursion
+  # Call populateNestedMegaConfig() after construction to initialize
+  nestedMegaConfig: null
+  # Serializable custom object
+  customObj:
+    name: test
+    id: 999
+  # List of serializable objects
+  serializableList:
+  - name: item1
+    id: 1
+  - name: item2
+    id: 2
+  - name: item3
+    id: 3
+  # Map of serializable objects
+  serializableMap:
+    obj1:
+      name: first
+      id: 100
+    obj2:
+      name: second
+      id: 200
+  # Field with custom key
+  custom-key-field: custom value
+  # Field backed by environment variable
+  variableField: default
+  # Null value test
+  nullValue: null
+  # Empty collection
+  emptyList: []
+  # Empty map
+  emptyMap: {}
+  # Field with repeating comments
+  # This tests multiple @Comment annotations
+  # on the same field
+  repeatingCommentField: test value
+# Serializable custom object
+customObj:
+  name: test
+  id: 999
+# List of serializable objects
+serializableList:
+- name: item1
+  id: 1
+- name: item2
+  id: 2
+- name: item3
+  id: 3
+# Map of serializable objects
+serializableMap:
+  obj1:
+    name: first
+    id: 100
+  obj2:
+    name: second
+    id: 200
+# Field with custom key
+custom-key-field: custom value
+# Field backed by environment variable
+variableField: default
+# Empty collection
+emptyList: []
+# Empty map
+emptyMap: {}
+# Field with repeating comments
+# This tests multiple @Comment annotations
+# on the same field
+repeatingCommentField: test value

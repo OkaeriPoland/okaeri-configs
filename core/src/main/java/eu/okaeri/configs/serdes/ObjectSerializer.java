@@ -23,7 +23,7 @@ public interface ObjectSerializer<T> {
      * @param type the type checked for compatibility
      * @return {@code true} if serializer is able to process the {@code type}
      */
-    boolean supports(@NonNull Class<? super T> type);
+    boolean supports(@NonNull Class<?> type);
 
     /**
      * @param object   the object to be serialized

@@ -70,6 +70,10 @@ public class JsonSimpleConfigurer extends Configurer {
 
     @Override
     public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
+        if (value == null) {
+            this.map.remove(key);
+            return;
+        }
         Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
         this.map.put(key, simplified);
     }
@@ -114,8 +118,45 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        JSONObject object = new JSONObject(this.map);
-        ConfigPostprocessor.of(object.toJSONString()).write(outputStream);
+        Map<Object, Object> cleanedMap = this.removeNullsRecursively(this.map);
+        String jsonString = JSONObject.toJSONString(cleanedMap);
+        ConfigPostprocessor.of(jsonString).write(outputStream);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Object, Object> removeNullsRecursively(Map<?, ?> map) {
+        Map<Object, Object> result = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            Object value = entry.getValue();
+            if (value == null) {
+                continue;
+            }
+            if (value instanceof Map) {
+                result.put(entry.getKey(), this.removeNullsRecursively((Map<?, ?>) value));
+            } else if (value instanceof List) {
+                result.put(entry.getKey(), this.removeNullsFromList((List<?>) value));
+            } else {
+                result.put(entry.getKey(), value);
+            }
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<?> removeNullsFromList(List<?> list) {
+        List<Object> result = new ArrayList<>();
+        for (Object item : list) {
+            if (item == null) {
+                continue;
+            }
+            if (item instanceof Map) {
+                result.add(this.removeNullsRecursively((Map<?, ?>) item));
+            } else {
+                result.add(item);
+            }
+        }
+        return result;
     }
 }

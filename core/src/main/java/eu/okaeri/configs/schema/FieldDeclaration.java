@@ -41,13 +41,23 @@ public class FieldDeclaration {
         FieldDeclaration template = DECLARATION_CACHE.computeIfAbsent(cache, (entry) -> {
 
             FieldDeclaration declaration = new FieldDeclaration();
-            field.setAccessible(true);
+            
+            // Try to make field accessible - return null if not possible (e.g., java.base module fields)
+            try {
+                field.setAccessible(true);
+            } catch (Exception exception) {
+                return null;
+            }
 
             if (field.getAnnotation(Exclude.class) != null) {
                 return null;
             }
 
             if (Modifier.isTransient(field.getModifiers())) {
+                return null;
+            }
+
+            if ("serialVersionUID".equals(field.getName())) {
                 return null;
             }
 

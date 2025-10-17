@@ -60,7 +60,7 @@ public class CraftItemStackSerializer implements ObjectSerializer<ItemStack> {
     private boolean verbose = false;
 
     @Override
-    public boolean supports(@NonNull Class<? super ItemStack> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return ItemStack.class.isAssignableFrom(type);
     }
 

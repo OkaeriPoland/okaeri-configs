@@ -14,7 +14,7 @@ import java.time.Duration;
 public class SingleBandwidthBucketSerializer implements ObjectSerializer<SingleBandwidthBucket> {
 
     @Override
-    public boolean supports(@NonNull Class<? super SingleBandwidthBucket> clazz) {
+    public boolean supports(@NonNull Class<?> clazz) {
         return SingleBandwidthBucket.class.isAssignableFrom(clazz);
     }
 

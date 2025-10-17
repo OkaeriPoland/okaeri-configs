@@ -14,7 +14,7 @@ import java.util.List;
 public class BucketConfigurationSerializer implements ObjectSerializer<BucketConfiguration> {
 
     @Override
-    public boolean supports(@NonNull Class<? super BucketConfiguration> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return BucketConfiguration.class.isAssignableFrom(type);
     }
 

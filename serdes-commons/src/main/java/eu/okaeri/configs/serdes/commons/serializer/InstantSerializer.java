@@ -16,7 +16,7 @@ public class InstantSerializer implements ObjectSerializer<Instant> {
     private final boolean numeric;
 
     @Override
-    public boolean supports(@NonNull Class<? super Instant> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Instant.class.isAssignableFrom(type);
     }
 

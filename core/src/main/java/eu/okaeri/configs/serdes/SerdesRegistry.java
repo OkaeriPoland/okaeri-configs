@@ -2,20 +2,19 @@ package eu.okaeri.configs.serdes;
 
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.schema.GenericsPair;
-import eu.okaeri.configs.serdes.standard.ObjectToStringTransformer;
 import lombok.NonNull;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class SerdesRegistry {
 
     private final Map<Class<? extends Annotation>, SerdesAnnotationResolver<Annotation, SerdesContextAttachment>> annotationResolverMap = new ConcurrentHashMap<>();
-    private final Set<ObjectSerializer> serializerSet = ConcurrentHashMap.newKeySet();
+    private final List<ObjectSerializer> serializerList = new CopyOnWriteArrayList<>(); // last registered wins
     private final Map<GenericsPair, ObjectTransformer> transformerMap = new ConcurrentHashMap<>();
 
     public void register(@NonNull ObjectTransformer transformer) {
@@ -52,18 +51,40 @@ public class SerdesRegistry {
     }
 
     public void registerWithReversedToString(@NonNull ObjectTransformer transformer) {
+        // Register forward transformer (e.g., String → Integer)
         this.transformerMap.put(transformer.getPair(), transformer);
-        this.transformerMap.put(transformer.getPair().reverse(), new ObjectToStringTransformer());
+        
+        // Register reverse transformer with CORRECT typing (e.g., Integer → String, not Object → String)
+        // This fixes the bug where all reverse transformers were registered as Object → String,
+        // which caused exact type matching to fail (Integer ≠ Object)
+        GenericsPair reversePair = transformer.getPair().reverse();
+        ObjectTransformer reverseTransformer = new ObjectTransformer() {
+            @Override
+            public GenericsPair getPair() {
+                return reversePair;  // Use the actual reversed pair (Integer → String)
+            }
+            
+            @Override
+            public Object transform(@NonNull Object data, @NonNull SerdesContext serdesContext) {
+                return data.toString();  // Same logic as ObjectToStringTransformer
+            }
+        };
+        
+        this.transformerMap.put(reversePair, reverseTransformer);
     }
 
     public void register(@NonNull ObjectSerializer serializer) {
-        this.serializerSet.add(serializer);
+        this.serializerList.add(serializer);
+    }
+
+    public void registerFirst(@NonNull ObjectSerializer serializer) {
+        this.serializerList.add(0, serializer);
     }
 
     @SuppressWarnings("unchecked")
     public void registerExclusive(@NonNull Class<?> type, @NonNull ObjectSerializer serializer) {
-        this.serializerSet.removeIf(ser -> ser.supports(type));
-        this.serializerSet.add(serializer);
+        this.serializerList.removeIf(ser -> ser.supports(type));
+        this.serializerList.add(serializer);
     }
 
     public ObjectTransformer getTransformer(@NonNull GenericsDeclaration from, @NonNull GenericsDeclaration to) {
@@ -91,10 +112,14 @@ public class SerdesRegistry {
 
     @SuppressWarnings("unchecked")
     public ObjectSerializer getSerializer(@NonNull Class<?> clazz) {
-        return this.serializerSet.stream()
-            .filter(serializer -> serializer.supports(clazz))
-            .findFirst()
-            .orElse(null);
+        // reverse iteration - last registered wins
+        for (int i = this.serializerList.size() - 1; i >= 0; i--) {
+            ObjectSerializer serializer = this.serializerList.get(i);
+            if (serializer.supports(clazz)) {
+                return serializer;
+            }
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -113,7 +138,7 @@ public class SerdesRegistry {
     public OkaeriSerdesPack allSerdes() {
         return registry -> {
             this.transformerMap.values().forEach(registry::register);
-            this.serializerSet.forEach(registry::register);
+            this.serializerList.forEach(registry::register);
             this.annotationResolverMap.values().forEach(registry::register);
         };
     }
