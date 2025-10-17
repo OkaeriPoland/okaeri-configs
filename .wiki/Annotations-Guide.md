@@ -11,6 +11,7 @@ Okaeri Configs provides several annotations to customize and document your confi
 | [@Variable](#variable) | Field | Use environment variables or JVM properties |
 | [@Exclude](#exclude) | Field | Exclude field from serialization |
 | [@ReadOnly](#readonly) | Field | Preserve original loaded values, ignore runtime modifications |
+| [@Serdes](#serdes) | Field | Use custom serializer for this field |
 | [@Include](#include) | Class | Include fields from other config classes |
 | [@TargetType](#targettype) | Field | Provide type hints for collections |
 | [@Names](#names-deprecated) | Class | ⚠️ **Deprecated** - Global naming strategy |
@@ -253,6 +254,30 @@ appVersion: 3.0.0     # Modified value saved
 ```
 
 **Use cases:** Build metadata, test environment markers, deployment timestamps - values that should only change through external processes (CI/CD, build tools), not runtime modifications.
+
+## @Serdes
+
+Use a custom serializer for a specific field, overriding the global registry.
+
+```java
+import eu.okaeri.configs.annotation.Serdes;
+
+public class ServerConfig extends OkaeriConfig {
+
+    // Uses default ItemStackSerializer from registry
+    private ItemStack normalItem;
+
+    // Uses CraftItemStackSerializer for this field only
+    @Serdes(serializer = CraftItemStackSerializer.class)
+    private ItemStack customItem;
+}
+```
+
+**Requirements:**
+- Serializer must have a public no-args constructor
+- Serializer must support the field type
+
+**Use cases:** Different serialization formats for same type (e.g., human-friendly vs. Bukkit native), field-specific requirements (NBT preservation), testing alternative serializers.
 
 ## @Include
 
