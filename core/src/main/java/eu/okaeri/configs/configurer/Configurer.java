@@ -503,15 +503,14 @@ public abstract class Configurer {
     public Set<String> sort(@NonNull ConfigDeclaration declaration) {
 
         // extract current data in declaration order
-        Map<String, Object> reordered = declaration.getFields().stream()
-            .collect(
-                LinkedHashMap::new,
-                (map, field) -> {
-                    Object oldValue = this.getValueUnsafe(field.getName());
-                    this.remove(field.getName());
-                    map.put(field.getName(), oldValue);
-                },
-                LinkedHashMap::putAll);
+        Map<String, Object> reordered = declaration.getFields().stream().collect(
+            LinkedHashMap::new,
+            (map, field) -> {
+                Object oldValue = this.getValueUnsafe(field.getName());
+                this.remove(field.getName());
+                map.put(field.getName(), oldValue);
+            },
+            LinkedHashMap::putAll);
 
         // save the orphans!
         Set<String> orphans = new LinkedHashSet<>(this.getAllKeys());
