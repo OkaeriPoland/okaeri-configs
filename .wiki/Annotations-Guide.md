@@ -10,6 +10,7 @@ Okaeri Configs provides several annotations to customize and document your confi
 | [@Comment](#comment) | Field | Document individual fields |
 | [@Variable](#variable) | Field | Use environment variables or JVM properties |
 | [@Exclude](#exclude) | Field | Exclude field from serialization |
+| [@ReadOnly](#readonly) | Field | Preserve original loaded values, ignore runtime modifications |
 | [@Include](#include) | Class | Include fields from other config classes |
 | [@TargetType](#targettype) | Field | Provide type hints for collections |
 | [@Names](#names-deprecated) | Class | ⚠️ **Deprecated** - Global naming strategy |
@@ -221,6 +222,37 @@ private transient String field2;
 - `@Exclude` only affects okaeri-configs
 
 > 💡 **Recommendation**: Use `transient` unless you specifically need Java serialization to work differently.
+
+## @ReadOnly
+
+Preserves the original loaded value when saving. The field can be modified at runtime, but saves will use the original value.
+
+```java
+import eu.okaeri.configs.annotation.ReadOnly;
+
+public class AppConfig extends OkaeriConfig {
+
+    @ReadOnly
+    private String buildNumber = "1234";
+
+    private String appVersion = "2.5.0";
+}
+```
+
+**Example:**
+```java
+config.setBuildNumber("5678");   // Modify in code
+config.setAppVersion("3.0.0");
+config.save();
+```
+
+**Result in file:**
+```yaml
+buildNumber: 1234     # Original value preserved
+appVersion: 3.0.0     # Modified value saved
+```
+
+**Use cases:** Build metadata, test environment markers, deployment timestamps - values that should only change through external processes (CI/CD, build tools), not runtime modifications.
 
 ## @Include
 
@@ -634,29 +666,21 @@ public class LegacyConfig extends OkaeriConfig {
 
 - ✅ @Header: Full support
 - ✅ @Comment: Full support for all fields
-- ✅ @Variable: Full support
-- ✅ @CustomKey: Full support
 
 ### HJSON
 
 - ✅ @Header: Full support
 - ✅ @Comment: Full support for all fields
-- ✅ @Variable: Full support
-- ✅ @CustomKey: Full support
 
 ### JSON (GSON, json-simple)
 
 - ❌ @Header: Ignored (JSON has no comment syntax)
 - ❌ @Comment: Ignored (JSON has no comment syntax)
-- ✅ @Variable: Full support
-- ✅ @CustomKey: Full support
 
 ### HOCON (Lightbend)
 
 - ⚠️ @Header: Works
 - ⚠️ @Comment: **Only top-level fields** - nested subconfig comments don't work
-- ✅ @Variable: Full support
-- ✅ @CustomKey: Full support
 
 ## Next Steps
 
