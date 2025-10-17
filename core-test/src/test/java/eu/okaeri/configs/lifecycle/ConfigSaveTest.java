@@ -1,9 +1,13 @@
 package eu.okaeri.configs.lifecycle;
 
 import eu.okaeri.configs.ConfigManager;
+import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.PrimitivesTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -25,9 +29,29 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * - Parent directory creation
  * - File overwriting
  * - Orphan removal (enabled/disabled)
+ * - Data loss prevention (file preserved on serialization errors)
  * - Error cases (no configurer, no bind file)
  */
 class ConfigSaveTest {
+
+    // Test config classes
+
+    /**
+     * Custom type without a registered serializer - used to trigger serialization errors
+     */
+    public static class UnserializableType {
+        private String data = "test";
+    }
+
+    /**
+     * Config with an unserializable field to test error handling
+     */
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ConfigWithUnserializableField extends OkaeriConfig {
+        private String normalField = "normal";
+        private UnserializableType problematicField = new UnserializableType();
+    }
 
     @Test
     void testSave_ToFile_SavesSuccessfully() throws Exception {
@@ -314,5 +338,54 @@ class ConfigSaveTest {
         assertThat(result).contains("intValue: 555");
         assertThat(result).contains("longValue: 999999");
         assertThat(result).contains("shortValue: 777");
+    }
+
+    @Test
+    void testSave_SerializationError_PreservesOriginalFileContent() throws Exception {
+        // Arrange
+        Path tempDir = TestUtils.createTempTestDir();
+        Path tempFile = tempDir.resolve("preserve-on-error.yml");
+
+        // Create file with original content
+        String originalContent = "original: content\nshould: be preserved\n";
+        Files.writeString(tempFile, originalContent);
+
+        // Create config with unserializable field
+        ConfigWithUnserializableField config = ConfigManager.create(ConfigWithUnserializableField.class);
+        config.withConfigurer(new YamlSnakeYamlConfigurer());
+        config.setNormalField("updated");
+
+        // Act & Assert - save should throw exception due to unserializable field
+        assertThatThrownBy(() -> config.save(tempFile.toFile()))
+            .isInstanceOf(OkaeriException.class)
+            .hasMessageContaining("problematicField");
+
+        // Assert - original file content should be preserved (not truncated)
+        String fileContent = Files.readString(tempFile);
+        assertThat(fileContent).isEqualTo(originalContent);
+        assertThat(fileContent).contains("original: content");
+        assertThat(fileContent).contains("should: be preserved");
+        assertThat(fileContent).doesNotContain("normalField");
+    }
+
+    @Test
+    void testSave_SerializationError_NewFileNotCreated() throws Exception {
+        // Arrange
+        Path tempDir = TestUtils.createTempTestDir();
+        Path tempFile = tempDir.resolve("should-not-be-created.yml");
+
+        // Verify file doesn't exist
+        assertThat(tempFile).doesNotExist();
+
+        // Create config with unserializable field
+        ConfigWithUnserializableField config = ConfigManager.create(ConfigWithUnserializableField.class);
+        config.withConfigurer(new YamlSnakeYamlConfigurer());
+
+        // Act & Assert - save should throw exception
+        assertThatThrownBy(() -> config.save(tempFile.toFile()))
+            .isInstanceOf(OkaeriException.class);
+
+        // Assert - file should not have been created
+        assertThat(tempFile).doesNotExist();
     }
 }

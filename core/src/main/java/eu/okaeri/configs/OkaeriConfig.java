@@ -298,17 +298,28 @@ public abstract class OkaeriConfig {
 
     /**
      * Saves current configuration state to the specific file.
+     * <p>
+     * This method serializes to memory first before writing to disk to prevent
+     * data loss if serialization fails. The original file content is preserved
+     * if any error occurs during the save operation.
      *
      * @param file target file
      * @return this instance
      * @throws OkaeriException if {@link #configurer} is null or saving fails
      */
     public OkaeriConfig save(@NonNull File file) throws OkaeriException {
+        // serialize to memory first to prevent data loss on errors
+        ByteArrayOutputStream memoryBuffer = new ByteArrayOutputStream();
+        this.save(memoryBuffer);
+        // only write to disk if serialization succeeded
         try {
             File parentFile = file.getParentFile();
             if (parentFile != null) parentFile.mkdirs();
-            return this.save(new PrintStream(new FileOutputStream(file, false), true, StandardCharsets.UTF_8.name()));
-        } catch (FileNotFoundException | UnsupportedEncodingException exception) {
+            try (FileOutputStream fileOut = new FileOutputStream(file, false)) {
+                memoryBuffer.writeTo(fileOut);
+            }
+            return this;
+        } catch (IOException exception) {
             throw new OkaeriException("failed #save using file " + file, exception);
         }
     }
