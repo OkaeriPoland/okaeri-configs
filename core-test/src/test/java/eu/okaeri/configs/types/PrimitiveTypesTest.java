@@ -1,10 +1,10 @@
 package eu.okaeri.configs.types;
 
 import eu.okaeri.configs.ConfigManager;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.PrimitivesTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,12 +22,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Edge cases (min/max values, zero, negative values)
  */
 class PrimitiveTypesTest {
+    
+    @TempDir
+    Path tempDir;
 
     @Test
     void testBoolean_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("boolean-test.yml");
+        Path tempFile = this.tempDir.resolve("boolean-test.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -48,8 +50,7 @@ class PrimitiveTypesTest {
     @Test
     void testByte_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("byte-test.yml");
+        Path tempFile = this.tempDir.resolve("byte-test.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -70,8 +71,7 @@ class PrimitiveTypesTest {
     @Test
     void testByte_EdgeCases_MinMaxValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("byte-edge.yml");
+        Path tempFile = this.tempDir.resolve("byte-edge.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -92,8 +92,7 @@ class PrimitiveTypesTest {
     @Test
     void testChar_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("char-test.yml");
+        Path tempFile = this.tempDir.resolve("char-test.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -114,8 +113,7 @@ class PrimitiveTypesTest {
     @Test
     void testDouble_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("double-test.yml");
+        Path tempFile = this.tempDir.resolve("double-test.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -136,8 +134,7 @@ class PrimitiveTypesTest {
     @Test
     void testFloat_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("float-test.yml");
+        Path tempFile = this.tempDir.resolve("float-test.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -158,8 +155,7 @@ class PrimitiveTypesTest {
     @Test
     void testInt_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("int-test.yml");
+        Path tempFile = this.tempDir.resolve("int-test.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -180,8 +176,7 @@ class PrimitiveTypesTest {
     @Test
     void testInt_EdgeCases_MinMaxValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("int-edge.yml");
+        Path tempFile = this.tempDir.resolve("int-edge.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -202,8 +197,7 @@ class PrimitiveTypesTest {
     @Test
     void testLong_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("long-test.yml");
+        Path tempFile = this.tempDir.resolve("long-test.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -224,8 +218,7 @@ class PrimitiveTypesTest {
     @Test
     void testShort_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("short-test.yml");
+        Path tempFile = this.tempDir.resolve("short-test.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -246,8 +239,7 @@ class PrimitiveTypesTest {
     @Test
     void testAllPrimitives_SaveAndLoad_Together() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("all-primitives.yml");
+        Path tempFile = this.tempDir.resolve("all-primitives.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -302,8 +294,7 @@ class PrimitiveTypesTest {
     @Test
     void testPrimitives_TypeConversion_StringToNumber() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("string-conversion.yml");
+        Path tempFile = this.tempDir.resolve("string-conversion.yml");
 
         // Create YAML with string values
         String yaml = """
@@ -343,8 +334,7 @@ class PrimitiveTypesTest {
     @Test
     void testPrimitives_DefaultValues_Preserved() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("defaults.yml");
+        Path tempFile = this.tempDir.resolve("defaults.yml");
 
         // Create empty YAML
         Files.writeString(tempFile, "");
@@ -368,8 +358,7 @@ class PrimitiveTypesTest {
     @Test
     void testPrimitives_ZeroValues_HandledCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("zeros.yml");
+        Path tempFile = this.tempDir.resolve("zeros.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -403,8 +392,7 @@ class PrimitiveTypesTest {
     @Test
     void testWrappers_NullValues_HandledCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("nulls.yml");
+        Path tempFile = this.tempDir.resolve("nulls.yml");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);

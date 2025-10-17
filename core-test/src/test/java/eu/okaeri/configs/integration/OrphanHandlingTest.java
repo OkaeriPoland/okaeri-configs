@@ -6,7 +6,6 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,7 +73,7 @@ class OrphanHandlingTest {
             orphanField1: "orphan value 1"
             orphanField2: 42
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
@@ -101,7 +101,7 @@ class OrphanHandlingTest {
             declaredField: "value1"
             orphanField: "orphan value"
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
@@ -117,7 +117,7 @@ class OrphanHandlingTest {
         config.save();
 
         // Read file and verify orphan is still there
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).contains("orphanField");
         assertThat(content).contains("orphan value");
     }
@@ -134,7 +134,7 @@ class OrphanHandlingTest {
             declaredField: "value1"
             orphanField: "orphan value"
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
@@ -147,7 +147,7 @@ class OrphanHandlingTest {
         config.save();
 
         // Read file and verify orphan is gone
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).doesNotContain("orphanField");
         assertThat(content).doesNotContain("orphan value");
         assertThat(content).contains("declaredField");
@@ -166,7 +166,7 @@ class OrphanHandlingTest {
             orphan1: "orphan value 1"
             orphan2: 42
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
@@ -197,7 +197,7 @@ class OrphanHandlingTest {
             orphan1: "orphan value 1"
             orphan2: 42
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
@@ -243,7 +243,7 @@ class OrphanHandlingTest {
               orphanInNested: "orphan in nested"
             orphanAtRoot: "orphan at root"
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         ParentConfig config = ConfigManager.create(ParentConfig.class);
@@ -261,7 +261,7 @@ class OrphanHandlingTest {
         // Save and verify orphans preserved
         config.save();
 
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).contains("orphanAtRoot");
         assertThat(content).contains("orphanInNested");
     }
@@ -280,7 +280,7 @@ class OrphanHandlingTest {
               orphanInNested: "should be removed"
             orphanAtRoot: "should be removed"
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         ParentConfig config = ConfigManager.create(ParentConfig.class);
@@ -291,7 +291,7 @@ class OrphanHandlingTest {
         config.save();
 
         // Verify orphans removed
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).doesNotContain("orphanAtRoot");
         assertThat(content).doesNotContain("orphanInNested");
         assertThat(content).contains("nestedField");
@@ -324,7 +324,7 @@ class OrphanHandlingTest {
         // Save and verify field2 still exists
         v2.save();
 
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).contains("field1");
         assertThat(content).contains("field2");
     }
@@ -343,7 +343,7 @@ class OrphanHandlingTest {
               nestedField: "nested value"
               orphanInNested: "should be removed"
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         ParentConfig config = ConfigManager.create(ParentConfig.class);
@@ -354,7 +354,7 @@ class OrphanHandlingTest {
         config.save();
 
         // Verify nested orphan removed (even though there were no root-level orphans)
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).doesNotContain("orphanInNested");
         assertThat(content).contains("nestedField");
     }
@@ -380,7 +380,7 @@ class OrphanHandlingTest {
             name: "parent"
             orphanField: "should be removed"
             """;
-        TestUtils.writeFile(configFile, yaml);
+        Files.writeString(configFile.toPath(), yaml);
 
         // Load
         SelfRefConfig config = ConfigManager.create(SelfRefConfig.class);
@@ -393,7 +393,7 @@ class OrphanHandlingTest {
         config.save();
 
         // Verify orphan removed
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).doesNotContain("orphanField");
         assertThat(content).contains("name: parent");
         assertThat(content).contains("child: null");
@@ -463,7 +463,7 @@ class OrphanHandlingTest {
         loaded.save();
 
         // Verify serializer-added fields are preserved
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).contains("__type");
         assertThat(content).contains("__version");
         assertThat(content).contains("value");

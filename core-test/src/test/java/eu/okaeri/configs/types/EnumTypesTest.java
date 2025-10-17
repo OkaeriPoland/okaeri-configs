@@ -1,10 +1,10 @@
 package eu.okaeri.configs.types;
 
 import eu.okaeri.configs.ConfigManager;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.EnumsTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,12 +24,14 @@ import static org.assertj.core.api.Assertions.entry;
  * - Map with enum keys/values
  */
 class EnumTypesTest {
+    
+    @TempDir
+    Path tempDir;
 
     @Test
     void testSingleEnum_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("single-enum.yml");
+        Path tempFile = this.tempDir.resolve("single-enum.yml");
 
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -48,8 +50,7 @@ class EnumTypesTest {
     @Test
     void testEnumList_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("enum-list.yml");
+        Path tempFile = this.tempDir.resolve("enum-list.yml");
 
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -76,8 +77,7 @@ class EnumTypesTest {
     @Test
     void testEnumSet_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("enum-set.yml");
+        Path tempFile = this.tempDir.resolve("enum-set.yml");
 
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -103,8 +103,7 @@ class EnumTypesTest {
     @Test
     void testEnumKeyMap_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("enum-key-map.yml");
+        Path tempFile = this.tempDir.resolve("enum-key-map.yml");
 
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -130,8 +129,7 @@ class EnumTypesTest {
     @Test
     void testEnumValueMap_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("enum-value-map.yml");
+        Path tempFile = this.tempDir.resolve("enum-value-map.yml");
 
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -157,8 +155,7 @@ class EnumTypesTest {
     @Test
     void testEnum_SerializedAsString_LoadsCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("enum-string.yml");
+        Path tempFile = this.tempDir.resolve("enum-string.yml");
 
         // Write YAML manually with enum as string
         String yaml = """
@@ -198,8 +195,7 @@ class EnumTypesTest {
     @Test
     void testEnum_CaseInsensitive_LoadsCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("enum-case.yml");
+        Path tempFile = this.tempDir.resolve("enum-case.yml");
 
         // Write YAML with different cases
         String yaml = """
@@ -233,8 +229,7 @@ class EnumTypesTest {
     @Test
     void testAllEnums_SaveAndLoad_Together() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("all-enums.yml");
+        Path tempFile = this.tempDir.resolve("all-enums.yml");
 
         EnumsTestConfig config = ConfigManager.create(EnumsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);

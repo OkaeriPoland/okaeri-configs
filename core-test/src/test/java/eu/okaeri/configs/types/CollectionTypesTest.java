@@ -1,10 +1,10 @@
 package eu.okaeri.configs.types;
 
 import eu.okaeri.configs.ConfigManager;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.CollectionsTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -23,12 +23,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Order preservation
  */
 class CollectionTypesTest {
+    
+    @TempDir
+    Path tempDir;
 
     @Test
     void testListOfStrings_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("list-strings.yml");
+        Path tempFile = this.tempDir.resolve("list-strings.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -47,8 +49,7 @@ class CollectionTypesTest {
     @Test
     void testListOfIntegers_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("list-integers.yml");
+        Path tempFile = this.tempDir.resolve("list-integers.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -67,8 +68,7 @@ class CollectionTypesTest {
     @Test
     void testListOrder_PreservedCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("list-order.yml");
+        Path tempFile = this.tempDir.resolve("list-order.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -87,8 +87,7 @@ class CollectionTypesTest {
     @Test
     void testEmptyList_SaveAndLoad_RemainsEmpty() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("list-empty.yml");
+        Path tempFile = this.tempDir.resolve("list-empty.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -109,8 +108,7 @@ class CollectionTypesTest {
     @Test
     void testSetOfStrings_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("set-strings.yml");
+        Path tempFile = this.tempDir.resolve("set-strings.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -131,8 +129,7 @@ class CollectionTypesTest {
     @Test
     void testSetOfIntegers_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("set-integers.yml");
+        Path tempFile = this.tempDir.resolve("set-integers.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -153,8 +150,7 @@ class CollectionTypesTest {
     @Test
     void testSetOrder_PreservedWithLinkedHashSet() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("set-order.yml");
+        Path tempFile = this.tempDir.resolve("set-order.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -179,8 +175,7 @@ class CollectionTypesTest {
     @Test
     void testEmptySet_SaveAndLoad_RemainsEmpty() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("set-empty.yml");
+        Path tempFile = this.tempDir.resolve("set-empty.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -201,8 +196,7 @@ class CollectionTypesTest {
     @Test
     void testNestedList_SaveAndLoad_MaintainsStructure() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("nested-list.yml");
+        Path tempFile = this.tempDir.resolve("nested-list.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -230,8 +224,7 @@ class CollectionTypesTest {
     @Test
     void testListWithDuplicates_PreservesDuplicates() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("list-duplicates.yml");
+        Path tempFile = this.tempDir.resolve("list-duplicates.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -250,8 +243,7 @@ class CollectionTypesTest {
     @Test
     void testSetWithDuplicates_RemovesDuplicates() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("set-duplicates.yml");
+        Path tempFile = this.tempDir.resolve("set-duplicates.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -272,8 +264,7 @@ class CollectionTypesTest {
     @Test
     void testListWithMixedTypes_ConvertedCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("list-mixed.yml");
+        Path tempFile = this.tempDir.resolve("list-mixed.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -293,8 +284,7 @@ class CollectionTypesTest {
     @Test
     void testLargeList_HandledCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("list-large.yml");
+        Path tempFile = this.tempDir.resolve("list-large.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -321,8 +311,7 @@ class CollectionTypesTest {
     @Test
     void testAllCollections_SaveAndLoad_Together() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("all-collections.yml");
+        Path tempFile = this.tempDir.resolve("all-collections.yml");
 
         CollectionsTestConfig config = ConfigManager.create(CollectionsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);

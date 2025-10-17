@@ -2,12 +2,13 @@ package eu.okaeri.configs.lifecycle;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.PrimitivesTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,6 +18,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Covers ConfigManager.create() methods and initialization.
  */
 class ConfigCreationTest {
+
+    @TempDir
+    Path tempDir;
 
     @Test
     void testCreate_WithClass_CreatesInstance() {
@@ -46,8 +50,8 @@ class ConfigCreationTest {
 
     @Test
     void testCreate_WithBindFile_SetsBindFile() throws Exception {
-        // Given: A temporary file (using TestUtils)
-        File testFile = TestUtils.createTempFile("", ".yml");
+        // Given: A temporary file
+        File testFile = this.tempDir.resolve("test.yml").toFile();
 
         // When: Creating config with initializer to set bind file
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class, cfg -> {

@@ -3,7 +3,6 @@ package eu.okaeri.configs.integration;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Exclude;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -209,7 +209,7 @@ class EdgeCasesTest {
         config.save();
 
         // File content should be essentially empty (just comments/structure)
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).doesNotContain("excluded1");
         assertThat(content).doesNotContain("excluded2");
         assertThat(content).doesNotContain("value1");
@@ -375,7 +375,7 @@ class EdgeCasesTest {
             field2: [unclosed array
             field3: value3
             """;
-        TestUtils.writeFile(malformedFile, malformed);
+        Files.writeString(malformedFile.toPath(), malformed);
 
         SimpleConfig2 config = ConfigManager.create(SimpleConfig2.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());

@@ -3,12 +3,12 @@ package eu.okaeri.configs.lifecycle;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.exception.OkaeriException;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.PrimitivesTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,6 +34,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class ConfigSaveTest {
 
+    @TempDir
+    Path tempDir;
+
     // Test config classes
 
     /**
@@ -56,7 +59,7 @@ class ConfigSaveTest {
     @Test
     void testSave_ToFile_SavesSuccessfully() throws Exception {
         // Arrange
-        File tempFile = TestUtils.createTempFile("", ".yml");
+        File tempFile = this.tempDir.resolve("test.yml").toFile();
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setBoolValue(false);
@@ -75,8 +78,7 @@ class ConfigSaveTest {
     @Test
     void testSave_ToPath_SavesSuccessfully() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("test-config.yml");
+        Path tempFile = this.tempDir.resolve("test-config.yml");
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
         config.setByteValue((byte) 42);
@@ -95,8 +97,7 @@ class ConfigSaveTest {
     @Test
     void testSave_ToBindFile_SavesSuccessfully() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("bound-config.yml");
+        Path tempFile = this.tempDir.resolve("bound-config.yml");
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
             .withBindFile(tempFile);
@@ -149,8 +150,7 @@ class ConfigSaveTest {
     @Test
     void testSaveDefaults_FileDoesNotExist_CreatesFile() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("defaults.yml");
+        Path tempFile = this.tempDir.resolve("defaults.yml");
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer())
             .withBindFile(tempFile);
@@ -165,8 +165,7 @@ class ConfigSaveTest {
     @Test
     void testSaveDefaults_FileExists_DoesNotOverwrite() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("existing.yml");
+        Path tempFile = this.tempDir.resolve("existing.yml");
         Files.writeString(tempFile, "existing: content");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
@@ -186,8 +185,7 @@ class ConfigSaveTest {
     @Test
     void testSave_CreatesParentDirectories() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path nestedFile = tempDir.resolve("nested/deep/config.yml");
+        Path nestedFile = this.tempDir.resolve("nested/deep/config.yml");
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
 
@@ -203,8 +201,7 @@ class ConfigSaveTest {
     @Test
     void testSave_OverwritesExistingFile() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("overwrite.yml");
+        Path tempFile = this.tempDir.resolve("overwrite.yml");
         Files.writeString(tempFile, "old: content\nstays: here");
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
@@ -223,8 +220,7 @@ class ConfigSaveTest {
     @Test
     void testSave_WithOrphanRemovalEnabled_RemovesOrphans() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("orphans.yml");
+        Path tempFile = this.tempDir.resolve("orphans.yml");
 
         // Create config with extra field
         String initialData = """
@@ -251,8 +247,7 @@ class ConfigSaveTest {
     @Test
     void testSave_WithOrphanRemovalDisabled_KeepsOrphans() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("keep-orphans.yml");
+        Path tempFile = this.tempDir.resolve("keep-orphans.yml");
 
         // Create config with extra field
         String initialData = """
@@ -343,8 +338,7 @@ class ConfigSaveTest {
     @Test
     void testSave_SerializationError_PreservesOriginalFileContent() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("preserve-on-error.yml");
+        Path tempFile = this.tempDir.resolve("preserve-on-error.yml");
 
         // Create file with original content
         String originalContent = "original: content\nshould: be preserved\n";
@@ -371,8 +365,7 @@ class ConfigSaveTest {
     @Test
     void testSave_SerializationError_NewFileNotCreated() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("should-not-be-created.yml");
+        Path tempFile = this.tempDir.resolve("should-not-be-created.yml");
 
         // Verify file doesn't exist
         assertThat(tempFile).doesNotExist();

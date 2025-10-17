@@ -2,11 +2,11 @@ package eu.okaeri.configs.types;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,6 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Object type: dynamic typing
  */
 class BasicTypesTest {
+    
+    @TempDir
+    Path tempDir;
 
     @Data
     @EqualsAndHashCode(callSuper = false)
@@ -39,8 +42,7 @@ class BasicTypesTest {
     @Test
     void testString_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("string-test.yml");
+        Path tempFile = this.tempDir.resolve("string-test.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -59,8 +61,7 @@ class BasicTypesTest {
     @Test
     void testString_EmptyString_PreservedCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("empty-string.yml");
+        Path tempFile = this.tempDir.resolve("empty-string.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -81,8 +82,7 @@ class BasicTypesTest {
     @Test
     void testString_NullValue_PreservedCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("null-string.yml");
+        Path tempFile = this.tempDir.resolve("null-string.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -101,8 +101,7 @@ class BasicTypesTest {
     @Test
     void testString_UnicodeCharacters_PreservedCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("unicode.yml");
+        Path tempFile = this.tempDir.resolve("unicode.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -127,8 +126,7 @@ class BasicTypesTest {
     @Test
     void testString_SpecialCharacters_PreservedCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("special-chars.yml");
+        Path tempFile = this.tempDir.resolve("special-chars.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -151,8 +149,7 @@ class BasicTypesTest {
     @Test
     void testBigInteger_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("bigint.yml");
+        Path tempFile = this.tempDir.resolve("bigint.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -171,8 +168,7 @@ class BasicTypesTest {
     @Test
     void testBigInteger_VeryLargeNumber_HandledCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("bigint-large.yml");
+        Path tempFile = this.tempDir.resolve("bigint-large.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -194,8 +190,7 @@ class BasicTypesTest {
     @Test
     void testBigDecimal_SaveAndLoad_MaintainsValue() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("bigdec.yml");
+        Path tempFile = this.tempDir.resolve("bigdec.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -214,8 +209,7 @@ class BasicTypesTest {
     @Test
     void testBigDecimal_PreciseDecimal_NoRoundingErrors() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("bigdec-precise.yml");
+        Path tempFile = this.tempDir.resolve("bigdec-precise.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -237,8 +231,7 @@ class BasicTypesTest {
     @Test
     void testObject_String_DynamicTyping() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("object-string.yml");
+        Path tempFile = this.tempDir.resolve("object-string.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -258,8 +251,7 @@ class BasicTypesTest {
     @Test
     void testObject_Integer_DynamicTyping() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("object-int.yml");
+        Path tempFile = this.tempDir.resolve("object-int.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -279,8 +271,7 @@ class BasicTypesTest {
     @Test
     void testObject_Boolean_DynamicTyping() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("object-bool.yml");
+        Path tempFile = this.tempDir.resolve("object-bool.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -300,8 +291,7 @@ class BasicTypesTest {
     @Test
     void testObject_Null_HandledCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("object-null.yml");
+        Path tempFile = this.tempDir.resolve("object-null.yml");
 
         BasicTypesConfig config = ConfigManager.create(BasicTypesConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);

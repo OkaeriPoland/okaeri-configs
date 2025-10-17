@@ -1,10 +1,10 @@
 package eu.okaeri.configs.types;
 
 import eu.okaeri.configs.ConfigManager;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.MapsTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -28,12 +28,14 @@ import static org.assertj.core.api.Assertions.entry;
  * - Key ordering preservation (LinkedHashMap)
  */
 class MapTypesTest {
+    
+    @TempDir
+    Path tempDir;
 
     @Test
     void testSimpleMap_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("simple-map.yml");
+        Path tempFile = this.tempDir.resolve("simple-map.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -61,8 +63,7 @@ class MapTypesTest {
     @Test
     void testIntKeyMap_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("int-key-map.yml");
+        Path tempFile = this.tempDir.resolve("int-key-map.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -90,8 +91,7 @@ class MapTypesTest {
     @Test
     void testIntValueMap_SaveAndLoad_MaintainsValues() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("int-value-map.yml");
+        Path tempFile = this.tempDir.resolve("int-value-map.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -119,8 +119,7 @@ class MapTypesTest {
     @Test
     void testComplexValueMap_SaveAndLoad_MaintainsStructure() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("complex-value-map.yml");
+        Path tempFile = this.tempDir.resolve("complex-value-map.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -147,8 +146,7 @@ class MapTypesTest {
     @Test
     void testNestedMap_SaveAndLoad_MaintainsStructure() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("nested-map.yml");
+        Path tempFile = this.tempDir.resolve("nested-map.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -182,8 +180,7 @@ class MapTypesTest {
     @Test
     void testEmptyMap_SaveAndLoad_RemainsEmpty() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("empty-map.yml");
+        Path tempFile = this.tempDir.resolve("empty-map.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -204,8 +201,7 @@ class MapTypesTest {
     @Test
     void testMapKeyOrder_PreservedWithLinkedHashMap() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("map-order.yml");
+        Path tempFile = this.tempDir.resolve("map-order.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -233,8 +229,7 @@ class MapTypesTest {
     @Test
     void testMapWithNullValues_HandledCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("map-null-values.yml");
+        Path tempFile = this.tempDir.resolve("map-null-values.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -261,8 +256,7 @@ class MapTypesTest {
     @Test
     void testLargeMap_HandledCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("large-map.yml");
+        Path tempFile = this.tempDir.resolve("large-map.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -288,8 +282,7 @@ class MapTypesTest {
     @Test
     void testMapWithSpecialKeyCharacters_HandledCorrectly() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("special-keys.yml");
+        Path tempFile = this.tempDir.resolve("special-keys.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);
@@ -319,8 +312,7 @@ class MapTypesTest {
     @Test
     void testAllMaps_SaveAndLoad_Together() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("all-maps.yml");
+        Path tempFile = this.tempDir.resolve("all-maps.yml");
 
         MapsTestConfig config = ConfigManager.create(MapsTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer()).withBindFile(tempFile);

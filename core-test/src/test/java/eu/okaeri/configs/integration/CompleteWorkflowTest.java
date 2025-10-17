@@ -3,7 +3,6 @@ package eu.okaeri.configs.integration;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.migrate.ConfigMigration;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.*;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -205,7 +205,7 @@ class CompleteWorkflowTest {
             oldName: "Old Value"
             oldNumber: 100
             """;
-        TestUtils.writeFile(configFile, oldYaml);
+        Files.writeString(configFile.toPath(), oldYaml);
 
         // Load with migration
         MigratableConfig config = ConfigManager.create(MigratableConfig.class);
@@ -316,7 +316,7 @@ class CompleteWorkflowTest {
         assertThat(loaded.getNormalField()).isEqualTo("normal");
 
         // Excluded field should not be in file
-        String content = TestUtils.readFile(configFile);
+        String content = Files.readString(configFile.toPath());
         assertThat(content).doesNotContain("excludedField");
     }
 

@@ -3,13 +3,13 @@ package eu.okaeri.configs.lifecycle;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Variable;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.PrimitivesTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ConfigUpdateTest {
 
+    @TempDir
+    Path tempDir;
+
     @Test
     void testUpdate_SynchronizesConfigurerToFields() throws Exception {
         // Arrange
@@ -42,7 +45,9 @@ class ConfigUpdateTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
 
         // Load data into configurer
-        config.getConfigurer().load(Files.newInputStream(TestUtils.createTempFile(yamlContent, ".yml").toPath()), config.getDeclaration());
+        Path tempFile = this.tempDir.resolve("test.yml");
+        Files.writeString(tempFile, yamlContent);
+        config.getConfigurer().load(Files.newInputStream(tempFile), config.getDeclaration());
 
         // Fields still have defaults at this point
         assertThat(config.isBoolValue()).isTrue();
@@ -194,8 +199,7 @@ class ConfigUpdateTest {
             boolValue: false
             intValue: 999
             """;
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("starting-values.yml");
+        Path tempFile = this.tempDir.resolve("starting-values.yml");
         Files.writeString(tempFile, yamlContent);
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
@@ -295,8 +299,7 @@ class ConfigUpdateTest {
     @Test
     void testUpdate_CompleteWorkflow_LoadModifySave() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("workflow.yml");
+        Path tempFile = this.tempDir.resolve("workflow.yml");
 
         String initialContent = """
             boolValue: true

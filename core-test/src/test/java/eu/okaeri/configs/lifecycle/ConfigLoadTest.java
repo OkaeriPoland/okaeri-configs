@@ -3,13 +3,13 @@ package eu.okaeri.configs.lifecycle;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.exception.OkaeriException;
-import eu.okaeri.configs.test.TestUtils;
 import eu.okaeri.configs.test.configs.PrimitivesTestConfig;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -38,6 +38,9 @@ import static org.assertj.core.api.Assertions.*;
  */
 class ConfigLoadTest {
 
+    @TempDir
+    Path tempDir;
+
     @Test
     void testLoad_FromFile_LoadsSuccessfully() throws Exception {
         // Arrange
@@ -46,7 +49,8 @@ class ConfigLoadTest {
             intValue: 999
             doubleValue: 3.14
             """;
-        File tempFile = TestUtils.createTempFile(yamlContent, ".yml");
+        File tempFile = this.tempDir.resolve("test.yml").toFile();
+        Files.writeString(tempFile.toPath(), yamlContent);
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -68,8 +72,7 @@ class ConfigLoadTest {
             shortValue: 1234
             longValue: 9876543210
             """;
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("test-config.yml");
+        Path tempFile = this.tempDir.resolve("test-config.yml");
         Files.writeString(tempFile, yamlContent);
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
@@ -91,8 +94,7 @@ class ConfigLoadTest {
             floatValue: 2.71
             charValue: X
             """;
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("bound-config.yml");
+        Path tempFile = this.tempDir.resolve("bound-config.yml");
         Files.writeString(tempFile, yamlContent);
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
@@ -196,8 +198,7 @@ class ConfigLoadTest {
             boolValue: false
             intValue: 42
             """;
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("update-test.yml");
+        Path tempFile = this.tempDir.resolve("update-test.yml");
         Files.writeString(tempFile, yamlContent);
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
@@ -225,8 +226,7 @@ class ConfigLoadTest {
             boolValue: false
             intValue: 42
             """;
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("no-update-test.yml");
+        Path tempFile = this.tempDir.resolve("no-update-test.yml");
         Files.writeString(tempFile, yamlContent);
 
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
@@ -380,8 +380,7 @@ class ConfigLoadTest {
     @Test
     void testLoad_CompleteWorkflow_CreateSaveLoad() throws Exception {
         // Arrange
-        Path tempDir = TestUtils.createTempTestDir();
-        Path tempFile = tempDir.resolve("workflow.yml");
+        Path tempFile = this.tempDir.resolve("workflow.yml");
 
         // Create and save
         PrimitivesTestConfig config1 = ConfigManager.create(PrimitivesTestConfig.class);
