@@ -1,15 +1,10 @@
 # Okaeri Configs | validator-jakartaee
 
-Based on [hibernate/hibernate-validator](https://github.com/hibernate/hibernate-validator). Jakarta Bean Validation 3.0 is a powerful tool and the ultimate validation solution, but comes at the cost
-of additional ~2MB in the final jar size. All supported annotations (`@NotNull`, `@Size`, `@Min`, `@Max`, `@Pattern`, etc.) are expected to be working. See more
-at [eclipse-ee4j/jakartaee-tutorial](https://github.com/eclipse-ee4j/jakartaee-tutorial/blob/569bf35a26f8965936ebd02cde84a2dcc11291f7/src/main/asciidoc/bean-validation/bean-validation002.adoc).
+Jakarta Bean Validation is a powerful and standardized validation solution. This module integrates with the Jakarta Bean Validation API, enabling use of all standard validation annotations (`@NotNull`, `@Size`, `@Min`, `@Max`, `@Pattern`, etc.). See more at [eclipse-ee4j/jakartaee-tutorial](https://github.com/eclipse-ee4j/jakartaee-tutorial/blob/569bf35a26f8965936ebd02cde84a2dcc11291f7/src/main/asciidoc/bean-validation/bean-validation002.adoc).
 
-It is highly recommended to use [validator-okaeri](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri)
-instead if no hibernate-validator 7.x is present in the current environment (e.g., Minecraft plugins, other small apps).
+> ⚠️ This module requires a Bean Validation implementation compatible with the Jakarta Bean Validation API at runtime.
 
 ## Installation
-
-Note: One of okaeri-configs configurers (yaml-bukkit, json-gson, etc.) is required.
 
 ### Maven
 
@@ -29,6 +24,54 @@ Add dependency to the `dependencies` section:
 implementation("eu.okaeri:okaeri-configs-validator-jakartaee:5.0.13")
 ```
 
+### Bean Validation Implementation
+
+You must also include a Bean Validation implementation. The most common choice is Hibernate Validator:
+
+#### Maven
+
+```xml
+<dependency>
+  <groupId>org.hibernate.validator</groupId>
+  <artifactId>hibernate-validator</artifactId>
+  <version>9.0.1.Final</version>
+</dependency>
+```
+
+#### Gradle (Kotlin)
+
+```kotlin
+implementation("org.hibernate.validator:hibernate-validator:9.0.1.Final")
+```
+
+**Version Compatibility:**
+
+| Hibernate Validator | Bean Validation | Jakarta EE | Minimal Java |
+|---------------------|-----------------|------------|--------------|
+| 9.x                 | 3.1             | 11         | 17           |
+| 8.x                 | 3.0             | 10         | 11           |
+| 7.x                 | 3.0             | 9+         | 8            |
+
+### Expression Language (Optional)
+
+Jakarta Expression Language (EL) is only required if you use complex constraint violation messages with EL expressions. For basic validation with simple messages, you can skip this dependency.
+
+#### Maven
+
+```xml
+<dependency>
+  <groupId>org.glassfish.expressly</groupId>
+  <artifactId>expressly</artifactId>
+  <version>6.0.0</version>
+</dependency>
+```
+
+#### Gradle (Kotlin)
+
+```kotlin
+implementation("org.glassfish.expressly:expressly:6.0.0")
+```
+
 ## Usage
 
 Please wrap your current Configurer with JakartaValidator:
@@ -36,3 +79,17 @@ Please wrap your current Configurer with JakartaValidator:
 ```java
 new JakartaValidator(yourConfigurer)
 ```
+
+## Environment Considerations
+
+### Dependency Management
+
+Some runtime environments already provide Bean Validation implementations:
+
+- **Jakarta EE Application Servers** (WildFly, Payara, TomEE, etc.) - Typically include both Hibernate Validator and an EL implementation.
+- **Spring Boot** - Often includes Hibernate Validator via `spring-boot-starter-validation`. Check your dependency tree to avoid duplicates.
+- **Standalone Applications** - You'll need to explicitly include both Hibernate Validator and optionally the EL implementation.
+
+### Size Impact
+
+Adding Hibernate Validator and its dependencies to a standalone application increases jar size by approximately 2-3 MB. The Expression Language implementation adds another ~500KB. If jar size is a critical concern and you don't need the full Jakarta Bean Validation specification, consider using [validator-okaeri](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) instead, which is a lightweight alternative with no external dependencies.

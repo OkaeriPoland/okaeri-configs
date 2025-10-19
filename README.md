@@ -36,7 +36,7 @@ Special implementations for safe use in specific environments, e.g., game server
 
 ## Validation extensions
 
-- [Jakarta EE](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): Jakarta EE based with full Jakarta Bean Validation 3.0 support
+- [Jakarta EE](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): Jakarta EE based with full Jakarta Bean Validation support
 - [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri): simple validator with Jakarta EE-like annotations but much less code (and features)
 
 ## Serialization extensions
