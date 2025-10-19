@@ -22,7 +22,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-yaml-bukkit</artifactId>
-  <version>5.0.13</version>
+  <version>6.0.0-beta.1</version>
 </dependency>
 ```
 
@@ -32,7 +32,7 @@ Additionally, if you want to serialize/deserialize [supported Bukkit objects](ht
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bukkit</artifactId>
-  <version>5.0.13</version>
+  <version>6.0.0-beta.1</version>
 </dependency>
 ```
 
@@ -47,13 +47,13 @@ maven("https://storehouse.okaeri.eu/repository/maven-public/")
 Add dependency to the `dependencies` section:
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-yaml-bukkit:5.0.13")
+implementation("eu.okaeri:okaeri-configs-yaml-bukkit:6.0.0-beta.1")
 ```
 
 Additionally, if you want to serialize/deserialize [supported Bukkit objects](https://github.com/OkaeriPoland/okaeri-configs/tree/master/serdes-bukkit):
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-serdes-bukkit:5.0.13")
+implementation("eu.okaeri:okaeri-configs-serdes-bukkit:6.0.0-beta.1")
 ```
 
 ## Limitations
