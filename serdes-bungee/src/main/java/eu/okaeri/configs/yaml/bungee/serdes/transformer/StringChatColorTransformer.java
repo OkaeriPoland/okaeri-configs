@@ -1,4 +1,4 @@
-package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
+package eu.okaeri.configs.yaml.bungee.serdes.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
