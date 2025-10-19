@@ -22,15 +22,8 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
     private static final ItemMetaSerializer ITEM_META_SERIALIZER = new ItemMetaSerializer();
     private static final StringBase64ItemStackTransformer ITEM_STACK_TRANSFORMER = new StringBase64ItemStackTransformer();
     private static final CraftItemStackSerializer CRAFT_ITEM_STACK_SERIALIZER = new CraftItemStackSerializer(true);
-    private ItemStackFailsafe failsafe = ItemStackFailsafe.NONE;
 
-    /**
-     * @deprecated Use {@link ItemStackSerializer#ItemStackSerializer(ItemStackFailsafe)}
-     */
-    @Deprecated
-    public ItemStackSerializer(boolean failsafe) {
-        this.failsafe = failsafe ? ItemStackFailsafe.BASE64 : ItemStackFailsafe.NONE;
-    }
+    private ItemStackFailsafe failsafe = ItemStackFailsafe.BUKKIT;
 
     public ItemStackSerializer(@NonNull ItemStackFailsafe failsafe) {
         this.failsafe = failsafe;
