@@ -5,6 +5,8 @@ import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.serdes.commons.duration.DurationAttachmentResolver;
 import eu.okaeri.configs.serdes.commons.duration.DurationTransformer;
 import eu.okaeri.configs.serdes.commons.serializer.InstantSerializer;
+import eu.okaeri.configs.serdes.commons.transformer.LocaleTransformer;
+import eu.okaeri.configs.serdes.commons.transformer.PatternTransformer;
 import lombok.NonNull;
 
 // types that exceed standard typeset

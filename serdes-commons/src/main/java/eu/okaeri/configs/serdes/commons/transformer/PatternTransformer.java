@@ -1,4 +1,4 @@
-package eu.okaeri.configs.serdes.commons;
+package eu.okaeri.configs.serdes.commons.transformer;
 
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
