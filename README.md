@@ -13,7 +13,7 @@ General implementations based on standard format libraries directly.
 - **YAML**
     - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): YAML for everyone! Your best choice for public projects and their configurations
 - **HJSON**
-    - 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON for your configuration, small footprint (~193kB total) but yet powerful
+    - 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON for your configuration, small total footprint but yet powerful
 - **JSON**
     - 🌟 [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): ideal for GSON lovers, best suited for in-app storage or advanced user configurations
     - [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): fairly limited but still working, no pretty print, probably best suited for simple in-app storage
@@ -36,8 +36,8 @@ Special implementations for safe use in specific environments, e.g., game server
 
 ## Validation extensions
 
-- 🌟 [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri): simple validator with Jakarta EE-like annotations but much less code (+15kB)
-- [Jakarta EE](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): hibernate-validator based with full Jakarta Bean Validation 3.0 support
+- [Jakarta EE](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-jakartaee): Jakarta EE based with full Jakarta Bean Validation 3.0 support
+- [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri): simple validator with Jakarta EE-like annotations but much less code (and features)
 
 ## Serialization extensions
 
@@ -49,7 +49,6 @@ Special implementations for safe use in specific environments, e.g., game server
 
 For `standalone platforms`, the [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson) module offers a good balance—it supports all features including full comment support with a small footprint.
 Combine it with [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) for a complete config solution.
-Total of only ~208kB (core 129kB + hjson 7kB + hjson-lib 57kB + validator 15kB), less than the latest snakeyaml 1.28 which is 319kB!
 
 For `any platform`, if some form of config validation is applicable (e.g., requiring that an integer is positive), it is recommended to use [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) when possible.
 Only a few kilobytes but makes for a much better experience for both end-users and developers.
