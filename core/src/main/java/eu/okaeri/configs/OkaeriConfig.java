@@ -58,6 +58,20 @@ public abstract class OkaeriConfig {
     }
 
     /**
+     * Updates the configuration declaration with the new one.
+     * Useful in situations where constructor may not be invoked.
+     *
+     * @return this instance
+     * @deprecated Declaration is now initialized lazily via {@link #getDeclaration()}.
+     * This method is no longer needed and will be removed in a future version.
+     */
+    @Deprecated
+    public OkaeriConfig updateDeclaration() {
+        this.setDeclaration(ConfigDeclaration.of(this));
+        return this;
+    }
+
+    /**
      * Replaces the current configurer with the provided.
      * Sets parent field of the configurer to this instance.
      *
@@ -66,6 +80,35 @@ public abstract class OkaeriConfig {
     public void setConfigurer(@NonNull Configurer configurer) {
         this.configurer = configurer;
         this.configurer.setParent(this);
+    }
+
+    /**
+     * Configures this instance using a lambda-based fluent API.
+     * <p>
+     * This is the recommended way to configure {@link OkaeriConfig} instances.
+     * It provides a clean, scoped and reusable configuration block.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * TestConfig config = ConfigManager.create(TestConfig.class, it -> {
+     *     it.configure(opt -> {
+     *         opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+     *         opt.bindFile(new File(this.getDataFolder(), "config.yml"));
+     *         opt.removeOrphans(true);
+     *     });
+     *     it.saveDefaults();
+     *     it.load(true);
+     * });
+     * }</pre>
+     *
+     * @param configurator the configuration lambda
+     * @return this instance
+     * @see OkaeriConfigOptions
+     */
+    public OkaeriConfig configure(@NonNull Consumer<OkaeriConfigOptions> configurator) {
+        OkaeriConfigOptions configurer = new OkaeriConfigOptions(this);
+        configurator.accept(configurer);
+        return this;
     }
 
     /**
@@ -78,7 +121,9 @@ public abstract class OkaeriConfig {
      *
      * @param configurer the new configurer
      * @return this instance
+     * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
+    @Deprecated
     public OkaeriConfig withConfigurer(@NonNull Configurer configurer) {
         if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
@@ -95,7 +140,9 @@ public abstract class OkaeriConfig {
      * @param configurer the new configurer
      * @param serdesPack the array of serdes packs to be registered
      * @return this instance
+     * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
+    @Deprecated
     public OkaeriConfig withConfigurer(@NonNull Configurer configurer, @NonNull OkaeriSerdesPack... serdesPack) {
         if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
@@ -108,7 +155,9 @@ public abstract class OkaeriConfig {
      *
      * @param serdesPack the serdes pack
      * @return this instance
+     * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
+    @Deprecated
     public OkaeriConfig withSerdesPack(@NonNull OkaeriSerdesPack serdesPack) {
 
         if (this.getConfigurer() == null) {
@@ -124,7 +173,9 @@ public abstract class OkaeriConfig {
      *
      * @param bindFile the bind file
      * @return this instance
+     * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
+    @Deprecated
     public OkaeriConfig withBindFile(@NonNull File bindFile) {
         this.setBindFile(bindFile.toPath());
         return this;
@@ -136,7 +187,9 @@ public abstract class OkaeriConfig {
      *
      * @param path the bind file path
      * @return this instance
+     * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
+    @Deprecated
     public OkaeriConfig withBindFile(@NonNull Path path) {
         this.setBindFile(path);
         return this;
@@ -148,7 +201,9 @@ public abstract class OkaeriConfig {
      *
      * @param pathname the bind file path
      * @return this instance
+     * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
+    @Deprecated
     public OkaeriConfig withBindFile(@NonNull String pathname) {
         this.setBindFile(Paths.get(pathname));
         return this;
@@ -159,7 +214,9 @@ public abstract class OkaeriConfig {
      *
      * @param logger the logger
      * @return this instance
+     * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
+    @Deprecated
     public OkaeriConfig withLogger(@NonNull Logger logger) {
         this.setLogger(logger);
         return this;
@@ -172,29 +229,12 @@ public abstract class OkaeriConfig {
      *
      * @param removeOrphans new state
      * @return this instance
+     * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
+    @Deprecated
     public OkaeriConfig withRemoveOrphans(boolean removeOrphans) {
         this.setRemoveOrphans(removeOrphans);
         return this;
-    }
-
-    /**
-     * Saves current configuration state to the bindFile if file does not exist.
-     *
-     * @return this instance
-     * @throws OkaeriException if bindFile is null or saving fails
-     */
-    public OkaeriConfig saveDefaults() throws OkaeriException {
-
-        if (this.getBindFile() == null) {
-            throw new IllegalStateException("bindFile cannot be null");
-        }
-
-        if (Files.exists(this.getBindFile())) {
-            return this;
-        }
-
-        return this.save();
     }
 
     /**
@@ -279,6 +319,25 @@ public abstract class OkaeriConfig {
         }
 
         return (T) this.getConfigurer().getValue(key, generics.getType(), null, SerdesContext.of(this.configurer));
+    }
+
+    /**
+     * Saves current configuration state to the bindFile if file does not exist.
+     *
+     * @return this instance
+     * @throws OkaeriException if bindFile is null or saving fails
+     */
+    public OkaeriConfig saveDefaults() throws OkaeriException {
+
+        if (this.getBindFile() == null) {
+            throw new IllegalStateException("bindFile cannot be null");
+        }
+
+        if (Files.exists(this.getBindFile())) {
+            return this;
+        }
+
+        return this.save();
     }
 
     /**
@@ -623,20 +682,6 @@ public abstract class OkaeriConfig {
         if (performed > 0) {
             callback.accept(performed);
         }
-        return this;
-    }
-
-    /**
-     * Updates the configuration declaration with the new one.
-     * Useful in situations where constructor may not be invoked.
-     *
-     * @return this instance
-     * @deprecated Declaration is now initialized lazily via {@link #getDeclaration()}.
-     * This method is no longer needed and will be removed in a future version.
-     */
-    @Deprecated
-    public OkaeriConfig updateDeclaration() {
-        this.setDeclaration(ConfigDeclaration.of(this));
         return this;
     }
 

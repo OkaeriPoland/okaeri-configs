@@ -116,16 +116,20 @@ public class AppConfig extends OkaeriConfig {
 
 ## Usage
 
+Pick your poison.
+
 ### With create(clazz, initializer)
 
 ```java
 // recommended
-TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
-    it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
-    it.withBindFile(new File(this.getDataFolder(), "config.yml")); // specify Path, File or pathname
-    it.withRemoveOrphans(true); // automatic removal of undeclared keys
+TestConfig config = ConfigManager.create(TestConfig.class, it -> {
+    it.configure(opt -> {
+        opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
+        opt.bindFile(new File(this.getDataFolder(), "config.yml")); // specify Path, File or pathname
+        opt.removeOrphans(true); // automatic removal of undeclared keys
+    });
     it.saveDefaults(); // save file if it does not exist
-    it.load(true); // load and save to update comments/new fields 
+    it.load(true); // load and save to update comments/new fields
 });
 ```
 
@@ -133,11 +137,26 @@ TestConfig config = ConfigManager.create(TestConfig.class, (it) -> {
 
 ```java
 TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
-    .withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit()) // specify configurer implementation, optionally additional serdes packages
-    .withBindFile(new File(this.getDataFolder(), "config.yml")) // specify Path, File or pathname
-    .withRemoveOrphans(true) // automatic removal of undeclared keys
+    .configure(opt -> {
+        opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
+        opt.bindFile(new File(this.getDataFolder(), "config.yml")); // specify Path, File or pathname
+        opt.removeOrphans(true); // automatic removal of undeclared keys
+    })
     .saveDefaults() // save file if it does not exist
     .load(true); // load and save to update comments/new fields
+```
+
+### With direct instantiation
+
+```java
+TestConfig config = new TestConfig();
+config.configure(opt -> {
+    opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
+    opt.bindFile(new File(this.getDataFolder(), "config.yml")); // specify Path, File or pathname
+    opt.removeOrphans(true); // automatic removal of undeclared keys
+});
+config.saveDefaults(); // save file if it does not exist
+config.load(true); // load and save to update comments/new fields
 ```
 
 ## Supported types
