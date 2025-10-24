@@ -789,15 +789,9 @@ public abstract class OkaeriConfig {
                 GenericsDeclaration fieldType = field.getType();
                 Class<?> nestedClass = fieldType.getType();
 
-                // Skip JDK and built-in classes to avoid scanning complex generic structures
-                String packageName = (nestedClass.getPackage() != null) ? nestedClass.getPackage().getName() : "";
-                if (packageName.startsWith("java.") || packageName.startsWith("javax.") ||
-                    packageName.startsWith("sun.") || packageName.startsWith("jdk.")) {
-                    continue;
-                }
-
-                // Check if it's a config or serializable (potential nesting)
-                if (fieldType.isConfig() || Serializable.class.isAssignableFrom(nestedClass)) {
+                // Only recurse into OkaeriConfig subclasses
+                // Serializable scanning is too broad and dangerous (circular refs, object graphs)
+                if (fieldType.isConfig()) {
                     ConfigDeclaration nestedDeclaration = ConfigDeclaration.of(nestedClass);
                     this.processVariablesRecursively(nestedDeclaration, nestedObject, visited);
                 }
