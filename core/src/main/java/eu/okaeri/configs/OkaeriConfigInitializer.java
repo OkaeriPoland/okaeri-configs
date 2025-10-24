@@ -1,7 +1,17 @@
 package eu.okaeri.configs;
 
-import java.util.function.Consumer;
+/**
+ * Functional interface for initializing OkaeriConfig instances.
+ * Supports lambda expressions with checked exception handling.
+ */
+@FunctionalInterface
+public interface OkaeriConfigInitializer {
 
-public interface OkaeriConfigInitializer extends Consumer<OkaeriConfig> {
-    void apply(OkaeriConfig config) throws Exception;
+    /**
+     * Accepts and initializes the config instance.
+     *
+     * @param config the config to initialize
+     * @throws Exception if initialization fails
+     */
+    void accept(OkaeriConfig config) throws Exception;
 }

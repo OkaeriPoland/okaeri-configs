@@ -72,7 +72,7 @@ public final class ConfigManager {
     public static <T extends OkaeriConfig> T create(@NonNull Class<T> clazz, @NonNull OkaeriConfigInitializer initializer) throws OkaeriException {
         T config = create(clazz);
         try {
-            initializer.apply(config);
+            initializer.accept(config);
         } catch (Exception exception) {
             if (config.getConfigurer() != null) {
                 throw new OkaeriException("failed to initialize " + clazz.getName() + " [" + config.getConfigurer().getClass() + "]", exception);

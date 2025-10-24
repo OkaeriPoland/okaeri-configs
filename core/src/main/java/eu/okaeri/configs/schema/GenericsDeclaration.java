@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,8 +92,13 @@ public class GenericsDeclaration {
 
     private static GenericsDeclaration from(Type type) {
 
-        if (type instanceof ParameterizedType) {
+        // Handle Class directly
+        if (type instanceof Class<?>) {
+            return new GenericsDeclaration((Class<?>) type);
+        }
 
+        // Handle ParameterizedType (e.g., List<String>, Map<K, V>)
+        if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type rawType = parameterizedType.getRawType();
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
@@ -107,6 +111,55 @@ public class GenericsDeclaration {
                     .collect(Collectors.toList()));
                 return declaration;
             }
+        }
+
+        // Handle WildcardType (e.g., ? extends T, ? super K)
+        if (type instanceof WildcardType) {
+            WildcardType wildcardType = (WildcardType) type;
+
+            // Try upper bounds first (? extends T)
+            Type[] upperBounds = wildcardType.getUpperBounds();
+            if (upperBounds.length > 0) {
+                // Use first upper bound (typically Object or the constraint)
+                return from(upperBounds[0]);
+            }
+
+            // Try lower bounds (? super T)
+            Type[] lowerBounds = wildcardType.getLowerBounds();
+            if (lowerBounds.length > 0) {
+                // Use first lower bound
+                return from(lowerBounds[0]);
+            }
+
+            // Unbounded wildcard (?), use Object
+            return new GenericsDeclaration(Object.class);
+        }
+
+        // Handle TypeVariable (e.g., T, K, V in generic declarations)
+        if (type instanceof TypeVariable<?>) {
+            TypeVariable<?> typeVariable = (TypeVariable<?>) type;
+            Type[] bounds = typeVariable.getBounds();
+
+            // Use first bound (typically Object or a constraint)
+            if (bounds.length > 0) {
+                return from(bounds[0]);
+            }
+
+            // No bounds, use Object
+            return new GenericsDeclaration(Object.class);
+        }
+
+        // Handle GenericArrayType (e.g., T[], List<String>[])
+        if (type instanceof GenericArrayType) {
+            GenericArrayType genericArrayType = (GenericArrayType) type;
+            Type componentType = genericArrayType.getGenericComponentType();
+
+            // Resolve component type and create array class
+            GenericsDeclaration componentDeclaration = from(componentType);
+
+            // Create array class from component type
+            Class<?> arrayClass = Array.newInstance(componentDeclaration.getType(), 0).getClass();
+            return new GenericsDeclaration(arrayClass);
         }
 
         throw new IllegalArgumentException("cannot process type: " + type + " [" + type.getClass() + "]");
