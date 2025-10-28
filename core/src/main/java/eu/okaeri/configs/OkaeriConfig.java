@@ -631,8 +631,25 @@ public abstract class OkaeriConfig {
     }
 
     /**
-     * Performs migrations and confirms the data is still loadable afterwards,
-     * then executes {@link #save()}.
+     * Performs migrations on the current in-memory config state, validates the result,
+     * and saves to file.
+     * <p>
+     * <b>IMPORTANT: Call order matters!</b> This method is <b>imperative</b> and runs
+     * immediately on the current state. You MUST call {@link #load()} BEFORE migrate(),
+     * otherwise migrations will run on default field values instead of your saved data.
+     * <p>
+     * Correct usage:
+     * <pre>{@code
+     * config.load();              // 1. Load existing data first
+     * config.migrate(migration);  // 2. Migrate loaded data
+     * // save() is called automatically by migrate()
+     * }</pre>
+     * <p>
+     * Incorrect usage (common mistake):
+     * <pre>{@code
+     * config.migrate(migration);  // WRONG: Runs on defaults, not saved data!
+     * config.load();              // Data loaded but migration already ran
+     * }</pre>
      *
      * @param migrations migrations to be performed
      * @return this instance
@@ -653,13 +670,21 @@ public abstract class OkaeriConfig {
     }
 
     /**
-     * Performs migrations and invokes consumer if performed migrations
-     * count is greater than zero.
+     * Performs migrations on the current in-memory config state and invokes callback
+     * with the count of performed migrations.
+     * <p>
+     * <b>IMPORTANT: Call order matters!</b> This method is <b>imperative</b> and runs
+     * immediately on the current state. You MUST call {@link #load()} BEFORE migrate(),
+     * otherwise migrations will run on default field values instead of your saved data.
+     * <p>
+     * The callback is invoked only if at least one migration was performed (count > 0).
+     * Use this variant when you want custom save behavior instead of the default.
      *
-     * @param callback   performed migrations count consumer
+     * @param callback   consumer invoked with performed migrations count (if > 0)
      * @param migrations migrations to be performed
      * @return this instance
      * @throws OkaeriException if {@link #configurer} is null or migration fails
+     * @see #migrate(ConfigMigration...) for typical usage with automatic save
      */
     public OkaeriConfig migrate(@NonNull Consumer<Long> callback, @NonNull ConfigMigration... migrations) throws OkaeriException {
         RawConfigView view = new RawConfigView(this);
