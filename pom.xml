@@ -74,6 +74,32 @@
                             <arg>-parameters</arg>
                         </compilerArgs>
                     </configuration>
+                    <executions>
+                        <!-- Compile main sources with Java 8 -->
+                        <execution>
+                            <id>default-compile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <source>8</source>
+                                <target>8</target>
+                            </configuration>
+                        </execution>
+                        <!-- Compile test sources with Java 21 (enables text blocks and modern features) -->
+                        <execution>
+                            <id>default-testCompile</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <configuration>
+                                <source>21</source>
+                                <target>21</target>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>

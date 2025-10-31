@@ -19,6 +19,40 @@
         <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <!-- Override parent: compile main sources with Java 21 (test utility module) -->
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <source>21</source>
+                            <target>21</target>
+                        </configuration>
+                    </execution>
+                    <!-- Override parent: compile test sources with Java 21 -->
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <source>21</source>
+                            <target>21</target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- Core library -->
         <dependency>
