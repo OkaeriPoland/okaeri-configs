@@ -13,5 +13,5 @@ public interface OkaeriConfigInitializer {
      * @param config the config to initialize
      * @throws Exception if initialization fails
      */
-    void accept(OkaeriConfig config) throws Exception;
+    void apply(OkaeriConfig config) throws Exception;
 }
