@@ -17,4 +17,9 @@ public class DurationAttachmentResolver implements SerdesAnnotationResolver<Dura
     public Optional<DurationSpecData> resolveAttachment(@NonNull Field field, @NonNull DurationSpec annotation) {
         return Optional.of(DurationSpecData.of(annotation.fallbackUnit(), annotation.format()));
     }
+
+    @Override
+    public Optional<DurationSpecData> resolveClassAttachment(@NonNull Class<?> clazz, @NonNull DurationSpec annotation) {
+        return Optional.of(DurationSpecData.of(annotation.fallbackUnit(), annotation.format()));
+    }
 }

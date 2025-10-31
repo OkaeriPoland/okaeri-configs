@@ -100,3 +100,35 @@ public class GameConfig extends OkaeriConfig {
 ```
 
 **Note:** Deserialization automatically detects the format, so existing configs using either format will continue to work.
+
+### Class-Level Annotations
+
+You can apply `@RangeSpec` (and other format annotations) at the class level to set a default format for all compatible fields. Field-level annotations take precedence over class-level annotations.
+
+```java
+@RangeSpec(format = RangeFormat.INLINE)
+public class CompactGameConfig extends OkaeriConfig {
+    // Uses INLINE from class-level annotation
+    private IntRange damageRange = IntRange.of(10, 20);
+    private LongRange healthRange = LongRange.of(50, 100);
+
+    // Field-level annotation overrides class-level
+    @RangeSpec(format = RangeFormat.SECTION)
+    private IntRange experienceRange = IntRange.of(100, 5000);
+}
+```
+
+**YAML Output:**
+```yaml
+damageRange: "10-20"
+healthRange: "50-100"
+experienceRange:
+  min: 100
+  max: 5000
+```
+
+This works for all SerdesContextAttachment annotations including:
+- `@RangeSpec` - Range serialization format
+- `@IndexedSetSpec` - IndexedSet key field
+- `@ItemStackSpec` - ItemStack serialization format (serdes-bukkit)
+- `@DurationSpec` - Duration serialization format (serdes-commons)

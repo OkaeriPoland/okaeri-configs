@@ -109,7 +109,7 @@ class RangeSerializationTest {
 
         // Write YAML manually
         Files.writeString(configFile.toPath(),
-                "intRange: \"10-20\"\n" +
+            "intRange: \"10-20\"\n" +
                 "longRange: \"100-500\"\n" +
                 "shortRange: \"5-15\"\n" +
                 "byteRange: \"1-10\"\n" +
@@ -179,7 +179,7 @@ class RangeSerializationTest {
 
         // Write YAML manually with section format
         Files.writeString(configFile.toPath(),
-                "intRange:\n" +
+            "intRange:\n" +
                 "  min: 10\n" +
                 "  max: 20\n" +
                 "longRange:\n" +

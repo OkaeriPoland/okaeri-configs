@@ -17,4 +17,9 @@ public class ItemStackAttachmentResolver implements SerdesAnnotationResolver<Ite
     public Optional<ItemStackSpecData> resolveAttachment(@NonNull Field field, @NonNull ItemStackSpec annotation) {
         return Optional.of(ItemStackSpecData.of(annotation.format()));
     }
+
+    @Override
+    public Optional<ItemStackSpecData> resolveClassAttachment(@NonNull Class<?> clazz, @NonNull ItemStackSpec annotation) {
+        return Optional.of(ItemStackSpecData.of(annotation.format()));
+    }
 }

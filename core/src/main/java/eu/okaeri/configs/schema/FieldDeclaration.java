@@ -182,6 +182,8 @@ public class FieldDeclaration {
 
     public SerdesContextAttachments readStaticAnnotations(@NonNull Configurer configurer) {
         SerdesContextAttachments attachments = new SerdesContextAttachments();
+
+        // Process field-level annotations first (these take precedence)
         for (Annotation annotation : this.getField().getAnnotations()) {
             SerdesAnnotationResolver<Annotation, SerdesContextAttachment> annotationResolver = configurer.getRegistry().getAnnotationResolver(annotation);
             if (annotationResolver == null) {
@@ -195,6 +197,30 @@ public class FieldDeclaration {
             Class<? extends SerdesContextAttachment> attachmentType = attachment.getClass();
             attachments.put(attachmentType, attachment);
         }
+
+        // Fallback to class-level annotations for attachment types not found on field
+        Class<?> declaringClass = this.getField().getDeclaringClass();
+        for (Annotation classAnnotation : declaringClass.getAnnotations()) {
+            SerdesAnnotationResolver<Annotation, SerdesContextAttachment> annotationResolver = configurer.getRegistry().getAnnotationResolver(classAnnotation);
+            if (annotationResolver == null) {
+                continue;
+            }
+
+            // Try class-level resolution
+            Optional<? extends SerdesContextAttachment> classAttachmentOptional = annotationResolver.resolveClassAttachment(declaringClass, classAnnotation);
+            if (!classAttachmentOptional.isPresent()) {
+                continue;
+            }
+
+            SerdesContextAttachment classAttachment = classAttachmentOptional.get();
+            Class<? extends SerdesContextAttachment> attachmentType = classAttachment.getClass();
+
+            // Only add if field doesn't already have this attachment type (field-level wins)
+            if (!attachments.containsKey(attachmentType)) {
+                attachments.put(attachmentType, classAttachment);
+            }
+        }
+
         return attachments;
     }
 

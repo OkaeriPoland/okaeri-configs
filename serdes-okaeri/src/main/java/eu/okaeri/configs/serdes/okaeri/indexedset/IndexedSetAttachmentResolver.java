@@ -17,4 +17,9 @@ public class IndexedSetAttachmentResolver implements SerdesAnnotationResolver<In
     public Optional<IndexedSetSpecData> resolveAttachment(@NonNull Field field, @NonNull IndexedSetSpec annotation) {
         return Optional.of(IndexedSetSpecData.of(annotation.key()));
     }
+
+    @Override
+    public Optional<IndexedSetSpecData> resolveClassAttachment(@NonNull Class<?> clazz, @NonNull IndexedSetSpec annotation) {
+        return Optional.of(IndexedSetSpecData.of(annotation.key()));
+    }
 }
