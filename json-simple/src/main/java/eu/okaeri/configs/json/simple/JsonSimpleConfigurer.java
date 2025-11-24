@@ -148,9 +148,6 @@ public class JsonSimpleConfigurer extends Configurer {
     private List<?> removeNullsFromList(List<?> list) {
         List<Object> result = new ArrayList<>();
         for (Object item : list) {
-            if (item == null) {
-                continue;
-            }
             if (item instanceof Map) {
                 result.add(this.removeNullsRecursively((Map<?, ?>) item));
             } else {
