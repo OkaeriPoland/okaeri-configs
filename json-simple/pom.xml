@@ -6,16 +6,16 @@
     <parent>
         <artifactId>okaeri-configs</artifactId>
         <groupId>eu.okaeri</groupId>
-        <version>6.0.0-beta.3</version>
+        <version>6.0.0-beta.4</version>
     </parent>
     <artifactId>okaeri-configs-json-simple</artifactId>
-    <version>6.0.0-beta.3</version>
+    <version>6.0.0-beta.4</version>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>6.0.0-beta.3</version>
+            <version>6.0.0-beta.4</version>
             <scope>compile</scope>
         </dependency>
 

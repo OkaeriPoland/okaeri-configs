@@ -29,7 +29,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-yaml-snakeyaml</artifactId>
-  <version>6.0.0-beta.3</version>
+  <version>6.0.0-beta.4</version>
 </dependency>
 ```
 
@@ -44,7 +44,7 @@ maven("https://storehouse.okaeri.eu/repository/maven-public/")
 Add dependency to the `dependencies` section:
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:6.0.0-beta.3")
+implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:6.0.0-beta.4")
 ```
 
 ## Limitations
