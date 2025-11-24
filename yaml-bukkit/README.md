@@ -11,8 +11,8 @@ Add repository to the `repositories` section:
 
 ```xml
 <repository>
-    <id>okaeri-repo</id>
-    <url>https://storehouse.okaeri.eu/repository/maven-public/</url>
+    <id>okaeri-releases</id>
+    <url>https://repo.okaeri.cloud/releases</url>
 </repository>
 ```
 
@@ -41,7 +41,7 @@ Additionally, if you want to serialize/deserialize [supported Bukkit objects](ht
 Add repository to the `repositories` section:
 
 ```kotlin
-maven("https://storehouse.okaeri.eu/repository/maven-public/")
+maven("https://repo.okaeri.cloud/releases")
 ```
 
 Add dependency to the `dependencies` section:

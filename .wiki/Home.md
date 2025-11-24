@@ -92,8 +92,8 @@ config.save();
 **Maven:**
 ```xml
 <repository>
-    <id>okaeri-repo</id>
-    <url>https://storehouse.okaeri.eu/repository/maven-public/</url>
+    <id>okaeri-releases</id>
+    <url>https://repo.okaeri.cloud/releases</url>
 </repository>
 
 <dependency>
@@ -105,7 +105,7 @@ config.save();
 
 **Gradle (Kotlin DSL):**
 ```kotlin
-maven("https://storehouse.okaeri.eu/repository/maven-public/")
+maven("https://repo.okaeri.cloud/releases")
 implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:{VERSION}")
 ```
 
@@ -137,7 +137,7 @@ See **[Getting Started](Getting-Started)** for detailed installation instruction
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/OkaeriPoland/okaeri-configs/issues)
 - 💬 **Discord**: [Join our Discord](https://discord.gg/hASN5eX)
 - 📖 **Source Code**: [GitHub Repository](https://github.com/OkaeriPoland/okaeri-configs)
-- 📦 **Maven Repository**: [Okaeri Storehouse](https://storehouse.okaeri.eu/repository/maven-public/)
+- 📦 **Maven Repository**: [Okaeri Storehouse](https://repo.okaeri.cloud/releases)
 
 ## Contributing to the Wiki
 

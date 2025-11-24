@@ -73,8 +73,8 @@
 
     <repositories>
         <repository>
-            <id>okaeri-repo</id>
-            <url>https://storehouse.okaeri.eu/repository/maven-public/</url>
+            <id>okaeri-releases</id>
+            <url>https://repo.okaeri.cloud/releases</url>
         </repository>
         <repository>
             <id>spigot-repo</id>

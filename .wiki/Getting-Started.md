@@ -29,8 +29,8 @@ Okaeri Configs supports multiple configuration formats. Choose the one that best
 ```xml
 <repositories>
     <repository>
-        <id>okaeri-repo</id>
-        <url>https://storehouse.okaeri.eu/repository/maven-public/</url>
+        <id>okaeri-releases</id>
+        <url>https://repo.okaeri.cloud/releases</url>
     </repository>
 </repositories>
 ```
@@ -53,7 +53,7 @@ Okaeri Configs supports multiple configuration formats. Choose the one that best
 
 ```kotlin
 repositories {
-    maven("https://storehouse.okaeri.eu/repository/maven-public/")
+    maven("https://repo.okaeri.cloud/releases")
 }
 ```
 
@@ -71,7 +71,7 @@ dependencies {
 
 ```groovy
 repositories {
-    maven { url "https://storehouse.okaeri.eu/repository/maven-public/" }
+    maven { url "https://repo.okaeri.cloud/releases" }
 }
 ```
 
