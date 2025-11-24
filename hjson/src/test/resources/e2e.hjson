@@ -10,7 +10,7 @@
   primByte: 127
   primShort: 32000
   primInt: 2147483647
-  primLong: 9223372036854775807
+  primLong: "9223372036854775807"
   primFloat: 3.141590118408203
   primDouble: 2.718281828
   primChar: Ω
@@ -164,7 +164,7 @@
     primByte: 127
     primShort: 32000
     primInt: 2147483647
-    primLong: 9223372036854775807
+    primLong: "9223372036854775807"
     primFloat: 3.141590118408203
     primDouble: 2.718281828
     primChar: Ω
@@ -358,6 +358,22 @@
     # Empty map
     emptyMap:
     {}
+    # List containing null values
+    listWithNulls:
+    [
+      first
+      null
+      third
+      null
+      fifth
+    ]
+    # Set containing null value
+    setWithNull:
+    [
+      one
+      null
+      three
+    ]
     # Field with repeating comments
     # This tests multiple @Comment annotations
     # on the same field
@@ -411,6 +427,22 @@
   # Empty map
   emptyMap:
   {}
+  # List containing null values
+  listWithNulls:
+  [
+    first
+    null
+    third
+    null
+    fifth
+  ]
+  # Set containing null value
+  setWithNull:
+  [
+    one
+    null
+    three
+  ]
   # Field with repeating comments
   # This tests multiple @Comment annotations
   # on the same field

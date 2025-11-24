@@ -234,6 +234,18 @@
     "variableField": "default",
     "emptyList": [],
     "emptyMap": {},
+    "listWithNulls": [
+      "first",
+      null,
+      "third",
+      null,
+      "fifth"
+    ],
+    "setWithNull": [
+      "one",
+      null,
+      "three"
+    ],
     "repeatingCommentField": "test value"
   },
   "customObj": {
@@ -268,5 +280,17 @@
   "variableField": "default",
   "emptyList": [],
   "emptyMap": {},
+  "listWithNulls": [
+    "first",
+    null,
+    "third",
+    null,
+    "fifth"
+  ],
+  "setWithNull": [
+    "one",
+    null,
+    "three"
+  ],
   "repeatingCommentField": "test value"
 }

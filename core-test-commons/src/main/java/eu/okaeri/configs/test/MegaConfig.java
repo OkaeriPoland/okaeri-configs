@@ -186,6 +186,22 @@ public class MegaConfig extends OkaeriConfig {
     @Comment("Empty map")
     private Map<String, String> emptyMap = new LinkedHashMap<>();
 
+    @Comment("List containing null values")
+    private List<String> listWithNulls = new ArrayList<>() {{
+        this.add("first");
+        this.add(null);
+        this.add("third");
+        this.add(null);
+        this.add("fifth");
+    }};
+
+    @Comment("Set containing null value")
+    private Set<String> setWithNull = new LinkedHashSet<>() {{
+        this.add("one");
+        this.add(null);
+        this.add("three");
+    }};
+
     @Comment("Field with repeating comments")
     @Comment("This tests multiple @Comment annotations")
     @Comment("on the same field")

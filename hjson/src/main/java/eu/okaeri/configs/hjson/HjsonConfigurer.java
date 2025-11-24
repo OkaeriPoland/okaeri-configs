@@ -39,6 +39,17 @@ public class HjsonConfigurer extends Configurer {
             return super.simplify(value, genericType, serdesContext, false);
         }
 
+        // long/Long values outside double precision range must be converted to String
+        // (HJSON library stores all numbers as double, which can only represent integers up to 2^53 precisely)
+        if ((genericsDeclaration.getType() == long.class) || (genericsDeclaration.getType() == Long.class)) {
+            long longValue = (Long) value;
+            // Double can precisely represent integers in range -(2^53) to 2^53
+            long maxSafeInteger = 1L << 53; // 9007199254740992
+            if ((longValue > maxSafeInteger) || (longValue < -maxSafeInteger)) {
+                return super.simplify(value, genericType, serdesContext, false);
+            }
+        }
+
         return super.simplify(value, genericType, serdesContext, conservative);
     }
 

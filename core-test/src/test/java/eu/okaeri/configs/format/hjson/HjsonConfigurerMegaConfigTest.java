@@ -5,7 +5,6 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.hjson.HjsonConfigurer;
 import eu.okaeri.configs.test.GoldenFileAssertion;
 import eu.okaeri.configs.test.MegaConfig;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -51,7 +50,6 @@ class HjsonConfigurerMegaConfigTest {
 
     @ParameterizedTest(name = "{0}: Round-trip MegaConfig")
     @MethodSource("hjsonConfigurers")
-    @Disabled("HJSON library has numeric overflow with Long.MAX_VALUE (9223372036854775807)")
     void testMegaConfig_RoundTrip(String configurerName, Configurer configurer, String goldenFilePath) throws Exception {
         // Given: MegaConfig saved to HJSON
         MegaConfig original = ConfigManager.create(MegaConfig.class);
@@ -71,7 +69,6 @@ class HjsonConfigurerMegaConfigTest {
 
     @ParameterizedTest(name = "{0}: Load MegaConfig with nested structure")
     @MethodSource("hjsonConfigurers")
-    @Disabled("HJSON library has numeric overflow with Long.MAX_VALUE (9223372036854775807)")
     void testMegaConfig_LoadNestedStructure(String configurerName, Configurer configurer, String goldenFilePath) throws Exception {
         // Given: MegaConfig with nested structure saved to HJSON
         MegaConfig original = ConfigManager.create(MegaConfig.class);
@@ -94,7 +91,6 @@ class HjsonConfigurerMegaConfigTest {
 
     @ParameterizedTest(name = "{0}: Load MegaConfig from golden file")
     @MethodSource("hjsonConfigurers")
-    @Disabled("HJSON library has numeric overflow with Long.MAX_VALUE (9223372036854775807)")
     void testMegaConfig_LoadFromGoldenFile(String configurerName, Configurer configurer, String goldenFilePath) throws Exception {
         // Given
         Path goldenFile = Paths.get(goldenFilePath);
@@ -114,7 +110,6 @@ class HjsonConfigurerMegaConfigTest {
 
     @ParameterizedTest(name = "{0}: Regression test with golden file")
     @MethodSource("hjsonConfigurers")
-    @Disabled("HJSON library has numeric overflow with Long.MAX_VALUE (9223372036854775807)")
     void testMegaConfig_RegressionTest(String configurerName, Configurer configurer, String goldenFilePath) throws Exception {
         // Given: MegaConfig with all features
         MegaConfig config = ConfigManager.create(MegaConfig.class);

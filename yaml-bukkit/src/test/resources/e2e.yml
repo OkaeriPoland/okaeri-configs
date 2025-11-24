@@ -260,6 +260,18 @@ nestedMegaConfig:
   emptyList: []
   # Empty map
   emptyMap: {}
+  # List containing null values
+  listWithNulls:
+  - first
+  - null
+  - third
+  - null
+  - fifth
+  # Set containing null value
+  setWithNull:
+  - one
+  - null
+  - three
   # Field with repeating comments
   # This tests multiple @Comment annotations
   # on the same field
@@ -292,6 +304,18 @@ variableField: default
 emptyList: []
 # Empty map
 emptyMap: {}
+# List containing null values
+listWithNulls:
+- first
+- null
+- third
+- null
+- fifth
+# Set containing null value
+setWithNull:
+- one
+- null
+- three
 # Field with repeating comments
 # This tests multiple @Comment annotations
 # on the same field
