@@ -1,6 +1,7 @@
 package eu.okaeri.configs;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.configurer.InMemoryConfigurer;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
@@ -104,13 +105,13 @@ public final class ConfigManager {
 
         T copy = initialize(ConfigManager.createUnsafe(into));
         Configurer configurer = config.getConfigurer();
+        copy.setConfigurer(configurer);
 
-        copy.withConfigurer(configurer);
         ConfigDeclaration copyDeclaration = copy.getDeclaration();
         ConfigDeclaration sourceDeclaration = config.getDeclaration();
 
         if (config.getBindFile() != null) {
-            copy.withBindFile(config.getBindFile());
+            copy.setBindFile(config.getBindFile());
         }
 
         // Process each field in target declaration
@@ -126,7 +127,7 @@ public final class ConfigManager {
 
                 // If value is OkaeriConfig or needs serialization, simplify it first
                 // This ensures nested objects are properly serialized before transformation
-                if (value != null && (value instanceof OkaeriConfig || !value.getClass().isPrimitive())) {
+                if ((value != null) && ((value instanceof OkaeriConfig) || !value.getClass().isPrimitive())) {
                     value = configurer.simplify(value, sourceField.get().getType(), SerdesContext.of(configurer, sourceField.get()), false);
                 }
 
@@ -170,11 +171,26 @@ public final class ConfigManager {
      * @throws OkaeriException if serialization or deserialization fails
      */
     public static <T extends OkaeriConfig> T deepCopy(@NonNull OkaeriConfig config, @NonNull Configurer newConfigurer, @NonNull Class<T> into) throws OkaeriException {
+
         T copy = initialize(ConfigManager.createUnsafe(into));
-        copy.withConfigurer(newConfigurer, config.getConfigurer().getRegistry().allSerdes());
+        newConfigurer.register(config.getConfigurer().getRegistry().allSerdes());
+        copy.setConfigurer(newConfigurer);
+
         if (config.getBindFile() != null) {
-            copy.withBindFile(config.getBindFile());
+            copy.setBindFile(config.getBindFile());
         }
+
+        // special handling for InMemoryConfigurer - use serialize/deserialize for deep copy
+        if (config.getConfigurer() instanceof InMemoryConfigurer) {
+            // deep copy each value field by field
+            for (FieldDeclaration field : config.getDeclaration().getFields()) {
+                newConfigurer.setValue(field.getName(), field.getValue(), field.getType(), field);
+            }
+            // update fields from configurer
+            copy.update();
+            return copy;
+        }
+
         copy.load(config.saveToString());
         return copy;
     }
