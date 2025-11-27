@@ -1,13 +1,25 @@
 name: Tests
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+  push:
+    branches: [ master ]
     paths-ignore:
       - '**.md'
       - '.wiki/**'
+      - '.editorconfig'
+      - '.gitattributes'
+      - '.gitignore'
       - 'LICENSE'
-  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - '**.md'
+      - '.wiki/**'
+      - '.editorconfig'
+      - '.gitattributes'
+      - '.gitignore'
+      - 'LICENSE'
 
 jobs:
   test:
@@ -34,6 +46,14 @@ jobs:
 
       - name: Build and test
         run: mvn clean install -B
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: OkaeriPoland/okaeri-configs
+          files: core-test/target/site/jacoco-aggregate/jacoco.xml
+          fail_ci_if_error: false
 
       - name: Upload test reports on failure
         if: failure()

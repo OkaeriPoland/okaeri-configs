@@ -1,8 +1,7 @@
 # Okaeri Configs
 
 ![License](https://img.shields.io/github/license/OkaeriPoland/okaeri-configs)
-![Total lines](https://img.shields.io/tokei/lines/github/OkaeriPoland/okaeri-configs)
-![Repo size](https://img.shields.io/github/repo-size/OkaeriPoland/okaeri-configs)
+[![Codecov](https://codecov.io/gh/OkaeriPoland/okaeri-configs/branch/master/graph/badge.svg)](https://codecov.io/gh/OkaeriPoland/okaeri-configs)
 ![Contributors](https://img.shields.io/github/contributors/OkaeriPoland/okaeri-configs)
 [![Discord](https://img.shields.io/discord/589089838200913930)](https://discord.gg/hASN5eX)
 
