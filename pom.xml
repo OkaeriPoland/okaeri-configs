@@ -184,6 +184,10 @@
             <id>okaeri-releases</id>
             <url>https://repo.okaeri.cloud/releases</url>
         </repository>
+        <repository>
+            <id>okaeri-snapshots</id>
+            <url>https://repo.okaeri.cloud/snapshots</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
