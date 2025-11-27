@@ -32,7 +32,6 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-test-commons</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- YAML SnakeYAML for serialization testing -->
@@ -40,7 +39,6 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-yaml-snakeyaml</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- YAML Bukkit for parameterized format testing -->
@@ -48,13 +46,12 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-yaml-bukkit</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
-            <scope>test</scope>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.code.gson</groupId>
@@ -68,13 +65,12 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-yaml-bungee</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
             <version>1.21-R0.2</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
 
         <!-- JSON GSON for parameterized format testing -->
@@ -82,7 +78,6 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-json-gson</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- JSON Simple for parameterized format testing -->
@@ -90,7 +85,6 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-json-simple</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- HJSON for parameterized format testing -->
@@ -98,7 +92,6 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-hjson</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- HOCON Lightbend for parameterized format testing -->
@@ -106,7 +99,6 @@
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-hocon-lightbend</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- JUnit 5 -->
