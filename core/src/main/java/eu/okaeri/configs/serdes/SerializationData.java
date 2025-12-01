@@ -168,7 +168,8 @@ public class SerializationData {
      * @param value target value
      */
     public void add(@NonNull String key, Object value) {
-        value = this.configurer.simplify(value, null, SerdesContext.of(this.configurer), true);
+        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
+        value = this.configurer.simplify(value, null, keyContext, true);
         this.addRaw(key, value);
     }
 
@@ -191,7 +192,8 @@ public class SerializationData {
      * @param genericType type declaration of value for simplification process
      */
     public void add(@NonNull String key, Object value, @NonNull GenericsDeclaration genericType) {
-        value = this.configurer.simplify(value, genericType, SerdesContext.of(this.configurer), true);
+        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
+        value = this.configurer.simplify(value, genericType, keyContext, true);
         this.addRaw(key, value);
     }
 
@@ -235,7 +237,8 @@ public class SerializationData {
             this.addRaw(key, null);
             return;
         }
-        Object object = this.configurer.simplifyCollection(collection, genericType, SerdesContext.of(this.configurer), true);
+        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
+        Object object = this.configurer.simplifyCollection(collection, genericType, keyContext, true);
         this.addRaw(key, object);
     }
 
@@ -308,7 +311,8 @@ public class SerializationData {
             this.addRaw(key, null);
             return;
         }
-        Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, SerdesContext.of(this.configurer), true);
+        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
+        Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, keyContext, true);
         this.addRaw(key, object);
     }
 

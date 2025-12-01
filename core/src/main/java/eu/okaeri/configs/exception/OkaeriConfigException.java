@@ -57,15 +57,16 @@ public class OkaeriConfigException extends OkaeriException {
             sb.append("Failed to load configuration value");
         }
 
-        // Path info
-        if ((path != null) && !path.isEmpty()) {
-            sb.append(" at '").append(path).append("'");
-        }
-
-        // Type info
+        // Details section (path, expected, actual)
+        boolean hasPath = (path != null) && !path.isEmpty();
         boolean hasTypeInfo = (expectedType != null) || (actualType != null);
-        if (hasTypeInfo) {
+
+        if (hasPath || hasTypeInfo) {
             sb.append("\n");
+
+            if (hasPath) {
+                sb.append("  At:       ").append(path).append("\n");
+            }
 
             if (expectedType != null) {
                 sb.append("  Expected: ").append(formatType(expectedType)).append("\n");
@@ -82,7 +83,6 @@ public class OkaeriConfigException extends OkaeriException {
             }
         }
 
-        System.out.println(sb);
         return sb.toString();
     }
 

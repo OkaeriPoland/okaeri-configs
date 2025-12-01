@@ -4,9 +4,10 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.InMemoryConfigurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import eu.okaeri.configs.serdes.ConfigPath;
+import eu.okaeri.configs.serdes.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -256,6 +257,89 @@ class OkaeriConfigExceptionTest {
             });
     }
 
+    // ==================== ObjectSerializer Path Propagation Tests ====================
+
+    @Test
+    void testLoadConfig_CustomSerializer_PathPropagatesThroughNestedGet() {
+        // Test that path propagates when ObjectSerializer calls data.get() for nested properties
+        Map<String, Object> personData = new LinkedHashMap<>();
+        personData.put("name", "John");
+        personData.put("age", "not_a_number"); // Invalid - should fail with path person.age
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("person", personData);
+
+        assertThatThrownBy(() -> {
+            CustomSerializerConfig config = ConfigManager.create(CustomSerializerConfig.class);
+            InMemoryConfigurer configurer = new InMemoryConfigurer(data);
+            configurer.getRegistry().register(new PersonSerializer());
+            config.setConfigurer(configurer);
+            config.update();
+        })
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException configEx = (OkaeriConfigException) ex;
+                assertThat(configEx.getPath()).isNotNull();
+                // Path should include both the field name and the property from inside the serializer
+                assertThat(configEx.getPath().toString()).isEqualTo("person.age");
+            });
+    }
+
+    @Test
+    void testLoadConfig_MissingSerializer_SuggestsRegistration() {
+        // Test that missing serializer gives a helpful error message
+        Map<String, Object> personData = new LinkedHashMap<>();
+        personData.put("name", "John");
+        personData.put("age", 25);
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("person", personData);
+
+        assertThatThrownBy(() -> {
+            CustomSerializerConfig config = ConfigManager.create(CustomSerializerConfig.class);
+            InMemoryConfigurer configurer = new InMemoryConfigurer(data);
+            // Intentionally NOT registering PersonSerializer
+            config.setConfigurer(configurer);
+            config.update();
+        })
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException configEx = (OkaeriConfigException) ex;
+                assertThat(configEx.getPath()).isNotNull();
+                assertThat(configEx.getPath().toString()).isEqualTo("person");
+                // Should suggest registering a serializer
+                assertThat(configEx.getMessage()).contains("No serializer found");
+                assertThat(configEx.getMessage()).contains("Person");
+                assertThat(configEx.getMessage()).contains("ObjectSerializer");
+            });
+    }
+
+    @Test
+    void testLoadConfig_CustomSerializer_PathPropagatesThroughNestedList() {
+        // Test that path propagates when ObjectSerializer calls data.getAsList()
+        Map<String, Object> teamData = new LinkedHashMap<>();
+        teamData.put("name", "Engineering");
+        teamData.put("memberIds", Arrays.asList(1, 2, "not_a_number", 4)); // Invalid at index 2
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("team", teamData);
+
+        assertThatThrownBy(() -> {
+            TeamConfig config = ConfigManager.create(TeamConfig.class);
+            InMemoryConfigurer configurer = new InMemoryConfigurer(data);
+            configurer.getRegistry().register(new TeamSerializer());
+            config.setConfigurer(configurer);
+            config.update();
+        })
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException configEx = (OkaeriConfigException) ex;
+                assertThat(configEx.getPath()).isNotNull();
+                // Path should include field, property from serializer, and list index
+                assertThat(configEx.getPath().toString()).isEqualTo("team.memberIds[2]");
+            });
+    }
+
     // ==================== Test Config Classes ====================
 
     @Data
@@ -321,5 +405,73 @@ class OkaeriConfigExceptionTest {
     @EqualsAndHashCode(callSuper = false)
     public static class Level3 extends OkaeriConfig {
         private int value = 100;
+    }
+
+    // ==================== Custom Serializer Test Classes ====================
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class CustomSerializerConfig extends OkaeriConfig {
+        private Person person = new Person("Default", 0);
+    }
+
+    @Data
+    public static class Person {
+        private final String name;
+        private final int age;
+    }
+
+    public static class PersonSerializer implements ObjectSerializer<Person> {
+        @Override
+        public boolean supports(@NonNull Class<?> type) {
+            return Person.class.isAssignableFrom(type);
+        }
+
+        @Override
+        public void serialize(@NonNull Person object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+            data.add("name", object.getName());
+            data.add("age", object.getAge());
+        }
+
+        @Override
+        public Person deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+            // These calls should propagate the path context
+            String name = data.get("name", String.class);
+            int age = data.get("age", Integer.class); // Will fail if "age" is not a valid integer
+            return new Person(name, age);
+        }
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class TeamConfig extends OkaeriConfig {
+        private Team team = new Team("Default", Arrays.asList(1, 2, 3));
+    }
+
+    @Data
+    public static class Team {
+        private final String name;
+        private final List<Integer> memberIds;
+    }
+
+    public static class TeamSerializer implements ObjectSerializer<Team> {
+        @Override
+        public boolean supports(@NonNull Class<?> type) {
+            return Team.class.isAssignableFrom(type);
+        }
+
+        @Override
+        public void serialize(@NonNull Team object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+            data.add("name", object.getName());
+            data.addCollection("memberIds", object.getMemberIds(), Integer.class);
+        }
+
+        @Override
+        public Team deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+            String name = data.get("name", String.class);
+            // This call should propagate path context through the list elements
+            List<Integer> memberIds = data.getAsList("memberIds", Integer.class);
+            return new Team(name, memberIds);
+        }
     }
 }

@@ -466,8 +466,14 @@ public abstract class Configurer {
             }
             // failed casting, explicit error
             catch (ClassCastException exception) {
+                // Provide helpful message when a Map can't be converted to a custom type
+                String message = "Cannot convert value";
+                if ((object instanceof Map) && !Map.class.isAssignableFrom(workingClazz)) {
+                    message = "No serializer found for type '" + workingClazz.getSimpleName() + "'. " +
+                        "Register an ObjectSerializer or make the class extend OkaeriConfig";
+                }
                 throw OkaeriConfigException.builder()
-                    .message("Cannot convert value")
+                    .message(message)
                     .path(serdesContext.getPath())
                     .expectedType(target)
                     .actualValue(object)

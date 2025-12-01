@@ -163,7 +163,8 @@ public class DeserializationData {
     @SuppressWarnings("unchecked")
     public <T> T getDirect(@NonNull String key, @NonNull GenericsDeclaration genericType) {
         Object object = this.getRaw(key);
-        return (T) this.configurer.resolveType(object, null, genericType.getType(), genericType, SerdesContext.of(this.configurer));
+        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
+        return (T) this.configurer.resolveType(object, null, genericType.getType(), genericType, keyContext);
     }
 
     /**
@@ -177,7 +178,8 @@ public class DeserializationData {
      */
     public <T> T get(@NonNull String key, @NonNull Class<T> valueType) {
         Object object = this.getRaw(key);
-        return this.configurer.resolveType(object, null, valueType, null, SerdesContext.of(this.configurer));
+        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
+        return this.configurer.resolveType(object, null, valueType, null, keyContext);
     }
 
     /**
