@@ -40,8 +40,7 @@ Special implementations for safe use in specific environments, e.g., game server
 | **BungeeCord/Waterfall** | 🌟 [yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee) | ⚠️ Partial¹ | No extra dependencies needed                                                                         |
 | **Velocity/Sponge**      | json-gson, hocon-lightbend, or yaml-snakeyaml                                            | Varies      | Exclude format deps when shading (provided by environment)                                           |
 
-¹ Comments not supported on Collection/Map elements<br>
-² Only header and top-level field comments (see [module README](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend))
+¹ Comments not supported on Collection/Map elements
 
 ## Validation extensions
 
