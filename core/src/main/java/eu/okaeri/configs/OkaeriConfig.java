@@ -555,7 +555,19 @@ public abstract class OkaeriConfig {
         }
 
         try {
-            this.getConfigurer().load(inputStream, this.getDeclaration());
+            // Buffer the content for error reporting
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] chunk = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(chunk)) != -1) {
+                buffer.write(chunk, 0, bytesRead);
+            }
+            byte[] contentBytes = buffer.toByteArray();
+            String rawContent = new String(contentBytes, StandardCharsets.UTF_8);
+            this.getConfigurer().setRawContent(rawContent);
+
+            // Parse from buffered content
+            this.getConfigurer().load(new ByteArrayInputStream(contentBytes), this.getDeclaration());
         } catch (Exception exception) {
             throw new OkaeriException("failed #load", exception);
         }
@@ -765,9 +777,10 @@ public abstract class OkaeriConfig {
             } catch (Exception exception) {
                 // Wrap with structured info
                 throw OkaeriConfigException.builder()
-                    .message("Failed to load configuration value")
+                    .message("Cannot deserialize")
                     .path(fieldPath)
                     .expectedType(genericType)
+                    .configurer(this.configurer)
                     .cause(exception)
                     .build();
             }
@@ -824,6 +837,7 @@ public abstract class OkaeriConfig {
                             .path(fieldPath)
                             .expectedType(fieldType)
                             .actualValue(property)
+                            .configurer(this.configurer)
                             .cause(exception)
                             .build();
                     }

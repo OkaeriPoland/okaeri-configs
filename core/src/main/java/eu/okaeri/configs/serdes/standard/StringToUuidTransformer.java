@@ -16,6 +16,10 @@ public class StringToUuidTransformer extends ObjectTransformer<String, UUID> {
 
     @Override
     public UUID transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return UUID.fromString(data);
+        try {
+            return UUID.fromString(data);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Expected UUID (e.g. 550e8400-e29b-41d4-a716-446655440000)");
+        }
     }
 }

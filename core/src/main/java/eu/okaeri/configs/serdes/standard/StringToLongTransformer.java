@@ -16,6 +16,10 @@ public class StringToLongTransformer extends ObjectTransformer<String, Long> {
 
     @Override
     public Long transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return new BigDecimal(data).longValueExact();
+        try {
+            return new BigDecimal(data).longValueExact();
+        } catch (NumberFormatException | ArithmeticException e) {
+            throw new IllegalArgumentException("Expected long number (e.g. 42, -10, 9999999999)");
+        }
     }
 }

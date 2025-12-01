@@ -16,6 +16,10 @@ public class StringToIntegerTransformer extends ObjectTransformer<String, Intege
 
     @Override
     public Integer transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return new BigDecimal(data).intValueExact();
+        try {
+            return new BigDecimal(data).intValueExact();
+        } catch (NumberFormatException | ArithmeticException e) {
+            throw new IllegalArgumentException("Expected whole number (e.g. 42, -10, 0)");
+        }
     }
 }

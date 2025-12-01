@@ -356,7 +356,7 @@ class StandardSerdesTest {
         ObjectTransformer<String, Integer> transformer = this.getTransformer(String.class, Integer.class);
 
         assertThatThrownBy(() -> transformer.transform("abc", this.context))
-            .isInstanceOf(NumberFormatException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -364,7 +364,7 @@ class StandardSerdesTest {
         ObjectTransformer<String, Integer> transformer = this.getTransformer(String.class, Integer.class);
 
         assertThatThrownBy(() -> transformer.transform("999999999999999999999", this.context))
-            .isInstanceOf(ArithmeticException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -372,7 +372,7 @@ class StandardSerdesTest {
         ObjectTransformer<String, Double> transformer = this.getTransformer(String.class, Double.class);
 
         assertThatThrownBy(() -> transformer.transform("not-a-number", this.context))
-            .isInstanceOf(NumberFormatException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

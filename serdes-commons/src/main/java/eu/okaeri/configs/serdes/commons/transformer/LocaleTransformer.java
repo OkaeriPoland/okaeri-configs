@@ -16,7 +16,13 @@ public class LocaleTransformer extends BidirectionalTransformer<String, Locale> 
 
     @Override
     public Locale leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return Locale.forLanguageTag(this.normalize(data));
+        String normalized = this.normalize(data);
+        Locale locale = Locale.forLanguageTag(normalized);
+        // Locale.forLanguageTag returns empty locale for invalid tags
+        if (locale.getLanguage().isEmpty() && !normalized.isEmpty()) {
+            throw new IllegalArgumentException("Expected locale (e.g. en, en-US, pl-PL)");
+        }
+        return locale;
     }
 
     @Override

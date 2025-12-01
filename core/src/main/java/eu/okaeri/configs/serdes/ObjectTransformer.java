@@ -6,6 +6,14 @@ import lombok.NonNull;
 
 public abstract class ObjectTransformer<S, D> {
 
+    /**
+     * Returns the original class for error reporting.
+     * For wrapped BidirectionalTransformers, returns the original transformer class.
+     */
+    public Class<?> getOriginalClass() {
+        return this.getClass();
+    }
+
     public abstract GenericsPair<S, D> getPair();
 
     public abstract D transform(S data, SerdesContext context);

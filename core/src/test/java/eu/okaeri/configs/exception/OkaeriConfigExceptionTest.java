@@ -4,7 +4,10 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.InMemoryConfigurer;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import eu.okaeri.configs.serdes.*;
+import eu.okaeri.configs.serdes.ConfigPath;
+import eu.okaeri.configs.serdes.DeserializationData;
+import eu.okaeri.configs.serdes.ObjectSerializer;
+import eu.okaeri.configs.serdes.SerializationData;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -31,10 +34,8 @@ class OkaeriConfigExceptionTest {
             .actualValue("not_a_number")
             .build();
 
-        assertThat(exception.getMessage()).contains("maxPlayers");
-        assertThat(exception.getMessage()).contains("Integer");
-        assertThat(exception.getMessage()).contains("not_a_number");
-        assertThat(exception.getMessage()).contains("String");
+        assertThat(exception.getMessage()).isEqualTo(
+            "Failed to convert value 'maxPlayers' to Integer from String: \"not_a_number\"");
     }
 
     @Test
@@ -45,7 +46,8 @@ class OkaeriConfigExceptionTest {
             .actualValue("invalid")
             .build();
 
-        assertThat(exception.getMessage()).contains("database.connection.port");
+        assertThat(exception.getMessage()).isEqualTo(
+            "Failed to load 'database.connection.port' to Integer from String: \"invalid\"");
     }
 
     @Test
@@ -56,7 +58,8 @@ class OkaeriConfigExceptionTest {
             .actualValue(123)
             .build();
 
-        assertThat(exception.getMessage()).contains("servers[2].host");
+        assertThat(exception.getMessage()).isEqualTo(
+            "Failed to load 'servers[2].host' to String from Integer: 123");
     }
 
     @Test
@@ -67,7 +70,8 @@ class OkaeriConfigExceptionTest {
             .actualValue(null)
             .build();
 
-        assertThat(exception.getMessage()).contains("settings[\"api-key\"]");
+        assertThat(exception.getMessage()).isEqualTo(
+            "Failed to load 'settings[\"api-key\"]' to String");
     }
 
     @Test
@@ -78,7 +82,8 @@ class OkaeriConfigExceptionTest {
             .actualValue("not_a_list")
             .build();
 
-        assertThat(exception.getMessage()).contains("List<String>");
+        assertThat(exception.getMessage()).isEqualTo(
+            "Failed to load 'users' to List<String> from String: \"not_a_list\"");
     }
 
     @Test

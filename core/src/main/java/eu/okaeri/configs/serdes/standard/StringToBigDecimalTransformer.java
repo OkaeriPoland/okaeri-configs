@@ -16,6 +16,10 @@ public class StringToBigDecimalTransformer extends ObjectTransformer<String, Big
 
     @Override
     public BigDecimal transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return new BigDecimal(data);
+        try {
+            return new BigDecimal(data);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Expected precise decimal (e.g. 3.14, -100.50, 0)");
+        }
     }
 }

@@ -1,11 +1,13 @@
 package eu.okaeri.configs.serdes.commons.transformer;
 
+import eu.okaeri.configs.exception.ValueIndexedException;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class PatternTransformer extends BidirectionalTransformer<String, Pattern> {
 
@@ -16,7 +18,11 @@ public class PatternTransformer extends BidirectionalTransformer<String, Pattern
 
     @Override
     public Pattern leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return Pattern.compile(data);
+        try {
+            return Pattern.compile(data);
+        } catch (PatternSyntaxException e) {
+            throw new ValueIndexedException(e.getDescription(), e.getIndex(), e);
+        }
     }
 
     @Override

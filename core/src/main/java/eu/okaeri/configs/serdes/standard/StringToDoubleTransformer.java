@@ -14,6 +14,10 @@ public class StringToDoubleTransformer extends ObjectTransformer<String, Double>
 
     @Override
     public Double transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return Double.parseDouble(data);
+        try {
+            return Double.parseDouble(data);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Expected decimal number (e.g. 3.14, -0.5, 100.0)");
+        }
     }
 }

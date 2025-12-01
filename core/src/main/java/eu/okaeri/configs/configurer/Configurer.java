@@ -38,6 +38,14 @@ public abstract class Configurer {
     @Setter
     private ConfigPath basePath = ConfigPath.root();
 
+    /**
+     * Raw configuration content for error reporting.
+     * Stored during load to enable source-level error markers.
+     */
+    @Getter
+    @Setter
+    private String rawContent;
+
     @Setter
     @Getter
     @NonNull
@@ -273,8 +281,22 @@ public abstract class Configurer {
             DeserializationData deserializationData = (object instanceof Map)
                 ? new DeserializationData((Map<String, Object>) object, configurer, serdesContext)
                 : new DeserializationData(Collections.singletonMap(ObjectSerializer.VALUE, object), configurer, serdesContext);
-            Object deserialized = objectSerializer.deserialize(deserializationData, target);
-            return workingClazz.cast(deserialized);
+            try {
+                Object deserialized = objectSerializer.deserialize(deserializationData, target);
+                return workingClazz.cast(deserialized);
+            } catch (OkaeriConfigException e) {
+                throw e;
+            } catch (Exception e) {
+                throw OkaeriConfigException.builder()
+                    .message("Cannot deserialize")
+                    .path(serdesContext.getPath())
+                    .expectedType(target)
+                    .actualValue(object)
+                    .configurer(this)
+                    .errorCode(objectSerializer.getClass())
+                    .cause(e)
+                    .build();
+            }
         }
 
         // subconfig
@@ -364,6 +386,7 @@ public abstract class Configurer {
                         .path(serdesContext.getPath())
                         .expectedType(target)
                         .actualValue(strObject)
+                        .configurer(this)
                         .build();
                 }
                 if (source.isEnum() && (targetClazz == String.class)) {
@@ -388,10 +411,12 @@ public abstract class Configurer {
                 } catch (OkaeriConfigException e) {
                     // Re-wrap with the original value (not the intermediate String)
                     throw OkaeriConfigException.builder()
-                        .message("Cannot convert value")
+                        .message("Cannot transform")
                         .path(e.getPath())
                         .expectedType(e.getExpectedType())
                         .actualValue(object) // Use original value, not simplified
+                        .configurer(this)
+                        .errorCode(e.getErrorCode())
                         .cause(e.getCause())
                         .build();
                 }
@@ -410,16 +435,32 @@ public abstract class Configurer {
                 if (stepTwoTransformer != null) {
                     try {
                         Object transformed = stepOneTransformer.transform(object, serdesContext);
-                        Object doubleTransformed = stepTwoTransformer.transform(transformed, serdesContext);
-                        return workingClazz.cast(doubleTransformed);
+                        try {
+                            Object doubleTransformed = stepTwoTransformer.transform(transformed, serdesContext);
+                            return workingClazz.cast(doubleTransformed);
+                        } catch (OkaeriConfigException e) {
+                            throw e;
+                        } catch (Exception e) {
+                            throw OkaeriConfigException.builder()
+                                .message("Cannot transform")
+                                .path(serdesContext.getPath())
+                                .expectedType(target)
+                                .actualValue(object)
+                                .configurer(this)
+                                .errorCode(stepTwoTransformer.getOriginalClass())
+                                .cause(e)
+                                .build();
+                        }
                     } catch (OkaeriConfigException e) {
                         throw e;
                     } catch (Exception e) {
                         throw OkaeriConfigException.builder()
-                            .message("Cannot convert value")
+                            .message("Cannot transform")
                             .path(serdesContext.getPath())
                             .expectedType(target)
                             .actualValue(object)
+                            .configurer(this)
+                            .errorCode(stepOneTransformer.getOriginalClass())
                             .cause(e)
                             .build();
                     }
@@ -467,7 +508,7 @@ public abstract class Configurer {
             // failed casting, explicit error
             catch (ClassCastException exception) {
                 // Provide helpful message when a Map can't be converted to a custom type
-                String message = "Cannot convert value";
+                String message = "Cannot transform";
                 if ((object instanceof Map) && !Map.class.isAssignableFrom(workingClazz)) {
                     message = "No serializer found for type '" + workingClazz.getSimpleName() + "'. " +
                         "Register an ObjectSerializer or make the class extend OkaeriConfig";
@@ -477,6 +518,7 @@ public abstract class Configurer {
                     .path(serdesContext.getPath())
                     .expectedType(target)
                     .actualValue(object)
+                    .configurer(this)
                     .cause(exception)
                     .build();
             }
@@ -489,10 +531,12 @@ public abstract class Configurer {
             throw e;
         } catch (Exception e) {
             throw OkaeriConfigException.builder()
-                .message("Cannot convert value")
+                .message("Cannot transform")
                 .path(serdesContext.getPath())
                 .expectedType(target)
                 .actualValue(object)
+                .configurer(this)
+                .errorCode(transformer.getOriginalClass())
                 .cause(e)
                 .build();
         }

@@ -16,6 +16,10 @@ public class StringToBigIntegerTransformer extends ObjectTransformer<String, Big
 
     @Override
     public BigInteger transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return new BigInteger(data);
+        try {
+            return new BigInteger(data);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Expected precise integer (e.g. 42, -10, 0)");
+        }
     }
 }

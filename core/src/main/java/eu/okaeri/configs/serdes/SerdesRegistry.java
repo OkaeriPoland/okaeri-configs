@@ -26,6 +26,7 @@ public class SerdesRegistry {
     }
 
     public <L, R> void register(@NonNull BidirectionalTransformer<L, R> transformer) {
+        Class<?> originalClass = transformer.getClass();
         this.register(new ObjectTransformer<L, R>() {
             @Override
             public GenericsPair<L, R> getPair() {
@@ -35,6 +36,11 @@ public class SerdesRegistry {
             @Override
             public R transform(@NonNull L data, @NonNull SerdesContext serdesContext) {
                 return transformer.leftToRight(data, serdesContext);
+            }
+
+            @Override
+            public Class<?> getOriginalClass() {
+                return originalClass;
             }
         });
         this.register(new ObjectTransformer<R, L>() {
@@ -46,6 +52,11 @@ public class SerdesRegistry {
             @Override
             public L transform(@NonNull R data, @NonNull SerdesContext serdesContext) {
                 return transformer.rightToLeft(data, serdesContext);
+            }
+
+            @Override
+            public Class<?> getOriginalClass() {
+                return originalClass;
             }
         });
     }

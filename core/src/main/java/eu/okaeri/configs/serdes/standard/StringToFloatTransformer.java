@@ -14,6 +14,10 @@ public class StringToFloatTransformer extends ObjectTransformer<String, Float> {
 
     @Override
     public Float transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return Float.parseFloat(data);
+        try {
+            return Float.parseFloat(data);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Expected float number (e.g. 3.14, -0.5, 100.0)");
+        }
     }
 }
