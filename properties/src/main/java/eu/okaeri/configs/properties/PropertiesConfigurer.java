@@ -21,20 +21,11 @@ import java.util.*;
  * Features:
  * <ul>
  *   <li>Nested structures via dot notation: {@code database.host=localhost}</li>
- *   <li>Lists via index notation: {@code items.0=first}, {@code items.1=second}</li>
+ *   <li>Simple lists via comma notation: {@code tags=a,b,c} (when line ≤80 chars)</li>
+ *   <li>Complex lists via index notation: {@code items.0=first}, {@code items.1=second}</li>
  *   <li>Write-only comments using {@code #} prefix</li>
  *   <li>Zero external dependencies (uses java.util.Properties)</li>
  * </ul>
- * <p>
- * Example output:
- * <pre>
- * # Application settings
- * name=MyApp
- * database.host=localhost
- * database.port=5432
- * features.0=logging
- * features.1=metrics
- * </pre>
  */
 @Accessors(chain = true)
 public class PropertiesConfigurer extends Configurer {
@@ -92,17 +83,15 @@ public class PropertiesConfigurer extends Configurer {
 
     @Override
     public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        // Use Java's Properties to handle parsing
         Properties props = new Properties();
         props.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         // Convert to sorted map (Properties doesn't maintain order)
-        Map<String, String> flat = new LinkedHashMap<>();
-        props.stringPropertyNames().stream()
-            .sorted()
-            .forEach(key -> flat.put(key, props.getProperty(key)));
+        Map<String, String> flat = new TreeMap<>();
+        for (String key : props.stringPropertyNames()) {
+            flat.put(key, props.getProperty(key));
+        }
 
-        // Unflatten with declaration for empty collection detection
         this.map = this.unflatten(flat, declaration);
     }
 
@@ -110,209 +99,153 @@ public class PropertiesConfigurer extends Configurer {
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         StringBuilder sb = new StringBuilder();
 
-        // Write header comments
-        String[] header = declaration.getHeader();
-        if (header != null) {
-            for (String line : header) {
-                sb.append(this.commentPrefix).append(line).append("\n");
-            }
-            if (header.length > 0) {
-                sb.append("\n");
-            }
-        }
-
-        // Flatten map and write with comments
-        Map<String, String> flat = new LinkedHashMap<>();
-        this.flatten("", this.map, flat);
-
-        // Write properties with field comments
-        Set<String> writtenComments = new HashSet<>();
-        for (Map.Entry<String, String> entry : flat.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            // Write field comments for any level in the hierarchy
-            this.writeComments(sb, key, declaration, writtenComments);
-
-            sb.append(this.escapeKey(key)).append("=").append(this.escapeValue(value)).append("\n");
-        }
+        this.writeHeader(sb, declaration);
+        this.writeProperties(sb, declaration);
 
         outputStream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
     }
 
-    private void writeComments(StringBuilder sb, String key, ConfigDeclaration declaration, Set<String> writtenComments) {
+    // ==================== Writing ====================
+
+    private void writeHeader(StringBuilder sb, ConfigDeclaration declaration) {
+        String[] header = declaration.getHeader();
+        if ((header != null) && (header.length > 0)) {
+            for (String line : header) {
+                sb.append(this.commentPrefix).append(line).append("\n");
+            }
+            sb.append("\n");
+        }
+    }
+
+    private void writeProperties(StringBuilder sb, ConfigDeclaration declaration) {
+        Map<String, String> flat = this.flatten(this.map);
+        Set<String> writtenCommentPaths = new HashSet<>();
+
+        for (Map.Entry<String, String> entry : flat.entrySet()) {
+            String key = entry.getKey();
+            this.writeFieldComments(sb, key, declaration, writtenCommentPaths);
+            sb.append(escapeKey(key)).append("=").append(escapeValue(entry.getValue())).append("\n");
+        }
+    }
+
+    private void writeFieldComments(StringBuilder sb, String key, ConfigDeclaration declaration, Set<String> written) {
         String[] parts = key.split("\\.");
         ConfigDeclaration currentDecl = declaration;
         StringBuilder pathBuilder = new StringBuilder();
 
-        for (int i = 0; i < parts.length; i++) {
-            String part = parts[i];
-
-            // Skip numeric indices (list elements)
-            if (this.isNumeric(part)) {
-                if (pathBuilder.length() > 0) {
-                    pathBuilder.append(".");
-                }
-                pathBuilder.append(part);
+        for (String part : parts) {
+            // Skip numeric indices
+            if (isNumeric(part)) {
+                pathBuilder.append((pathBuilder.length() > 0) ? "." : "").append(part);
                 continue;
             }
 
-            if (pathBuilder.length() > 0) {
-                pathBuilder.append(".");
-            }
-            pathBuilder.append(part);
-            String currentPath = pathBuilder.toString();
+            pathBuilder.append((pathBuilder.length() > 0) ? "." : "").append(part);
+            String path = pathBuilder.toString();
 
-            // Only write comment once per path, and only on first occurrence
-            if (writtenComments.contains(currentPath)) {
-                // Navigate to nested declaration for next iteration
-                if (currentDecl != null) {
-                    Optional<FieldDeclaration> field = currentDecl.getField(part);
-                    if (field.isPresent() && field.get().getType().isConfig()) {
-                        currentDecl = ConfigDeclaration.of(field.get().getType().getType());
-                    } else {
-                        currentDecl = null;
-                    }
-                }
+            if (written.contains(path) || (currentDecl == null)) {
+                currentDecl = this.getNestedDeclaration(currentDecl, part);
                 continue;
             }
 
-            if (currentDecl != null) {
-                Optional<FieldDeclaration> field = currentDecl.getField(part);
-                if (field.isPresent()) {
-                    String[] comment = field.get().getComment();
-                    if (comment != null) {
-                        for (String line : comment) {
-                            sb.append(this.commentPrefix).append(line).append("\n");
-                        }
-                    }
-                    writtenComments.add(currentPath);
-
-                    // Navigate to nested declaration
-                    if (field.get().getType().isConfig()) {
-                        currentDecl = ConfigDeclaration.of(field.get().getType().getType());
-                    } else {
-                        currentDecl = null;
-                    }
-                } else {
-                    currentDecl = null;
-                }
-            }
-        }
-    }
-
-    private boolean isNumeric(String str) {
-        try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private void flatten(String prefix, Map<?, ?> map, Map<String, String> result) {
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
-            String key = prefix.isEmpty()
-                ? String.valueOf(entry.getKey())
-                : (prefix + "." + entry.getKey());
-            Object value = entry.getValue();
-
-            if (value == null) {
-                result.put(key, NULL_MARKER);
-                continue;
-            } else if (value instanceof Map) {
-                Map<?, ?> nested = (Map<?, ?>) value;
-                if (nested.isEmpty()) {
-                    // Empty value signals empty collection (type determined by ConfigDeclaration on load)
-                    result.put(key, "");
-                    continue;
-                }
-                // Check if this map represents a list (has sequential integer keys)
-                // Lists are often simplified to Maps with numeric keys
-                if (this.isListLikeMap(nested)) {
-                    String simpleList = this.tryFlattenListLikeMap(key, nested);
-                    if (simpleList != null) {
-                        result.put(key, simpleList);
-                        continue;
+            Optional<FieldDeclaration> field = currentDecl.getField(part);
+            if (field.isPresent()) {
+                String[] comment = field.get().getComment();
+                if (comment != null) {
+                    for (String line : comment) {
+                        sb.append(this.commentPrefix).append(line).append("\n");
                     }
                 }
-                this.flatten(key, nested, result);
-            } else if (value instanceof List) {
-                List<?> list = (List<?>) value;
-                if (list.isEmpty()) {
-                    // Empty value signals empty collection (type determined by ConfigDeclaration on load)
-                    result.put(key, "");
-                    continue;
-                }
-                // Try simple comma-separated format for lists of simple values
-                String simpleList = this.tryFlattenSimpleList(key, list);
-                if (simpleList != null) {
-                    result.put(key, simpleList);
-                    continue;
-                }
-                // Fall back to index notation for complex lists
-                for (int i = 0; i < list.size(); i++) {
-                    Object item = list.get(i);
-                    if (item == null) {
-                        result.put(key + "." + i, NULL_MARKER);
-                    } else if (item instanceof Map) {
-                        this.flatten(key + "." + i, (Map<?, ?>) item, result);
-                    } else if (item instanceof List) {
-                        // Handle nested lists (e.g., List<List<String>>)
-                        this.flattenList(key + "." + i, (List<?>) item, result);
-                    } else {
-                        result.put(key + "." + i, String.valueOf(item));
-                    }
-                }
+                written.add(path);
+                currentDecl = this.getNestedDeclaration(currentDecl, part);
             } else {
-                result.put(key, String.valueOf(value));
+                currentDecl = null;
             }
         }
     }
 
-    private void flattenList(String prefix, List<?> list, Map<String, String> result) {
-        if (list.isEmpty()) {
-            result.put(prefix, "");
+    private ConfigDeclaration getNestedDeclaration(ConfigDeclaration decl, String fieldName) {
+        if (decl == null) {
+            return null;
+        }
+        Optional<FieldDeclaration> field = decl.getField(fieldName);
+        if (field.isPresent() && field.get().getType().isConfig()) {
+            return ConfigDeclaration.of(field.get().getType().getType());
+        }
+        return null;
+    }
+
+    // ==================== Flattening (Object → Properties) ====================
+
+    private Map<String, String> flatten(Map<?, ?> map) {
+        Map<String, String> result = new LinkedHashMap<>();
+        this.flattenMap("", map, result);
+        return result;
+    }
+
+    private void flattenMap(String prefix, Map<?, ?> map, Map<String, String> result) {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            String key = prefix.isEmpty() ? String.valueOf(entry.getKey()) : (prefix + "." + entry.getKey());
+            this.flattenValue(key, entry.getValue(), result);
+        }
+    }
+
+    private void flattenValue(String key, Object value, Map<String, String> result) {
+        if (value == null) {
+            result.put(key, NULL_MARKER);
+        } else if (value instanceof Map) {
+            this.flattenMapOrList(key, (Map<?, ?>) value, result);
+        } else if (value instanceof List) {
+            this.flattenList(key, (List<?>) value, result);
+        } else {
+            result.put(key, String.valueOf(value));
+        }
+    }
+
+    private void flattenMapOrList(String key, Map<?, ?> map, Map<String, String> result) {
+        if (map.isEmpty()) {
+            result.put(key, "");
             return;
         }
-        // Try simple comma-separated format first
-        String simpleList = this.tryFlattenSimpleList(prefix, list);
-        if (simpleList != null) {
-            result.put(prefix, simpleList);
+        // Maps with sequential integer keys represent lists
+        List<Object> asList = this.tryConvertToList(map);
+        if (asList != null) {
+            this.flattenList(key, asList, result);
+        } else {
+            this.flattenMap(key, map, result);
+        }
+    }
+
+    private void flattenList(String key, List<?> list, Map<String, String> result) {
+        if (list.isEmpty()) {
+            result.put(key, "");
+            return;
+        }
+        // Try compact comma format first
+        String commaFormat = this.tryFormatAsCommaList(key, list);
+        if (commaFormat != null) {
+            result.put(key, commaFormat);
             return;
         }
         // Fall back to index notation
         for (int i = 0; i < list.size(); i++) {
-            Object item = list.get(i);
-            String key = prefix + "." + i;
-            if (item == null) {
-                result.put(key, NULL_MARKER);
-            } else if (item instanceof Map) {
-                this.flatten(key, (Map<?, ?>) item, result);
-            } else if (item instanceof List) {
-                this.flattenList(key, (List<?>) item, result);
-            } else {
-                result.put(key, String.valueOf(item));
-            }
+            this.flattenValue(key + "." + i, list.get(i), result);
         }
     }
 
     /**
-     * Tries to flatten a list as comma-separated values.
-     * Returns null if the list is not suitable for simple format.
+     * Tries to format a list as comma-separated values.
+     * Returns null if not suitable (contains commas/newlines, exceeds line length, or has complex values).
      */
-    private String tryFlattenSimpleList(String key, List<?> list) {
+    private String tryFormatAsCommaList(String key, List<?> list) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < list.size(); i++) {
             Object item = list.get(i);
-            // Not simple: Map, List (nested structures)
             if ((item instanceof Map) || (item instanceof List)) {
                 return null;
             }
-            // Null uses __null__ marker
             String value = (item == null) ? NULL_MARKER : String.valueOf(item);
-            // Not simple: contains comma or newline
-            if ((value.indexOf(',') >= 0) || (value.indexOf('\n') >= 0) || (value.indexOf('\r') >= 0)) {
+            if (containsDelimiter(value)) {
                 return null;
             }
             if (i > 0) {
@@ -320,85 +253,236 @@ public class PropertiesConfigurer extends Configurer {
             }
             sb.append(value);
         }
-        // Check total line length: key + "=" + value
-        int lineLength = key.length() + 1 + sb.length();
-        if (lineLength > this.simpleListMaxLineLength) {
+        // Check line length: key=value
+        if ((key.length() + 1 + sb.length()) > this.simpleListMaxLineLength) {
             return null;
         }
         return sb.toString();
     }
 
     /**
-     * Checks if a map has sequential integer keys starting from 0 (i.e., represents a list).
-     * Works with Map<?, ?> where keys might be String or Integer.
+     * Converts a map with sequential integer keys (0, 1, 2, ...) to a list.
+     * Returns null if the map doesn't represent a list.
      */
-    private boolean isListLikeMap(Map<?, ?> map) {
+    private List<Object> tryConvertToList(Map<?, ?> map) {
+        if (map.isEmpty()) {
+            return null;
+        }
+        // Parse and validate indices
+        TreeMap<Integer, Object> indexed = new TreeMap<>();
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            Integer index = parseNonNegativeInt(String.valueOf(entry.getKey()));
+            if (index == null) {
+                return null;
+            }
+            indexed.put(index, entry.getValue());
+        }
+        // Check sequential from 0
+        int expected = 0;
+        for (int index : indexed.keySet()) {
+            if (index != expected++) {
+                return null;
+            }
+        }
+        return new ArrayList<>(indexed.values());
+    }
+
+    // ==================== Unflattening (Properties → Object) ====================
+
+    private Map<String, Object> unflatten(Map<String, String> flat, ConfigDeclaration declaration) {
+        // Build nested structure from dot notation
+        Map<String, Object> root = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : flat.entrySet()) {
+            this.setNestedValue(root, entry.getKey().split("\\."), entry.getValue());
+        }
+        // Convert map structures to lists where appropriate
+        return this.convertStructures(root, declaration);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setNestedValue(Map<String, Object> root, String[] path, String value) {
+        Map<String, Object> current = root;
+        for (int i = 0; i < (path.length - 1); i++) {
+            Object existing = current.get(path[i]);
+            if (existing instanceof Map) {
+                current = (Map<String, Object>) existing;
+            } else {
+                Map<String, Object> newMap = new LinkedHashMap<>();
+                current.put(path[i], newMap);
+                current = newMap;
+            }
+        }
+        String leafKey = path[path.length - 1];
+        current.put(leafKey, NULL_MARKER.equals(value) ? null : value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> convertStructures(Map<String, Object> map, ConfigDeclaration declaration) {
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            GenericsDeclaration fieldType = this.getFieldType(declaration, key);
+
+            result.put(key, this.convertValue(value, fieldType));
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object convertValue(Object value, GenericsDeclaration type) {
+        if (value instanceof String) {
+            return this.convertStringValue((String) value, type);
+        }
+        if (value instanceof Map) {
+            return this.convertMapValue((Map<String, Object>) value, type);
+        }
+        return value;
+    }
+
+    private Object convertStringValue(String value, GenericsDeclaration type) {
+        // Empty string → empty collection or map
+        if (value.isEmpty()) {
+            if (isCollectionType(type)) {
+                return new ArrayList<>();
+            }
+            if (isMapType(type)) {
+                return new LinkedHashMap<>();
+            }
+        }
+        // Comma-separated list for collection types
+        if (isCollectionType(type)) {
+            return this.parseCommaList(value);
+        }
+        return value;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object convertMapValue(Map<String, Object> map, GenericsDeclaration type) {
+        boolean shouldBeList = isCollectionType(type);
+        boolean looksLikeList = this.looksLikeList(map);
+
+        if (shouldBeList || looksLikeList) {
+            GenericsDeclaration elementType = (type != null) ? type.getSubtypeAtOrNull(0) : null;
+            return this.convertMapToList(map, elementType);
+        }
+        // Regular nested map/subconfig
+        ConfigDeclaration nestedDecl = ((type != null) && type.isConfig())
+            ? ConfigDeclaration.of(type.getType())
+            : null;
+        return this.convertStructures(map, nestedDecl);
+    }
+
+    private List<Object> convertMapToList(Map<String, Object> map, GenericsDeclaration elementType) {
+        // Sort by numeric key
+        List<String> sortedKeys = new ArrayList<>(map.keySet());
+        sortedKeys.sort(Comparator.comparingInt(Integer::parseInt));
+
+        GenericsDeclaration nestedType = (elementType != null) ? elementType.getSubtypeAtOrNull(0) : null;
+        ConfigDeclaration elementDecl = ((elementType != null) && elementType.isConfig())
+            ? ConfigDeclaration.of(elementType.getType())
+            : null;
+
+        List<Object> list = new ArrayList<>();
+        for (String key : sortedKeys) {
+            Object value = map.get(key);
+            list.add(this.convertListElement(value, elementType, nestedType, elementDecl));
+        }
+        return list;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object convertListElement(Object value, GenericsDeclaration elementType,
+                                      GenericsDeclaration nestedType, ConfigDeclaration elementDecl) {
+        if (value instanceof Map) {
+            Map<String, Object> nested = (Map<String, Object>) value;
+            if (this.looksLikeList(nested)) {
+                return this.convertMapToList(nested, nestedType);
+            }
+            return this.convertStructures(nested, elementDecl);
+        }
+        if ((value instanceof String) && isCollectionType(elementType)) {
+            String strValue = (String) value;
+            return strValue.isEmpty() ? new ArrayList<>() : this.parseCommaList(strValue);
+        }
+        return value;
+    }
+
+    /**
+     * Parses a comma-separated string into a list, handling __null__ markers.
+     */
+    private List<Object> parseCommaList(String value) {
+        if (value.indexOf(',') < 0) {
+            // Single element
+            return new ArrayList<>(Collections.singletonList(NULL_MARKER.equals(value) ? null : value));
+        }
+        String[] parts = value.split(",", -1);
+        List<Object> list = new ArrayList<>(parts.length);
+        for (String part : parts) {
+            list.add(NULL_MARKER.equals(part) ? null : part);
+        }
+        return list;
+    }
+
+    private boolean looksLikeList(Map<String, Object> map) {
         if (map.isEmpty()) {
             return false;
         }
-
-        Set<Integer> indices = new TreeSet<>();
-        for (Object key : map.keySet()) {
-            try {
-                int index = Integer.parseInt(String.valueOf(key));
-                if (index < 0) {
-                    return false;
-                }
-                indices.add(index);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-
-        // Check for sequential indices starting from 0
         int expected = 0;
-        for (int index : indices) {
-            if (index != expected) {
+        TreeSet<Integer> indices = new TreeSet<>();
+        for (String key : map.keySet()) {
+            Integer index = parseNonNegativeInt(key);
+            if (index == null) {
                 return false;
             }
-            expected++;
+            indices.add(index);
         }
-
+        for (int index : indices) {
+            if (index != expected++) {
+                return false;
+            }
+        }
         return true;
     }
 
-    /**
-     * Tries to flatten a list-like map (with sequential integer keys) as comma-separated values.
-     * Returns null if the map is not suitable for simple format.
-     */
-    private String tryFlattenListLikeMap(String key, Map<?, ?> map) {
-        // Sort entries by key numerically (keys might be String or Integer)
-        List<Map.Entry<?, ?>> sortedEntries = new ArrayList<>(map.entrySet());
-        sortedEntries.sort(Comparator.comparingInt(e -> Integer.parseInt(String.valueOf(e.getKey()))));
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < sortedEntries.size(); i++) {
-            Object item = sortedEntries.get(i).getValue();
-            // Not simple: Map, List (nested structures)
-            if ((item instanceof Map) || (item instanceof List)) {
-                return null;
-            }
-            // Null uses __null__ marker
-            String value = (item == null) ? NULL_MARKER : String.valueOf(item);
-            // Not simple: contains comma or newline
-            if ((value.indexOf(',') >= 0) || (value.indexOf('\n') >= 0) || (value.indexOf('\r') >= 0)) {
-                return null;
-            }
-            if (i > 0) {
-                sb.append(",");
-            }
-            sb.append(value);
-        }
-        // Check total line length: key + "=" + value
-        int lineLength = key.length() + 1 + sb.length();
-        if (lineLength > this.simpleListMaxLineLength) {
+    private GenericsDeclaration getFieldType(ConfigDeclaration declaration, String key) {
+        if (declaration == null) {
             return null;
         }
-        return sb.toString();
+        Optional<FieldDeclaration> field = declaration.getField(key);
+        return field.map(FieldDeclaration::getType).orElse(null);
     }
 
-    private String escapeKey(String key) {
-        StringBuilder sb = new StringBuilder();
+    // ==================== Utilities ====================
+
+    private static boolean isNumeric(String str) {
+        return parseNonNegativeInt(str) != null;
+    }
+
+    private static Integer parseNonNegativeInt(String str) {
+        try {
+            int value = Integer.parseInt(str);
+            return (value >= 0) ? value : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static boolean containsDelimiter(String value) {
+        return (value.indexOf(',') >= 0) || (value.indexOf('\n') >= 0) || (value.indexOf('\r') >= 0);
+    }
+
+    private static boolean isCollectionType(GenericsDeclaration type) {
+        return (type != null) && Collection.class.isAssignableFrom(type.getType());
+    }
+
+    private static boolean isMapType(GenericsDeclaration type) {
+        return (type != null) && Map.class.isAssignableFrom(type.getType());
+    }
+
+    private static String escapeKey(String key) {
+        StringBuilder sb = new StringBuilder(key.length());
         for (int i = 0; i < key.length(); i++) {
             char c = key.charAt(i);
             if ((c == '=') || (c == ':') || (c == ' ')) {
@@ -409,217 +493,40 @@ public class PropertiesConfigurer extends Configurer {
         return sb.toString();
     }
 
-    private String escapeValue(String value) {
-        StringBuilder sb = new StringBuilder();
+    private static String escapeValue(String value) {
+        StringBuilder sb = new StringBuilder(value.length());
         boolean leadingWhitespace = true;
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
-            if (c == '\\') {
-                sb.append("\\\\");
-                leadingWhitespace = false;
-            } else if (c == '\n') {
-                sb.append("\\n");
-                leadingWhitespace = false;
-            } else if (c == '\r') {
-                sb.append("\\r");
-                leadingWhitespace = false;
-            } else if (c == '\t') {
-                sb.append("\\t");
-                leadingWhitespace = false;
-            } else if ((c == ' ') && leadingWhitespace) {
-                // Escape leading spaces to preserve them
-                sb.append("\\ ");
-            } else if (c > 0x7F) {
-                // Escape non-ASCII as unicode
-                sb.append(String.format("\\u%04X", (int) c));
-                leadingWhitespace = false;
-            } else {
-                sb.append(c);
-                if (c != ' ') {
+            switch (c) {
+                case '\\':
+                    sb.append("\\\\");
                     leadingWhitespace = false;
-                }
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    leadingWhitespace = false;
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    leadingWhitespace = false;
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    leadingWhitespace = false;
+                    break;
+                case ' ':
+                    sb.append(leadingWhitespace ? "\\ " : " ");
+                    break;
+                default:
+                    if (c > 0x7F) {
+                        sb.append(String.format("\\u%04X", (int) c));
+                    } else {
+                        sb.append(c);
+                    }
+                    leadingWhitespace = false;
             }
         }
         return sb.toString();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> unflatten(Map<String, String> flat, ConfigDeclaration declaration) {
-        Map<String, Object> root = new LinkedHashMap<>();
-
-        for (Map.Entry<String, String> entry : flat.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            String[] parts = key.split("\\.");
-            Map<String, Object> current = root;
-
-            for (int i = 0; i < (parts.length - 1); i++) {
-                String part = parts[i];
-                Object existing = current.get(part);
-
-                if (existing == null) {
-                    Map<String, Object> newMap = new LinkedHashMap<>();
-                    current.put(part, newMap);
-                    current = newMap;
-                } else if (existing instanceof Map) {
-                    current = (Map<String, Object>) existing;
-                } else {
-                    Map<String, Object> newMap = new LinkedHashMap<>();
-                    current.put(part, newMap);
-                    current = newMap;
-                }
-            }
-
-            String leafKey = parts[parts.length - 1];
-            current.put(leafKey, NULL_MARKER.equals(value) ? null : value);
-        }
-
-        // Convert maps with sequential integer keys to lists, using declaration for guidance
-        return this.convertMapsToLists(root, declaration);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> convertMapsToLists(Map<String, Object> map, ConfigDeclaration declaration) {
-        Map<String, Object> result = new LinkedHashMap<>();
-
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-
-            // Get field type from declaration
-            GenericsDeclaration fieldType = null;
-            if (declaration != null) {
-                Optional<FieldDeclaration> field = declaration.getField(key);
-                if (field.isPresent()) {
-                    fieldType = field.get().getType();
-                }
-            }
-
-            if ((value instanceof String) && (fieldType != null) && Collection.class.isAssignableFrom(fieldType.getType())) {
-                String strValue = (String) value;
-                if (strValue.isEmpty()) {
-                    // Empty string value for collection fields means empty collection
-                    result.put(key, new ArrayList<>());
-                } else if (strValue.indexOf(',') >= 0) {
-                    // Comma-separated simple list - convert __null__ markers back to null
-                    String[] parts = strValue.split(",");
-                    List<Object> list = new ArrayList<>();
-                    for (String part : parts) {
-                        list.add(NULL_MARKER.equals(part) ? null : part);
-                    }
-                    result.put(key, list);
-                } else {
-                    // Single-element list (no comma) - convert __null__ marker back to null
-                    Object element = NULL_MARKER.equals(strValue) ? null : strValue;
-                    result.put(key, new ArrayList<>(Collections.singletonList(element)));
-                }
-                continue;
-            }
-
-            if ("".equals(value) && (fieldType != null) && Map.class.isAssignableFrom(fieldType.getType())) {
-                // Empty string value for map fields means empty map
-                result.put(key, new LinkedHashMap<>());
-                continue;
-            }
-
-            if (value instanceof Map) {
-                Map<String, Object> nested = (Map<String, Object>) value;
-
-                // Check if this should be a list based on declaration or structure
-                boolean shouldBeList = (fieldType != null) && Collection.class.isAssignableFrom(fieldType.getType());
-                boolean looksLikeList = this.isListLike(nested);
-
-                if (shouldBeList || looksLikeList) {
-                    GenericsDeclaration elementType = (fieldType != null) ? fieldType.getSubtypeAtOrNull(0) : null;
-                    result.put(key, this.convertToList(nested, elementType));
-                } else {
-                    // Get nested declaration for subconfigs
-                    ConfigDeclaration nestedDeclaration = ((fieldType != null) && fieldType.isConfig())
-                        ? ConfigDeclaration.of(fieldType.getType())
-                        : null;
-                    result.put(key, this.convertMapsToLists(nested, nestedDeclaration));
-                }
-            } else {
-                result.put(key, value);
-            }
-        }
-
-        return result;
-    }
-
-    private boolean isListLike(Map<String, Object> map) {
-        if (map.isEmpty()) {
-            return false;
-        }
-
-        Set<Integer> indices = new TreeSet<>();
-        for (String key : map.keySet()) {
-            try {
-                int index = Integer.parseInt(key);
-                if (index < 0) {
-                    return false;
-                }
-                indices.add(index);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-
-        // Check for sequential indices starting from 0
-        int expected = 0;
-        for (int index : indices) {
-            if (index != expected) {
-                return false;
-            }
-            expected++;
-        }
-
-        return true;
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<Object> convertToList(Map<String, Object> map, GenericsDeclaration elementType) {
-        List<Object> list = new ArrayList<>();
-        List<String> sortedKeys = new ArrayList<>(map.keySet());
-        sortedKeys.sort(Comparator.comparingInt(Integer::parseInt));
-
-        // Get nested element type for List<List<...>> cases
-        GenericsDeclaration nestedElementType = (elementType != null) ? elementType.getSubtypeAtOrNull(0) : null;
-        ConfigDeclaration elementDeclaration = ((elementType != null) && elementType.isConfig())
-            ? ConfigDeclaration.of(elementType.getType())
-            : null;
-
-        for (String key : sortedKeys) {
-            Object value = map.get(key);
-            if (value instanceof Map) {
-                Map<String, Object> nested = (Map<String, Object>) value;
-                if (this.isListLike(nested)) {
-                    list.add(this.convertToList(nested, nestedElementType));
-                } else {
-                    list.add(this.convertMapsToLists(nested, elementDeclaration));
-                }
-            } else if ((value instanceof String) && (elementType != null) && Collection.class.isAssignableFrom(elementType.getType())) {
-                // Handle comma-separated string that should become a nested list
-                String strValue = (String) value;
-                if (strValue.isEmpty()) {
-                    list.add(new ArrayList<>());
-                } else if (strValue.indexOf(',') >= 0) {
-                    String[] parts = strValue.split(",");
-                    List<Object> nestedList = new ArrayList<>();
-                    for (String part : parts) {
-                        nestedList.add(NULL_MARKER.equals(part) ? null : part);
-                    }
-                    list.add(nestedList);
-                } else {
-                    Object element = NULL_MARKER.equals(strValue) ? null : strValue;
-                    list.add(new ArrayList<>(Collections.singletonList(element)));
-                }
-            } else {
-                list.add(value);
-            }
-        }
-
-        return list;
     }
 }
