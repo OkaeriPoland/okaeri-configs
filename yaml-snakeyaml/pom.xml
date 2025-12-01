@@ -6,10 +6,10 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>6.0.0-beta.7</version>
+        <version>6.0.0-beta.8</version>
     </parent>
     <artifactId>okaeri-configs-yaml-snakeyaml</artifactId>
-    <version>6.0.0-beta.7</version>
+    <version>6.0.0-beta.8</version>
 
     <build>
         <plugins>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>6.0.0-beta.7</version>
+            <version>6.0.0-beta.8</version>
             <scope>compile</scope>
         </dependency>
 
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-test-commons</artifactId>
-            <version>6.0.0-beta.7</version>
+            <version>6.0.0-beta.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
