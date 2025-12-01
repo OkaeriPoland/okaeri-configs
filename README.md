@@ -5,43 +5,43 @@
 ![Contributors](https://img.shields.io/github/contributors/OkaeriPoland/okaeri-configs)
 [![Discord](https://img.shields.io/discord/589089838200913930)](https://discord.gg/hASN5eX)
 
-## Supported platforms (general use)
+## Supported formats
 
-General implementations based on standard format libraries directly.
+### Zero external dependencies
 
-- **YAML**
-    - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): standalone YAML via SnakeYAML with comment support
-    - [yaml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-jackson): YAML via Jackson (SnakeYAML underneath), useful when Jackson is already a dependency
-- **XML**
-    - 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml): zero external dependencies, uses Java built-in XML APIs with full comment support
-- **Properties**
-    - [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties): zero external dependencies, flat `key=value` format with comments
-- **INI**
-    - [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties): zero external dependencies, section-based `[section]` format with comments
-- **TOML**
-    - [toml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/toml-jackson): TOML 1.0 via Jackson with comment support and proper table sections
-- **HJSON**
-    - [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON via hjson-java with full comment support
-- **JSON**
-    - [json-gson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): JSON via GSON, no comment support
-    - [json-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-jackson): JSON via Jackson, no comment support
-    - [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): JSON via json-simple, no pretty print, no comment support
-- **HOCON**
-    - [hocon-lightbend](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): HOCON via Lightbend Config with a lot of limitations (see module README)
+Uses only Java built-in APIs. Great for minimal footprint.
 
-## Supported platforms (environment dependent)
+| Format         | Module                                                                              | Comments | Notes                            |
+|----------------|-------------------------------------------------------------------------------------|----------|----------------------------------|
+| **XML**        | 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml)            | ✅ Full   | Uses Java built-in XML APIs      |
+| **Properties** | [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties) | ✅ Full   | Flat `key=value` format          |
+| **INI**        | [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties) | ✅ Full   | Section-based `[section]` format |
+
+### With external dependencies
+
+| Format    | Module                                                                                         | Comments     | Notes                                |
+|-----------|------------------------------------------------------------------------------------------------|--------------|--------------------------------------|
+| **YAML**  | 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml) | ⚠️ Partial¹  | Via SnakeYAML                        |
+| **YAML**  | [yaml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-jackson)        | ⚠️ Partial¹  | Via Jackson (SnakeYAML underneath)   |
+| **TOML**  | [toml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/toml-jackson)        | ✅ Full       | TOML 1.0 via Jackson                 |
+| **HJSON** | [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson)                      | ✅ Full       | Human JSON via hjson-java            |
+| **JSON**  | [json-gson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson)              | ❌ None       | Via Google GSON                      |
+| **JSON**  | [json-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-jackson)        | ❌ None       | Via Jackson                          |
+| **JSON**  | [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple)          | ❌ None       | Via json-simple, no pretty print     |
+| **HOCON** | [hocon-lightbend](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend)  | ⚠️ Top-level | Severely limited (see module README) |
+
+### Environment dependent
 
 Special implementations for safe use in specific environments, e.g., game servers.
 
-- **Bukkit/Spigot/Paper (Minecraft server)**
-    - 🌟 [Minecraft (Bukkit) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit): no need for additional dependencies when writing Spigot/Paper plugins
-      (best used with [okaeri-platform](https://github.com/OkaeriPoland/okaeri-platform))
-- **BungeeCord/Waterfall (Minecraft proxy)**
-    - 🌟 [Minecraft (Bungee) YamlConfiguration](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee): no need for additional dependencies when writing BungeeCord/Waterfall plugins
-- **Velocity (Minecraft proxy), Sponge (Minecraft server)**
-    - Currently no ready adapters, but use with [Google GSON](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson),
-      [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend), or [SnakeYAML](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml)
-      is possible (remember to exclude format-specific dependencies (e.g., gson) when shading, as these should be provided by the environment directly).
+| Platform                 | Module                                                                                   | Comments    | Notes                                                                                                |
+|--------------------------|------------------------------------------------------------------------------------------|-------------|------------------------------------------------------------------------------------------------------|
+| **Bukkit/Spigot/Paper**  | 🌟 [yaml-bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit) | ⚠️ Partial¹ | No extra dependencies (best with [okaeri-platform](https://github.com/OkaeriPoland/okaeri-platform)) |
+| **BungeeCord/Waterfall** | 🌟 [yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee) | ⚠️ Partial¹ | No extra dependencies needed                                                                         |
+| **Velocity/Sponge**      | json-gson, hocon-lightbend, or yaml-snakeyaml                                            | Varies      | Exclude format deps when shading (provided by environment)                                           |
+
+¹ Comments not supported on Collection/Map elements<br>
+² Only header and top-level field comments (see [module README](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend))
 
 ## Validation extensions
 
