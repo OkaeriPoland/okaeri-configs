@@ -105,95 +105,174 @@ public class XmlSimpleConfigurer extends Configurer {
         return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
     }
 
+    // ==================== Loading ====================
+
     @Override
     public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+        Document document = this.parseDocument(inputStream);
+        Element root = document.getDocumentElement();
+        if (root == null) {
+            throw new IllegalStateException("XML document has no root element");
+        }
+        this.map = this.parseMap(root, declaration);
+    }
 
+    private Document parseDocument(InputStream inputStream) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
         factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
         DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(inputStream);
-
-        Element root = document.getDocumentElement();
-        if (root == null) {
-            throw new IllegalStateException("XML document has no root element");
-        }
-
-        this.map = this.parseRootElement(root, declaration);
+        return builder.parse(inputStream);
     }
 
-    private Map<String, Object> parseRootElement(Element root, ConfigDeclaration declaration) {
+    private Map<String, Object> parseMap(Element parent, ConfigDeclaration declaration) {
         Map<String, Object> result = new LinkedHashMap<>();
-        List<Element> childElements = this.getChildElements(root.getChildNodes());
 
-        for (Element child : childElements) {
-            String key = child.hasAttribute(KEY_ATTRIBUTE)
-                ? child.getAttribute(KEY_ATTRIBUTE)
-                : child.getTagName();
-
-            GenericsDeclaration fieldType = null;
-            if (declaration != null) {
-                Optional<FieldDeclaration> field = declaration.getField(key);
-                if (field.isPresent()) {
-                    fieldType = field.get().getType();
-                }
-            }
-
-            result.put(key, this.parseElement(child, fieldType));
+        for (Element child : getChildElements(parent)) {
+            String key = getElementKey(child);
+            GenericsDeclaration fieldType = getFieldType(declaration, key);
+            result.put(key, this.parseValue(child, fieldType));
         }
 
         return result;
     }
 
-    @Override
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    private Object parseValue(Element element, GenericsDeclaration expectedType) {
+        List<Element> children = getChildElements(element);
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.newDocument();
+        // <null/> element means null value
+        if (isNullElement(children)) {
+            return null;
+        }
 
-        // Add header comments before root element
-        String[] header = declaration.getHeader();
-        if (header != null) {
-            for (String line : header) {
-                Comment comment = document.createComment(" " + line + " ");
-                document.appendChild(comment);
+        // No child elements: primitive value or empty collection
+        if (children.isEmpty()) {
+            return this.parseEmptyOrPrimitive(element, expectedType);
+        }
+
+        // Has children: list or map
+        if (this.isListStructure(children, expectedType)) {
+            return this.parseList(children, expectedType);
+        }
+        return this.parseNestedMap(children, expectedType);
+    }
+
+    private Object parseEmptyOrPrimitive(Element element, GenericsDeclaration expectedType) {
+        if (isCollectionType(expectedType)) {
+            return new ArrayList<>();
+        }
+        if (isMapOrConfigType(expectedType)) {
+            return new LinkedHashMap<>();
+        }
+        return element.getTextContent();
+    }
+
+    private boolean isListStructure(List<Element> children, GenericsDeclaration expectedType) {
+        // Trust declaration if available
+        if (expectedType != null) {
+            return Collection.class.isAssignableFrom(expectedType.getType());
+        }
+        // Fallback: all children are <item> elements
+        return children.stream().allMatch(e -> ITEM_ELEMENT.equals(e.getTagName()));
+    }
+
+    private List<Object> parseList(List<Element> children, GenericsDeclaration listType) {
+        GenericsDeclaration itemType = (listType != null) ? listType.getSubtypeAtOrNull(0) : null;
+
+        List<Object> list = new ArrayList<>();
+        for (Element child : children) {
+            list.add(this.parseValue(child, itemType));
+        }
+        return list;
+    }
+
+    private Map<String, Object> parseNestedMap(List<Element> children, GenericsDeclaration expectedType) {
+        ConfigDeclaration nestedDecl = getConfigDeclaration(expectedType);
+        GenericsDeclaration mapValueType = getMapValueType(expectedType);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (Element child : children) {
+            String key = getElementKey(child);
+            GenericsDeclaration childType = this.resolveChildType(key, nestedDecl, mapValueType);
+            result.put(key, this.parseValue(child, childType));
+        }
+        return result;
+    }
+
+    private GenericsDeclaration resolveChildType(String key, ConfigDeclaration nestedDecl, GenericsDeclaration mapValueType) {
+        if (nestedDecl != null) {
+            Optional<FieldDeclaration> field = nestedDecl.getField(key);
+            if (field.isPresent()) {
+                return field.get().getType();
             }
         }
+        return mapValueType;
+    }
+
+    // ==================== Writing ====================
+
+    @Override
+    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+        Document document = this.createDocument();
+
+        this.writeHeaderComments(document, declaration);
 
         Element root = document.createElement(ROOT_ELEMENT);
         document.appendChild(root);
-
         this.writeMap(document, root, this.map, declaration);
 
+        String xml = this.transformToString(document);
+        xml = this.postProcessHeaderComments(xml);
+
+        outputStream.write(xml.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private Document createDocument() throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.newDocument();
+    }
+
+    private void writeHeaderComments(Document document, ConfigDeclaration declaration) {
+        String[] header = declaration.getHeader();
+        if (header != null) {
+            for (String line : header) {
+                document.appendChild(document.createComment(" " + line + " "));
+            }
+        }
+    }
+
+    private String transformToString(Document document) throws Exception {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(this.indent));
 
-        // Transform to byte array first for post-processing
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DOMSource source = new DOMSource(document);
-        StreamResult result = new StreamResult(buffer);
-        transformer.transform(source, result);
+        transformer.transform(new DOMSource(document), new StreamResult(buffer));
+        return new String(buffer.toByteArray(), StandardCharsets.UTF_8);
+    }
 
-        // Post-process: add newlines after header comments (only before <config> to avoid modifying values)
-        String xml = new String(buffer.toByteArray(), StandardCharsets.UTF_8);
+    private String postProcessHeaderComments(String xml) {
         int configStart = xml.indexOf("<" + ROOT_ELEMENT);
-        if (configStart > 0) {
-            String headerPart = xml.substring(0, configStart);
-            String bodyPart = xml.substring(configStart);
-            headerPart = headerPart.replace("--><!--", "-->\n<!--");
-            // Add newline before <config> if header ends with comment
-            if (headerPart.endsWith("-->")) {
-                headerPart = headerPart + "\n";
-            }
-            xml = headerPart + bodyPart;
+        if (configStart <= 0) {
+            return xml;
         }
 
-        outputStream.write(xml.getBytes(StandardCharsets.UTF_8));
+        String header = xml.substring(0, configStart);
+        String body = xml.substring(configStart);
+
+        // Add newlines between consecutive comments
+        header = header.replace("--><!--", "-->\n<!--");
+
+        // Add newline before root element if header ends with comment
+        if (header.endsWith("-->")) {
+            header = header + "\n";
+        }
+
+        return header + body;
     }
 
     private void writeMap(Document document, Element parent, Map<?, ?> map, ConfigDeclaration declaration) {
@@ -201,154 +280,94 @@ public class XmlSimpleConfigurer extends Configurer {
             String key = String.valueOf(entry.getKey());
             Object value = entry.getValue();
 
-            // Add field comment if available
-            if (declaration != null) {
-                Optional<FieldDeclaration> field = declaration.getField(key);
-                if (field.isPresent()) {
-                    String[] comment = field.get().getComment();
-                    if (comment != null) {
-                        for (String line : comment) {
-                            Comment xmlComment = document.createComment(" " + line + " ");
-                            parent.appendChild(xmlComment);
-                        }
-                    }
-                }
-            }
+            this.writeFieldComment(document, parent, declaration, key);
 
-            Element element;
-            if (this.isValidXmlName(key)) {
-                element = document.createElement(key);
-            } else {
-                element = document.createElement(ENTRY_ELEMENT);
-                element.setAttribute(KEY_ATTRIBUTE, key);
-            }
-
-            // Get nested declaration for subconfigs or list element type
-            ConfigDeclaration nestedDeclaration = null;
-            if (declaration != null) {
-                Optional<FieldDeclaration> field = declaration.getField(key);
-                if (field.isPresent()) {
-                    GenericsDeclaration fieldType = field.get().getType();
-                    if (fieldType.isConfig()) {
-                        // Direct subconfig
-                        nestedDeclaration = ConfigDeclaration.of(fieldType.getType());
-                    } else if (value instanceof List) {
-                        // List of configs - pass element type declaration
-                        GenericsDeclaration elementType = fieldType.getSubtypeAtOrNull(0);
-                        if ((elementType != null) && elementType.isConfig()) {
-                            nestedDeclaration = ConfigDeclaration.of(elementType.getType());
-                        }
-                    }
-                }
-            }
-
-            this.writeValue(document, element, value, nestedDeclaration);
+            Element element = this.createElement(document, key);
+            ConfigDeclaration nestedDecl = this.getNestedDeclaration(declaration, key, value);
+            this.writeValue(document, element, value, nestedDecl);
             parent.appendChild(element);
         }
+    }
+
+    private void writeFieldComment(Document document, Element parent, ConfigDeclaration declaration, String key) {
+        if (declaration == null) {
+            return;
+        }
+        Optional<FieldDeclaration> field = declaration.getField(key);
+        if (field.isPresent()) {
+            String[] comment = field.get().getComment();
+            if (comment != null) {
+                for (String line : comment) {
+                    parent.appendChild(document.createComment(" " + line + " "));
+                }
+            }
+        }
+    }
+
+    private Element createElement(Document document, String key) {
+        if (isValidXmlName(key)) {
+            return document.createElement(key);
+        }
+        Element element = document.createElement(ENTRY_ELEMENT);
+        element.setAttribute(KEY_ATTRIBUTE, key);
+        return element;
+    }
+
+    private ConfigDeclaration getNestedDeclaration(ConfigDeclaration declaration, String key, Object value) {
+        if (declaration == null) {
+            return null;
+        }
+        Optional<FieldDeclaration> field = declaration.getField(key);
+        if (!field.isPresent()) {
+            return null;
+        }
+
+        GenericsDeclaration fieldType = field.get().getType();
+
+        // Direct subconfig
+        if (fieldType.isConfig()) {
+            return ConfigDeclaration.of(fieldType.getType());
+        }
+
+        // List of configs - use element type declaration
+        if (value instanceof List) {
+            GenericsDeclaration elementType = fieldType.getSubtypeAtOrNull(0);
+            if ((elementType != null) && elementType.isConfig()) {
+                return ConfigDeclaration.of(elementType.getType());
+            }
+        }
+
+        return null;
     }
 
     private void writeValue(Document document, Element element, Object value, ConfigDeclaration declaration) {
         if (value == null) {
             element.appendChild(document.createElement(NULL_ELEMENT));
-            return;
-        }
-
-        if (value instanceof Map) {
+        } else if (value instanceof Map) {
             this.writeMap(document, element, (Map<?, ?>) value, declaration);
-            return;
-        }
-
-        if (value instanceof List) {
-            boolean first = true;
-            for (Object item : (List<?>) value) {
-                Element itemElement = document.createElement(ITEM_ELEMENT);
-                // Use declaration only for first item (to show field comments as template)
-                this.writeValue(document, itemElement, item, first ? declaration : null);
-                element.appendChild(itemElement);
-                first = false;
-            }
-            return;
-        }
-
-        // Everything else is dumped as string - okaeri-configs handles type resolution
-        element.setTextContent(String.valueOf(value));
-    }
-
-    private Object parseElement(Element element, GenericsDeclaration expectedType) {
-        NodeList children = element.getChildNodes();
-        List<Element> childElements = this.getChildElements(children);
-
-        // Check for null: single <null/> child element
-        if ((childElements.size() == 1) && NULL_ELEMENT.equals(childElements.get(0).getTagName())) {
-            return null;
-        }
-
-        // If no child elements, use expected type to determine if it's an empty collection or primitive
-        if (childElements.isEmpty()) {
-            // Empty collection (List, Set, etc.)
-            if ((expectedType != null) && Collection.class.isAssignableFrom(expectedType.getType())) {
-                return new ArrayList<>();
-            }
-            // Empty map or config
-            if ((expectedType != null) && (Map.class.isAssignableFrom(expectedType.getType()) || expectedType.isConfig())) {
-                return new LinkedHashMap<>();
-            }
-            // Primitive value (returned as string)
-            return element.getTextContent();
-        }
-
-        // Use expected type if available, otherwise detect from structure
-        boolean isList;
-        if (expectedType != null) {
-            // Trust the declaration - prevents "item" field in config being detected as list
-            // Check for any Collection type (List, Set, etc.)
-            isList = Collection.class.isAssignableFrom(expectedType.getType());
+        } else if (value instanceof List) {
+            this.writeList(document, element, (List<?>) value, declaration);
         } else {
-            // Fallback: check if all children are "item" elements
-            isList = childElements.stream().allMatch(e -> ITEM_ELEMENT.equals(e.getTagName()));
+            element.setTextContent(String.valueOf(value));
         }
-
-        if (isList) {
-            List<Object> list = new ArrayList<>();
-            GenericsDeclaration itemType = (expectedType != null) ? expectedType.getSubtypeAtOrNull(0) : null;
-            for (Element child : childElements) {
-                list.add(this.parseElement(child, itemType));
-            }
-            return list;
-        }
-
-        // Otherwise it's a map - get nested declaration for subconfigs
-        Map<String, Object> result = new LinkedHashMap<>();
-        ConfigDeclaration nestedDeclaration = ((expectedType != null) && expectedType.isConfig())
-            ? ConfigDeclaration.of(expectedType.getType())
-            : null;
-        GenericsDeclaration mapValueType = ((expectedType != null) && Map.class.isAssignableFrom(expectedType.getType()))
-            ? expectedType.getSubtypeAtOrNull(1)
-            : null;
-
-        for (Element child : childElements) {
-            String key = child.hasAttribute(KEY_ATTRIBUTE)
-                ? child.getAttribute(KEY_ATTRIBUTE)
-                : child.getTagName();
-
-            // Determine expected type for this child
-            GenericsDeclaration childType = null;
-            if (nestedDeclaration != null) {
-                Optional<FieldDeclaration> field = nestedDeclaration.getField(key);
-                if (field.isPresent()) {
-                    childType = field.get().getType();
-                }
-            } else if (mapValueType != null) {
-                childType = mapValueType;
-            }
-
-            result.put(key, this.parseElement(child, childType));
-        }
-        return result;
     }
 
-    private List<Element> getChildElements(NodeList nodes) {
+    private void writeList(Document document, Element parent, List<?> list, ConfigDeclaration declaration) {
+        boolean first = true;
+        for (Object item : list) {
+            Element itemElement = document.createElement(ITEM_ELEMENT);
+            // Show field comments only for first item (as template)
+            this.writeValue(document, itemElement, item, first ? declaration : null);
+            parent.appendChild(itemElement);
+            first = false;
+        }
+    }
+
+    // ==================== Utilities ====================
+
+    private static List<Element> getChildElements(Element parent) {
         List<Element> elements = new ArrayList<>();
+        NodeList nodes = parent.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -358,7 +377,48 @@ public class XmlSimpleConfigurer extends Configurer {
         return elements;
     }
 
-    private boolean isValidXmlName(String name) {
+    private static String getElementKey(Element element) {
+        return element.hasAttribute(KEY_ATTRIBUTE)
+            ? element.getAttribute(KEY_ATTRIBUTE)
+            : element.getTagName();
+    }
+
+    private static boolean isNullElement(List<Element> children) {
+        return (children.size() == 1) && NULL_ELEMENT.equals(children.get(0).getTagName());
+    }
+
+    private static boolean isValidXmlName(String name) {
         return (name != null) && VALID_XML_NAME.matcher(name).matches();
+    }
+
+    private static boolean isCollectionType(GenericsDeclaration type) {
+        return (type != null) && Collection.class.isAssignableFrom(type.getType());
+    }
+
+    private static boolean isMapOrConfigType(GenericsDeclaration type) {
+        return (type != null) && (Map.class.isAssignableFrom(type.getType()) || type.isConfig());
+    }
+
+    private static GenericsDeclaration getFieldType(ConfigDeclaration declaration, String key) {
+        if (declaration == null) {
+            return null;
+        }
+        return declaration.getField(key)
+            .map(FieldDeclaration::getType)
+            .orElse(null);
+    }
+
+    private static ConfigDeclaration getConfigDeclaration(GenericsDeclaration type) {
+        if ((type != null) && type.isConfig()) {
+            return ConfigDeclaration.of(type.getType());
+        }
+        return null;
+    }
+
+    private static GenericsDeclaration getMapValueType(GenericsDeclaration type) {
+        if ((type != null) && Map.class.isAssignableFrom(type.getType())) {
+            return type.getSubtypeAtOrNull(1);
+        }
+        return null;
     }
 }
