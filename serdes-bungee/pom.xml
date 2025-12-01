@@ -6,16 +6,16 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>6.0.0-beta.8</version>
+        <version>6.0.0-beta.9</version>
     </parent>
     <artifactId>okaeri-configs-serdes-bungee</artifactId>
-    <version>6.0.0-beta.8</version>
+    <version>6.0.0-beta.9</version>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>6.0.0-beta.8</version>
+            <version>6.0.0-beta.9</version>
             <scope>compile</scope>
         </dependency>
 

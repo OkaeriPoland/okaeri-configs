@@ -22,7 +22,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-hocon-lightbend</artifactId>
-  <version>6.0.0-beta.8</version>
+  <version>6.0.0-beta.9</version>
 </dependency>
 ```
 
@@ -37,7 +37,7 @@ maven("https://repo.okaeri.cloud/releases")
 Add dependency to the `dependencies` section:
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-hocon-lightbend:6.0.0-beta.8")
+implementation("eu.okaeri:okaeri-configs-hocon-lightbend:6.0.0-beta.9")
 ```
 
 ## Limitations
