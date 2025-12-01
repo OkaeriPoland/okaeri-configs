@@ -3,6 +3,7 @@ package eu.okaeri.configs;
 import eu.okaeri.configs.annotation.ReadOnly;
 import eu.okaeri.configs.annotation.Variable;
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.exception.ValidationException;
 import eu.okaeri.configs.migrate.ConfigMigration;
@@ -11,6 +12,7 @@ import eu.okaeri.configs.migrate.view.RawConfigView;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.ConfigPath;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.SerdesRegistry;
@@ -746,11 +748,28 @@ public abstract class OkaeriConfig {
                 continue;
             }
 
+            // Build path including any base path from parent configs
+            ConfigPath basePath = this.configurer.getBasePath();
+            ConfigPath fieldPath = (basePath == null || basePath.isEmpty())
+                ? ConfigPath.of(fieldName)
+                : basePath.property(fieldName);
+            SerdesContext serdesContext = SerdesContext.of(this.configurer, field)
+                .withPath(fieldPath);
+
             Object value;
             try {
-                value = this.getConfigurer().getValue(fieldName, type, genericType, SerdesContext.of(this.configurer, field));
+                value = this.getConfigurer().getValue(fieldName, type, genericType, serdesContext);
+            } catch (OkaeriConfigException exception) {
+                // Already has structured info, just rethrow
+                throw exception;
             } catch (Exception exception) {
-                throw new OkaeriException("failed to #getValue for " + fieldName, exception);
+                // Wrap with structured info
+                throw OkaeriConfigException.builder()
+                    .message("Failed to load configuration value")
+                    .path(fieldPath)
+                    .expectedType(genericType)
+                    .cause(exception)
+                    .build();
             }
 
             if (!this.getConfigurer().isValid(field, value)) {
@@ -787,12 +806,26 @@ public abstract class OkaeriConfig {
 
                 if (property != null) {
                     GenericsDeclaration fieldType = field.getType();
+                    // Build path including any base path from parent configs
+                    ConfigPath basePath = this.configurer.getBasePath();
+                    ConfigPath fieldPath = (basePath == null || basePath.isEmpty())
+                        ? ConfigPath.of(field.getName())
+                        : basePath.property(field.getName());
+                    SerdesContext serdesContext = SerdesContext.of(this.configurer, field).withPath(fieldPath);
 
                     Object value;
                     try {
-                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), fieldType.getType(), fieldType, SerdesContext.of(this.configurer, field));
+                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), fieldType.getType(), fieldType, serdesContext);
+                    } catch (OkaeriConfigException exception) {
+                        throw exception;
                     } catch (Exception exception) {
-                        throw new OkaeriException("failed to #resolveType for @Variable { " + variable.value() + " }", exception);
+                        throw OkaeriConfigException.builder()
+                            .message("Failed to resolve @Variable(" + variable.value() + ")")
+                            .path(fieldPath)
+                            .expectedType(fieldType)
+                            .actualValue(property)
+                            .cause(exception)
+                            .build();
                     }
 
                     if (!this.getConfigurer().isValid(field, value)) {

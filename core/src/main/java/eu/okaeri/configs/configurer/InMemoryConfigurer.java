@@ -6,15 +6,21 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.SerdesRegistry;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+@NoArgsConstructor
 public class InMemoryConfigurer extends Configurer {
 
     private Map<String, Object> map = new LinkedHashMap<>();
+
+    public InMemoryConfigurer(@NonNull Map<String, Object> map) {
+        this.map = new LinkedHashMap<>(map);
+    }
 
     /**
      * Sets a value in the in-memory map after applying serialization transformations.

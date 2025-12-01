@@ -17,17 +17,22 @@ public class SerdesContext {
     @NonNull private final Configurer configurer;
     private final FieldDeclaration field;
     private final SerdesContextAttachments attachments;
+    @NonNull private final ConfigPath path;
 
     public static SerdesContext of(@NonNull Configurer configurer) {
-        return of(configurer, null, new SerdesContextAttachments());
+        return of(configurer, null, new SerdesContextAttachments(), ConfigPath.root());
     }
 
     public static SerdesContext of(@NonNull Configurer configurer, FieldDeclaration field) {
-        return of(configurer, field, (field == null) ? new SerdesContextAttachments() : field.readStaticAnnotations(configurer));
+        return of(configurer, field, (field == null) ? new SerdesContextAttachments() : field.readStaticAnnotations(configurer), ConfigPath.root());
     }
 
     public static SerdesContext of(@NonNull Configurer configurer, FieldDeclaration field, @NonNull SerdesContextAttachments attachments) {
-        return new SerdesContext(configurer, field, attachments);
+        return new SerdesContext(configurer, field, attachments, ConfigPath.root());
+    }
+
+    public static SerdesContext of(@NonNull Configurer configurer, FieldDeclaration field, @NonNull SerdesContextAttachments attachments, @NonNull ConfigPath path) {
+        return new SerdesContext(configurer, field, attachments, path);
     }
 
     public static SerdesContext.Builder builder() {
@@ -56,18 +61,79 @@ public class SerdesContext {
         return this.getAttachment(type).orElse(defaultValue);
     }
 
+    // ==================== Path Navigation ====================
+
+    /**
+     * Creates a new context with the path updated to include a property name.
+     *
+     * @param name the property name
+     * @return new context with updated path
+     */
+    public SerdesContext withProperty(@NonNull String name) {
+        return new SerdesContext(this.configurer, this.field, this.attachments, this.path.property(name));
+    }
+
+    /**
+     * Creates a new context with the path updated to include a list/array index.
+     *
+     * @param index the index (0-based)
+     * @return new context with updated path
+     */
+    public SerdesContext withIndex(int index) {
+        return new SerdesContext(this.configurer, this.field, this.attachments, this.path.index(index));
+    }
+
+    /**
+     * Creates a new context with the path updated to include a map key.
+     *
+     * @param key the map key
+     * @return new context with updated path
+     */
+    public SerdesContext withKey(@NonNull Object key) {
+        return new SerdesContext(this.configurer, this.field, this.attachments, this.path.key(key));
+    }
+
+    /**
+     * Creates a new context with the specified path.
+     *
+     * @param path the new path
+     * @return new context with the given path
+     */
+    public SerdesContext withPath(@NonNull ConfigPath path) {
+        return new SerdesContext(this.configurer, this.field, this.attachments, path);
+    }
+
+    /**
+     * Creates a new context with the specified field declaration but same path.
+     *
+     * @param field the field declaration
+     * @return new context with updated field
+     */
+    public SerdesContext withField(FieldDeclaration field) {
+        SerdesContextAttachments newAttachments = (field == null) ? new SerdesContextAttachments() : field.readStaticAnnotations(this.configurer);
+        return new SerdesContext(this.configurer, field, newAttachments, this.path);
+    }
+
     private static class Builder {
 
         private final SerdesContextAttachments attachments = new SerdesContextAttachments();
         private Configurer configurer;
         private FieldDeclaration field;
+        private ConfigPath path = ConfigPath.root();
 
-        public void configurer(Configurer configurer) {
+        public Builder configurer(Configurer configurer) {
             this.configurer = configurer;
+            return this;
         }
 
-        public void field(FieldDeclaration field) {
+        public Builder field(FieldDeclaration field) {
             this.field = field;
+            return this;
+        }
+
+        public Builder path(ConfigPath path) {
+            this.path = path;
+            return this;
         }
 
         public <A extends SerdesContextAttachment> Builder attach(Class<A> type, A attachment) {
@@ -78,8 +144,13 @@ public class SerdesContext {
             return this;
         }
 
+        public SerdesContext build() {
+            return SerdesContext.of(this.configurer, this.field, this.attachments, this.path);
+        }
+
+        @Deprecated
         public SerdesContext create() {
-            return SerdesContext.of(this.configurer, this.field, this.attachments);
+            return this.build();
         }
     }
 }

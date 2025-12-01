@@ -3,6 +3,7 @@ package eu.okaeri.configs.configurer;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.TargetType;
+import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
@@ -28,11 +29,19 @@ public abstract class Configurer {
     @Setter
     private OkaeriConfig parent;
 
+    /**
+     * Base path for error reporting in nested configs.
+     * When a subconfig is loaded, this is set to the parent's path
+     * so errors show the full path from root.
+     */
+    @Getter
+    @Setter
+    private ConfigPath basePath = ConfigPath.root();
+
     @Setter
     @Getter
     @NonNull
     private SerdesRegistry registry = new SerdesRegistry();
-
     {
         this.registry.register(new StandardSerdes());
     }
@@ -101,8 +110,10 @@ public abstract class Configurer {
         List collection = new ArrayList();
         GenericsDeclaration collectionSubtype = (genericType == null) ? null : genericType.getSubtypeAtOrNull(0);
 
+        int index = 0;
         for (Object collectionElement : value) {
-            collection.add(this.simplify(collectionElement, collectionSubtype, serdesContext, conservative));
+            collection.add(this.simplify(collectionElement, collectionSubtype, serdesContext.withIndex(index), conservative));
+            index++;
         }
 
         return collection;
@@ -116,8 +127,9 @@ public abstract class Configurer {
         GenericsDeclaration valueDeclaration = (genericType == null) ? null : genericType.getSubtypeAtOrNull(1);
 
         for (Map.Entry<Object, Object> entry : value.entrySet()) {
-            Object key = this.simplify(entry.getKey(), keyDeclaration, serdesContext, conservative);
-            Object kValue = this.simplify(entry.getValue(), valueDeclaration, serdesContext, conservative);
+            SerdesContext entryContext = serdesContext.withKey(entry.getKey());
+            Object key = this.simplify(entry.getKey(), keyDeclaration, entryContext, conservative);
+            Object kValue = this.simplify(entry.getValue(), valueDeclaration, entryContext, conservative);
             map.put(key, kValue);
         }
 
@@ -269,7 +281,10 @@ public abstract class Configurer {
         if (OkaeriConfig.class.isAssignableFrom(workingClazz)) {
             OkaeriConfig config = ConfigManager.createUnsafe((Class<? extends OkaeriConfig>) targetClazz);
             Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
-            config.setConfigurer(new InMemoryWrappedConfigurer(this, configMap));
+            InMemoryWrappedConfigurer childConfigurer = new InMemoryWrappedConfigurer(this, configMap);
+            // Propagate the current path as base path for error reporting in the child config
+            childConfigurer.setBasePath(serdesContext.getPath());
+            config.setConfigurer(childConfigurer);
             return (T) config.update();
         }
 
@@ -286,9 +301,11 @@ public abstract class Configurer {
                 Collection<Object> targetList = (Collection<Object>) this.createInstance(localTargetClazz);
                 GenericsDeclaration listDeclaration = genericTarget.getSubtypeAtOrNull(0);
 
+                int index = 0;
                 for (Object item : sourceList) {
-                    Object converted = this.resolveType(item, GenericsDeclaration.of(item), listDeclaration.getType(), listDeclaration, serdesContext);
+                    Object converted = this.resolveType(item, GenericsDeclaration.of(item), listDeclaration.getType(), listDeclaration, serdesContext.withIndex(index));
                     targetList.add(converted);
+                    index++;
                 }
 
                 return localTargetClazz.cast(targetList);
@@ -303,8 +320,9 @@ public abstract class Configurer {
                 Map<Object, Object> map = (Map<Object, Object>) this.createInstance(localTargetClazz);
 
                 for (Map.Entry<Object, Object> entry : values.entrySet()) {
-                    Object key = this.resolveType(entry.getKey(), GenericsDeclaration.of(entry.getKey()), keyDeclaration.getType(), keyDeclaration, serdesContext);
-                    Object value = this.resolveType(entry.getValue(), GenericsDeclaration.of(entry.getValue()), valueDeclaration.getType(), valueDeclaration, serdesContext);
+                    SerdesContext entryContext = serdesContext.withKey(entry.getKey());
+                    Object key = this.resolveType(entry.getKey(), GenericsDeclaration.of(entry.getKey()), keyDeclaration.getType(), keyDeclaration, entryContext);
+                    Object value = this.resolveType(entry.getValue(), GenericsDeclaration.of(entry.getValue()), valueDeclaration.getType(), valueDeclaration, entryContext);
                     map.put(key, value);
                 }
 
@@ -341,7 +359,12 @@ public abstract class Configurer {
                     }
                     // match fail
                     String enumValuesStr = Arrays.stream(targetClazz.getEnumConstants()).map(item -> ((Enum) item).name()).collect(Collectors.joining(", "));
-                    throw new IllegalArgumentException("no enum value for name " + strObject + " (available: " + enumValuesStr + ")");
+                    throw OkaeriConfigException.builder()
+                        .message("Invalid enum value '" + strObject + "' (available: " + enumValuesStr + ")")
+                        .path(serdesContext.getPath())
+                        .expectedType(target)
+                        .actualValue(strObject)
+                        .build();
                 }
                 if (source.isEnum() && (targetClazz == String.class)) {
                     Method enumMethod = objectClazz.getMethod("name");
@@ -360,7 +383,18 @@ public abstract class Configurer {
             if ((GenericsDeclaration.of(objectClazz).isPrimitiveWrapper() || objectClazz.isPrimitive())
                 && (GenericsDeclaration.of(workingClazz).isPrimitiveWrapper() || workingClazz.isPrimitive())) {
                 Object simplified = this.simplify(object, GenericsDeclaration.of(objectClazz), serdesContext, false);
-                return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz), serdesContext);
+                try {
+                    return this.resolveType(simplified, GenericsDeclaration.of(simplified), targetClazz, GenericsDeclaration.of(targetClazz), serdesContext);
+                } catch (OkaeriConfigException e) {
+                    // Re-wrap with the original value (not the intermediate String)
+                    throw OkaeriConfigException.builder()
+                        .message("Cannot convert value")
+                        .path(e.getPath())
+                        .expectedType(e.getExpectedType())
+                        .actualValue(object) // Use original value, not simplified
+                        .cause(e.getCause())
+                        .build();
+                }
             }
 
             // in conservative mode some values may change their type unexpected, e.g. '10' becomes 10
@@ -374,9 +408,21 @@ public abstract class Configurer {
 
                 // found it! convert
                 if (stepTwoTransformer != null) {
-                    Object transformed = stepOneTransformer.transform(object, serdesContext);
-                    Object doubleTransformed = stepTwoTransformer.transform(transformed, serdesContext);
-                    return workingClazz.cast(doubleTransformed);
+                    try {
+                        Object transformed = stepOneTransformer.transform(object, serdesContext);
+                        Object doubleTransformed = stepTwoTransformer.transform(transformed, serdesContext);
+                        return workingClazz.cast(doubleTransformed);
+                    } catch (OkaeriConfigException e) {
+                        throw e;
+                    } catch (Exception e) {
+                        throw OkaeriConfigException.builder()
+                            .message("Cannot convert value")
+                            .path(serdesContext.getPath())
+                            .expectedType(target)
+                            .actualValue(object)
+                            .cause(e)
+                            .build();
+                    }
                 }
             }
 
@@ -398,9 +444,10 @@ public abstract class Configurer {
                         continue;
                     }
 
+                    SerdesContext fieldContext = serdesContext.withProperty(field.getName()).withField(field);
                     Object deserializedValue = this.resolveType(
                         serializedValue, GenericsDeclaration.of(serializedValue),
-                        field.getType().getType(), field.getType(), SerdesContext.of(this, field)
+                        field.getType().getType(), field.getType(), fieldContext
                     );
 
                     try {
@@ -419,12 +466,30 @@ public abstract class Configurer {
             }
             // failed casting, explicit error
             catch (ClassCastException exception) {
-                throw new OkaeriException("cannot resolve " + object.getClass() + " to " + targetClazz + " (" + source + " => " + target + "): " + object, exception);
+                throw OkaeriConfigException.builder()
+                    .message("Cannot convert value")
+                    .path(serdesContext.getPath())
+                    .expectedType(target)
+                    .actualValue(object)
+                    .cause(exception)
+                    .build();
             }
         }
 
         // transformer - work with wrapper, auto-unboxing handles primitive conversion
-        return workingClazz.cast(transformer.transform(object, serdesContext));
+        try {
+            return workingClazz.cast(transformer.transform(object, serdesContext));
+        } catch (OkaeriConfigException e) {
+            throw e;
+        } catch (Exception e) {
+            throw OkaeriConfigException.builder()
+                .message("Cannot convert value")
+                .path(serdesContext.getPath())
+                .expectedType(target)
+                .actualValue(object)
+                .cause(e)
+                .build();
+        }
     }
 
     @SuppressWarnings("unchecked")
