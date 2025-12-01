@@ -14,9 +14,31 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
 
-        <junit.version>5.10.0</junit.version>
+        <!-- test -->
+        <junit.version>5.13.4</junit.version>
         <assertj.version>3.27.6</assertj.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+
+        <!-- format libraries -->
+        <jackson.version>2.20.1</jackson.version>
+        <snakeyaml.version>2.5</snakeyaml.version>
+        <gson.version>2.13.2</gson.version>
+        <json-simple.version>1.1.1</json-simple.version>
+        <okaeri-hjson.version>4.0.0</okaeri-hjson.version>
+        <hocon.version>1.4.5</hocon.version>
+
+        <!-- validation -->
+        <okaeri-validator.version>2.0.1</okaeri-validator.version>
+        <jakarta-validation.version>3.0.2</jakarta-validation.version>
+
+        <!-- serdes libraries -->
+        <adventure.version>4.25.0</adventure.version>
+        <bucket4j.version>7.5.0</bucket4j.version>
+        <okaeri-commons.version>0.2.21</okaeri-commons.version>
+
+        <!-- minecraft -->
+        <spigot-api.version>1.21.5-R0.1-SNAPSHOT</spigot-api.version>
+        <bungeecord-api.version>1.21-R0.2</bungeecord-api.version>
     </properties>
 
     <modules>

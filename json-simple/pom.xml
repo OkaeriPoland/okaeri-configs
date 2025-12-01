@@ -9,20 +9,19 @@
         <version>6.0.0-beta.10</version>
     </parent>
     <artifactId>okaeri-configs-json-simple</artifactId>
-    <version>6.0.0-beta.10</version>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>6.0.0-beta.10</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
+            <version>${json-simple.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>junit</groupId>

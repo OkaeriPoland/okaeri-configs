@@ -15,13 +15,13 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>6.0.0-beta.10</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.vladimir-bukhtoyarov</groupId>
             <artifactId>bucket4j-core</artifactId>
-            <version>7.5.0</version>
+            <version>${bucket4j.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

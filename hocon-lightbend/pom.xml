@@ -9,20 +9,19 @@
         <version>6.0.0-beta.10</version>
     </parent>
     <artifactId>okaeri-configs-hocon-lightbend</artifactId>
-    <version>6.0.0-beta.10</version>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>6.0.0-beta.10</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <version>1.4.2</version>
+            <version>${hocon.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

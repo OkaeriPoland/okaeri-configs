@@ -9,27 +9,26 @@
         <version>6.0.0-beta.10</version>
     </parent>
     <artifactId>okaeri-configs-toml-jackson</artifactId>
-    <version>6.0.0-beta.10</version>
 
     <dependencies>
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>6.0.0-beta.10</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-toml</artifactId>
-            <version>2.18.2</version>
+            <version>${jackson.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-test-commons</artifactId>
-            <version>6.0.0-beta.10</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 

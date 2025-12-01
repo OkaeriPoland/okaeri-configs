@@ -15,13 +15,13 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-core</artifactId>
-            <version>6.0.0-beta.10</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-            <version>3.0.2</version>
+            <version>${jakarta-validation.version}</version>
         </dependency>
     </dependencies>
 
