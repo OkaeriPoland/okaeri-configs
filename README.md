@@ -15,7 +15,9 @@ General implementations based on standard format libraries directly.
 - **XML**
     - 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml): zero external dependencies, uses Java built-in XML APIs with full comment support
 - **Properties**
-    - [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties): zero external dependencies, flat configs only (deep nesting gets verbose, non-ASCII escaped as `\uXXXX`)
+    - [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties): zero external dependencies, flat `key=value` format with comments
+- **INI**
+    - [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties): zero external dependencies, section-based `[section]` format with comments
 - **TOML**
     - [toml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/toml-jackson): TOML 1.0 via Jackson with comment support and proper table sections
 - **HJSON**

@@ -279,7 +279,18 @@ public class TomlJacksonConfigurer extends Configurer {
             }
 
             result.append("[").append(sectionPath).append("]\n");
+
+            // Resolve nested declaration for this section
+            ConfigDeclaration sectionDecl = this.resolveNestedDeclaration(sectionPath, declaration);
+
             for (String line : lines) {
+                String key = extractKey(line);
+                if ((key != null) && (sectionDecl != null) && !commentedKeys.contains(sectionPath + "." + key)) {
+                    // Use base key without dots for field lookup
+                    String baseKey = key.contains(".") ? key.substring(0, key.indexOf('.')) : key;
+                    this.appendFieldComment(result, sectionDecl, baseKey);
+                    commentedKeys.add(sectionPath + "." + key);
+                }
                 result.append(line).append("\n");
             }
         }
@@ -325,6 +336,26 @@ public class TomlJacksonConfigurer extends Configurer {
         String sectionPath = String.join(".", Arrays.copyOfRange(parts, 0, sectionDepth));
         String remainingKey = String.join(".", Arrays.copyOfRange(parts, sectionDepth, parts.length));
         return new String[]{sectionPath, remainingKey};
+    }
+
+    private ConfigDeclaration resolveNestedDeclaration(String sectionPath, ConfigDeclaration declaration) {
+        if ((declaration == null) || sectionPath.isEmpty()) {
+            return declaration;
+        }
+
+        String[] parts = sectionPath.split("\\.");
+        ConfigDeclaration currentDecl = declaration;
+
+        for (String part : parts) {
+            Optional<FieldDeclaration> field = currentDecl.getField(part);
+            if (field.isPresent() && field.get().getType().isConfig()) {
+                currentDecl = ConfigDeclaration.of(field.get().getType().getType());
+            } else {
+                return null;
+            }
+        }
+
+        return currentDecl;
     }
 
     private static int findEqualsIndex(String line) {

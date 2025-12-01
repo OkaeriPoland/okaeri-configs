@@ -25,7 +25,7 @@ class PropertiesConfigurerFeaturesTest {
         configurer.setCommentPrefix("#> ");
 
         CommentedConfig config = ConfigManager.create(CommentedConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -44,7 +44,7 @@ class PropertiesConfigurerFeaturesTest {
         configurer.setSimpleListMaxLineLength(20); // Force index format for most lists
 
         ListConfig config = ConfigManager.create(ListConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setItems(List.of("alpha", "beta", "gamma"));
 
         // When: Write to OutputStream
@@ -65,7 +65,7 @@ class PropertiesConfigurerFeaturesTest {
         configurer.setSimpleListMaxLineLength(200); // Allow longer comma lists
 
         ListConfig config = ConfigManager.create(ListConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setItems(List.of("very-long-item-one", "very-long-item-two", "very-long-item-three", "very-long-item-four"));
 
         // When: Write to OutputStream
