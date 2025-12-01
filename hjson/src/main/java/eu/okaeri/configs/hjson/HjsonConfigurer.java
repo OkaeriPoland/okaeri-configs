@@ -158,7 +158,10 @@ public class HjsonConfigurer extends Configurer {
             GenericsDeclaration arrayType = field.getType().getSubtypeAtOrNull(0);
             if (arrayType.isConfig()) {
                 ConfigDeclaration configDeclaration = ConfigDeclaration.of(arrayType.getType());
-                ((JsonArray) object).forEach(item -> this.addComments(item, configDeclaration, null));
+                JsonArray array = (JsonArray) object;
+                if (!array.isEmpty()) {
+                    this.addComments(array.get(0), configDeclaration, null);
+                }
             }
         }
 

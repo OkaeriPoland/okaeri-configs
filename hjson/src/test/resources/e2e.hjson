@@ -146,7 +146,6 @@
       subNumber: 10
     }
     {
-      # Subconfig field
       subField: sub2
       subNumber: 20
     }
@@ -300,7 +299,6 @@
         subNumber: 10
       }
       {
-        # Subconfig field
         subField: sub2
         subNumber: 20
       }
