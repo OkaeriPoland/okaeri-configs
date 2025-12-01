@@ -120,8 +120,8 @@ class XmlSimpleConfigurerFeaturesTest {
         config.save(file);
         String xml = Files.readString(file);
 
-        // Then: Null is marked with type attribute
-        assertThat(xml).contains("type=\"null\"");
+        // Then: Null is marked with null element
+        assertThat(xml).contains("<null/>");
     }
 
     @Test

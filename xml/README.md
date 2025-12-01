@@ -55,17 +55,27 @@ Example output:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Configuration File -->
-<!-- Database Settings -->
+<!-- My Application Config -->
 <config>
   <!-- The database host -->
   <host>localhost</host>
-  <!-- Port number -->
   <port>5432</port>
-  <items type="list">
-    <item>first</item>
-    <item>second</item>
-  </items>
+  <features>
+    <item>logging</item>
+    <item>metrics</item>
+  </features>
+  <!-- List of database connections -->
+  <databases>
+    <!-- Database connection settings -->
+    <item>
+      <name>primary</name>
+      <url>jdbc:mysql://localhost:3306/app</url>
+    </item>
+    <item>
+      <name>replica</name>
+      <url>jdbc:mysql://localhost:3307/app</url>
+    </item>
+  </databases>
 </config>
 ```
 
