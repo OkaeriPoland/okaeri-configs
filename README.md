@@ -11,6 +11,8 @@ General implementations based on standard format libraries directly.
 
 - **YAML**
     - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): YAML for everyone! Your best choice for public projects and their configurations
+- **XML**
+    - 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml): zero external dependencies, uses Java built-in XML APIs with full comment support
 - **HJSON**
     - 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON for your configuration, small total footprint but yet powerful
 - **JSON**
@@ -46,8 +48,9 @@ Special implementations for safe use in specific environments, e.g., game server
 
 ## Recommendations
 
-For `standalone platforms`, the [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson) module offers a good balance—it supports all features including full comment support with a small footprint.
-Combine it with [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) for a complete config solution.
+For `standalone platforms`, the [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml) module is a great choice with zero external dependencies (uses Java built-in APIs) and full comment support.
+Alternatively, the [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson) module offers a good balance of readability and small footprint, also including full comment support.
+Combine either with [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) for a complete config solution.
 
 For `any platform`, if some form of config validation is applicable (e.g., requiring that an integer is positive), it is recommended to use [Okaeri Validator](https://github.com/OkaeriPoland/okaeri-configs/tree/master/validator-okaeri) when possible.
 Only a few kilobytes but makes for a much better experience for both end-users and developers.
@@ -62,7 +65,7 @@ Okaeri's configuration library is an easy way to use Java classes as config adap
 - Allows for even complex types to be serialized/deserialized
 - Enhances your configs with durable comments and strongly-typed fields
 - Provides the ability to access typed fields with classic getters and setters
-- Core library is just ~129kB in size, most of the adapters require only ~100 lines of code
+- Core library is just ~133kB in size, most of the adapters require only ~100 lines of code
 
 ## Example
 

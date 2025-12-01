@@ -45,6 +45,9 @@
         <!-- hocon modules -->
         <module>hocon-lightbend</module>
 
+        <!-- xml modules -->
+        <module>xml</module>
+
         <!-- serdes modules -->
         <module>serdes-adventure</module>
         <module>serdes-bucket4j</module>

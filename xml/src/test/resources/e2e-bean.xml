@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="21.0.9" class="java.beans.XMLDecoder">
+ <object class="java.util.LinkedHashMap">
+  <void method="put">
+   <string>primBool</string>
+   <boolean>true</boolean>
+  </void>
+  <void method="put">
+   <string>wrapBool</string>
+   <boolean>false</boolean>
+  </void>
+  <void method="put">
+   <string>primByte</string>
+   <byte>127</byte>
+  </void>
+  <void method="put">
+   <string>primShort</string>
+   <short>32000</short>
+  </void>
+  <void method="put">
+   <string>primInt</string>
+   <int>2147483647</int>
+  </void>
+  <void method="put">
+   <string>primLong</string>
+   <long>9223372036854775807</long>
+  </void>
+  <void method="put">
+   <string>primFloat</string>
+   <float>3.14159</float>
+  </void>
+  <void method="put">
+   <string>primDouble</string>
+   <double>2.718281828</double>
+  </void>
+  <void method="put">
+   <string>primChar</string>
+   <char>Ω</char>
+  </void>
+  <void method="put">
+   <string>wrapByte</string>
+   <byte>100</byte>
+  </void>
+  <void method="put">
+   <string>wrapShort</string>
+   <short>30000</short>
+  </void>
+  <void method="put">
+   <string>wrapInt</string>
+   <int>123456</int>
+  </void>
+  <void method="put">
+   <string>wrapLong</string>
+   <long>987654321</long>
+  </void>
+  <void method="put">
+   <string>wrapFloat</string>
+   <float>1.414</float>
+  </void>
+  <void method="put">
+   <string>wrapDouble</string>
+   <double>1.732</double>
+  </void>
+  <void method="put">
+   <string>wrapChar</string>
+   <char>€</char>
+  </void>
+  <void method="put">
+   <string>simpleString</string>
+   <string>Hello, World!</string>
+  </void>
+  <void method="put">
+   <string>unicodeJapanese</string>
+   <string>こんにちは世界 🌍</string>
+  </void>
+  <void method="put">
+   <string>unicodeRussian</string>
+   <string>Привет мир! Тестирование кириллицы</string>
+  </void>
+  <void method="put">
+   <string>unicodePolish</string>
+   <string>Część świecie! Łódź, Gdańsk, Kraków, źdźbło</string>
+  </void>
+  <void method="put">
+   <string>specialChars</string>
+   <string>!@#$%^&amp;*()_+-=[]{}|;&apos;:&quot;&lt;&gt;?,./</string>
+  </void>
+  <void method="put">
+   <string>emptyString</string>
+   <string></string>
+  </void>
+  <void method="put">
+   <string>longStringNoSpaces</string>
+   <string>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</string>
+  </void>
+  <void method="put">
+   <string>longStringWithSpaces</string>
+   <string>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
+  </void>
+  <void method="put">
+   <string>multilineString</string>
+   <string>Line 1
+Line 2
+Line 3
+Line 4 with more text
+Line 5 final</string>
+  </void>
+  <void method="put">
+   <string>bigInt</string>
+   <string>999999999999999999999999999999</string>
+  </void>
+  <void method="put">
+   <string>bigDec</string>
+   <string>123.456789012345678901234567890</string>
+  </void>
+  <void method="put">
+   <string>stringList</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <string>alpha</string>
+    </void>
+    <void method="add">
+     <string>beta</string>
+    </void>
+    <void method="add">
+     <string>gamma</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>intList</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>2</int>
+    </void>
+    <void method="add">
+     <int>3</int>
+    </void>
+    <void method="add">
+     <int>5</int>
+    </void>
+    <void method="add">
+     <int>8</int>
+    </void>
+    <void method="add">
+     <int>13</int>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>stringSet</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <string>one</string>
+    </void>
+    <void method="add">
+     <string>two</string>
+    </void>
+    <void method="add">
+     <string>three</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>enumSet</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <string>FIRST</string>
+    </void>
+    <void method="add">
+     <string>SECOND</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>nestedListOfLists</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <string>a</string>
+      </void>
+      <void method="add">
+       <string>b</string>
+      </void>
+     </object>
+    </void>
+    <void method="add">
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <string>c</string>
+      </void>
+      <void method="add">
+       <string>d</string>
+      </void>
+      <void method="add">
+       <string>e</string>
+      </void>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>simpleMap</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>key1</string>
+     <string>value1</string>
+    </void>
+    <void method="put">
+     <string>key2</string>
+     <string>value2</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>intKeyMap</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <int>1</int>
+     <string>one</string>
+    </void>
+    <void method="put">
+     <int>2</int>
+     <string>two</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>nestedMap</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>group1</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>a</string>
+       <int>1</int>
+      </void>
+      <void method="put">
+       <string>b</string>
+       <int>2</int>
+      </void>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>enumKeyMap</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>FIRST</string>
+     <string>first value</string>
+    </void>
+    <void method="put">
+     <string>SECOND</string>
+     <string>second value</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>enumValueMap</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>a</string>
+     <string>FIRST</string>
+    </void>
+    <void method="put">
+     <string>b</string>
+     <string>THIRD</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>singleEnum</string>
+   <string>THIRD</string>
+  </void>
+  <void method="put">
+   <string>enumList</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <string>FIRST</string>
+    </void>
+    <void method="add">
+     <string>THIRD</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>subConfig</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>subField</string>
+     <string>default sub</string>
+    </void>
+    <void method="put">
+     <string>subNumber</string>
+     <int>42</int>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>subConfigList</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>subField</string>
+       <string>sub1</string>
+      </void>
+      <void method="put">
+       <string>subNumber</string>
+       <int>10</int>
+      </void>
+     </object>
+    </void>
+    <void method="add">
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>subField</string>
+       <string>sub2</string>
+      </void>
+      <void method="put">
+       <string>subNumber</string>
+       <int>20</int>
+      </void>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>nestedMegaConfig</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>primBool</string>
+     <boolean>true</boolean>
+    </void>
+    <void method="put">
+     <string>wrapBool</string>
+     <boolean>false</boolean>
+    </void>
+    <void method="put">
+     <string>primByte</string>
+     <byte>127</byte>
+    </void>
+    <void method="put">
+     <string>primShort</string>
+     <short>32000</short>
+    </void>
+    <void method="put">
+     <string>primInt</string>
+     <int>2147483647</int>
+    </void>
+    <void method="put">
+     <string>primLong</string>
+     <long>9223372036854775807</long>
+    </void>
+    <void method="put">
+     <string>primFloat</string>
+     <float>3.14159</float>
+    </void>
+    <void method="put">
+     <string>primDouble</string>
+     <double>2.718281828</double>
+    </void>
+    <void method="put">
+     <string>primChar</string>
+     <char>Ω</char>
+    </void>
+    <void method="put">
+     <string>wrapByte</string>
+     <byte>100</byte>
+    </void>
+    <void method="put">
+     <string>wrapShort</string>
+     <short>30000</short>
+    </void>
+    <void method="put">
+     <string>wrapInt</string>
+     <int>123456</int>
+    </void>
+    <void method="put">
+     <string>wrapLong</string>
+     <long>987654321</long>
+    </void>
+    <void method="put">
+     <string>wrapFloat</string>
+     <float>1.414</float>
+    </void>
+    <void method="put">
+     <string>wrapDouble</string>
+     <double>1.732</double>
+    </void>
+    <void method="put">
+     <string>wrapChar</string>
+     <char>€</char>
+    </void>
+    <void method="put">
+     <string>simpleString</string>
+     <string>Hello, World!</string>
+    </void>
+    <void method="put">
+     <string>unicodeJapanese</string>
+     <string>こんにちは世界 🌍</string>
+    </void>
+    <void method="put">
+     <string>unicodeRussian</string>
+     <string>Привет мир! Тестирование кириллицы</string>
+    </void>
+    <void method="put">
+     <string>unicodePolish</string>
+     <string>Część świecie! Łódź, Gdańsk, Kraków, źdźbło</string>
+    </void>
+    <void method="put">
+     <string>specialChars</string>
+     <string>!@#$%^&amp;*()_+-=[]{}|;&apos;:&quot;&lt;&gt;?,./</string>
+    </void>
+    <void method="put">
+     <string>emptyString</string>
+     <string></string>
+    </void>
+    <void method="put">
+     <string>longStringNoSpaces</string>
+     <string>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</string>
+    </void>
+    <void method="put">
+     <string>longStringWithSpaces</string>
+     <string>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
+    </void>
+    <void method="put">
+     <string>multilineString</string>
+     <string>Line 1
+Line 2
+Line 3
+Line 4 with more text
+Line 5 final</string>
+    </void>
+    <void method="put">
+     <string>bigInt</string>
+     <string>999999999999999999999999999999</string>
+    </void>
+    <void method="put">
+     <string>bigDec</string>
+     <string>123.456789012345678901234567890</string>
+    </void>
+    <void method="put">
+     <string>stringList</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <string>alpha</string>
+      </void>
+      <void method="add">
+       <string>beta</string>
+      </void>
+      <void method="add">
+       <string>gamma</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>intList</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <int>1</int>
+      </void>
+      <void method="add">
+       <int>2</int>
+      </void>
+      <void method="add">
+       <int>3</int>
+      </void>
+      <void method="add">
+       <int>5</int>
+      </void>
+      <void method="add">
+       <int>8</int>
+      </void>
+      <void method="add">
+       <int>13</int>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>stringSet</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <string>one</string>
+      </void>
+      <void method="add">
+       <string>two</string>
+      </void>
+      <void method="add">
+       <string>three</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>enumSet</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <string>FIRST</string>
+      </void>
+      <void method="add">
+       <string>SECOND</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>nestedListOfLists</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <object class="java.util.ArrayList">
+        <void method="add">
+         <string>a</string>
+        </void>
+        <void method="add">
+         <string>b</string>
+        </void>
+       </object>
+      </void>
+      <void method="add">
+       <object class="java.util.ArrayList">
+        <void method="add">
+         <string>c</string>
+        </void>
+        <void method="add">
+         <string>d</string>
+        </void>
+        <void method="add">
+         <string>e</string>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>simpleMap</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>key1</string>
+       <string>value1</string>
+      </void>
+      <void method="put">
+       <string>key2</string>
+       <string>value2</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>intKeyMap</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <int>1</int>
+       <string>one</string>
+      </void>
+      <void method="put">
+       <int>2</int>
+       <string>two</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>nestedMap</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>group1</string>
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>a</string>
+         <int>1</int>
+        </void>
+        <void method="put">
+         <string>b</string>
+         <int>2</int>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>enumKeyMap</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>FIRST</string>
+       <string>first value</string>
+      </void>
+      <void method="put">
+       <string>SECOND</string>
+       <string>second value</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>enumValueMap</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>a</string>
+       <string>FIRST</string>
+      </void>
+      <void method="put">
+       <string>b</string>
+       <string>THIRD</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>singleEnum</string>
+     <string>THIRD</string>
+    </void>
+    <void method="put">
+     <string>enumList</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <string>FIRST</string>
+      </void>
+      <void method="add">
+       <string>THIRD</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>subConfig</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>subField</string>
+       <string>default sub</string>
+      </void>
+      <void method="put">
+       <string>subNumber</string>
+       <int>42</int>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>subConfigList</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>subField</string>
+         <string>sub1</string>
+        </void>
+        <void method="put">
+         <string>subNumber</string>
+         <int>10</int>
+        </void>
+       </object>
+      </void>
+      <void method="add">
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>subField</string>
+         <string>sub2</string>
+        </void>
+        <void method="put">
+         <string>subNumber</string>
+         <int>20</int>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>nestedMegaConfig</string>
+     <null/>
+    </void>
+    <void method="put">
+     <string>customObj</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>name</string>
+       <string>test</string>
+      </void>
+      <void method="put">
+       <string>id</string>
+       <int>999</int>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>serializableList</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>name</string>
+         <string>item1</string>
+        </void>
+        <void method="put">
+         <string>id</string>
+         <int>1</int>
+        </void>
+       </object>
+      </void>
+      <void method="add">
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>name</string>
+         <string>item2</string>
+        </void>
+        <void method="put">
+         <string>id</string>
+         <int>2</int>
+        </void>
+       </object>
+      </void>
+      <void method="add">
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>name</string>
+         <string>item3</string>
+        </void>
+        <void method="put">
+         <string>id</string>
+         <int>3</int>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>serializableMap</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>obj1</string>
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>name</string>
+         <string>first</string>
+        </void>
+        <void method="put">
+         <string>id</string>
+         <int>100</int>
+        </void>
+       </object>
+      </void>
+      <void method="put">
+       <string>obj2</string>
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>name</string>
+         <string>second</string>
+        </void>
+        <void method="put">
+         <string>id</string>
+         <int>200</int>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>custom-key-field</string>
+     <string>custom value</string>
+    </void>
+    <void method="put">
+     <string>variableField</string>
+     <string>default</string>
+    </void>
+    <void method="put">
+     <string>nullValue</string>
+     <null/>
+    </void>
+    <void method="put">
+     <string>emptyList</string>
+     <object class="java.util.ArrayList"/>
+    </void>
+    <void method="put">
+     <string>emptyMap</string>
+     <object class="java.util.LinkedHashMap"/>
+    </void>
+    <void method="put">
+     <string>listWithNulls</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <string>first</string>
+      </void>
+      <void method="add">
+       <null/>
+      </void>
+      <void method="add">
+       <string>third</string>
+      </void>
+      <void method="add">
+       <null/>
+      </void>
+      <void method="add">
+       <string>fifth</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>setWithNull</string>
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <string>one</string>
+      </void>
+      <void method="add">
+       <null/>
+      </void>
+      <void method="add">
+       <string>three</string>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>repeatingCommentField</string>
+     <string>test value</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>customObj</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>name</string>
+     <string>test</string>
+    </void>
+    <void method="put">
+     <string>id</string>
+     <int>999</int>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>serializableList</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>name</string>
+       <string>item1</string>
+      </void>
+      <void method="put">
+       <string>id</string>
+       <int>1</int>
+      </void>
+     </object>
+    </void>
+    <void method="add">
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>name</string>
+       <string>item2</string>
+      </void>
+      <void method="put">
+       <string>id</string>
+       <int>2</int>
+      </void>
+     </object>
+    </void>
+    <void method="add">
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>name</string>
+       <string>item3</string>
+      </void>
+      <void method="put">
+       <string>id</string>
+       <int>3</int>
+      </void>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>serializableMap</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>obj1</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>name</string>
+       <string>first</string>
+      </void>
+      <void method="put">
+       <string>id</string>
+       <int>100</int>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>obj2</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>name</string>
+       <string>second</string>
+      </void>
+      <void method="put">
+       <string>id</string>
+       <int>200</int>
+      </void>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>custom-key-field</string>
+   <string>custom value</string>
+  </void>
+  <void method="put">
+   <string>variableField</string>
+   <string>default</string>
+  </void>
+  <void method="put">
+   <string>nullValue</string>
+   <null/>
+  </void>
+  <void method="put">
+   <string>emptyList</string>
+   <object class="java.util.ArrayList"/>
+  </void>
+  <void method="put">
+   <string>emptyMap</string>
+   <object class="java.util.LinkedHashMap"/>
+  </void>
+  <void method="put">
+   <string>listWithNulls</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <string>first</string>
+    </void>
+    <void method="add">
+     <null/>
+    </void>
+    <void method="add">
+     <string>third</string>
+    </void>
+    <void method="add">
+     <null/>
+    </void>
+    <void method="add">
+     <string>fifth</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>setWithNull</string>
+   <object class="java.util.ArrayList">
+    <void method="add">
+     <string>one</string>
+    </void>
+    <void method="add">
+     <null/>
+    </void>
+    <void method="add">
+     <string>three</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>repeatingCommentField</string>
+   <string>test value</string>
+  </void>
+ </object>
+</java>

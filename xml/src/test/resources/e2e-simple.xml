@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- =========================================== -->
+<!--   Okaeri Configs - Mega Test Config -->
+<!--   Tests ALL features comprehensively -->
+<!-- =========================================== -->
+<config>
+  <!-- Boolean primitive and wrapper -->
+  <primBool>true</primBool>
+  <wrapBool>false</wrapBool>
+  <!-- Numeric primitives -->
+  <primByte>127</primByte>
+  <primShort>32000</primShort>
+  <primInt>2147483647</primInt>
+  <primLong>9223372036854775807</primLong>
+  <primFloat>3.14159</primFloat>
+  <primDouble>2.718281828</primDouble>
+  <primChar>Ω</primChar>
+  <!-- Wrapper types -->
+  <wrapByte>100</wrapByte>
+  <wrapShort>30000</wrapShort>
+  <wrapInt>123456</wrapInt>
+  <wrapLong>987654321</wrapLong>
+  <wrapFloat>1.414</wrapFloat>
+  <wrapDouble>1.732</wrapDouble>
+  <wrapChar>€</wrapChar>
+  <!-- String tests -->
+  <!-- including unicode and special chars -->
+  <simpleString>Hello, World!</simpleString>
+  <unicodeJapanese>こんにちは世界 &#127757;</unicodeJapanese>
+  <unicodeRussian>Привет мир! Тестирование кириллицы</unicodeRussian>
+  <unicodePolish>Część świecie! Łódź, Gdańsk, Kraków, źdźbło</unicodePolish>
+  <specialChars>!@#$%^&amp;*()_+-=[]{}|;':"&lt;&gt;?,./</specialChars>
+  <emptyString/>
+  <!-- Long string without spaces (tests line wrapping) -->
+  <longStringNoSpaces>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</longStringNoSpaces>
+  <!-- Long string with spaces (tests folding behavior) -->
+  <longStringWithSpaces>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</longStringWithSpaces>
+  <!-- Multiline string (tests literal/folded style) -->
+  <multilineString>Line 1
+Line 2
+Line 3
+Line 4 with more text
+Line 5 final</multilineString>
+  <!-- Math types for precision -->
+  <bigInt>999999999999999999999999999999</bigInt>
+  <bigDec>123.456789012345678901234567890</bigDec>
+  <!-- List of strings -->
+  <stringList type="list">
+    <item>alpha</item>
+    <item>beta</item>
+    <item>gamma</item>
+  </stringList>
+  <!-- List of integers -->
+  <intList type="list">
+    <item>1</item>
+    <item>2</item>
+    <item>3</item>
+    <item>5</item>
+    <item>8</item>
+    <item>13</item>
+  </intList>
+  <!-- Set of strings (order preserved) -->
+  <stringSet type="list">
+    <item>one</item>
+    <item>two</item>
+    <item>three</item>
+  </stringSet>
+  <!-- Set of enums -->
+  <enumSet type="list">
+    <item>FIRST</item>
+    <item>SECOND</item>
+  </enumSet>
+  <!-- Nested collection - list of lists -->
+  <nestedListOfLists type="list">
+    <item type="list">
+      <item>a</item>
+      <item>b</item>
+    </item>
+    <item type="list">
+      <item>c</item>
+      <item>d</item>
+      <item>e</item>
+    </item>
+  </nestedListOfLists>
+  <!-- Simple string-to-string map -->
+  <simpleMap type="map">
+    <key1>value1</key1>
+    <key2>value2</key2>
+  </simpleMap>
+  <!-- Map with integer keys -->
+  <intKeyMap type="map">
+    <entry key="1">one</entry>
+    <entry key="2">two</entry>
+  </intKeyMap>
+  <!-- Nested map -->
+  <nestedMap type="map">
+    <group1 type="map">
+      <a>1</a>
+      <b>2</b>
+    </group1>
+  </nestedMap>
+  <!-- Map with enum keys -->
+  <enumKeyMap type="map">
+    <FIRST>first value</FIRST>
+    <SECOND>second value</SECOND>
+  </enumKeyMap>
+  <!-- Map with enum values -->
+  <enumValueMap type="map">
+    <a>FIRST</a>
+    <b>THIRD</b>
+  </enumValueMap>
+  <!-- Simple enum -->
+  <singleEnum>THIRD</singleEnum>
+  <!-- List of enums -->
+  <enumList type="list">
+    <item>FIRST</item>
+    <item>THIRD</item>
+  </enumList>
+  <!-- Nested subconfig -->
+  <subConfig type="map">
+    <!-- Subconfig field -->
+    <subField>default sub</subField>
+    <subNumber>42</subNumber>
+  </subConfig>
+  <!-- List of nested configs -->
+  <subConfigList type="list">
+    <item type="map">
+      <!-- Subconfig field -->
+      <subField>sub1</subField>
+      <subNumber>10</subNumber>
+    </item>
+    <item type="map">
+      <subField>sub2</subField>
+      <subNumber>20</subNumber>
+    </item>
+  </subConfigList>
+  <!-- Complex multi-level subconfig -->
+  <!-- MegaConfig nested inside itself (2 levels deep) -->
+  <!-- Note: Set to null by default to avoid infinite recursion -->
+  <!-- Call populateNestedMegaConfig() after construction to initialize -->
+  <nestedMegaConfig type="map">
+    <!-- Boolean primitive and wrapper -->
+    <primBool>true</primBool>
+    <wrapBool>false</wrapBool>
+    <!-- Numeric primitives -->
+    <primByte>127</primByte>
+    <primShort>32000</primShort>
+    <primInt>2147483647</primInt>
+    <primLong>9223372036854775807</primLong>
+    <primFloat>3.14159</primFloat>
+    <primDouble>2.718281828</primDouble>
+    <primChar>Ω</primChar>
+    <!-- Wrapper types -->
+    <wrapByte>100</wrapByte>
+    <wrapShort>30000</wrapShort>
+    <wrapInt>123456</wrapInt>
+    <wrapLong>987654321</wrapLong>
+    <wrapFloat>1.414</wrapFloat>
+    <wrapDouble>1.732</wrapDouble>
+    <wrapChar>€</wrapChar>
+    <!-- String tests -->
+    <!-- including unicode and special chars -->
+    <simpleString>Hello, World!</simpleString>
+    <unicodeJapanese>こんにちは世界 &#127757;</unicodeJapanese>
+    <unicodeRussian>Привет мир! Тестирование кириллицы</unicodeRussian>
+    <unicodePolish>Część świecie! Łódź, Gdańsk, Kraków, źdźbło</unicodePolish>
+    <specialChars>!@#$%^&amp;*()_+-=[]{}|;':"&lt;&gt;?,./</specialChars>
+    <emptyString/>
+    <!-- Long string without spaces (tests line wrapping) -->
+    <longStringNoSpaces>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</longStringNoSpaces>
+    <!-- Long string with spaces (tests folding behavior) -->
+    <longStringWithSpaces>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</longStringWithSpaces>
+    <!-- Multiline string (tests literal/folded style) -->
+    <multilineString>Line 1
+Line 2
+Line 3
+Line 4 with more text
+Line 5 final</multilineString>
+    <!-- Math types for precision -->
+    <bigInt>999999999999999999999999999999</bigInt>
+    <bigDec>123.456789012345678901234567890</bigDec>
+    <!-- List of strings -->
+    <stringList type="list">
+      <item>alpha</item>
+      <item>beta</item>
+      <item>gamma</item>
+    </stringList>
+    <!-- List of integers -->
+    <intList type="list">
+      <item>1</item>
+      <item>2</item>
+      <item>3</item>
+      <item>5</item>
+      <item>8</item>
+      <item>13</item>
+    </intList>
+    <!-- Set of strings (order preserved) -->
+    <stringSet type="list">
+      <item>one</item>
+      <item>two</item>
+      <item>three</item>
+    </stringSet>
+    <!-- Set of enums -->
+    <enumSet type="list">
+      <item>FIRST</item>
+      <item>SECOND</item>
+    </enumSet>
+    <!-- Nested collection - list of lists -->
+    <nestedListOfLists type="list">
+      <item type="list">
+        <item>a</item>
+        <item>b</item>
+      </item>
+      <item type="list">
+        <item>c</item>
+        <item>d</item>
+        <item>e</item>
+      </item>
+    </nestedListOfLists>
+    <!-- Simple string-to-string map -->
+    <simpleMap type="map">
+      <key1>value1</key1>
+      <key2>value2</key2>
+    </simpleMap>
+    <!-- Map with integer keys -->
+    <intKeyMap type="map">
+      <entry key="1">one</entry>
+      <entry key="2">two</entry>
+    </intKeyMap>
+    <!-- Nested map -->
+    <nestedMap type="map">
+      <group1 type="map">
+        <a>1</a>
+        <b>2</b>
+      </group1>
+    </nestedMap>
+    <!-- Map with enum keys -->
+    <enumKeyMap type="map">
+      <FIRST>first value</FIRST>
+      <SECOND>second value</SECOND>
+    </enumKeyMap>
+    <!-- Map with enum values -->
+    <enumValueMap type="map">
+      <a>FIRST</a>
+      <b>THIRD</b>
+    </enumValueMap>
+    <!-- Simple enum -->
+    <singleEnum>THIRD</singleEnum>
+    <!-- List of enums -->
+    <enumList type="list">
+      <item>FIRST</item>
+      <item>THIRD</item>
+    </enumList>
+    <!-- Nested subconfig -->
+    <subConfig type="map">
+      <!-- Subconfig field -->
+      <subField>default sub</subField>
+      <subNumber>42</subNumber>
+    </subConfig>
+    <!-- List of nested configs -->
+    <subConfigList type="list">
+      <item type="map">
+        <!-- Subconfig field -->
+        <subField>sub1</subField>
+        <subNumber>10</subNumber>
+      </item>
+      <item type="map">
+        <subField>sub2</subField>
+        <subNumber>20</subNumber>
+      </item>
+    </subConfigList>
+    <!-- Complex multi-level subconfig -->
+    <!-- MegaConfig nested inside itself (2 levels deep) -->
+    <!-- Note: Set to null by default to avoid infinite recursion -->
+    <!-- Call populateNestedMegaConfig() after construction to initialize -->
+    <nestedMegaConfig type="null"/>
+    <!-- Serializable custom object -->
+    <customObj type="map">
+      <name>test</name>
+      <id>999</id>
+    </customObj>
+    <!-- List of serializable objects -->
+    <serializableList type="list">
+      <item type="map">
+        <name>item1</name>
+        <id>1</id>
+      </item>
+      <item type="map">
+        <name>item2</name>
+        <id>2</id>
+      </item>
+      <item type="map">
+        <name>item3</name>
+        <id>3</id>
+      </item>
+    </serializableList>
+    <!-- Map of serializable objects -->
+    <serializableMap type="map">
+      <obj1 type="map">
+        <name>first</name>
+        <id>100</id>
+      </obj1>
+      <obj2 type="map">
+        <name>second</name>
+        <id>200</id>
+      </obj2>
+    </serializableMap>
+    <!-- Field with custom key -->
+    <custom-key-field>custom value</custom-key-field>
+    <!-- Field backed by environment variable -->
+    <variableField>default</variableField>
+    <!-- Null value test -->
+    <nullValue type="null"/>
+    <!-- Empty collection -->
+    <emptyList type="list"/>
+    <!-- Empty map -->
+    <emptyMap type="map"/>
+    <!-- List containing null values -->
+    <listWithNulls type="list">
+      <item>first</item>
+      <item type="null"/>
+      <item>third</item>
+      <item type="null"/>
+      <item>fifth</item>
+    </listWithNulls>
+    <!-- Set containing null value -->
+    <setWithNull type="list">
+      <item>one</item>
+      <item type="null"/>
+      <item>three</item>
+    </setWithNull>
+    <!-- Field with repeating comments -->
+    <!-- This tests multiple @Comment annotations -->
+    <!-- on the same field -->
+    <repeatingCommentField>test value</repeatingCommentField>
+  </nestedMegaConfig>
+  <!-- Serializable custom object -->
+  <customObj type="map">
+    <name>test</name>
+    <id>999</id>
+  </customObj>
+  <!-- List of serializable objects -->
+  <serializableList type="list">
+    <item type="map">
+      <name>item1</name>
+      <id>1</id>
+    </item>
+    <item type="map">
+      <name>item2</name>
+      <id>2</id>
+    </item>
+    <item type="map">
+      <name>item3</name>
+      <id>3</id>
+    </item>
+  </serializableList>
+  <!-- Map of serializable objects -->
+  <serializableMap type="map">
+    <obj1 type="map">
+      <name>first</name>
+      <id>100</id>
+    </obj1>
+    <obj2 type="map">
+      <name>second</name>
+      <id>200</id>
+    </obj2>
+  </serializableMap>
+  <!-- Field with custom key -->
+  <custom-key-field>custom value</custom-key-field>
+  <!-- Field backed by environment variable -->
+  <variableField>default</variableField>
+  <!-- Null value test -->
+  <nullValue type="null"/>
+  <!-- Empty collection -->
+  <emptyList type="list"/>
+  <!-- Empty map -->
+  <emptyMap type="map"/>
+  <!-- List containing null values -->
+  <listWithNulls type="list">
+    <item>first</item>
+    <item type="null"/>
+    <item>third</item>
+    <item type="null"/>
+    <item>fifth</item>
+  </listWithNulls>
+  <!-- Set containing null value -->
+  <setWithNull type="list">
+    <item>one</item>
+    <item type="null"/>
+    <item>three</item>
+  </setWithNull>
+  <!-- Field with repeating comments -->
+  <!-- This tests multiple @Comment annotations -->
+  <!-- on the same field -->
+  <repeatingCommentField>test value</repeatingCommentField>
+</config>

@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.UnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +31,7 @@ public class GoldenFileAssertion {
     private String currentContent;
     private boolean verbose = true;
     private String customFailureMessage;
+    private final List<UnaryOperator<String>> normalizers = new ArrayList<>();
 
     private GoldenFileAssertion(String goldenFilePath) {
         this.goldenFilePath = goldenFilePath;
@@ -76,6 +80,19 @@ public class GoldenFileAssertion {
     }
 
     /**
+     * Add a normalizer function to transform content before comparison.
+     * Normalizers are applied to both golden file content and current content.
+     * Useful for ignoring volatile values like timestamps or version numbers.
+     *
+     * @param normalizer function to transform content
+     * @return this builder
+     */
+    public GoldenFileAssertion withNormalizer(UnaryOperator<String> normalizer) {
+        this.normalizers.add(normalizer);
+        return this;
+    }
+
+    /**
      * Assert that current content matches golden file.
      * Creates golden file on first run, compares on subsequent runs.
      *
@@ -118,45 +135,60 @@ public class GoldenFileAssertion {
     private void compareWithGoldenFile(Path goldenPath) throws IOException {
         String goldenContent = Files.readString(goldenPath);
 
-        if (!this.currentContent.equals(goldenContent)) {
+        // Apply normalizers to both contents
+        String normalizedGolden = this.applyNormalizers(goldenContent);
+        String normalizedCurrent = this.applyNormalizers(this.currentContent);
+
+        if (!normalizedCurrent.equals(normalizedGolden)) {
             if (this.verbose) {
-                this.printDiffInfo(goldenContent);
+                this.printDiffInfo(normalizedGolden, normalizedCurrent);
             }
 
-            String failureMessage = (customFailureMessage != null)
+            String failureMessage = (this.customFailureMessage != null)
                 ? this.customFailureMessage
                 : "Content differs from golden file. See console for diff details.";
 
-            assertThat(this.currentContent)
+            assertThat(normalizedCurrent)
                 .withFailMessage(failureMessage)
-                .isEqualTo(goldenContent);
+                .isEqualTo(normalizedGolden);
         }
+    }
+
+    /**
+     * Apply all registered normalizers to content.
+     */
+    private String applyNormalizers(String content) {
+        String result = content;
+        for (UnaryOperator<String> normalizer : this.normalizers) {
+            result = normalizer.apply(result);
+        }
+        return result;
     }
 
     /**
      * Print detailed diff information to console.
      */
-    private void printDiffInfo(String goldenContent) {
+    private void printDiffInfo(String goldenContent, String currentContent) {
         System.err.println("=".repeat(80));
         System.err.println("CONTENT DIFFERS FROM GOLDEN FILE!");
         System.err.println("Golden file: " + this.goldenFilePath);
         System.err.println("=".repeat(80));
-        System.err.println("Current content length: " + this.currentContent.length());
+        System.err.println("Current content length: " + currentContent.length());
         System.err.println("Golden content length: " + goldenContent.length());
         System.err.println("=".repeat(80));
 
         // Find first difference
-        int firstDiff = this.findFirstDifference(goldenContent, this.currentContent);
+        int firstDiff = this.findFirstDifference(goldenContent, currentContent);
         if (firstDiff >= 0) {
             System.err.println("First difference at position: " + firstDiff);
 
             // Show context around difference
             int contextStart = Math.max(0, firstDiff - 50);
             int goldenContextEnd = Math.min(goldenContent.length(), firstDiff + 50);
-            int currentContextEnd = Math.min(this.currentContent.length(), firstDiff + 50);
+            int currentContextEnd = Math.min(currentContent.length(), firstDiff + 50);
 
             String goldenContext = this.escapeForDisplay(goldenContent.substring(contextStart, goldenContextEnd));
-            String currentContext = this.escapeForDisplay(this.currentContent.substring(contextStart, currentContextEnd));
+            String currentContext = this.escapeForDisplay(currentContent.substring(contextStart, currentContextEnd));
 
             // Calculate arrow position (accounting for escaped characters before the diff)
             int arrowPosition = this.calculateDisplayPosition(goldenContent.substring(contextStart, firstDiff));
