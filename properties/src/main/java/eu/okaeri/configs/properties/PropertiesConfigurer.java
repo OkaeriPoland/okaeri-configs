@@ -83,12 +83,12 @@ public class PropertiesConfigurer extends Configurer {
 
     @Override
     public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        Properties props = new Properties();
+
+        OrderedProperties props = new OrderedProperties();
         props.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-        // Convert to sorted map (Properties doesn't maintain order)
-        Map<String, String> flat = new TreeMap<>();
-        for (String key : props.stringPropertyNames()) {
+        Map<String, String> flat = new LinkedHashMap<>();
+        for (String key : props.orderedKeys()) {
             flat.put(key, props.getProperty(key));
         }
 
@@ -528,5 +528,36 @@ public class PropertiesConfigurer extends Configurer {
             }
         }
         return sb.toString();
+    }
+
+    // ==================== Inner Classes ====================
+
+    /**
+     * Properties subclass that preserves insertion order.
+     * Standard Properties uses Hashtable internally which has undefined iteration order.
+     */
+    private static class OrderedProperties extends Properties {
+        private static final long serialVersionUID = 1L;
+        private List<String> orderedKeys = new ArrayList<>();
+
+        @Override
+        public synchronized Object put(Object key, Object value) {
+            String keyStr = String.valueOf(key);
+            if (!this.containsKey(keyStr)) {
+                this.orderedKeys.add(keyStr);
+            }
+            return super.put(key, value);
+        }
+
+        public List<String> orderedKeys() {
+            return this.orderedKeys;
+        }
+
+        @Override
+        public synchronized Object clone() {
+            OrderedProperties clone = (OrderedProperties) super.clone();
+            clone.orderedKeys = new ArrayList<>(this.orderedKeys);
+            return clone;
+        }
     }
 }
