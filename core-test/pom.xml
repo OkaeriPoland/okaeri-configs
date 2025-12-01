@@ -108,6 +108,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Properties for parameterized format testing -->
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-configs-properties</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

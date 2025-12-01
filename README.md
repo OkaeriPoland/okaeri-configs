@@ -13,6 +13,8 @@ General implementations based on standard format libraries directly.
     - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): YAML for everyone! Your best choice for public projects and their configurations
 - **XML**
     - 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml): zero external dependencies, uses Java built-in XML APIs with full comment support
+- **Properties**
+    - [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties): zero external dependencies, acceptable for flat configs (deep nesting gets verbose, non-ASCII escaped as `\uXXXX`)
 - **HJSON**
     - 🌟 [hjson-java](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON for your configuration, small total footprint but yet powerful
 - **JSON**

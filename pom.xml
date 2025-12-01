@@ -48,6 +48,9 @@
         <!-- xml modules -->
         <module>xml</module>
 
+        <!-- properties modules -->
+        <module>properties</module>
+
         <!-- serdes modules -->
         <module>serdes-adventure</module>
         <module>serdes-bucket4j</module>
