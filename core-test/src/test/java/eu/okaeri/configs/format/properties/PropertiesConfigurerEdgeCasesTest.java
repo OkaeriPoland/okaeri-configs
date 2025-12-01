@@ -265,6 +265,206 @@ class PropertiesConfigurerEdgeCasesTest {
         assertThat(loaded.getEmoji()).isEqualTo("🎉🌍");
     }
 
+    // === Simple comma-separated list tests ===
+
+    @ParameterizedTest(name = "{0}: Simple list uses comma format")
+    @MethodSource("propertiesConfigurers")
+    void testWrite_SimpleShortList_UsesCommaFormat(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with short simple list
+        SimpleListConfig config = ConfigManager.create(SimpleListConfig.class);
+        config.setConfigurer(configurer);
+        config.setTags(List.of("java", "config", "yaml"));
+
+        // When: Write to string
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+        String properties = output.toString();
+
+        // Then: Uses comma-separated format
+        assertThat(properties).contains("tags=java,config,yaml");
+        assertThat(properties).doesNotContain("tags.0");
+    }
+
+    @ParameterizedTest(name = "{0}: Long list uses index format")
+    @MethodSource("propertiesConfigurers")
+    void testWrite_LongList_UsesIndexFormat(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with list that exceeds 80 char threshold (81 chars total)
+        SimpleListConfig config = ConfigManager.create(SimpleListConfig.class);
+        config.setConfigurer(configurer);
+        config.setTags(List.of("very-long-tag-one", "very-long-tag-two", "very-long-tag-three", "very-long-tag-four-x"));
+
+        // When: Write to string
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+        String properties = output.toString();
+
+        // Then: Uses index format (exceeds 80 chars)
+        assertThat(properties).contains("tags.0=very-long-tag-one");
+        assertThat(properties).contains("tags.1=very-long-tag-two");
+    }
+
+    @ParameterizedTest(name = "{0}: List with comma in value uses index format")
+    @MethodSource("propertiesConfigurers")
+    void testWrite_ListWithCommaInValue_UsesIndexFormat(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with list containing comma in value
+        SimpleListConfig config = ConfigManager.create(SimpleListConfig.class);
+        config.setConfigurer(configurer);
+        config.setTags(List.of("Doe, John", "Smith, Jane"));
+
+        // When: Write to string
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+        String properties = output.toString();
+
+        // Then: Uses index format to preserve commas
+        assertThat(properties).contains("tags.0=Doe, John");
+        assertThat(properties).contains("tags.1=Smith, Jane");
+    }
+
+    @ParameterizedTest(name = "{0}: List with newline in value uses index format")
+    @MethodSource("propertiesConfigurers")
+    void testWrite_ListWithNewlineInValue_UsesIndexFormat(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with list containing newline
+        SimpleListConfig config = ConfigManager.create(SimpleListConfig.class);
+        config.setConfigurer(configurer);
+        config.setTags(List.of("line1\nline2", "normal"));
+
+        // When: Write to string
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+        String properties = output.toString();
+
+        // Then: Uses index format
+        assertThat(properties).contains("tags.0=");
+        assertThat(properties).contains("tags.1=normal");
+    }
+
+    @ParameterizedTest(name = "{0}: Simple list round-trip")
+    @MethodSource("propertiesConfigurers")
+    void testRoundTrip_SimpleList(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with simple list
+        SimpleListConfig config = ConfigManager.create(SimpleListConfig.class);
+        config.setConfigurer(configurer);
+        config.setTags(List.of("alpha", "beta", "gamma"));
+
+        // When: Save and load
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+
+        SimpleListConfig loaded = ConfigManager.create(SimpleListConfig.class);
+        loaded.setConfigurer(configurer);
+        loaded.load(new ByteArrayInputStream(output.toByteArray()));
+
+        // Then: List is preserved
+        assertThat(loaded.getTags()).containsExactly("alpha", "beta", "gamma");
+    }
+
+    @ParameterizedTest(name = "{0}: Single element list")
+    @MethodSource("propertiesConfigurers")
+    void testRoundTrip_SingleElementList(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with single element list
+        SimpleListConfig config = ConfigManager.create(SimpleListConfig.class);
+        config.setConfigurer(configurer);
+        config.setTags(List.of("only-one"));
+
+        // When: Save and load
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+        String properties = output.toString();
+
+        SimpleListConfig loaded = ConfigManager.create(SimpleListConfig.class);
+        loaded.setConfigurer(configurer);
+        loaded.load(new ByteArrayInputStream(output.toByteArray()));
+
+        // Then: Single element preserved (no comma in output)
+        assertThat(properties).contains("tags=only-one");
+        assertThat(properties).doesNotContain(",");
+        assertThat(loaded.getTags()).containsExactly("only-one");
+    }
+
+    @ParameterizedTest(name = "{0}: Number list uses comma format")
+    @MethodSource("propertiesConfigurers")
+    void testWrite_NumberList_UsesCommaFormat(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with number list
+        NumberListConfig config = ConfigManager.create(NumberListConfig.class);
+        config.setConfigurer(configurer);
+        config.setScores(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+
+        // When: Write to string
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+        String properties = output.toString();
+
+        // Then: Uses comma format (numbers are short)
+        assertThat(properties).contains("scores=1,2,3,4,5,6,7,8,9,10");
+    }
+
+    @ParameterizedTest(name = "{0}: Long comma list converts to index on save")
+    @MethodSource("propertiesConfigurers")
+    void testRoundTrip_LongCommaList_ConvertsToIndex(String configurerName, Configurer configurer) throws Exception {
+        // Given: Properties file with long comma-separated list (exceeds 80 chars)
+        String input = "tags=very-long-tag-one,very-long-tag-two,very-long-tag-three,very-long-tag-four-x\n";
+
+        SimpleListConfig config = ConfigManager.create(SimpleListConfig.class);
+        config.setConfigurer(configurer);
+        config.load(new ByteArrayInputStream(input.getBytes()));
+
+        // When: Save
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+        String properties = output.toString();
+
+        // Then: Uses index format (exceeds 80 chars on save)
+        assertThat(properties).contains("tags.0=very-long-tag-one");
+        assertThat(properties).contains("tags.1=very-long-tag-two");
+        assertThat(config.getTags()).containsExactly("very-long-tag-one", "very-long-tag-two", "very-long-tag-three", "very-long-tag-four-x");
+    }
+
+    @ParameterizedTest(name = "{0}: List with nulls uses comma format")
+    @MethodSource("propertiesConfigurers")
+    void testWrite_ListWithNulls_UsesCommaFormat(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with list containing nulls
+        NullListConfig config = ConfigManager.create(NullListConfig.class);
+        config.setConfigurer(configurer);
+        List<String> listWithNulls = new ArrayList<>();
+        listWithNulls.add("first");
+        listWithNulls.add(null);
+        listWithNulls.add("third");
+        config.setItems(listWithNulls);
+
+        // When: Write to string
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+        String properties = output.toString();
+
+        // Then: Uses comma format with __null__ marker
+        assertThat(properties).contains("items=first,__null__,third");
+    }
+
+    @ParameterizedTest(name = "{0}: List with nulls round-trip")
+    @MethodSource("propertiesConfigurers")
+    void testRoundTrip_ListWithNulls(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with list containing nulls
+        NullListConfig config = ConfigManager.create(NullListConfig.class);
+        config.setConfigurer(configurer);
+        List<String> listWithNulls = new ArrayList<>();
+        listWithNulls.add("first");
+        listWithNulls.add(null);
+        listWithNulls.add("third");
+        config.setItems(listWithNulls);
+
+        // When: Save and load
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        config.save(output);
+
+        NullListConfig loaded = ConfigManager.create(NullListConfig.class);
+        loaded.setConfigurer(configurer);
+        loaded.load(new ByteArrayInputStream(output.toByteArray()));
+
+        // Then: Nulls are preserved
+        assertThat(loaded.getItems()).containsExactly("first", null, "third");
+    }
+
     // Test config classes
 
     @Data
@@ -325,5 +525,23 @@ class PropertiesConfigurerEdgeCasesTest {
     public static class UnicodeConfig extends OkaeriConfig {
         private String japanese;
         private String emoji;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SimpleListConfig extends OkaeriConfig {
+        private List<String> tags;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class NumberListConfig extends OkaeriConfig {
+        private List<Integer> scores;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class NullListConfig extends OkaeriConfig {
+        private List<String> items;
     }
 }

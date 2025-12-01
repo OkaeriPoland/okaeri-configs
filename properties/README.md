@@ -53,8 +53,10 @@ Example output:
 # The database host
 host=localhost
 port=5432
-features.0=logging
-features.1=metrics
+features=logging,metrics
+# Index notation is used for lists with commas in values or lines >80 chars
+allowedOrigins.0=https://example.com
+allowedOrigins.1=https://api.example.com,https://cdn.example.com
 # List of database connections
 databases.0.name=primary
 databases.0.url=jdbc:mysql://localhost:3306/app

@@ -40,10 +40,12 @@ import java.util.*;
 public class PropertiesConfigurer extends Configurer {
 
     private static final String NULL_MARKER = "__null__";
+    private static final int DEFAULT_SIMPLE_LIST_MAX_LINE_LENGTH = 80;
 
     private Map<String, Object> map = new LinkedHashMap<>();
 
-    @Setter private String commentPrefix = "# ";
+    private @Setter String commentPrefix = "# ";
+    private @Setter int simpleListMaxLineLength = DEFAULT_SIMPLE_LIST_MAX_LINE_LENGTH;
 
     public PropertiesConfigurer() {
     }
@@ -225,6 +227,15 @@ public class PropertiesConfigurer extends Configurer {
                     result.put(key, "");
                     continue;
                 }
+                // Check if this map represents a list (has sequential integer keys)
+                // Lists are often simplified to Maps with numeric keys
+                if (this.isListLikeMap(nested)) {
+                    String simpleList = this.tryFlattenListLikeMap(key, nested);
+                    if (simpleList != null) {
+                        result.put(key, simpleList);
+                        continue;
+                    }
+                }
                 this.flatten(key, nested, result);
             } else if (value instanceof List) {
                 List<?> list = (List<?>) value;
@@ -233,6 +244,13 @@ public class PropertiesConfigurer extends Configurer {
                     result.put(key, "");
                     continue;
                 }
+                // Try simple comma-separated format for lists of simple values
+                String simpleList = this.tryFlattenSimpleList(key, list);
+                if (simpleList != null) {
+                    result.put(key, simpleList);
+                    continue;
+                }
+                // Fall back to index notation for complex lists
                 for (int i = 0; i < list.size(); i++) {
                     Object item = list.get(i);
                     if (item == null) {
@@ -254,8 +272,16 @@ public class PropertiesConfigurer extends Configurer {
 
     private void flattenList(String prefix, List<?> list, Map<String, String> result) {
         if (list.isEmpty()) {
+            result.put(prefix, "");
             return;
         }
+        // Try simple comma-separated format first
+        String simpleList = this.tryFlattenSimpleList(prefix, list);
+        if (simpleList != null) {
+            result.put(prefix, simpleList);
+            return;
+        }
+        // Fall back to index notation
         for (int i = 0; i < list.size(); i++) {
             Object item = list.get(i);
             String key = prefix + "." + i;
@@ -269,6 +295,106 @@ public class PropertiesConfigurer extends Configurer {
                 result.put(key, String.valueOf(item));
             }
         }
+    }
+
+    /**
+     * Tries to flatten a list as comma-separated values.
+     * Returns null if the list is not suitable for simple format.
+     */
+    private String tryFlattenSimpleList(String key, List<?> list) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < list.size(); i++) {
+            Object item = list.get(i);
+            // Not simple: Map, List (nested structures)
+            if ((item instanceof Map) || (item instanceof List)) {
+                return null;
+            }
+            // Null uses __null__ marker
+            String value = (item == null) ? NULL_MARKER : String.valueOf(item);
+            // Not simple: contains comma or newline
+            if ((value.indexOf(',') >= 0) || (value.indexOf('\n') >= 0) || (value.indexOf('\r') >= 0)) {
+                return null;
+            }
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(value);
+        }
+        // Check total line length: key + "=" + value
+        int lineLength = key.length() + 1 + sb.length();
+        if (lineLength > this.simpleListMaxLineLength) {
+            return null;
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Checks if a map has sequential integer keys starting from 0 (i.e., represents a list).
+     * Works with Map<?, ?> where keys might be String or Integer.
+     */
+    private boolean isListLikeMap(Map<?, ?> map) {
+        if (map.isEmpty()) {
+            return false;
+        }
+
+        Set<Integer> indices = new TreeSet<>();
+        for (Object key : map.keySet()) {
+            try {
+                int index = Integer.parseInt(String.valueOf(key));
+                if (index < 0) {
+                    return false;
+                }
+                indices.add(index);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        // Check for sequential indices starting from 0
+        int expected = 0;
+        for (int index : indices) {
+            if (index != expected) {
+                return false;
+            }
+            expected++;
+        }
+
+        return true;
+    }
+
+    /**
+     * Tries to flatten a list-like map (with sequential integer keys) as comma-separated values.
+     * Returns null if the map is not suitable for simple format.
+     */
+    private String tryFlattenListLikeMap(String key, Map<?, ?> map) {
+        // Sort entries by key numerically (keys might be String or Integer)
+        List<Map.Entry<?, ?>> sortedEntries = new ArrayList<>(map.entrySet());
+        sortedEntries.sort(Comparator.comparingInt(e -> Integer.parseInt(String.valueOf(e.getKey()))));
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < sortedEntries.size(); i++) {
+            Object item = sortedEntries.get(i).getValue();
+            // Not simple: Map, List (nested structures)
+            if ((item instanceof Map) || (item instanceof List)) {
+                return null;
+            }
+            // Null uses __null__ marker
+            String value = (item == null) ? NULL_MARKER : String.valueOf(item);
+            // Not simple: contains comma or newline
+            if ((value.indexOf(',') >= 0) || (value.indexOf('\n') >= 0) || (value.indexOf('\r') >= 0)) {
+                return null;
+            }
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(value);
+        }
+        // Check total line length: key + "=" + value
+        int lineLength = key.length() + 1 + sb.length();
+        if (lineLength > this.simpleListMaxLineLength) {
+            return null;
+        }
+        return sb.toString();
     }
 
     private String escapeKey(String key) {
@@ -370,15 +496,31 @@ public class PropertiesConfigurer extends Configurer {
                 }
             }
 
-            if ("".equals(value) && (fieldType != null)) {
-                // Empty string value for collection fields means empty collection
-                if (Collection.class.isAssignableFrom(fieldType.getType())) {
+            if ((value instanceof String) && (fieldType != null) && Collection.class.isAssignableFrom(fieldType.getType())) {
+                String strValue = (String) value;
+                if (strValue.isEmpty()) {
+                    // Empty string value for collection fields means empty collection
                     result.put(key, new ArrayList<>());
-                    continue;
-                } else if (Map.class.isAssignableFrom(fieldType.getType())) {
-                    result.put(key, new LinkedHashMap<>());
-                    continue;
+                } else if (strValue.indexOf(',') >= 0) {
+                    // Comma-separated simple list - convert __null__ markers back to null
+                    String[] parts = strValue.split(",");
+                    List<Object> list = new ArrayList<>();
+                    for (String part : parts) {
+                        list.add(NULL_MARKER.equals(part) ? null : part);
+                    }
+                    result.put(key, list);
+                } else {
+                    // Single-element list (no comma) - convert __null__ marker back to null
+                    Object element = NULL_MARKER.equals(strValue) ? null : strValue;
+                    result.put(key, new ArrayList<>(Collections.singletonList(element)));
                 }
+                continue;
+            }
+
+            if ("".equals(value) && (fieldType != null) && Map.class.isAssignableFrom(fieldType.getType())) {
+                // Empty string value for map fields means empty map
+                result.put(key, new LinkedHashMap<>());
+                continue;
             }
 
             if (value instanceof Map) {
@@ -390,10 +532,7 @@ public class PropertiesConfigurer extends Configurer {
 
                 if (shouldBeList || looksLikeList) {
                     GenericsDeclaration elementType = (fieldType != null) ? fieldType.getSubtypeAtOrNull(0) : null;
-                    ConfigDeclaration elementDeclaration = ((elementType != null) && elementType.isConfig())
-                        ? ConfigDeclaration.of(elementType.getType())
-                        : null;
-                    result.put(key, this.convertToList(nested, elementDeclaration));
+                    result.put(key, this.convertToList(nested, elementType));
                 } else {
                     // Get nested declaration for subconfigs
                     ConfigDeclaration nestedDeclaration = ((fieldType != null) && fieldType.isConfig())
@@ -440,19 +579,41 @@ public class PropertiesConfigurer extends Configurer {
     }
 
     @SuppressWarnings("unchecked")
-    private List<Object> convertToList(Map<String, Object> map, ConfigDeclaration elementDeclaration) {
+    private List<Object> convertToList(Map<String, Object> map, GenericsDeclaration elementType) {
         List<Object> list = new ArrayList<>();
         List<String> sortedKeys = new ArrayList<>(map.keySet());
         sortedKeys.sort(Comparator.comparingInt(Integer::parseInt));
+
+        // Get nested element type for List<List<...>> cases
+        GenericsDeclaration nestedElementType = (elementType != null) ? elementType.getSubtypeAtOrNull(0) : null;
+        ConfigDeclaration elementDeclaration = ((elementType != null) && elementType.isConfig())
+            ? ConfigDeclaration.of(elementType.getType())
+            : null;
 
         for (String key : sortedKeys) {
             Object value = map.get(key);
             if (value instanceof Map) {
                 Map<String, Object> nested = (Map<String, Object>) value;
                 if (this.isListLike(nested)) {
-                    list.add(this.convertToList(nested, null));
+                    list.add(this.convertToList(nested, nestedElementType));
                 } else {
                     list.add(this.convertMapsToLists(nested, elementDeclaration));
+                }
+            } else if ((value instanceof String) && (elementType != null) && Collection.class.isAssignableFrom(elementType.getType())) {
+                // Handle comma-separated string that should become a nested list
+                String strValue = (String) value;
+                if (strValue.isEmpty()) {
+                    list.add(new ArrayList<>());
+                } else if (strValue.indexOf(',') >= 0) {
+                    String[] parts = strValue.split(",");
+                    List<Object> nestedList = new ArrayList<>();
+                    for (String part : parts) {
+                        nestedList.add(NULL_MARKER.equals(part) ? null : part);
+                    }
+                    list.add(nestedList);
+                } else {
+                    Object element = NULL_MARKER.equals(strValue) ? null : strValue;
+                    list.add(new ArrayList<>(Collections.singletonList(element)));
                 }
             } else {
                 list.add(value);

@@ -126,11 +126,9 @@ class PropertiesConfigurerStructureTest {
         // When: Save to Properties
         String properties = config.saveToString();
 
-        // Then: Matches expected output (index notation for lists)
+        // Then: Matches expected output (comma notation for short lists)
         String expected = """
-            stringList.0=alpha
-            stringList.1=beta
-            stringList.2=gamma
+            stringList=alpha,beta,gamma
             simpleMap.key1=value1
             simpleMap.key2=value2
             """;
