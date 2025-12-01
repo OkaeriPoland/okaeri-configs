@@ -4,6 +4,7 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
+import eu.okaeri.configs.json.jackson.JsonJacksonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,6 +31,7 @@ class JsonConfigurerEdgeCasesTest {
     static Stream<Arguments> jsonConfigurers() {
         return Stream.of(
             Arguments.of("JSON-GSON", new JsonGsonConfigurer()),
+            Arguments.of("JSON-Jackson", new JsonJacksonConfigurer()),
             Arguments.of("JSON-Simple", new JsonSimpleConfigurer())
         );
     }
@@ -39,15 +41,15 @@ class JsonConfigurerEdgeCasesTest {
     void testWrite_EmptyConfig(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with no fields
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         config.save(output);
         String json = output.toString();
 
-        // Then: JSON output is minimal (just {})
-        assertThat(json.trim()).isEqualTo("{}");
+        // Then: JSON output is minimal (empty object, formatting may vary)
+        assertThat(json.trim()).isIn("{}", "{ }");
     }
 
     @ParameterizedTest(name = "{0}: Very large string values")
@@ -55,7 +57,7 @@ class JsonConfigurerEdgeCasesTest {
     void testWrite_VeryLargeValues(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with very large string value
         LargeValueConfig config = ConfigManager.create(LargeValueConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setLargeValue("x".repeat(10000)); // 10k characters
 
         // When: Write to OutputStream
@@ -73,7 +75,7 @@ class JsonConfigurerEdgeCasesTest {
     void testWrite_SpecialCharactersInStrings(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with special characters
         SpecialCharsConfig config = ConfigManager.create(SpecialCharsConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setQuotes("She said: \"Hello!\"");
         config.setBackslash("C:\\Users\\test\\path");
         config.setNewlines("Line 1\nLine 2\nLine 3");
@@ -114,7 +116,7 @@ class JsonConfigurerEdgeCasesTest {
             """;
 
         DeepNestedConfig config = ConfigManager.create(DeepNestedConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.load(json);
 
         // When: Write to OutputStream
@@ -135,7 +137,7 @@ class JsonConfigurerEdgeCasesTest {
     void testWrite_VeryLargeCollection(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with very large list
         LargeCollectionConfig config = ConfigManager.create(LargeCollectionConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         List<String> largeList = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             largeList.add("item-" + i);
@@ -158,7 +160,7 @@ class JsonConfigurerEdgeCasesTest {
     void testWrite_NullValues_NotStored(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with null values
         NullValueConfig config = ConfigManager.create(NullValueConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setNullString(null);
         config.setNullList(null);
         config.setNullMap(null);
@@ -179,7 +181,7 @@ class JsonConfigurerEdgeCasesTest {
     void testWrite_NestedNullValues_NotStored(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with nested OkaeriConfig containing null values
         NestedNullConfig config = ConfigManager.create(NestedNullConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.getNested().setNestedNullString(null);
         config.getNested().setNestedNullList(null);
 
@@ -199,7 +201,7 @@ class JsonConfigurerEdgeCasesTest {
     void testRoundTrip_EmptyStrings(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with empty strings
         EmptyStringConfig config = ConfigManager.create(EmptyStringConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setEmptyString("");
         config.setWhitespaceString("   ");
 
@@ -208,7 +210,7 @@ class JsonConfigurerEdgeCasesTest {
         config.save(output);
 
         EmptyStringConfig loaded = ConfigManager.create(EmptyStringConfig.class);
-        loaded.withConfigurer(configurer);
+        loaded.setConfigurer(configurer);
         loaded.load(new ByteArrayInputStream(output.toByteArray()));
 
         // Then: Empty strings are preserved
@@ -221,7 +223,7 @@ class JsonConfigurerEdgeCasesTest {
     void testWrite_JsonReservedWords(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with JSON reserved words as string values
         ReservedWordsConfig config = ConfigManager.create(ReservedWordsConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setTrueString("true");
         config.setFalseString("false");
         config.setNullString("null");
@@ -255,7 +257,7 @@ class JsonConfigurerEdgeCasesTest {
 
         // When/Then: Loading malformed JSON throws exception
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         assertThatThrownBy(() -> config.load(malformedJson))
             .isInstanceOf(Exception.class);

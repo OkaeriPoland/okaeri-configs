@@ -10,20 +10,22 @@
 General implementations based on standard format libraries directly.
 
 - **YAML**
-    - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): YAML for everyone! Your best choice for public projects and their configurations
+    - 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml): standalone YAML via SnakeYAML with comment support
+    - [yaml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-jackson): YAML via Jackson (SnakeYAML underneath), useful when Jackson is already a dependency
 - **XML**
     - 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml): zero external dependencies, uses Java built-in XML APIs with full comment support
 - **Properties**
-    - [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties): zero external dependencies, acceptable for flat configs (deep nesting gets verbose, non-ASCII escaped as `\uXXXX`)
+    - [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties): zero external dependencies, flat configs only (deep nesting gets verbose, non-ASCII escaped as `\uXXXX`)
 - **TOML**
-    - [toml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/toml-jackson): TOML 1.0 support via Jackson with proper table sections for nested configs
+    - [toml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/toml-jackson): TOML 1.0 via Jackson with comment support and proper table sections
 - **HJSON**
-    - [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON for your configuration, small total footprint but yet powerful
+    - [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson): Human JSON via hjson-java with full comment support
 - **JSON**
-    - [json-gson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): ideal for GSON lovers, best suited for in-app storage or advanced user configurations
-    - [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): fairly limited but still working, no pretty print, probably best suited for simple in-app storage
+    - [json-gson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson): JSON via GSON, no comment support
+    - [json-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-jackson): JSON via Jackson, no comment support
+    - [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple): JSON via json-simple, no pretty print, no comment support
 - **HOCON**
-    - [Lightbend (HOCON) Config](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): use Human-Optimized Config Object Notation for your configs, but beware of limitations
+    - [hocon-lightbend](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend): HOCON via Lightbend Config with a lot of limitations (see module README)
 
 ## Supported platforms (environment dependent)
 

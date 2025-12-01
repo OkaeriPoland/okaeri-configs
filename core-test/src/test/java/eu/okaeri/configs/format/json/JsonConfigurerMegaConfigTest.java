@@ -3,6 +3,7 @@ package eu.okaeri.configs.format.json;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
+import eu.okaeri.configs.json.jackson.JsonJacksonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import eu.okaeri.configs.test.GoldenFileAssertion;
 import eu.okaeri.configs.test.MegaConfig;
@@ -28,6 +29,7 @@ class JsonConfigurerMegaConfigTest {
     static Stream<Arguments> jsonConfigurers() {
         return Stream.of(
             Arguments.of("JSON-GSON", new JsonGsonConfigurer(), "../json-gson/src/test/resources/e2e.json"),
+            Arguments.of("JSON-Jackson", new JsonJacksonConfigurer(), "../json-jackson/src/test/resources/e2e.json"),
             Arguments.of("JSON-Simple", new JsonSimpleConfigurer(), "../json-simple/src/test/resources/e2e.json")
         );
     }
@@ -37,7 +39,7 @@ class JsonConfigurerMegaConfigTest {
     void testMegaConfig_SaveToString(String configurerName, Configurer configurer, String goldenFilePath) throws Exception {
         // Given: MegaConfig with all features
         MegaConfig config = ConfigManager.create(MegaConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.populateNestedMegaConfig(); // Initialize 2-level deep nesting
 
         // When: Save to string
@@ -55,13 +57,13 @@ class JsonConfigurerMegaConfigTest {
     void testMegaConfig_RoundTrip(String configurerName, Configurer configurer, String goldenFilePath) throws Exception {
         // Given: MegaConfig saved to JSON
         MegaConfig original = ConfigManager.create(MegaConfig.class);
-        original.withConfigurer(configurer);
+        original.setConfigurer(configurer);
         original.populateNestedMegaConfig(); // Initialize 2-level deep nesting
         String json = original.saveToString();
 
         // When: Load into new instance
         MegaConfig loaded = ConfigManager.create(MegaConfig.class);
-        loaded.withConfigurer(configurer);
+        loaded.setConfigurer(configurer);
         loaded.load(json);
 
         // Then: Both configs produce identical JSON output
@@ -74,13 +76,13 @@ class JsonConfigurerMegaConfigTest {
     void testMegaConfig_LoadNestedStructure(String configurerName, Configurer configurer, String goldenFilePath) throws Exception {
         // Given: MegaConfig with nested structure saved to JSON
         MegaConfig original = ConfigManager.create(MegaConfig.class);
-        original.withConfigurer(configurer);
+        original.setConfigurer(configurer);
         original.populateNestedMegaConfig();
         String json = original.saveToString();
 
         // When: Load into new instance
         MegaConfig loaded = ConfigManager.create(MegaConfig.class);
-        loaded.withConfigurer(configurer);
+        loaded.setConfigurer(configurer);
         loaded.load(json);
 
         // Then: Nested structure is loaded correctly
@@ -100,7 +102,7 @@ class JsonConfigurerMegaConfigTest {
         // When: Load MegaConfig from golden file
         MegaConfig config = ConfigManager.create(MegaConfig.class);
         config.populateNestedMegaConfig();
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.withBindFile(goldenFile);
         config.saveDefaults();
         config.load();
@@ -115,7 +117,7 @@ class JsonConfigurerMegaConfigTest {
     void testMegaConfig_RegressionTest(String configurerName, Configurer configurer, String goldenFilePath) throws Exception {
         // Given: MegaConfig with all features
         MegaConfig config = ConfigManager.create(MegaConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.populateNestedMegaConfig();
 
         // When: Save to string

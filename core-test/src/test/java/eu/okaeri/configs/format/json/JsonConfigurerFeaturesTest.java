@@ -4,6 +4,7 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
+import eu.okaeri.configs.json.jackson.JsonJacksonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,6 +33,7 @@ class JsonConfigurerFeaturesTest {
     static Stream<Arguments> jsonConfigurers() {
         return Stream.of(
             Arguments.of("JSON-GSON", new JsonGsonConfigurer()),
+            Arguments.of("JSON-Jackson", new JsonJacksonConfigurer()),
             Arguments.of("JSON-Simple", new JsonSimpleConfigurer())
         );
     }
@@ -50,7 +52,7 @@ class JsonConfigurerFeaturesTest {
 
         // When: Load into config
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.load(json);
 
         // Then: Values are loaded correctly
@@ -73,7 +75,7 @@ class JsonConfigurerFeaturesTest {
             """;
 
         OrderedConfig config = ConfigManager.create(OrderedConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.load(json);
 
         // When: Write to string
@@ -167,7 +169,7 @@ class JsonConfigurerFeaturesTest {
             """;
 
         TestConfigWithStructure config = ConfigManager.create(TestConfigWithStructure.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.load(originalJson);
 
         // When: Save and load again

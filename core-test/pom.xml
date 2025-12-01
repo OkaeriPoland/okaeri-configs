@@ -41,6 +41,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- YAML Jackson for parameterized format testing -->
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-configs-yaml-jackson</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- YAML Bukkit for parameterized format testing -->
         <dependency>
             <groupId>eu.okaeri</groupId>
@@ -77,6 +84,13 @@
         <dependency>
             <groupId>eu.okaeri</groupId>
             <artifactId>okaeri-configs-json-gson</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- JSON Jackson for parameterized format testing -->
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-configs-json-jackson</artifactId>
             <version>${project.version}</version>
         </dependency>
 

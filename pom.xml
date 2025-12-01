@@ -33,6 +33,7 @@
         <!-- yaml modules -->
         <module>yaml-bukkit</module>
         <module>yaml-bungee</module>
+        <module>yaml-jackson</module>
         <module>yaml-snakeyaml</module>
 
         <!-- hjson modules -->
@@ -40,6 +41,7 @@
 
         <!-- json modules -->
         <module>json-gson</module>
+        <module>json-jackson</module>
         <module>json-simple</module>
 
         <!-- hocon modules -->

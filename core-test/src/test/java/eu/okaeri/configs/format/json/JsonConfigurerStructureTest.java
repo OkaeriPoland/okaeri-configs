@@ -4,6 +4,7 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
+import eu.okaeri.configs.json.jackson.JsonJacksonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +33,7 @@ class JsonConfigurerStructureTest {
     static Stream<Arguments> jsonConfigurers() {
         return Stream.of(
             Arguments.of("JSON-GSON", new JsonGsonConfigurer()),
+            Arguments.of("JSON-Jackson", new JsonJacksonConfigurer()),
             Arguments.of("JSON-Simple", new JsonSimpleConfigurer())
         );
     }
@@ -41,7 +43,7 @@ class JsonConfigurerStructureTest {
     void testSaveToString_SimpleFields_MatchesExpectedJson(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with simple fields
         SimpleConfig config = ConfigManager.create(SimpleConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Save to JSON
         String json = config.saveToString();
@@ -58,7 +60,7 @@ class JsonConfigurerStructureTest {
     void testSaveToString_SubConfig_MatchesExpectedJson(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with SubConfig
         SubConfigConfig config = ConfigManager.create(SubConfigConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Save to JSON
         String json = config.saveToString();
@@ -76,7 +78,7 @@ class JsonConfigurerStructureTest {
     void testSaveToString_UnicodeStrings_PreservedInJson(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with unicode strings
         UnicodeConfig config = ConfigManager.create(UnicodeConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Save to JSON
         String json = config.saveToString();
@@ -93,7 +95,7 @@ class JsonConfigurerStructureTest {
     void testSaveToString_NestedCollections_MatchesExpectedStructure(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with nested structures
         NestedStructureConfig config = ConfigManager.create(NestedStructureConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Save to JSON
         String json = config.saveToString();
@@ -115,7 +117,7 @@ class JsonConfigurerStructureTest {
     void testSaveLoadCycles_RemainsStable(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with various fields
         StableConfig config = ConfigManager.create(StableConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Initial save
         String firstJson = config.saveToString();
@@ -124,7 +126,7 @@ class JsonConfigurerStructureTest {
         String currentJson = firstJson;
         for (int i = 0; i < 5; i++) {
             StableConfig reloaded = ConfigManager.create(StableConfig.class);
-            reloaded.withConfigurer(configurer);
+            reloaded.setConfigurer(configurer);
             reloaded.load(currentJson);
             currentJson = reloaded.saveToString();
 
@@ -139,7 +141,7 @@ class JsonConfigurerStructureTest {
     void testSaveToString_Serializable_MatchesExpectedJson(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with Serializable object
         SerializableConfig config = ConfigManager.create(SerializableConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Save to JSON
         String json = config.saveToString();

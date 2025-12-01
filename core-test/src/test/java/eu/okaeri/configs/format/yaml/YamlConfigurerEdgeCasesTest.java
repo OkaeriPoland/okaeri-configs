@@ -5,6 +5,7 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
+import eu.okaeri.configs.yaml.jackson.YamlJacksonConfigurer;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,6 +32,7 @@ class YamlConfigurerEdgeCasesTest {
     static Stream<Arguments> yamlConfigurers() {
         return Stream.of(
             Arguments.of("SnakeYAML", new YamlSnakeYamlConfigurer()),
+            Arguments.of("Jackson", new YamlJacksonConfigurer()),
             Arguments.of("Bukkit", new YamlBukkitConfigurer()),
             Arguments.of("Bungee", new YamlBungeeConfigurer())
         );

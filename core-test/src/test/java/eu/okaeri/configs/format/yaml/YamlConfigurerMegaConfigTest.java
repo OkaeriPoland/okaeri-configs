@@ -6,6 +6,7 @@ import eu.okaeri.configs.test.GoldenFileAssertion;
 import eu.okaeri.configs.test.MegaConfig;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
+import eu.okaeri.configs.yaml.jackson.YamlJacksonConfigurer;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,6 +27,7 @@ class YamlConfigurerMegaConfigTest {
     static Stream<Arguments> yamlConfigurers() {
         return Stream.of(
             Arguments.of("SnakeYAML", new YamlSnakeYamlConfigurer(), "../yaml-snakeyaml/src/test/resources/e2e.yml"),
+            Arguments.of("Jackson", new YamlJacksonConfigurer(), "../yaml-jackson/src/test/resources/e2e.yml"),
             Arguments.of("Bukkit", new YamlBukkitConfigurer(), "../yaml-bukkit/src/test/resources/e2e.yml"),
             Arguments.of("Bungee", new YamlBungeeConfigurer(), "../yaml-bungee/src/test/resources/e2e.yml")
         );
