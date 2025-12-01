@@ -51,6 +51,9 @@
         <!-- properties modules -->
         <module>properties</module>
 
+        <!-- toml modules -->
+        <module>toml-jackson</module>
+
         <!-- serdes modules -->
         <module>serdes-adventure</module>
         <module>serdes-bucket4j</module>
