@@ -16,6 +16,15 @@ public class DeserializationData {
     @Getter @NonNull private SerdesContext context;
 
     /**
+     * Creates a context for nested resolution with path but WITHOUT field.
+     * This prevents reusing custom serializers recursively.
+     */
+    private SerdesContext contextForKey(@NonNull String key) {
+        ConfigPath newPath = ObjectSerializer.VALUE.equals(key) ? this.context.getPath() : this.context.getPath().property(key);
+        return SerdesContext.of(this.configurer).withPath(newPath);
+    }
+
+    /**
      * @return unmodifiable map of current deserialization data
      */
     public Map<String, Object> asMap() {
@@ -163,8 +172,7 @@ public class DeserializationData {
     @SuppressWarnings("unchecked")
     public <T> T getDirect(@NonNull String key, @NonNull GenericsDeclaration genericType) {
         Object object = this.getRaw(key);
-        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
-        return (T) this.configurer.resolveType(object, null, genericType.getType(), genericType, keyContext);
+        return (T) this.configurer.resolveType(object, null, genericType.getType(), genericType, this.contextForKey(key));
     }
 
     /**
@@ -178,8 +186,7 @@ public class DeserializationData {
      */
     public <T> T get(@NonNull String key, @NonNull Class<T> valueType) {
         Object object = this.getRaw(key);
-        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
-        return this.configurer.resolveType(object, null, valueType, null, keyContext);
+        return this.configurer.resolveType(object, null, valueType, null, this.contextForKey(key));
     }
 
     /**

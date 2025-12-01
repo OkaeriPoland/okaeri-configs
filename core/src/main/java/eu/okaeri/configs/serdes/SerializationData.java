@@ -16,6 +16,15 @@ public class SerializationData {
     private Map<String, Object> data = new LinkedHashMap<>();
 
     /**
+     * Creates a context for nested simplification with path but WITHOUT field.
+     * This prevents reusing custom serializers recursively.
+     */
+    private SerdesContext contextForKey(@NonNull String key) {
+        ConfigPath newPath = ObjectSerializer.VALUE.equals(key) ? this.context.getPath() : this.context.getPath().property(key);
+        return SerdesContext.of(this.configurer).withPath(newPath);
+    }
+
+    /**
      * Removes all currently stored serialization data.
      */
     public void clear() {
@@ -168,8 +177,7 @@ public class SerializationData {
      * @param value target value
      */
     public void add(@NonNull String key, Object value) {
-        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
-        value = this.configurer.simplify(value, null, keyContext, true);
+        value = this.configurer.simplify(value, null, this.contextForKey(key), true);
         this.addRaw(key, value);
     }
 
@@ -192,8 +200,7 @@ public class SerializationData {
      * @param genericType type declaration of value for simplification process
      */
     public void add(@NonNull String key, Object value, @NonNull GenericsDeclaration genericType) {
-        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
-        value = this.configurer.simplify(value, genericType, keyContext, true);
+        value = this.configurer.simplify(value, genericType, this.contextForKey(key), true);
         this.addRaw(key, value);
     }
 
@@ -237,8 +244,7 @@ public class SerializationData {
             this.addRaw(key, null);
             return;
         }
-        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
-        Object object = this.configurer.simplifyCollection(collection, genericType, keyContext, true);
+        Object object = this.configurer.simplifyCollection(collection, genericType, this.contextForKey(key), true);
         this.addRaw(key, object);
     }
 
@@ -311,8 +317,7 @@ public class SerializationData {
             this.addRaw(key, null);
             return;
         }
-        SerdesContext keyContext = ObjectSerializer.VALUE.equals(key) ? this.context : this.context.withProperty(key);
-        Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, keyContext, true);
+        Object object = this.configurer.simplifyMap((Map<Object, Object>) map, genericType, this.contextForKey(key), true);
         this.addRaw(key, object);
     }
 
