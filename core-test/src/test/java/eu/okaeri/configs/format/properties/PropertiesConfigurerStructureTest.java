@@ -8,6 +8,7 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.properties.PropertiesConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -100,12 +101,11 @@ class PropertiesConfigurerStructureTest {
         assertThat(properties).isEqualTo(expected);
     }
 
-    @ParameterizedTest(name = "{0}: Unicode strings escaped")
-    @MethodSource("propertiesConfigurers")
-    void testSaveToString_UnicodeStrings_EscapedInProperties(String configurerName, Configurer configurer) throws Exception {
-        // Given: Config with unicode strings
+    @Test
+    void testSaveToString_UnicodeStrings_EscapedWhenEnabled() throws Exception {
+        // Given: Config with unicode strings and escapeUnicode enabled
         UnicodeConfig config = ConfigManager.create(UnicodeConfig.class);
-        config.setConfigurer(configurer);
+        config.setConfigurer(new PropertiesConfigurer().setEscapeUnicode(true));
 
         // When: Save to Properties
         String properties = config.saveToString();
@@ -114,6 +114,21 @@ class PropertiesConfigurerStructureTest {
         assertThat(properties).contains("japanese=\\u3053\\u3093\\u306B\\u3061\\u306F");
         assertThat(properties).contains("russian=\\u041F\\u0440\\u0438\\u0432\\u0435\\u0442");
         assertThat(properties).contains("polish=Cz\\u0119\\u015B\\u0107");
+    }
+
+    @Test
+    void testSaveToString_UnicodeStrings_Utf8ByDefault() throws Exception {
+        // Given: Config with unicode strings (default escapeUnicode=false)
+        UnicodeConfig config = ConfigManager.create(UnicodeConfig.class);
+        config.setConfigurer(new PropertiesConfigurer());
+
+        // When: Save to Properties
+        String properties = config.saveToString();
+
+        // Then: Unicode is preserved as UTF-8
+        assertThat(properties).contains("japanese=こんにちは世界");
+        assertThat(properties).contains("russian=Привет мир!");
+        assertThat(properties).contains("polish=Część świecie!");
     }
 
     @ParameterizedTest(name = "{0}: Nested collections structure")
