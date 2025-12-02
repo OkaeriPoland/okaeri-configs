@@ -331,6 +331,37 @@ Line 5 final</string>
    </object>
   </void>
   <void method="put">
+   <string>subConfigMap</string>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>first</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>subField</string>
+       <string>map1</string>
+      </void>
+      <void method="put">
+       <string>subNumber</string>
+       <int>100</int>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>second</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>subField</string>
+       <string>map2</string>
+      </void>
+      <void method="put">
+       <string>subNumber</string>
+       <int>200</int>
+      </void>
+     </object>
+    </void>
+   </object>
+  </void>
+  <void method="put">
    <string>nestedMegaConfig</string>
    <object class="java.util.LinkedHashMap">
     <void method="put">
@@ -657,6 +688,37 @@ Line 5 final</string>
         <void method="put">
          <string>subNumber</string>
          <int>20</int>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+    <void method="put">
+     <string>subConfigMap</string>
+     <object class="java.util.LinkedHashMap">
+      <void method="put">
+       <string>first</string>
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>subField</string>
+         <string>map1</string>
+        </void>
+        <void method="put">
+         <string>subNumber</string>
+         <int>100</int>
+        </void>
+       </object>
+      </void>
+      <void method="put">
+       <string>second</string>
+       <object class="java.util.LinkedHashMap">
+        <void method="put">
+         <string>subField</string>
+         <string>map2</string>
+        </void>
+        <void method="put">
+         <string>subNumber</string>
+         <int>200</int>
         </void>
        </object>
       </void>

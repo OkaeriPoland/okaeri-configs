@@ -35,7 +35,6 @@ class XmlErrorMessageTest {
     @MethodSource("xmlConfigurers")
     void testError_InvalidInteger(String name, Configurer configurer) {
         String xml = """
-            <?xml version="1.0" encoding="UTF-8"?>
             <config>
               <value>not_a_number</value>
             </config>
@@ -48,9 +47,9 @@ class XmlErrorMessageTest {
                 assertThat(e.getPath().toString()).isEqualTo("value");
                 assertThat(e.getMessage()).isEqualTo("""
                     error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
-                     --> 3:10
+                     --> 2:10
                       |
-                    3 |   <value>not_a_number</value>
+                    2 |   <value>not_a_number</value>
                       |          ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
             });
     }
@@ -61,7 +60,6 @@ class XmlErrorMessageTest {
     @MethodSource("xmlConfigurers")
     void testError_NestedField(String name, Configurer configurer) {
         String xml = """
-            <?xml version="1.0" encoding="UTF-8"?>
             <config>
               <database>
                 <host>localhost</host>
@@ -77,9 +75,9 @@ class XmlErrorMessageTest {
                 assertThat(e.getPath().toString()).isEqualTo("database.port");
                 assertThat(e.getMessage()).isEqualTo("""
                     error[StringToIntegerTransformer]: Cannot transform 'database.port' to Integer from String
-                     --> 5:11
+                     --> 4:11
                       |
-                    5 |     <port>not_a_port</port>
+                    4 |     <port>not_a_port</port>
                       |           ^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
             });
     }
@@ -90,7 +88,6 @@ class XmlErrorMessageTest {
     @MethodSource("xmlConfigurers")
     void testError_ListElement(String name, Configurer configurer) {
         String xml = """
-            <?xml version="1.0" encoding="UTF-8"?>
             <config>
               <numbers>
                 <item>1</item>
@@ -108,9 +105,9 @@ class XmlErrorMessageTest {
                 assertThat(e.getPath().toString()).isEqualTo("numbers[2]");
                 assertThat(e.getMessage()).isEqualTo("""
                     error[StringToIntegerTransformer]: Cannot transform 'numbers[2]' to Integer from String
-                     --> 6:11
+                     --> 5:11
                       |
-                    6 |     <item>not_a_number</item>
+                    5 |     <item>not_a_number</item>
                       |           ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
             });
     }
@@ -121,7 +118,6 @@ class XmlErrorMessageTest {
     @MethodSource("xmlConfigurers")
     void testError_MapValue(String name, Configurer configurer) {
         String xml = """
-            <?xml version="1.0" encoding="UTF-8"?>
             <config>
               <limits>
                 <daily>100</daily>
@@ -137,9 +133,9 @@ class XmlErrorMessageTest {
                 assertThat(e.getPath().toString()).isEqualTo("limits[\"weekly\"]");
                 assertThat(e.getMessage()).isEqualTo("""
                     error[StringToIntegerTransformer]: Cannot transform 'limits["weekly"]' to Integer from String
-                     --> 5:13
+                     --> 4:13
                       |
-                    5 |     <weekly>not_a_number</weekly>
+                    4 |     <weekly>not_a_number</weekly>
                       |             ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
             });
     }
@@ -150,7 +146,6 @@ class XmlErrorMessageTest {
     @MethodSource("xmlConfigurers")
     void testError_InvalidEnum(String name, Configurer configurer) {
         String xml = """
-            <?xml version="1.0" encoding="UTF-8"?>
             <config>
               <level>MDIUM</level>
             </config>
@@ -163,9 +158,9 @@ class XmlErrorMessageTest {
                 assertThat(e.getPath().toString()).isEqualTo("level");
                 assertThat(e.getMessage()).isEqualTo("""
                     Cannot resolve 'level' to Level from String
-                     --> 3:10
+                     --> 2:10
                       |
-                    3 |   <level>MDIUM</level>
+                    2 |   <level>MDIUM</level>
                       |          ^^^^^ Expected MEDIUM, HIGH or LOW""");
             });
     }
@@ -175,7 +170,7 @@ class XmlErrorMessageTest {
     @ParameterizedTest(name = "{0}: Inline XML - Invalid Integer")
     @MethodSource("xmlConfigurers")
     void testError_InlineXml_InvalidInteger(String name, Configurer configurer) {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><config><value>not_a_number</value></config>";
+        String xml = "<config><value>not_a_number</value></config>";
 
         assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, xml))
             .isInstanceOf(OkaeriConfigException.class)
@@ -184,10 +179,10 @@ class XmlErrorMessageTest {
                 assertThat(e.getPath().toString()).isEqualTo("value");
                 assertThat(e.getMessage()).isEqualTo("""
                     error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
-                     --> 1:48
+                     --> 1:16
                       |
-                    1 | <?xml version="1.0" encoding="UTF-8"?><config><value>not_a_number</value></config>
-                      |                                                      ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+                    1 | <config><value>not_a_number</value></config>
+                      |                ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
             });
     }
 

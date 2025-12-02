@@ -1,8 +1,8 @@
 package eu.okaeri.configs.exception;
 
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.postprocessor.format.SourceErrorMarker;
-import eu.okaeri.configs.postprocessor.format.SourceWalker;
+import eu.okaeri.configs.format.SourceErrorMarker;
+import eu.okaeri.configs.format.SourceWalker;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.ConfigPath;
 import lombok.Getter;
@@ -78,29 +78,30 @@ public class OkaeriConfigException extends OkaeriException {
             sb.append(" from ").append(actualType.getSimpleName());
         }
 
+        // Extract hint from cause
+        String hint = null;
+        int valueOffset = -1;
+        int valueLength = 1;
+
+        if (cause instanceof ValueIndexedException) {
+            // Generic indexed exception - preferred way
+            ValueIndexedException vie = (ValueIndexedException) cause;
+            hint = vie.getMessage();
+            valueOffset = vie.getStartIndex();
+            valueLength = vie.getLength();
+        } else if (cause instanceof PatternSyntaxException) {
+            // Backwards compatibility for direct PatternSyntaxException
+            PatternSyntaxException pse = (PatternSyntaxException) cause;
+            hint = pse.getDescription();
+            valueOffset = pse.getIndex();
+        } else if ((cause != null) && (cause.getMessage() != null)) {
+            hint = cause.getMessage();
+        }
+
         // Add source marker if walker is available
         SourceWalker walker = (configurer != null) ? configurer.createSourceWalker() : null;
         boolean hasSourceMarker = false;
         if ((walker != null) && hasPath) {
-            String hint = null;
-            int valueOffset = -1;
-            int valueLength = 1;
-
-            if (cause instanceof ValueIndexedException) {
-                // Generic indexed exception - preferred way
-                ValueIndexedException vie = (ValueIndexedException) cause;
-                hint = vie.getMessage();
-                valueOffset = vie.getStartIndex();
-                valueLength = vie.getLength();
-            } else if (cause instanceof PatternSyntaxException) {
-                // Backwards compatibility for direct PatternSyntaxException
-                PatternSyntaxException pse = (PatternSyntaxException) cause;
-                hint = pse.getDescription();
-                valueOffset = pse.getIndex();
-            } else if ((cause != null) && (cause.getMessage() != null)) {
-                hint = cause.getMessage();
-            }
-
             String marker = SourceErrorMarker.format(walker, path, sourceFile, hint, valueOffset, valueLength);
             if (!marker.isEmpty()) {
                 sb.append("\n").append(marker);
@@ -111,6 +112,10 @@ public class OkaeriConfigException extends OkaeriException {
         // Show actual value when no source marker
         if (!hasSourceMarker && (actualValue != null)) {
             sb.append(": ").append(formatValue(actualValue));
+            // Include hint if available (e.g., valid enum values)
+            if ((hint != null) && !hint.isEmpty()) {
+                sb.append(" (").append(hint).append(")");
+            }
         }
 
         return sb.toString();

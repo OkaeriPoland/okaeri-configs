@@ -143,6 +143,12 @@ public class MegaConfig extends OkaeriConfig {
         new SubConfig("sub2", 20)
     );
 
+    @Comment("Map of nested configs")
+    private Map<String, SubConfig> subConfigMap = new LinkedHashMap<>() {{
+        this.put("first", new SubConfig("map1", 100));
+        this.put("second", new SubConfig("map2", 200));
+    }};
+
     // === MULTI-LEVEL SELF-REFERENTIAL NESTING ===
     @Comment({"Complex multi-level subconfig", "MegaConfig nested inside itself (2 levels deep)", "Note: Set to null by default to avoid infinite recursion", "Call populateNestedMegaConfig() after construction to initialize"})
     private MegaConfig nestedMegaConfig = null;

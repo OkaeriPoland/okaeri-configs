@@ -150,6 +150,20 @@
       subNumber: 20
     }
   ]
+  # Map of nested configs
+  subConfigMap:
+  {
+    first:
+    {
+      subField: map1
+      subNumber: 100
+    }
+    second:
+    {
+      subField: map2
+      subNumber: 200
+    }
+  }
   # Complex multi-level subconfig
   # MegaConfig nested inside itself (2 levels deep)
   # Note: Set to null by default to avoid infinite recursion
@@ -303,6 +317,20 @@
         subNumber: 20
       }
     ]
+    # Map of nested configs
+    subConfigMap:
+    {
+      first:
+      {
+        subField: map1
+        subNumber: 100
+      }
+      second:
+      {
+        subField: map2
+        subNumber: 200
+      }
+    }
     # Complex multi-level subconfig
     # MegaConfig nested inside itself (2 levels deep)
     # Note: Set to null by default to avoid infinite recursion

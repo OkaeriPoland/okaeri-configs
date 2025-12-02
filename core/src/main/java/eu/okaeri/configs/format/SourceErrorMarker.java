@@ -1,4 +1,4 @@
-package eu.okaeri.configs.postprocessor.format;
+package eu.okaeri.configs.format;
 
 import eu.okaeri.configs.serdes.ConfigPath;
 import lombok.NonNull;
@@ -88,23 +88,34 @@ public final class SourceErrorMarker {
             underlineStart = location.getValueColumn();
             String value = location.getValue();
 
+            // Strip quotes from underline position - highlight content inside quotes
+            int quoteOffset = 0;
+            int quoteTrim = 0;
+            if (value.length() >= 2) {
+                char first = value.charAt(0);
+                char last = value.charAt(value.length() - 1);
+                if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
+                    quoteOffset = 1;
+                    quoteTrim = 2;
+                }
+            }
+
             if (valueOffset >= 0) {
                 // Point to specific range within the value
-                // Account for quotes: offset is relative to unquoted content
-                int adjustedOffset = valueOffset;
-                if (value.startsWith("\"") || value.startsWith("'")) {
-                    adjustedOffset += 1;
-                }
+                // Offset is relative to unquoted content
+                int adjustedOffset = valueOffset + quoteOffset;
                 if (adjustedOffset < value.length()) {
                     underlineStart += adjustedOffset;
                     // Use provided length, but don't exceed value bounds
-                    int maxLength = value.length() - adjustedOffset;
+                    int maxLength = value.length() - adjustedOffset - (quoteTrim > 0 ? 1 : 0);
                     underlineLength = Math.min(Math.max(1, valueLength), maxLength);
                 } else {
-                    underlineLength = value.length();
+                    underlineLength = Math.max(1, value.length() - quoteTrim);
                 }
             } else {
-                underlineLength = value.length();
+                // Underline content inside quotes
+                underlineStart += quoteOffset;
+                underlineLength = Math.max(1, value.length() - quoteTrim);
             }
         } else if ((location.getKeyColumn() >= 0) && (location.getKey() != null)) {
             // Underline the key

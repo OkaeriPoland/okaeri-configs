@@ -37,8 +37,9 @@ class XmlSimpleConfigurerFeaturesTest {
         String xml = Files.readString(file);
 
         // Then: XML is formatted with proper structure
-        assertThat(xml).contains("<?xml version=\"1.0\" encoding=\"UTF-8\"");
         assertThat(xml).contains("<config>");
+        assertThat(xml).contains("<name>Test</name>");
+        assertThat(xml).contains("<value>42</value>");
         assertThat(xml).contains("</config>");
     }
 

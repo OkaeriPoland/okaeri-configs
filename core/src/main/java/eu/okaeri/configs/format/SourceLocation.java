@@ -1,11 +1,12 @@
-package eu.okaeri.configs.postprocessor.format;
+package eu.okaeri.configs.format;
 
+import eu.okaeri.configs.serdes.ConfigPath;
 import lombok.Builder;
 import lombok.Data;
 
 /**
- * Represents a location in source content for error reporting.
- * Format-agnostic representation used by SourceErrorMarker.
+ * Represents a location in source content for error reporting and comment insertion.
+ * Format-agnostic representation used by SourceErrorMarker and source walkers.
  */
 @Data
 @Builder
@@ -42,4 +43,15 @@ public class SourceLocation {
      * The key name, used as fallback when no value
      */
     private final String key;
+
+    /**
+     * The full config path to this location (e.g., database.connections[0].host)
+     */
+    private final ConfigPath configPath;
+
+    /**
+     * Indentation level (number of spaces), used for comment insertion
+     */
+    @Builder.Default
+    private final int indent = 0;
 }

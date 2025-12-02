@@ -43,8 +43,10 @@ multilineString: |-
   Line 3
   Line 4 with more text
   Line 5 final
+# Math types for precision
 bigInt: '999999999999999999999999999999'
 bigDec: '123.456789012345678901234567890'
+# List of strings
 stringList:
 - alpha
 - beta
@@ -107,10 +109,20 @@ subConfig:
   subNumber: 42
 # List of nested configs
 subConfigList:
+# Subconfig field
 - subField: sub1
   subNumber: 10
 - subField: sub2
   subNumber: 20
+# Map of nested configs
+subConfigMap:
+  first:
+    # Subconfig field
+    subField: map1
+    subNumber: 100
+  second:
+    subField: map2
+    subNumber: 200
 # Complex multi-level subconfig
 # MegaConfig nested inside itself (2 levels deep)
 # Note: Set to null by default to avoid infinite recursion
@@ -157,8 +169,10 @@ nestedMegaConfig:
     Line 3
     Line 4 with more text
     Line 5 final
+  # Math types for precision
   bigInt: '999999999999999999999999999999'
   bigDec: '123.456789012345678901234567890'
+  # List of strings
   stringList:
   - alpha
   - beta
@@ -221,10 +235,20 @@ nestedMegaConfig:
     subNumber: 42
   # List of nested configs
   subConfigList:
+  # Subconfig field
   - subField: sub1
     subNumber: 10
   - subField: sub2
     subNumber: 20
+  # Map of nested configs
+  subConfigMap:
+    first:
+      # Subconfig field
+      subField: map1
+      subNumber: 100
+    second:
+      subField: map2
+      subNumber: 200
   # Complex multi-level subconfig
   # MegaConfig nested inside itself (2 levels deep)
   # Note: Set to null by default to avoid infinite recursion

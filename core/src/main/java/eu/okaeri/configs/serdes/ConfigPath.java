@@ -1,13 +1,14 @@
 package eu.okaeri.configs.serdes;
 
+import eu.okaeri.configs.schema.ConfigDeclaration;
+import eu.okaeri.configs.schema.FieldDeclaration;
+import eu.okaeri.configs.schema.GenericsDeclaration;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents a path to a configuration value, supporting nested properties,
@@ -48,6 +49,101 @@ public class ConfigPath implements SerdesContextAttachment {
      */
     public static ConfigPath of(@NonNull String name) {
         return ROOT.property(name);
+    }
+
+    /**
+     * Parses a flat dot-notation path into a ConfigPath, using schema to distinguish
+     * between indices, map keys, and property names.
+     * <p>
+     * Examples (with appropriate schema):
+     * <ul>
+     *   <li>{@code "database.host"} → property("database").property("host")</li>
+     *   <li>{@code "servers.0.name"} → property("servers").index(0).property("name")</li>
+     *   <li>{@code "settings.main.timeout"} → property("settings").key("main").property("timeout")</li>
+     * </ul>
+     *
+     * @param path            the flat dot-notation path to parse
+     * @param rootDeclaration the root config declaration for schema-aware parsing
+     * @return parsed ConfigPath
+     */
+    public static ConfigPath parseFlat(@NonNull String path, @NonNull ConfigDeclaration rootDeclaration) {
+        if (path.isEmpty()) {
+            return ROOT;
+        }
+
+        String[] parts = path.split("\\.");
+        ConfigPath result = ROOT;
+        ConfigDeclaration currentDecl = rootDeclaration;
+        GenericsDeclaration pendingElementType = null;
+        boolean pendingMapKey = false;
+
+        for (String part : parts) {
+            // Handle numeric indices (list elements) or map keys
+            if (pendingMapKey || (pendingElementType != null)) {
+                Integer index = parseIndex(part);
+                if (index != null) {
+                    result = result.index(index);
+                } else {
+                    result = result.key(part);
+                }
+                // Advance to element's config declaration if it's a config type
+                if (pendingElementType.isConfig()) {
+                    currentDecl = ConfigDeclaration.of(pendingElementType.getType());
+                }
+                pendingElementType = null;
+                pendingMapKey = false;
+                continue;
+            }
+
+            // Regular property
+            result = result.property(part);
+
+            if (currentDecl == null) {
+                continue;
+            }
+
+            Optional<FieldDeclaration> field = currentDecl.getField(part);
+            if (!field.isPresent()) {
+                currentDecl = null;
+                continue;
+            }
+
+            GenericsDeclaration fieldType = field.get().getType();
+            if (fieldType.isConfig()) {
+                currentDecl = ConfigDeclaration.of(fieldType.getType());
+            } else if (isCollectionLike(fieldType)) {
+                pendingElementType = fieldType.getSubtypeAtOrNull(0);
+                currentDecl = null;
+            } else if (isMapLike(fieldType)) {
+                GenericsDeclaration valueType = fieldType.getSubtypeAtOrNull(1);
+                if ((valueType != null) && valueType.isConfig()) {
+                    pendingElementType = valueType;
+                    pendingMapKey = true;
+                }
+                currentDecl = null;
+            } else {
+                currentDecl = null;
+            }
+        }
+
+        return result;
+    }
+
+    private static Integer parseIndex(String s) {
+        try {
+            int value = Integer.parseInt(s);
+            return (value >= 0) ? value : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static boolean isCollectionLike(GenericsDeclaration type) {
+        return (type != null) && Collection.class.isAssignableFrom(type.getType());
+    }
+
+    private static boolean isMapLike(GenericsDeclaration type) {
+        return (type != null) && Map.class.isAssignableFrom(type.getType());
     }
 
     /**
@@ -108,7 +204,7 @@ public class ConfigPath implements SerdesContextAttachment {
             } else {
                 // Property name: read until . or [ or end
                 int end = i;
-                while (end < len && path.charAt(end) != '.' && path.charAt(end) != '[') {
+                while ((end < len) && (path.charAt(end) != '.') && (path.charAt(end) != '[')) {
                     end++;
                 }
                 String propName = path.substring(i, end);
@@ -206,6 +302,33 @@ public class ConfigPath implements SerdesContextAttachment {
         return new ConfigPath(new ArrayList<>(this.nodes.subList(0, this.nodes.size() - 1)));
     }
 
+    /**
+     * Returns a sub-path from root up to and including the node at endIndex.
+     * <p>
+     * Example with path {@code servers[0].name} (3 nodes):
+     * <ul>
+     *   <li>{@code subPath(0)} → "servers"</li>
+     *   <li>{@code subPath(1)} → "servers[0]"</li>
+     *   <li>{@code subPath(2)} → "servers[0].name"</li>
+     * </ul>
+     * Example with path {@code settings["main"].timeout} (3 nodes):
+     * <ul>
+     *   <li>{@code subPath(0)} → "settings"</li>
+     *   <li>{@code subPath(1)} → "settings["main"]"</li>
+     *   <li>{@code subPath(2)} → "settings["main"].timeout"</li>
+     * </ul>
+     *
+     * @param endIndex the last node index to include (0-based, inclusive)
+     * @return sub-path containing nodes [0, endIndex]
+     * @throws IndexOutOfBoundsException if endIndex is out of range
+     */
+    public ConfigPath subPath(int endIndex) {
+        if ((endIndex < 0) || (endIndex >= this.nodes.size())) {
+            throw new IndexOutOfBoundsException("endIndex: " + endIndex + ", size: " + this.nodes.size());
+        }
+        return new ConfigPath(new ArrayList<>(this.nodes.subList(0, endIndex + 1)));
+    }
+
     @Override
     public String toString() {
         if (this.nodes.isEmpty()) {
@@ -241,6 +364,197 @@ public class ConfigPath implements SerdesContextAttachment {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
+    // ==================== Declaration Resolution ====================
+
+    /**
+     * Resolves this path to a FieldDeclaration, walking through nested configs,
+     * list elements, and map values as needed.
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>{@code database.host} - returns FieldDeclaration for 'host' in Database config</li>
+     *   <li>{@code servers[0].name} - returns FieldDeclaration for 'name' in list element config</li>
+     *   <li>{@code settings["main"].timeout} - returns FieldDeclaration for 'timeout' in map value config</li>
+     * </ul>
+     *
+     * @param rootDeclaration the root config declaration to start resolution from
+     * @return the field declaration if path resolves successfully, empty otherwise
+     */
+    public Optional<FieldDeclaration> resolveFieldDeclaration(@NonNull ConfigDeclaration rootDeclaration) {
+        ConfigDeclaration currentDecl = rootDeclaration;
+        FieldDeclaration lastField = null;
+
+        for (PathNode node : this.nodes) {
+            if (node instanceof PropertyNode) {
+                String name = ((PropertyNode) node).getName();
+
+                // If currentDecl is null but lastField was a Map, treat this as map key access
+                if ((currentDecl == null) && (lastField != null) && isMapLike(lastField.getType())) {
+                    GenericsDeclaration valueType = lastField.getType().getSubtypeAtOrNull(1);
+                    currentDecl = ((valueType != null) && valueType.isConfig())
+                        ? ConfigDeclaration.of(valueType.getType())
+                        : null;
+                    lastField = null;
+                    continue;
+                }
+
+                if (currentDecl == null) {
+                    return Optional.empty();
+                }
+
+                Optional<FieldDeclaration> field = currentDecl.getField(name);
+                if (!field.isPresent()) {
+                    return Optional.empty();
+                }
+                lastField = field.get();
+                currentDecl = resolveNextDeclaration(lastField.getType());
+            } else if (node instanceof IndexNode) {
+                // Inside a list - lastField should be List<T>, resolve T's declaration
+                if (lastField == null) {
+                    return Optional.empty();
+                }
+                GenericsDeclaration elementType = lastField.getType().getSubtypeAtOrNull(0);
+                currentDecl = ((elementType != null) && elementType.isConfig())
+                    ? ConfigDeclaration.of(elementType.getType())
+                    : null;
+                lastField = null; // Reset - we're now inside the element
+            } else if (node instanceof KeyNode) {
+                // Inside a map - lastField should be Map<K,V>, resolve V's declaration
+                if (lastField == null) {
+                    return Optional.empty();
+                }
+                GenericsDeclaration valueType = lastField.getType().getSubtypeAtOrNull(1);
+                currentDecl = ((valueType != null) && valueType.isConfig())
+                    ? ConfigDeclaration.of(valueType.getType())
+                    : null;
+                lastField = null; // Reset - we're now inside the value
+            }
+        }
+
+        return Optional.ofNullable(lastField);
+    }
+
+    private static ConfigDeclaration resolveNextDeclaration(GenericsDeclaration type) {
+        if (type == null) {
+            return null;
+        }
+        if (type.isConfig()) {
+            return ConfigDeclaration.of(type.getType());
+        }
+        // For List/Map, we need index/key node to resolve further
+        return null;
+    }
+
+    /**
+     * Converts this path to a pattern string for deduplication purposes.
+     * Indices and keys are replaced with wildcards (*).
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>{@code servers[0].name} → "servers.*.name"</li>
+     *   <li>{@code settings["main"].timeout} → "settings.*.timeout"</li>
+     *   <li>{@code data[0]["key"].value} → "data.*.*.value"</li>
+     * </ul>
+     *
+     * @return pattern string with wildcards for indices/keys
+     */
+    public String toPattern() {
+        StringBuilder sb = new StringBuilder();
+        for (PathNode node : this.nodes) {
+            if (sb.length() > 0) {
+                sb.append(".");
+            }
+            if (node instanceof PropertyNode) {
+                sb.append(((PropertyNode) node).getName());
+            } else if ((node instanceof IndexNode) || (node instanceof KeyNode)) {
+                sb.append("*");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Converts this path to a pattern string using declaration for context.
+     * Detects PropertyNodes that are actually map keys (when following a Map field).
+     * <p>
+     * This is useful when paths are built without schema awareness (e.g., YAML parsing)
+     * and PropertyNodes may represent map keys rather than field names.
+     * <p>
+     * Difference from {@link #toPattern()}:
+     * <ul>
+     *   <li>{@code toPattern()} treats all PropertyNodes as field names</li>
+     *   <li>{@code toPattern(declaration)} uses schema to detect map keys</li>
+     * </ul>
+     * <p>
+     * Example with {@code Map<String, SubConfig> settings} field:
+     * <pre>
+     * // Path built from YAML: settings.main.timeout (all PropertyNodes)
+     * path.toPattern()            → "settings.main.timeout"
+     * path.toPattern(declaration) → "settings.*.timeout"
+     * </pre>
+     * The declaration-aware version recognizes "main" as a map key (not a field),
+     * converting it to wildcard for proper deduplication across map entries.
+     *
+     * @param declaration the root config declaration for context
+     * @return pattern string with wildcards for indices/keys/map-key-properties
+     */
+    public String toPattern(@NonNull ConfigDeclaration declaration) {
+        StringBuilder sb = new StringBuilder();
+        ConfigDeclaration currentDecl = declaration;
+        FieldDeclaration lastField = null;
+
+        for (PathNode node : this.nodes) {
+            if (node instanceof PropertyNode) {
+                String name = ((PropertyNode) node).getName();
+
+                // Check if this PropertyNode is actually a map key
+                if ((currentDecl == null) && (lastField != null) && isMapLike(lastField.getType())) {
+                    sb.append((sb.length() > 0) ? "." : "").append("*");
+                    GenericsDeclaration valueType = lastField.getType().getSubtypeAtOrNull(1);
+                    currentDecl = ((valueType != null) && valueType.isConfig())
+                        ? ConfigDeclaration.of(valueType.getType())
+                        : null;
+                    lastField = null;
+                    continue;
+                }
+
+                sb.append((sb.length() > 0) ? "." : "").append(name);
+
+                // Update declaration context
+                if (currentDecl != null) {
+                    Optional<FieldDeclaration> field = currentDecl.getField(name);
+                    if (field.isPresent()) {
+                        lastField = field.get();
+                        GenericsDeclaration fieldType = lastField.getType();
+                        currentDecl = fieldType.isConfig() ? ConfigDeclaration.of(fieldType.getType()) : null;
+                    } else {
+                        currentDecl = null;
+                        lastField = null;
+                    }
+                }
+            } else if (node instanceof IndexNode) {
+                sb.append((sb.length() > 0) ? "." : "").append("*");
+                if (lastField != null) {
+                    GenericsDeclaration elementType = lastField.getType().getSubtypeAtOrNull(0);
+                    currentDecl = ((elementType != null) && elementType.isConfig())
+                        ? ConfigDeclaration.of(elementType.getType())
+                        : null;
+                    lastField = null;
+                }
+            } else if (node instanceof KeyNode) {
+                sb.append((sb.length() > 0) ? "." : "").append("*");
+                if (lastField != null) {
+                    GenericsDeclaration valueType = lastField.getType().getSubtypeAtOrNull(1);
+                    currentDecl = ((valueType != null) && valueType.isConfig())
+                        ? ConfigDeclaration.of(valueType.getType())
+                        : null;
+                    lastField = null;
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     // ==================== Path Node Types ====================
 
     /**
@@ -273,8 +587,7 @@ public class ConfigPath implements SerdesContextAttachment {
                 Object key = ((KeyNode) o).getKey();
                 return (key instanceof String) && this.name.equals(key);
             }
-            if (!(o instanceof PropertyNode)) return false;
-            return this.name.equals(((PropertyNode) o).name);
+            return (o instanceof PropertyNode) && this.name.equals(((PropertyNode) o).name);
         }
 
         @Override
@@ -328,8 +641,7 @@ public class ConfigPath implements SerdesContextAttachment {
             if ((this.key instanceof String) && (o instanceof PropertyNode)) {
                 return this.key.equals(((PropertyNode) o).getName());
             }
-            if (!(o instanceof KeyNode)) return false;
-            return this.key.equals(((KeyNode) o).key);
+            return (o instanceof KeyNode) && this.key.equals(((KeyNode) o).key);
         }
 
         @Override

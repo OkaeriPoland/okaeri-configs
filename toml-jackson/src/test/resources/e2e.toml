@@ -49,14 +49,19 @@ stringSet = ['one', 'two', 'three']
 enumSet = ['FIRST', 'SECOND']
 # Nested collection - list of lists
 nestedListOfLists = [['a', 'b'], ['c', 'd', 'e']]
+# Simple string-to-string map
 simpleMap.key1 = 'value1'
 simpleMap.key2 = 'value2'
+# Map with integer keys
 intKeyMap.1 = 'one'
 intKeyMap.2 = 'two'
+# Nested map
 nestedMap.group1.a = 1
 nestedMap.group1.b = 2
+# Map with enum keys
 enumKeyMap.FIRST = 'first value'
 enumKeyMap.SECOND = 'second value'
+# Map with enum values
 enumValueMap.a = 'FIRST'
 enumValueMap.b = 'THIRD'
 # Simple enum
@@ -65,10 +70,18 @@ singleEnum = 'THIRD'
 enumList = ['FIRST', 'THIRD']
 # List of nested configs
 subConfigList = [{subField = 'sub1', subNumber = 10}, {subField = 'sub2', subNumber = 20}]
+# Map of nested configs
+# Subconfig field
+subConfigMap.first.subField = 'map1'
+subConfigMap.first.subNumber = 100
+subConfigMap.second.subField = 'map2'
+subConfigMap.second.subNumber = 200
+# Serializable custom object
 customObj.name = 'test'
 customObj.id = 999
 # List of serializable objects
 serializableList = [{name = 'item1', id = 1}, {name = 'item2', id = 2}, {name = 'item3', id = 3}]
+# Map of serializable objects
 serializableMap.obj1.name = 'first'
 serializableMap.obj1.id = 100
 serializableMap.obj2.name = 'second'
@@ -151,23 +164,18 @@ enumSet = ['FIRST', 'SECOND']
 nestedListOfLists = [['a', 'b'], ['c', 'd', 'e']]
 # Simple string-to-string map
 simpleMap.key1 = 'value1'
-# Simple string-to-string map
 simpleMap.key2 = 'value2'
 # Map with integer keys
 intKeyMap.1 = 'one'
-# Map with integer keys
 intKeyMap.2 = 'two'
 # Nested map
 nestedMap.group1.a = 1
-# Nested map
 nestedMap.group1.b = 2
 # Map with enum keys
 enumKeyMap.FIRST = 'first value'
-# Map with enum keys
 enumKeyMap.SECOND = 'second value'
 # Map with enum values
 enumValueMap.a = 'FIRST'
-# Map with enum values
 enumValueMap.b = 'THIRD'
 # Simple enum
 singleEnum = 'THIRD'
@@ -175,6 +183,12 @@ singleEnum = 'THIRD'
 enumList = ['FIRST', 'THIRD']
 # List of nested configs
 subConfigList = [{subField = 'sub1', subNumber = 10}, {subField = 'sub2', subNumber = 20}]
+# Map of nested configs
+# Subconfig field
+subConfigMap.first.subField = 'map1'
+subConfigMap.first.subNumber = 100
+subConfigMap.second.subField = 'map2'
+subConfigMap.second.subNumber = 200
 # Complex multi-level subconfig
 # MegaConfig nested inside itself (2 levels deep)
 # Note: Set to null by default to avoid infinite recursion
@@ -182,17 +196,13 @@ subConfigList = [{subField = 'sub1', subNumber = 10}, {subField = 'sub2', subNum
 nestedMegaConfig = '__null__'
 # Serializable custom object
 customObj.name = 'test'
-# Serializable custom object
 customObj.id = 999
 # List of serializable objects
 serializableList = [{name = 'item1', id = 1}, {name = 'item2', id = 2}, {name = 'item3', id = 3}]
 # Map of serializable objects
 serializableMap.obj1.name = 'first'
-# Map of serializable objects
 serializableMap.obj1.id = 100
-# Map of serializable objects
 serializableMap.obj2.name = 'second'
-# Map of serializable objects
 serializableMap.obj2.id = 200
 # Field with custom key
 custom-key-field = 'custom value'
@@ -213,6 +223,7 @@ setWithNull = ['one', '__null__', 'three']
 # on the same field
 repeatingCommentField = 'test value'
 
+# Nested subconfig
 [nestedMegaConfig.subConfig]
 # Subconfig field
 subField = 'default sub'

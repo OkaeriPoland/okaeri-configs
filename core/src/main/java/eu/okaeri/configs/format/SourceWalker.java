@@ -1,4 +1,4 @@
-package eu.okaeri.configs.postprocessor.format;
+package eu.okaeri.configs.format;
 
 import eu.okaeri.configs.serdes.ConfigPath;
 import lombok.NonNull;

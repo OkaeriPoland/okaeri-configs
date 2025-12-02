@@ -1,5 +1,10 @@
-package eu.okaeri.configs.postprocessor.format;
+package eu.okaeri.configs.format.yaml;
 
+import eu.okaeri.configs.format.SourceLocation;
+import eu.okaeri.configs.format.SourceWalker;
+import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
+import eu.okaeri.configs.schema.ConfigDeclaration;
+import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.serdes.ConfigPath;
 import lombok.Getter;
 import lombok.NonNull;
@@ -13,57 +18,94 @@ import java.util.regex.Pattern;
  * Supports nested objects, lists, and maps for both comment insertion
  * and error position lookup.
  */
-public class YamlWalker implements SourceWalker {
+public class YamlSourceWalker implements SourceWalker {
 
     private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("^(\\s*)([^#:\\-][^:]*?):\\s*(.*)$");
     private static final Pattern LIST_ITEM_PATTERN = Pattern.compile("^(\\s*)-\\s*(.*)$");
     private static final Set<String> MULTILINE_INDICATORS = new HashSet<>(Arrays.asList("|", "|-", ">", ">-"));
 
     @Getter
-    private final List<YamlLine> lines = new ArrayList<>();
+    private final List<SourceLocation> locations = new ArrayList<>();
 
     @Getter
-    private final Map<ConfigPath, YamlLine> pathToLine = new LinkedHashMap<>();
+    private final Map<ConfigPath, SourceLocation> pathToLocation = new LinkedHashMap<>();
 
     private final String content;
 
-    public YamlWalker(@NonNull String content) {
+    public YamlSourceWalker(@NonNull String content) {
         this.content = content;
         this.parse();
     }
 
-    public static YamlWalker of(@NonNull String content) {
-        return new YamlWalker(content);
-    }
-
-    /**
-     * Find the line for a given ConfigPath.
-     */
-    public YamlLine findLine(@NonNull ConfigPath path) {
-        return this.pathToLine.get(path);
+    public static YamlSourceWalker of(@NonNull String content) {
+        return new YamlSourceWalker(content);
     }
 
     @Override
     public SourceLocation findPath(@NonNull ConfigPath path) {
-        YamlLine line = this.findLine(path);
-        if (line == null) {
+        return this.pathToLocation.get(path);
+    }
+
+    /**
+     * Inserts comments from the ConfigDeclaration into the YAML content.
+     * Handles nested configs, lists, and maps.
+     *
+     * @param declaration   the config declaration with comment annotations
+     * @param commentPrefix the prefix for comments (e.g., "# ")
+     * @return the content with comments inserted
+     */
+    public String insertComments(@NonNull ConfigDeclaration declaration, @NonNull String commentPrefix) {
+        // Track which path patterns have been commented (to avoid duplicates across list items)
+        Set<String> commentedPatterns = new HashSet<>();
+
+        // Build new content with comments
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < this.locations.size(); i++) {
+            SourceLocation location = this.locations.get(i);
+            ConfigPath path = location.getConfigPath();
+
+            // Only add comments for locations with paths and keys
+            if ((path != null) && (location.getKey() != null)) {
+                String pattern = path.toPattern(declaration);
+                if (!commentedPatterns.contains(pattern)) {
+                    String[] comment = resolveComment(path, declaration);
+                    if (comment != null) {
+                        String commentStr = ConfigPostprocessor.createComment(commentPrefix, comment);
+                        result.append(ConfigPostprocessor.addIndent(commentStr, location.getIndent()));
+                    }
+                    commentedPatterns.add(pattern);
+                }
+            }
+
+            result.append(location.getRawLine());
+            // Add newline after each line except trailing empty lines
+            boolean isLastLine = (i == (this.locations.size() - 1));
+            boolean isTrailingEmpty = isLastLine && location.getRawLine().isEmpty();
+            if (!isTrailingEmpty) {
+                result.append("\n");
+            }
+        }
+
+        return result.toString();
+    }
+
+
+    /**
+     * Resolves the comment for a given path using ConfigPath.resolveFieldDeclaration().
+     */
+    private static String[] resolveComment(ConfigPath path, ConfigDeclaration declaration) {
+        if ((path == null) || path.isEmpty() || (declaration == null)) {
             return null;
         }
-        return SourceLocation.builder()
-            .lineNumber(line.getLineNumber())
-            .rawLine(line.getRawLine())
-            .valueColumn(line.getValueColumn())
-            .value(line.getValue())
-            .keyColumn(line.getColumn())
-            .key(line.getKey())
-            .build();
+        Optional<FieldDeclaration> field = path.resolveFieldDeclaration(declaration);
+        return field.map(FieldDeclaration::getComment).orElse(null);
     }
 
     private void parse() {
         String[] rawLines = this.content.split("\n", -1);
 
         // Track context: list of (path, indent) pairs
-        // When indent decreases, we pop entries with higher or equal indent
         List<PathEntry> pathStack = new ArrayList<>();
 
         // Track list indices at each indent level
@@ -80,14 +122,12 @@ public class YamlWalker implements SourceWalker {
 
             // Handle multiline content
             if (inMultiline) {
-                if (!trimmed.isEmpty() && indent <= multilineBaseIndent) {
+                if (!trimmed.isEmpty() && (indent <= multilineBaseIndent)) {
                     inMultiline = false;
                 } else {
-                    this.lines.add(YamlLine.builder()
+                    this.locations.add(SourceLocation.builder()
                         .lineNumber(lineNumber)
-                        .column(indent)
                         .indent(indent)
-                        .type(YamlLineType.MULTILINE_CONTENT)
                         .rawLine(rawLine)
                         .build());
                     continue;
@@ -96,11 +136,9 @@ public class YamlWalker implements SourceWalker {
 
             // Blank lines
             if (trimmed.isEmpty()) {
-                this.lines.add(YamlLine.builder()
+                this.locations.add(SourceLocation.builder()
                     .lineNumber(lineNumber)
-                    .column(0)
                     .indent(0)
-                    .type(YamlLineType.BLANK)
                     .rawLine(rawLine)
                     .build());
                 continue;
@@ -108,26 +146,33 @@ public class YamlWalker implements SourceWalker {
 
             // Comments
             if (trimmed.startsWith("#")) {
-                this.lines.add(YamlLine.builder()
+                this.locations.add(SourceLocation.builder()
                     .lineNumber(lineNumber)
-                    .column(indent)
                     .indent(indent)
-                    .type(YamlLineType.COMMENT)
                     .rawLine(rawLine)
                     .build());
                 continue;
             }
 
+            // Check if this is a list item first (before popping stack)
+            Matcher listMatcher = LIST_ITEM_PATTERN.matcher(rawLine);
+            boolean isListItem = listMatcher.matches();
+
             // Pop path stack for entries at same or higher indent
-            while (!pathStack.isEmpty() && pathStack.get(pathStack.size() - 1).indent >= indent) {
-                pathStack.remove(pathStack.size() - 1);
+            // For list items, only pop entries with HIGHER indent (keep parent at same indent)
+            if (isListItem) {
+                while (!pathStack.isEmpty() && (pathStack.get(pathStack.size() - 1).indent > indent)) {
+                    pathStack.remove(pathStack.size() - 1);
+                }
+            } else {
+                while (!pathStack.isEmpty() && (pathStack.get(pathStack.size() - 1).indent >= indent)) {
+                    pathStack.remove(pathStack.size() - 1);
+                }
             }
-            // Clear list indices for HIGHER indents only (not same level - that's a sibling in same list)
+            // Clear list indices for HIGHER indents only
             listIndices.keySet().removeIf(ind -> ind > indent);
 
-            // Check if this is a list item
-            Matcher listMatcher = LIST_ITEM_PATTERN.matcher(rawLine);
-            if (listMatcher.matches()) {
+            if (isListItem) {
                 int listIndent = listMatcher.group(1).length();
                 String listContent = listMatcher.group(2);
 
@@ -135,8 +180,8 @@ public class YamlWalker implements SourceWalker {
                 int listIndex = listIndices.getOrDefault(listIndent, -1) + 1;
                 listIndices.put(listIndent, listIndex);
 
-                // Build indexed path from parent
-                ConfigPath parentPath = getParentPath(pathStack);
+                // For list items, find the parent list path (skip any indexed paths at same indent)
+                ConfigPath parentPath = this.getListParentPath(pathStack, listIndent);
                 ConfigPath indexedPath = parentPath.index(listIndex);
 
                 // Check if list content is a key-value
@@ -149,23 +194,20 @@ public class YamlWalker implements SourceWalker {
                     int keyColumn = rawLine.indexOf(key, listIndent + 2);
                     int valueColumn = value.isEmpty() ? -1 : rawLine.lastIndexOf(value);
 
-                    YamlLineType type = value.isEmpty() ? YamlLineType.LIST_ITEM_KEY_ONLY : YamlLineType.LIST_ITEM_KEY_VALUE;
-                    YamlLine line = YamlLine.builder()
+                    SourceLocation location = SourceLocation.builder()
                         .lineNumber(lineNumber)
-                        .column(keyColumn)
+                        .keyColumn(keyColumn)
                         .indent(listIndent)
-                        .type(type)
                         .key(key)
                         .value(value.isEmpty() ? null : value)
                         .valueColumn(valueColumn)
                         .rawLine(rawLine)
                         .configPath(fullPath)
-                        .listIndex(listIndex)
                         .build();
-                    this.lines.add(line);
-                    this.pathToLine.put(fullPath, line);
+                    this.locations.add(location);
+                    this.pathToLocation.put(fullPath, location);
 
-                    // Push the indexed path (not the key path) for sibling keys in same list item
+                    // Push the indexed path for sibling keys in same list item
                     pathStack.add(new PathEntry(indexedPath, listIndent));
 
                     if (isMultilineIndicator(value)) {
@@ -176,19 +218,17 @@ public class YamlWalker implements SourceWalker {
                     // Simple list item
                     int valueColumn = listContent.isEmpty() ? -1 : rawLine.indexOf(listContent, listIndent + 2);
 
-                    YamlLine line = YamlLine.builder()
+                    SourceLocation location = SourceLocation.builder()
                         .lineNumber(lineNumber)
-                        .column(listIndent + 2)
+                        .keyColumn(listIndent + 2)
                         .indent(listIndent)
-                        .type(YamlLineType.LIST_ITEM)
                         .value(listContent.isEmpty() ? null : listContent)
                         .valueColumn(valueColumn)
                         .rawLine(rawLine)
                         .configPath(indexedPath)
-                        .listIndex(listIndex)
                         .build();
-                    this.lines.add(line);
-                    this.pathToLine.put(indexedPath, line);
+                    this.locations.add(location);
+                    this.pathToLocation.put(indexedPath, location);
                 }
                 continue;
             }
@@ -199,26 +239,24 @@ public class YamlWalker implements SourceWalker {
                 String key = keyValueMatcher.group(2).trim();
                 String value = keyValueMatcher.group(3).trim();
 
-                ConfigPath parentPath = getParentPath(pathStack);
+                ConfigPath parentPath = this.getParentPath(pathStack);
                 ConfigPath fullPath = parentPath.property(key);
 
                 int keyColumn = rawLine.indexOf(key);
                 int valueColumn = value.isEmpty() ? -1 : rawLine.lastIndexOf(value);
 
-                YamlLineType type = value.isEmpty() ? YamlLineType.KEY_ONLY : YamlLineType.KEY_VALUE;
-                YamlLine line = YamlLine.builder()
+                SourceLocation location = SourceLocation.builder()
                     .lineNumber(lineNumber)
-                    .column(keyColumn)
+                    .keyColumn(keyColumn)
                     .indent(indent)
-                    .type(type)
                     .key(key)
                     .value(value.isEmpty() ? null : value)
                     .valueColumn(valueColumn)
                     .rawLine(rawLine)
                     .configPath(fullPath)
                     .build();
-                this.lines.add(line);
-                this.pathToLine.put(fullPath, line);
+                this.locations.add(location);
+                this.pathToLocation.put(fullPath, location);
 
                 // Push for nested content
                 pathStack.add(new PathEntry(fullPath, indent));
@@ -231,11 +269,9 @@ public class YamlWalker implements SourceWalker {
             }
 
             // Unrecognized - treat as content
-            this.lines.add(YamlLine.builder()
+            this.locations.add(SourceLocation.builder()
                 .lineNumber(lineNumber)
-                .column(indent)
                 .indent(indent)
-                .type(YamlLineType.MULTILINE_CONTENT)
                 .rawLine(rawLine)
                 .build());
         }
@@ -246,6 +282,30 @@ public class YamlWalker implements SourceWalker {
             return ConfigPath.root();
         }
         return pathStack.get(pathStack.size() - 1).path;
+    }
+
+    /**
+     * Finds the parent path for a list item, skipping indexed paths at the same indent level.
+     * This ensures consecutive list items share the same parent (e.g., items[0] and items[1] both have parent "items").
+     */
+    private ConfigPath getListParentPath(List<PathEntry> pathStack, int listIndent) {
+        if (pathStack.isEmpty()) {
+            return ConfigPath.root();
+        }
+        // Walk backwards through the stack to find the first non-indexed path at this indent level
+        for (int i = pathStack.size() - 1; i >= 0; i--) {
+            PathEntry entry = pathStack.get(i);
+            if (entry.indent == listIndent) {
+                // Check if this path ends with an index node (meaning it's from a previous list item)
+                List<ConfigPath.PathNode> nodes = entry.path.getNodes();
+                if (!nodes.isEmpty() && (nodes.get(nodes.size() - 1) instanceof ConfigPath.IndexNode)) {
+                    // Skip this indexed path, continue looking
+                    continue;
+                }
+            }
+            return entry.path;
+        }
+        return ConfigPath.root();
     }
 
     private static int countIndent(String line) {

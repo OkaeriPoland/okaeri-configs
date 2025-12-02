@@ -1,7 +1,7 @@
-package eu.okaeri.configs.properties;
+package eu.okaeri.configs.format.ini;
 
-import eu.okaeri.configs.postprocessor.format.SourceLocation;
-import eu.okaeri.configs.postprocessor.format.SourceWalker;
+import eu.okaeri.configs.format.SourceLocation;
+import eu.okaeri.configs.format.SourceWalker;
 import eu.okaeri.configs.serdes.ConfigPath;
 import lombok.NonNull;
 
@@ -46,13 +46,13 @@ public class IniSourceWalker implements SourceWalker {
         ConfigPath searchPath = path;
         ConfigPath.PathNode lastNode = null;
 
-        while (location == null && !searchPath.isEmpty()) {
+        while ((location == null) && !searchPath.isEmpty()) {
             lastNode = searchPath.getLastNode();
             searchPath = searchPath.parent();
             location = this.pathToLocation.get(searchPath);
         }
 
-        if (location == null || lastNode == null) {
+        if ((location == null) || (lastNode == null)) {
             return null;
         }
 
@@ -88,7 +88,7 @@ public class IniSourceWalker implements SourceWalker {
         int start = 0;
 
         for (int i = 0; i <= value.length(); i++) {
-            if (i == value.length() || value.charAt(i) == ',') {
+            if ((i == value.length()) || (value.charAt(i) == ',')) {
                 if (currentIndex == index) {
                     return new int[]{start, i - start};
                 }
@@ -166,7 +166,7 @@ public class IniSourceWalker implements SourceWalker {
      * E.g., "database.settings" becomes ConfigPath with properties ["database", "settings"]
      */
     private static ConfigPath parseDottedPath(String dottedPath) {
-        if (dottedPath == null || dottedPath.isEmpty()) {
+        if ((dottedPath == null) || dottedPath.isEmpty()) {
             return ConfigPath.root();
         }
         String[] parts = dottedPath.split("\\.");

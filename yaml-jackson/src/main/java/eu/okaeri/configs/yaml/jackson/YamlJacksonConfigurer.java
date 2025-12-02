@@ -7,9 +7,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.postprocessor.ConfigLineInfo;
+import eu.okaeri.configs.format.yaml.YamlSourceWalker;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
-import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -120,45 +119,18 @@ public class YamlJacksonConfigurer extends Configurer {
         this.mapper.writeValue(baos, this.map);
         String contents = baos.toString(StandardCharsets.UTF_8.name());
 
-        // Post-process to add comments
-        ConfigPostprocessor.of(contents)
-            // Remove all current top-level comments
+        // Remove existing comments
+        contents = ConfigPostprocessor.of(contents)
             .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-            // Add new comments
-            .updateLinesKeys(new YamlSectionWalker() {
-                @Override
-                public String update(String line, ConfigLineInfo lineInfo, List<ConfigLineInfo> path) {
-                    ConfigDeclaration currentDeclaration = declaration;
-                    for (int i = 0; i < (path.size() - 1); i++) {
-                        ConfigLineInfo pathElement = path.get(i);
-                        Optional<FieldDeclaration> field = currentDeclaration.getField(pathElement.getName());
-                        if (!field.isPresent()) {
-                            return line;
-                        }
-                        GenericsDeclaration fieldType = field.get().getType();
-                        if (!fieldType.isConfig()) {
-                            return line;
-                        }
-                        currentDeclaration = ConfigDeclaration.of(fieldType.getType());
-                    }
+            .getContext();
 
-                    Optional<FieldDeclaration> lineDeclaration = currentDeclaration.getField(lineInfo.getName());
-                    if (!lineDeclaration.isPresent()) {
-                        return line;
-                    }
+        // Insert comments using the source walker
+        YamlSourceWalker walker = YamlSourceWalker.of(contents);
+        contents = walker.insertComments(declaration, this.commentPrefix);
 
-                    String[] fieldComment = lineDeclaration.get().getComment();
-                    if (fieldComment == null) {
-                        return line;
-                    }
-
-                    String comment = ConfigPostprocessor.createComment(YamlJacksonConfigurer.this.commentPrefix, fieldComment);
-                    return ConfigPostprocessor.addIndent(comment, lineInfo.getIndent()) + line;
-                }
-            })
-            // Add header if available
+        // Add header and write
+        ConfigPostprocessor.of(contents)
             .prependContextComment(this.commentPrefix, declaration.getHeader())
-            // Save
             .write(outputStream);
     }
 }

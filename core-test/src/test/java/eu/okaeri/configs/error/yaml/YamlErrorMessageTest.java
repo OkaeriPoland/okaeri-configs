@@ -422,6 +422,136 @@ class YamlErrorMessageTest {
             });
     }
 
+    // ==================== Quoted Values ====================
+
+    @ParameterizedTest(name = "{0}: Invalid Integer (single quoted)")
+    @MethodSource("yamlConfigurers")
+    void testError_InvalidInteger_SingleQuoted(String name, Configurer configurer) {
+        String yaml = "value: 'not_a_number'";
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 1:9
+                      |
+                    1 | value: 'not_a_number'
+                      |         ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid Integer (double quoted)")
+    @MethodSource("yamlConfigurers")
+    void testError_InvalidInteger_DoubleQuoted(String name, Configurer configurer) {
+        String yaml = "value: \"not_a_number\"";
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 1:9
+                      |
+                    1 | value: "not_a_number"
+                      |         ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid enum (single quoted)")
+    @MethodSource("yamlConfigurers")
+    void testError_InvalidEnum_SingleQuoted(String name, Configurer configurer) {
+        String yaml = "level: 'MDIUM'";
+
+        assertThatThrownBy(() -> this.loadConfig(EnumConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("level");
+                assertThat(e.getMessage()).isEqualTo("""
+                    Cannot resolve 'level' to Level from String
+                     --> 1:9
+                      |
+                    1 | level: 'MDIUM'
+                      |         ^^^^^ Expected MEDIUM, HIGH or LOW""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid nested field (single quoted)")
+    @MethodSource("yamlConfigurers")
+    void testError_NestedField_SingleQuoted(String name, Configurer configurer) {
+        String yaml = """
+            database:
+              host: localhost
+              port: 'not_a_port'
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(NestedConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("database.port");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'database.port' to Integer from String
+                     --> 3:10
+                      |
+                    3 |   port: 'not_a_port'
+                      |          ^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid list element (single quoted)")
+    @MethodSource("yamlConfigurers")
+    void testError_ListElement_SingleQuoted(String name, Configurer configurer) {
+        String yaml = """
+            numbers:
+              - 1
+              - 2
+              - 'not_a_number'
+              - 4
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(ListConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("numbers[2]");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'numbers[2]' to Integer from String
+                     --> 4:6
+                      |
+                    4 |   - 'not_a_number'
+                      |      ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid map value (single quoted)")
+    @MethodSource("yamlConfigurers")
+    void testError_MapValue_SingleQuoted(String name, Configurer configurer) {
+        String yaml = """
+            limits:
+              daily: 100
+              weekly: 'not_a_number'
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(MapConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("limits[\"weekly\"]");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'limits["weekly"]' to Integer from String
+                     --> 3:12
+                      |
+                    3 |   weekly: 'not_a_number'
+                      |            ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
     // ==================== Complex Nested Paths ====================
 
     @ParameterizedTest(name = "{0}: Map with nested object value")

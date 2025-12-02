@@ -1,7 +1,8 @@
 package eu.okaeri.configs.xml;
 
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.postprocessor.format.SourceWalker;
+import eu.okaeri.configs.format.SourceWalker;
+import eu.okaeri.configs.format.xml.XmlSourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -30,12 +31,11 @@ import java.util.regex.Pattern;
  * <p>
  * Designed for simplified data (Map/List of primitive types/wrappers).
  * Uses element names for map keys, with fallback to entry[@key] for invalid XML names.
- * Lists use repeated item elements.
+ * Lists use repeated item elements. No XML declaration is generated.
  * </p>
  * <p>
  * Example output:
  * <pre>{@code
- * <?xml version="1.0" encoding="UTF-8"?>
  * <config>
  *   <name>Example</name>
  *   <count>42</count>
@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 public class XmlSimpleConfigurer extends Configurer {
 
     private static final Pattern VALID_XML_NAME = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_\\-]*$");
-    private static final String ROOT_ELEMENT = "config";
+    private static final String DEFAULT_ROOT_ELEMENT = "config";
     private static final String ENTRY_ELEMENT = "entry";
     private static final String ITEM_ELEMENT = "item";
     private static final String KEY_ATTRIBUTE = "key";
@@ -62,6 +62,7 @@ public class XmlSimpleConfigurer extends Configurer {
     private Map<String, Object> map = new LinkedHashMap<>();
 
     private @Setter int indent = 2;
+    private @Setter String rootElement = DEFAULT_ROOT_ELEMENT;
 
     public XmlSimpleConfigurer() {
     }
@@ -77,8 +78,8 @@ public class XmlSimpleConfigurer extends Configurer {
 
     @Override
     public SourceWalker createSourceWalker() {
-        String raw = getRawContent();
-        return (raw != null) ? XmlSourceWalker.of(raw) : null;
+        String raw = this.getRawContent();
+        return (raw == null) ? null : XmlSourceWalker.of(raw, this.rootElement);
     }
 
     @Override
@@ -225,7 +226,7 @@ public class XmlSimpleConfigurer extends Configurer {
 
         this.writeHeaderComments(document, declaration);
 
-        Element root = document.createElement(ROOT_ELEMENT);
+        Element root = document.createElement(this.rootElement);
         document.appendChild(root);
         this.writeMap(document, root, this.map, declaration);
 
@@ -253,6 +254,7 @@ public class XmlSimpleConfigurer extends Configurer {
     private String transformToString(Document document) throws Exception {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(this.indent));
@@ -263,7 +265,7 @@ public class XmlSimpleConfigurer extends Configurer {
     }
 
     private String postProcessHeaderComments(String xml) {
-        int configStart = xml.indexOf("<" + ROOT_ELEMENT);
+        int configStart = xml.indexOf("<" + this.rootElement);
         if (configStart <= 0) {
             return xml;
         }
@@ -283,6 +285,11 @@ public class XmlSimpleConfigurer extends Configurer {
     }
 
     private void writeMap(Document document, Element parent, Map<?, ?> map, ConfigDeclaration declaration) {
+        this.writeMap(document, parent, map, declaration, false);
+    }
+
+    private void writeMap(Document document, Element parent, Map<?, ?> map, ConfigDeclaration declaration, boolean isMapValue) {
+        boolean first = true;
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             String key = String.valueOf(entry.getKey());
             Object value = entry.getValue();
@@ -290,9 +297,14 @@ public class XmlSimpleConfigurer extends Configurer {
             this.writeFieldComment(document, parent, declaration, key);
 
             Element element = this.createElement(document, key);
-            ConfigDeclaration nestedDecl = this.getNestedDeclaration(declaration, key, value);
+            // For Map<K, Config> values, declaration is already the value type - use it directly
+            // Only pass for first entry to deduplicate comments
+            ConfigDeclaration nestedDecl = isMapValue
+                ? (first ? declaration : null)
+                : (declaration != null ? declaration.resolveNestedDeclaration(key, value) : null);
             this.writeValue(document, element, value, nestedDecl);
             parent.appendChild(element);
+            first = false;
         }
     }
 
@@ -320,38 +332,12 @@ public class XmlSimpleConfigurer extends Configurer {
         return element;
     }
 
-    private ConfigDeclaration getNestedDeclaration(ConfigDeclaration declaration, String key, Object value) {
-        if (declaration == null) {
-            return null;
-        }
-        Optional<FieldDeclaration> field = declaration.getField(key);
-        if (!field.isPresent()) {
-            return null;
-        }
-
-        GenericsDeclaration fieldType = field.get().getType();
-
-        // Direct subconfig
-        if (fieldType.isConfig()) {
-            return ConfigDeclaration.of(fieldType.getType());
-        }
-
-        // List of configs - use element type declaration
-        if (value instanceof List) {
-            GenericsDeclaration elementType = fieldType.getSubtypeAtOrNull(0);
-            if ((elementType != null) && elementType.isConfig()) {
-                return ConfigDeclaration.of(elementType.getType());
-            }
-        }
-
-        return null;
-    }
-
     private void writeValue(Document document, Element element, Object value, ConfigDeclaration declaration) {
         if (value == null) {
             element.appendChild(document.createElement(NULL_ELEMENT));
         } else if (value instanceof Map) {
-            this.writeMap(document, element, (Map<?, ?>) value, declaration);
+            // If declaration exists, we're writing Map<K, Config> entries where values are configs
+            this.writeMap(document, element, (Map<?, ?>) value, declaration, declaration != null);
         } else if (value instanceof List) {
             this.writeList(document, element, (List<?>) value, declaration);
         } else {

@@ -47,8 +47,8 @@ class XmlConfigurerEdgeCasesTest {
         config.save(output);
         String xml = output.toString();
 
-        // Then: XML output contains root element
-        assertThat(xml).contains("<?xml");
+        // Then: XML output is valid (XmlSimple uses <config>, XmlBean uses <java>)
+        assertThat(xml.contains("<config") || xml.contains("<java")).isTrue();
     }
 
     @ParameterizedTest(name = "{0}: Very large string values")

@@ -1,7 +1,6 @@
 package eu.okaeri.configs.properties;
 
 import eu.okaeri.configs.schema.ConfigDeclaration;
-import eu.okaeri.configs.schema.FieldDeclaration;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -132,7 +131,7 @@ public class IniConfigurer extends FlatConfigurer {
         List<Map.Entry<String, String>> rootEntries = sections.remove("");
         if (rootEntries != null) {
             for (Map.Entry<String, String> entry : rootEntries) {
-                this.writeFieldComment(sb, entry.getKey(), declaration, writtenComments);
+                this.writeFieldComments(sb, entry.getKey(), declaration, writtenComments);
                 sb.append(escapeKey(entry.getKey())).append("=").append(escapeValue(entry.getValue())).append("\n");
             }
         }
@@ -147,23 +146,15 @@ public class IniConfigurer extends FlatConfigurer {
             String topLevelField = sectionName.contains(".")
                 ? sectionName.substring(0, sectionName.indexOf('.'))
                 : sectionName;
-            this.writeFieldComment(sb, topLevelField, declaration, writtenComments);
+            this.writeFieldComments(sb, topLevelField, declaration, writtenComments);
 
             sb.append("[").append(sectionName).append("]\n");
 
-            // Resolve nested declaration for this section
-            ConfigDeclaration sectionDecl = this.resolveNestedDeclaration(sectionName, declaration);
-
             for (Map.Entry<String, String> entry : section.getValue()) {
                 String entryKey = entry.getKey();
-                // Write comment for fields within section (use base key without dots)
-                String baseKey = entryKey.contains(".") ? entryKey.substring(0, entryKey.indexOf('.')) : entryKey;
-                // Use section-qualified key to allow same field name in different sections
-                String qualifiedKey = sectionName + "." + baseKey;
-                if ((sectionDecl != null) && !writtenComments.contains(qualifiedKey)) {
-                    this.writeFieldCommentDirect(sb, baseKey, sectionDecl);
-                    writtenComments.add(qualifiedKey);
-                }
+                // Write comments using section-qualified key for proper deduplication
+                String qualifiedKey = sectionName + "." + entryKey;
+                this.writeFieldComments(sb, qualifiedKey, declaration, writtenComments);
 
                 sb.append(escapeKey(entryKey)).append("=").append(escapeValue(entry.getValue())).append("\n");
             }
@@ -180,24 +171,7 @@ public class IniConfigurer extends FlatConfigurer {
             return new String[]{"", fullKey};
         }
 
-        ConfigDeclaration currentDecl = declaration;
-        int sectionDepth = 0;
-
-        // Walk through declaration, only counting OkaeriConfig fields
-        for (int i = 0; (i < (parts.length - 1)) && (i < this.maxSectionDepth); i++) {
-            Optional<FieldDeclaration> field = currentDecl.getField(parts[i]);
-            if (!field.isPresent()) {
-                break;
-            }
-
-            if (field.get().getType().isConfig()) {
-                currentDecl = ConfigDeclaration.of(field.get().getType().getType());
-                sectionDepth = i + 1;
-            } else {
-                break;
-            }
-        }
-
+        int sectionDepth = declaration.findConfigDepth(parts, this.maxSectionDepth);
         if (sectionDepth == 0) {
             return new String[]{"", fullKey};
         }
@@ -205,59 +179,6 @@ public class IniConfigurer extends FlatConfigurer {
         String sectionPath = String.join(".", Arrays.copyOfRange(parts, 0, sectionDepth));
         String remainingKey = String.join(".", Arrays.copyOfRange(parts, sectionDepth, parts.length));
         return new String[]{sectionPath, remainingKey};
-    }
-
-    private ConfigDeclaration resolveNestedDeclaration(String sectionPath, ConfigDeclaration declaration) {
-        if ((declaration == null) || sectionPath.isEmpty()) {
-            return declaration;
-        }
-
-        String[] parts = sectionPath.split("\\.");
-        ConfigDeclaration currentDecl = declaration;
-
-        for (String part : parts) {
-            Optional<FieldDeclaration> field = currentDecl.getField(part);
-            if (field.isPresent() && field.get().getType().isConfig()) {
-                currentDecl = ConfigDeclaration.of(field.get().getType().getType());
-            } else {
-                return null;
-            }
-        }
-
-        return currentDecl;
-    }
-
-    private void writeFieldComment(StringBuilder sb, String key, ConfigDeclaration declaration, Set<String> written) {
-        if ((declaration == null) || written.contains(key)) {
-            return;
-        }
-
-        Optional<FieldDeclaration> field = declaration.getField(key);
-        if (field.isPresent()) {
-            String[] comment = field.get().getComment();
-            if (comment != null) {
-                for (String line : comment) {
-                    sb.append(this.commentPrefix).append(line).append("\n");
-                }
-            }
-            written.add(key);
-        }
-    }
-
-    private void writeFieldCommentDirect(StringBuilder sb, String key, ConfigDeclaration declaration) {
-        if (declaration == null) {
-            return;
-        }
-
-        Optional<FieldDeclaration> field = declaration.getField(key);
-        if (field.isPresent()) {
-            String[] comment = field.get().getComment();
-            if (comment != null) {
-                for (String line : comment) {
-                    sb.append(this.commentPrefix).append(line).append("\n");
-                }
-            }
-        }
     }
 
     // ==================== INI-Specific Utilities ====================

@@ -136,4 +136,89 @@ public class ConfigDeclaration {
     public Collection<FieldDeclaration> getFields() {
         return this.fieldMap.values();
     }
+
+    /**
+     * Finds how many leading parts of a dotted path are OkaeriConfig fields.
+     * Used for determining section depth in formats like TOML and INI.
+     * <p>
+     * Example with config having {@code SubConfig sub} field which has {@code String name}:
+     * <ul>
+     *   <li>{@code findConfigDepth(["sub", "name"], 10)} → 1 (sub is config, name is not)</li>
+     *   <li>{@code findConfigDepth(["sub", "name"], 0)} → 0 (maxDepth reached)</li>
+     *   <li>{@code findConfigDepth(["unknown", "x"], 10)} → 0 (unknown field)</li>
+     * </ul>
+     *
+     * @param parts    path parts to check
+     * @param maxDepth maximum depth to search
+     * @return number of consecutive OkaeriConfig fields from the start
+     */
+    public int findConfigDepth(@NonNull String[] parts, int maxDepth) {
+        ConfigDeclaration currentDecl = this;
+        int depth = 0;
+
+        for (int i = 0; (i < (parts.length - 1)) && (i < maxDepth); i++) {
+            Optional<FieldDeclaration> field = currentDecl.getField(parts[i]);
+            if (!field.isPresent()) {
+                break;
+            }
+
+            GenericsDeclaration fieldType = field.get().getType();
+            if (fieldType.isConfig()) {
+                currentDecl = ConfigDeclaration.of(fieldType.getType());
+                depth = i + 1;
+            } else {
+                break;
+            }
+        }
+
+        return depth;
+    }
+
+    /**
+     * Resolves the ConfigDeclaration for a nested field value.
+     * Handles direct OkaeriConfig fields, List&lt;Config&gt;, and Map&lt;K, Config&gt;.
+     * <p>
+     * Example:
+     * <ul>
+     *   <li>Field type {@code SubConfig} → returns SubConfig declaration</li>
+     *   <li>Field type {@code List<SubConfig>}, value is List → returns SubConfig declaration</li>
+     *   <li>Field type {@code Map<String, SubConfig>}, value is Map → returns SubConfig declaration</li>
+     *   <li>Field type {@code String} → returns null</li>
+     * </ul>
+     *
+     * @param key   the field name
+     * @param value the field value (used to distinguish List vs Map when type is ambiguous)
+     * @return the nested ConfigDeclaration, or null if not a config type
+     */
+    public ConfigDeclaration resolveNestedDeclaration(@NonNull String key, Object value) {
+        Optional<FieldDeclaration> field = this.getField(key);
+        if (!field.isPresent()) {
+            return null;
+        }
+
+        GenericsDeclaration fieldType = field.get().getType();
+
+        // Direct subconfig
+        if (fieldType.isConfig()) {
+            return ConfigDeclaration.of(fieldType.getType());
+        }
+
+        // List of configs
+        if (value instanceof List) {
+            GenericsDeclaration elementType = fieldType.getSubtypeAtOrNull(0);
+            if ((elementType != null) && elementType.isConfig()) {
+                return ConfigDeclaration.of(elementType.getType());
+            }
+        }
+
+        // Map of configs
+        if (value instanceof Map) {
+            GenericsDeclaration valueType = fieldType.getSubtypeAtOrNull(1);
+            if ((valueType != null) && valueType.isConfig()) {
+                return ConfigDeclaration.of(valueType.getType());
+            }
+        }
+
+        return null;
+    }
 }

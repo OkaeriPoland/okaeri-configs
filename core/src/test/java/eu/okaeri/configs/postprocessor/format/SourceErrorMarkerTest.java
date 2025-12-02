@@ -1,5 +1,7 @@
 package eu.okaeri.configs.postprocessor.format;
 
+import eu.okaeri.configs.format.SourceErrorMarker;
+import eu.okaeri.configs.format.yaml.YamlSourceWalker;
 import eu.okaeri.configs.serdes.ConfigPath;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +15,7 @@ class SourceErrorMarkerTest {
             name: John
             age: 30""";
 
-        YamlWalker walker = YamlWalker.of(yaml);
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
         String marker = SourceErrorMarker.format(walker, ConfigPath.parse("age"), "config.yml");
 
         assertThat(marker).isEqualTo("""
@@ -30,7 +32,7 @@ class SourceErrorMarkerTest {
               host: localhost
               port: 5432""";
 
-        YamlWalker walker = YamlWalker.of(yaml);
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
         String marker = SourceErrorMarker.format(walker, ConfigPath.parse("database.port"), "config.yml");
 
         assertThat(marker).isEqualTo("""
@@ -49,7 +51,7 @@ class SourceErrorMarkerTest {
               - host: server2.com
                 port: invalid""";
 
-        YamlWalker walker = YamlWalker.of(yaml);
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
         String marker = SourceErrorMarker.format(walker, ConfigPath.parse("servers[1].port"), "app.yml");
 
         assertThat(marker).isEqualTo("""
@@ -65,7 +67,7 @@ class SourceErrorMarkerTest {
             settings:
               enabled: true""";
 
-        YamlWalker walker = YamlWalker.of(yaml);
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
         String marker = SourceErrorMarker.format(walker, ConfigPath.parse("settings"), "config.yml");
 
         // Should underline the key since there's no value
@@ -81,7 +83,7 @@ class SourceErrorMarkerTest {
         }
         String yaml = yamlBuilder.toString().trim();
 
-        YamlWalker walker = YamlWalker.of(yaml);
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
         String marker = SourceErrorMarker.format(walker, ConfigPath.parse("key12"), null);
 
         // Should handle double-digit line numbers with proper alignment
@@ -93,7 +95,7 @@ class SourceErrorMarkerTest {
     void testWithoutSourceFile() {
         String yaml = "name: test";
 
-        YamlWalker walker = YamlWalker.of(yaml);
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
         String marker = SourceErrorMarker.format(walker, ConfigPath.parse("name"), null);
 
         assertThat(marker).startsWith(" --> 1:7");
@@ -104,7 +106,7 @@ class SourceErrorMarkerTest {
     void testPathNotFound() {
         String yaml = "name: test";
 
-        YamlWalker walker = YamlWalker.of(yaml);
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
         String marker = SourceErrorMarker.format(walker, ConfigPath.parse("nonexistent.path"), "config.yml");
 
         assertThat(marker).isEmpty();
@@ -116,7 +118,7 @@ class SourceErrorMarkerTest {
             database:
               port: invalid""";
 
-        YamlWalker walker = YamlWalker.of(yaml);
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
         String marker = SourceErrorMarker.format(walker, ConfigPath.parse("database.port"), "config.yml", "expected Integer");
 
         assertThat(marker).isEqualTo("""

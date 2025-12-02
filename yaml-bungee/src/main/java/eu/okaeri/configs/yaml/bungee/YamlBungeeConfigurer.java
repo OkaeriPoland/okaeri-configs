@@ -2,11 +2,9 @@ package eu.okaeri.configs.yaml.bungee;
 
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
-import eu.okaeri.configs.postprocessor.ConfigLineInfo;
+import eu.okaeri.configs.format.SourceWalker;
+import eu.okaeri.configs.format.yaml.YamlSourceWalker;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
-import eu.okaeri.configs.postprocessor.format.SourceWalker;
-import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
-import eu.okaeri.configs.postprocessor.format.YamlWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -46,8 +44,8 @@ public class YamlBungeeConfigurer extends Configurer {
 
     @Override
     public SourceWalker createSourceWalker() {
-        String raw = getRawContent();
-        return (raw != null) ? YamlWalker.of(raw) : null;
+        String raw = this.getRawContent();
+        return (raw == null) ? null : YamlSourceWalker.of(raw);
     }
 
     @Override
@@ -123,52 +121,23 @@ public class YamlBungeeConfigurer extends Configurer {
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-
         // bungee's save
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ConfigurationProvider.getProvider(YamlConfiguration.class).save(this.config, new OutputStreamWriter(baos, StandardCharsets.UTF_8));
         String contents = new String(baos.toByteArray(), StandardCharsets.UTF_8);
 
-        // postprocess
-        ConfigPostprocessor.of(contents)
-            // remove all current top-level comments
+        // remove existing comments
+        contents = ConfigPostprocessor.of(contents)
             .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-            // add new comments
-            .updateLinesKeys(new YamlSectionWalker() {
-                @Override
-                public String update(String line, ConfigLineInfo lineInfo, List<ConfigLineInfo> path) {
+            .getContext();
 
-                    ConfigDeclaration currentDeclaration = declaration;
-                    for (int i = 0; i < (path.size() - 1); i++) {
-                        ConfigLineInfo pathElement = path.get(i);
-                        Optional<FieldDeclaration> field = currentDeclaration.getField(pathElement.getName());
-                        if (!field.isPresent()) {
-                            return line;
-                        }
-                        GenericsDeclaration fieldType = field.get().getType();
-                        if (!fieldType.isConfig()) {
-                            return line;
-                        }
-                        currentDeclaration = ConfigDeclaration.of(fieldType.getType());
-                    }
+        // insert comments using the source walker
+        YamlSourceWalker walker = YamlSourceWalker.of(contents);
+        contents = walker.insertComments(declaration, this.commentPrefix);
 
-                    Optional<FieldDeclaration> lineDeclaration = currentDeclaration.getField(lineInfo.getName());
-                    if (!lineDeclaration.isPresent()) {
-                        return line;
-                    }
-
-                    String[] fieldComment = lineDeclaration.get().getComment();
-                    if (fieldComment == null) {
-                        return line;
-                    }
-
-                    String comment = ConfigPostprocessor.createComment(YamlBungeeConfigurer.this.commentPrefix, fieldComment);
-                    return ConfigPostprocessor.addIndent(comment, lineInfo.getIndent()) + line;
-                }
-            })
-            // add header if available
+        // add header and write
+        ConfigPostprocessor.of(contents)
             .prependContextComment(this.commentPrefix, declaration.getHeader())
-            // save
             .write(outputStream);
     }
 }

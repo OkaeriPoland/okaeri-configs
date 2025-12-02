@@ -3,9 +3,12 @@ package eu.okaeri.configs.toml;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.format.SourceWalker;
+import eu.okaeri.configs.format.toml.TomlSourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.ConfigPath;
 import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 import lombok.Setter;
@@ -59,6 +62,12 @@ public class TomlJacksonConfigurer extends Configurer {
     @Override
     public List<String> getExtensions() {
         return Collections.singletonList("toml");
+    }
+
+    @Override
+    public SourceWalker createSourceWalker() {
+        String raw = this.getRawContent();
+        return (raw == null) ? null : TomlSourceWalker.of(raw);
     }
 
     @Override
@@ -244,17 +253,16 @@ public class TomlJacksonConfigurer extends Configurer {
                 .add(remainingKey + " = " + value);
         }
 
-        // Build output: root lines first, then sections in order of first appearance
+        // Build output with comments using ConfigPath for resolution
         StringBuilder result = new StringBuilder();
-        Set<String> commentedKeys = new HashSet<>();
+        Set<String> commentedPatterns = new HashSet<>();
 
         // Root lines (empty section path)
         List<String> rootLines = sections.getOrDefault("", Collections.emptyList());
         for (String line : rootLines) {
             String key = extractKey(line);
-            if ((key != null) && !commentedKeys.contains(key)) {
-                this.appendFieldComment(result, declaration, key);
-                commentedKeys.add(key);
+            if (key != null) {
+                this.writeCommentsForKey(result, key, declaration, commentedPatterns);
             }
             result.append(line).append("\n");
         }
@@ -269,33 +277,54 @@ public class TomlJacksonConfigurer extends Configurer {
             List<String> lines = section.getValue();
             result.append("\n");
 
-            // Add comment for top-level field only
-            String topLevelKey = sectionPath.contains(".")
-                ? sectionPath.substring(0, sectionPath.indexOf('.'))
-                : sectionPath;
-            if (!commentedKeys.contains(topLevelKey)) {
-                this.appendFieldComment(result, declaration, topLevelKey);
-                commentedKeys.add(topLevelKey);
-            }
-
+            // Add comment for section itself
+            this.writeCommentsForKey(result, sectionPath, declaration, commentedPatterns);
             result.append("[").append(sectionPath).append("]\n");
-
-            // Resolve nested declaration for this section
-            ConfigDeclaration sectionDecl = this.resolveNestedDeclaration(sectionPath, declaration);
 
             for (String line : lines) {
                 String key = extractKey(line);
-                if ((key != null) && (sectionDecl != null) && !commentedKeys.contains(sectionPath + "." + key)) {
-                    // Use base key without dots for field lookup
-                    String baseKey = key.contains(".") ? key.substring(0, key.indexOf('.')) : key;
-                    this.appendFieldComment(result, sectionDecl, baseKey);
-                    commentedKeys.add(sectionPath + "." + key);
+                if (key != null) {
+                    String fullKey = sectionPath + "." + key;
+                    this.writeCommentsForKey(result, fullKey, declaration, commentedPatterns);
                 }
                 result.append(line).append("\n");
             }
         }
 
         return result.toString();
+    }
+
+    /**
+     * Writes comments for a dotted key path using ConfigPath for resolution.
+     * Uses pattern-based deduplication (list.*.field, map.*.field).
+     */
+    private void writeCommentsForKey(StringBuilder sb, String key, ConfigDeclaration declaration, Set<String> commentedPatterns) {
+        ConfigPath path = ConfigPath.parseFlat(key, declaration);
+        List<ConfigPath.PathNode> nodes = path.getNodes();
+
+        for (int i = 0; i < nodes.size(); i++) {
+            // Skip indices/keys - they don't have field comments
+            if (!(nodes.get(i) instanceof ConfigPath.PropertyNode)) {
+                continue;
+            }
+
+            ConfigPath partialPath = path.subPath(i);
+            String pattern = partialPath.toPattern();
+            if (commentedPatterns.contains(pattern)) {
+                continue;
+            }
+
+            Optional<FieldDeclaration> field = partialPath.resolveFieldDeclaration(declaration);
+            if (field.isPresent()) {
+                String[] comment = field.get().getComment();
+                if (comment != null) {
+                    for (String line : comment) {
+                        sb.append("# ").append(line).append("\n");
+                    }
+                }
+                commentedPatterns.add(pattern);
+            }
+        }
     }
 
     /**
@@ -309,26 +338,7 @@ public class TomlJacksonConfigurer extends Configurer {
             return new String[]{"", dottedKey};
         }
 
-        ConfigDeclaration currentDecl = declaration;
-        int sectionDepth = 0;
-
-        // Walk through declaration, only counting OkaeriConfig fields
-        for (int i = 0; (i < (parts.length - 1)) && (i < this.maxSectionDepth); i++) {
-
-            Optional<FieldDeclaration> field = currentDecl.getField(parts[i]);
-            if (!field.isPresent()) {
-                break;
-            }
-
-            GenericsDeclaration fieldType = field.get().getType();
-            if (fieldType.isConfig()) {
-                currentDecl = ConfigDeclaration.of(fieldType.getType());
-                sectionDepth = i + 1;
-            } else {
-                break;
-            }
-        }
-
+        int sectionDepth = declaration.findConfigDepth(parts, this.maxSectionDepth);
         if (sectionDepth == 0) {
             return new String[]{"", dottedKey};
         }
@@ -336,26 +346,6 @@ public class TomlJacksonConfigurer extends Configurer {
         String sectionPath = String.join(".", Arrays.copyOfRange(parts, 0, sectionDepth));
         String remainingKey = String.join(".", Arrays.copyOfRange(parts, sectionDepth, parts.length));
         return new String[]{sectionPath, remainingKey};
-    }
-
-    private ConfigDeclaration resolveNestedDeclaration(String sectionPath, ConfigDeclaration declaration) {
-        if ((declaration == null) || sectionPath.isEmpty()) {
-            return declaration;
-        }
-
-        String[] parts = sectionPath.split("\\.");
-        ConfigDeclaration currentDecl = declaration;
-
-        for (String part : parts) {
-            Optional<FieldDeclaration> field = currentDecl.getField(part);
-            if (field.isPresent() && field.get().getType().isConfig()) {
-                currentDecl = ConfigDeclaration.of(field.get().getType().getType());
-            } else {
-                return null;
-            }
-        }
-
-        return currentDecl;
     }
 
     private static int findEqualsIndex(String line) {
@@ -387,20 +377,5 @@ public class TomlJacksonConfigurer extends Configurer {
             return line.substring(0, eqIndex).trim();
         }
         return null;
-    }
-
-    private void appendFieldComment(StringBuilder sb, ConfigDeclaration declaration, String key) {
-        if (declaration == null) {
-            return;
-        }
-        Optional<FieldDeclaration> field = declaration.getField(key);
-        if (field.isPresent()) {
-            String[] comment = field.get().getComment();
-            if (comment != null) {
-                for (String line : comment) {
-                    sb.append("# ").append(line).append("\n");
-                }
-            }
-        }
     }
 }

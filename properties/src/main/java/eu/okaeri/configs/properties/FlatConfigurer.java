@@ -1,10 +1,12 @@
 package eu.okaeri.configs.properties;
 
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.postprocessor.format.SourceWalker;
+import eu.okaeri.configs.format.SourceWalker;
+import eu.okaeri.configs.format.ini.IniSourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.ConfigPath;
 import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.Getter;
 import lombok.NonNull;
@@ -375,15 +377,39 @@ public abstract class FlatConfigurer extends Configurer {
         return field.map(FieldDeclaration::getType).orElse(null);
     }
 
-    protected ConfigDeclaration getNestedDeclaration(ConfigDeclaration decl, String fieldName) {
-        if (decl == null) {
-            return null;
+    // ==================== Comment Writing ====================
+
+    /**
+     * Writes comments for a dotted key path, handling list/map element types.
+     * Uses pattern-based deduplication (list.*.field) so comments appear only on first occurrence.
+     */
+    protected void writeFieldComments(StringBuilder sb, String key, ConfigDeclaration declaration, Set<String> written) {
+        ConfigPath path = ConfigPath.parseFlat(key, declaration);
+        List<ConfigPath.PathNode> nodes = path.getNodes();
+
+        for (int i = 0; i < nodes.size(); i++) {
+            // Skip indices/keys - they don't have field comments
+            if (!(nodes.get(i) instanceof ConfigPath.PropertyNode)) {
+                continue;
+            }
+
+            ConfigPath partialPath = path.subPath(i);
+            String pattern = partialPath.toPattern();
+            if (written.contains(pattern)) {
+                continue;
+            }
+
+            Optional<FieldDeclaration> field = partialPath.resolveFieldDeclaration(declaration);
+            if (field.isPresent()) {
+                String[] comment = field.get().getComment();
+                if (comment != null) {
+                    for (String line : comment) {
+                        sb.append(this.commentPrefix).append(line).append("\n");
+                    }
+                }
+                written.add(pattern);
+            }
         }
-        Optional<FieldDeclaration> field = decl.getField(fieldName);
-        if (field.isPresent() && field.get().getType().isConfig()) {
-            return ConfigDeclaration.of(field.get().getType().getType());
-        }
-        return null;
     }
 
     // ==================== Utilities ====================

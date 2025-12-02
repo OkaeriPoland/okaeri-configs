@@ -1,7 +1,6 @@
 package eu.okaeri.configs.properties;
 
 import eu.okaeri.configs.schema.ConfigDeclaration;
-import eu.okaeri.configs.schema.FieldDeclaration;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -78,42 +77,6 @@ public class PropertiesConfigurer extends FlatConfigurer {
             String key = entry.getKey();
             this.writeFieldComments(sb, key, declaration, writtenCommentPaths);
             sb.append(escapeKey(key)).append("=").append(this.escapeValue(entry.getValue())).append("\n");
-        }
-    }
-
-    private void writeFieldComments(StringBuilder sb, String key, ConfigDeclaration declaration, Set<String> written) {
-        String[] parts = key.split("\\.");
-        ConfigDeclaration currentDecl = declaration;
-        StringBuilder pathBuilder = new StringBuilder();
-
-        for (String part : parts) {
-            // Skip numeric indices
-            if (isNumeric(part)) {
-                pathBuilder.append((pathBuilder.length() > 0) ? "." : "").append(part);
-                continue;
-            }
-
-            pathBuilder.append((pathBuilder.length() > 0) ? "." : "").append(part);
-            String path = pathBuilder.toString();
-
-            if (written.contains(path) || (currentDecl == null)) {
-                currentDecl = this.getNestedDeclaration(currentDecl, part);
-                continue;
-            }
-
-            Optional<FieldDeclaration> field = currentDecl.getField(part);
-            if (field.isPresent()) {
-                String[] comment = field.get().getComment();
-                if (comment != null) {
-                    for (String line : comment) {
-                        sb.append(this.commentPrefix).append(line).append("\n");
-                    }
-                }
-                written.add(path);
-                currentDecl = this.getNestedDeclaration(currentDecl, part);
-            } else {
-                currentDecl = null;
-            }
         }
     }
 
