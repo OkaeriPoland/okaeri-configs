@@ -331,13 +331,21 @@ public class YamlSourceWalker implements SourceWalker {
         if (lines == null) return "";
         if (prefix == null) prefix = "";
 
+        String prefixTrimmed = prefix.trim();
+
         StringBuilder result = new StringBuilder();
         for (String line : lines) {
             if (line.isEmpty()) {
+                // @Comment("") -> empty line (no # at all)
                 result.append("\n");
-            } else if (line.startsWith(prefix.trim())) {
+            } else if (line.startsWith(prefixTrimmed)) {
+                // Already has prefix (e.g., starts with #)
                 result.append(line).append("\n");
+            } else if (line.trim().isEmpty()) {
+                // @Comment(" ") -> "#" (just the hash, whitespace-only acts as visual separator)
+                result.append(prefixTrimmed).append("\n");
             } else {
+                // Normal comment text
                 result.append(prefix).append(line).append("\n");
             }
         }
@@ -355,7 +363,12 @@ public class YamlSourceWalker implements SourceWalker {
 
         StringBuilder result = new StringBuilder();
         for (String line : text.split("\n")) {
-            result.append(indent).append(line).append("\n");
+            if (line.isEmpty()) {
+                // Don't indent empty lines (from @Comment(""))
+                result.append("\n");
+            } else {
+                result.append(indent).append(line).append("\n");
+            }
         }
         return result.toString();
     }

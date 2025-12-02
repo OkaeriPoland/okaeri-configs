@@ -2,6 +2,7 @@ package eu.okaeri.configs.format.properties;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.properties.PropertiesConfigurer;
 import lombok.Data;
@@ -441,6 +442,27 @@ class PropertiesConfigurerEdgeCasesTest {
         assertThat(properties).contains("items=first,__null__,third");
     }
 
+    @ParameterizedTest(name = "{0}: Empty comment creates blank line")
+    @MethodSource("propertiesConfigurers")
+    void testWrite_EmptyCommentCreatesBlankLine(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with empty comment annotation
+        EmptyCommentConfig config = ConfigManager.create(EmptyCommentConfig.class);
+        config.setConfigurer(configurer);
+
+        // When: Write to string
+        String properties = config.saveToString();
+
+        // Then: @Comment(" ") creates "#", @Comment("") creates empty line (no #)
+        assertThat(properties).isEqualTo("""
+                #
+                # Field after space comment
+                afterSpaceComment=value1
+
+                # Field after empty line
+                afterEmptyLine=value2
+                """);
+    }
+
     @ParameterizedTest(name = "{0}: List with nulls round-trip")
     @MethodSource("propertiesConfigurers")
     void testRoundTrip_ListWithNulls(String configurerName, Configurer configurer) throws Exception {
@@ -543,5 +565,17 @@ class PropertiesConfigurerEdgeCasesTest {
     @EqualsAndHashCode(callSuper = false)
     public static class NullListConfig extends OkaeriConfig {
         private List<String> items;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class EmptyCommentConfig extends OkaeriConfig {
+        @Comment(" ")
+        @Comment("Field after space comment")
+        private String afterSpaceComment = "value1";
+
+        @Comment("")
+        @Comment("Field after empty line")
+        private String afterEmptyLine = "value2";
     }
 }

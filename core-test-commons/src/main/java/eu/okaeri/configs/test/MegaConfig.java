@@ -213,6 +213,14 @@ public class MegaConfig extends OkaeriConfig {
     @Comment("on the same field")
     private String repeatingCommentField = "test value";
 
+    @Comment(" ")
+    @Comment("Field after space-only comment")
+    private String spaceCommentField = "after space comment";
+
+    @Comment("")
+    @Comment("Field after empty comment line")
+    private String emptyCommentField = "after empty line";
+
     // === FACTORY METHOD FOR NESTED MEGACONFIG ===
 
     /**

@@ -319,7 +319,16 @@ public class TomlJacksonConfigurer extends Configurer {
                 String[] comment = field.get().getComment();
                 if (comment != null) {
                     for (String line : comment) {
-                        sb.append("# ").append(line).append("\n");
+                        if (line.isEmpty()) {
+                            // @Comment("") -> empty line (no # at all)
+                            sb.append("\n");
+                        } else if (line.trim().isEmpty()) {
+                            // @Comment(" ") -> "#" (just the hash)
+                            sb.append("#\n");
+                        } else {
+                            // Normal comment text
+                            sb.append("# ").append(line).append("\n");
+                        }
                     }
                 }
                 commentedPatterns.add(pattern);

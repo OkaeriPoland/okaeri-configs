@@ -317,6 +317,11 @@ public class XmlSimpleConfigurer extends Configurer {
             String[] comment = field.get().getComment();
             if (comment != null) {
                 for (String line : comment) {
+                    // Skip empty/whitespace-only comments - XML has no concept of blank lines
+                    // @Comment("") and @Comment(" ") are ignored for XML format
+                    if (line.trim().isEmpty()) {
+                        continue;
+                    }
                     parent.appendChild(document.createComment(" " + line + " "));
                 }
             }

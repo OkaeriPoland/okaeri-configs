@@ -2,6 +2,10 @@ package eu.okaeri.configs.format.yaml;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
+import eu.okaeri.configs.annotation.NameModifier;
+import eu.okaeri.configs.annotation.NameStrategy;
+import eu.okaeri.configs.annotation.Names;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
@@ -43,7 +47,7 @@ class YamlConfigurerEdgeCasesTest {
     void testWrite_EmptyConfig(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with no fields
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         // When: Write to OutputStream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -59,7 +63,7 @@ class YamlConfigurerEdgeCasesTest {
     void testWrite_VeryLargeValues(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with very large string value
         LargeValueConfig config = ConfigManager.create(LargeValueConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setLargeValue("x".repeat(10000)); // 10k characters
 
         // When: Write to OutputStream
@@ -77,7 +81,7 @@ class YamlConfigurerEdgeCasesTest {
     void testWrite_SpecialCharactersInStrings(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with special characters
         SpecialCharsConfig config = ConfigManager.create(SpecialCharsConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setQuotes("She said: \"Hello!\"");
         config.setBackslash("C:\\Users\\test\\path");
         config.setNewlines("Line 1\nLine 2\nLine 3");
@@ -111,7 +115,7 @@ class YamlConfigurerEdgeCasesTest {
             """;
 
         DeepNestedConfig config = ConfigManager.create(DeepNestedConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.load(yaml);
 
         // When: Write to OutputStream
@@ -132,7 +136,7 @@ class YamlConfigurerEdgeCasesTest {
     void testWrite_VeryLargeCollection(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with very large list
         LargeCollectionConfig config = ConfigManager.create(LargeCollectionConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         List<String> largeList = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             largeList.add("item-" + i);
@@ -156,6 +160,62 @@ class YamlConfigurerEdgeCasesTest {
         );
     }
 
+    @ParameterizedTest(name = "{0}: Empty comment creates blank line")
+    @MethodSource("yamlConfigurers")
+    void testWrite_EmptyCommentCreatesBlankLine(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with empty comment annotation
+        EmptyCommentConfig config = ConfigManager.create(EmptyCommentConfig.class);
+        config.setConfigurer(configurer);
+
+        // When: Write to string
+        String yaml = config.saveToString();
+
+        // Then: @Comment(" ") creates "#", @Comment("") creates empty line (no #)
+        // Note: Empty line should have no trailing whitespace, not be indented
+        assertThat(yaml).isEqualTo("""
+                #
+                # Field after space comment
+                afterSpaceComment: value1
+
+                # Field after empty line
+                afterEmptyLine: value2
+
+                section:
+                  # Field inside section
+                  insideSection: inside
+
+                  # Second field after empty line
+                  secondField: second
+                """);
+    }
+
+    @ParameterizedTest(name = "{0}: Names strategy with hyphen-case and empty comments")
+    @MethodSource("yamlConfigurers")
+    void testWrite_NamesStrategyWithEmptyComments(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with @Names(HYPHEN_CASE) and nested subconfig with @Comment("")
+        HyphenCaseConfig config = ConfigManager.create(HyphenCaseConfig.class);
+        config.setConfigurer(configurer);
+
+        // When: Write to string
+        String yaml = config.saveToString();
+
+        // Then: Empty comments create blank lines, field names are hyphen-case
+        assertThat(yaml).isEqualTo("""
+                # First field comment
+                simple-field: value1
+
+                # Second field after empty line
+                enable-something: true
+
+                format:
+                  # Field inside format section
+                  inner-field: inner value
+
+                  # Another field after empty line
+                  some-number: 42
+                """);
+    }
+
     @ParameterizedTest(name = "{0}: Top-level null values")
     @MethodSource("snakeYamlOnly")
     void testWrite_NullValues(String configurerName, Configurer configurer) throws Exception {
@@ -165,7 +225,7 @@ class YamlConfigurerEdgeCasesTest {
 
         // Given: Config with null values
         NullValueConfig config = ConfigManager.create(NullValueConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setNullString(null);
         config.setNullList(null);
         config.setNullMap(null);
@@ -186,7 +246,7 @@ class YamlConfigurerEdgeCasesTest {
     void testWrite_NestedNullValues(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with nested OkaeriConfig containing null values
         NestedNullConfig config = ConfigManager.create(NestedNullConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.getNested().setNestedNullString(null);
         config.getNested().setNestedNullList(null);
 
@@ -206,7 +266,7 @@ class YamlConfigurerEdgeCasesTest {
     void testRoundTrip_EmptyStrings(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with empty strings
         EmptyStringConfig config = ConfigManager.create(EmptyStringConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setEmptyString("");
         config.setWhitespaceString("   ");
 
@@ -215,7 +275,7 @@ class YamlConfigurerEdgeCasesTest {
         config.save(output);
 
         EmptyStringConfig loaded = ConfigManager.create(EmptyStringConfig.class);
-        loaded.withConfigurer(configurer);
+        loaded.setConfigurer(configurer);
         loaded.load(new ByteArrayInputStream(output.toByteArray()));
 
         // Then: Empty strings are preserved
@@ -228,7 +288,7 @@ class YamlConfigurerEdgeCasesTest {
     void testWrite_YamlReservedWords(String configurerName, Configurer configurer) throws Exception {
         // Given: Config with YAML reserved words as values
         ReservedWordsConfig config = ConfigManager.create(ReservedWordsConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
         config.setTrueString("true");
         config.setFalseString("false");
         config.setNullString("null");
@@ -258,7 +318,7 @@ class YamlConfigurerEdgeCasesTest {
 
         // When/Then: Loading malformed YAML throws exception
         EmptyConfig config = ConfigManager.create(EmptyConfig.class);
-        config.withConfigurer(configurer);
+        config.setConfigurer(configurer);
 
         assertThatThrownBy(() -> config.load(malformedYaml))
             .isInstanceOf(Exception.class);
@@ -335,5 +395,59 @@ class YamlConfigurerEdgeCasesTest {
         private String nullString;
         private String yesString;
         private String noString;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class EmptyCommentConfig extends OkaeriConfig {
+        @Comment(" ")
+        @Comment("Field after space comment")
+        private String afterSpaceComment = "value1";
+
+        @Comment("")
+        @Comment("Field after empty line")
+        private String afterEmptyLine = "value2";
+
+        @Comment("")
+        private EmptyCommentSection section = new EmptyCommentSection();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class EmptyCommentSection extends OkaeriConfig {
+        @Comment("Field inside section")
+        private String insideSection = "inside";
+
+        @Comment("")
+        @Comment("Second field after empty line")
+        private String secondField = "second";
+    }
+
+    // Test for @Names strategy with hyphen-case + nested subconfig + empty comment
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+    public static class HyphenCaseConfig extends OkaeriConfig {
+        @Comment("First field comment")
+        private String simpleField = "value1";
+
+        @Comment("")
+        @Comment("Second field after empty line")
+        private boolean enableSomething = true;
+
+        @Comment("")
+        private HyphenCaseSection format = new HyphenCaseSection();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+    public static class HyphenCaseSection extends OkaeriConfig {
+        @Comment("Field inside format section")
+        private String innerField = "inner value";
+
+        @Comment("")
+        @Comment("Another field after empty line")
+        private int someNumber = 42;
     }
 }

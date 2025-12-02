@@ -300,6 +300,12 @@ nestedMegaConfig:
   # This tests multiple @Comment annotations
   # on the same field
   repeatingCommentField: test value
+  #
+  # Field after space-only comment
+  spaceCommentField: after space comment
+
+  # Field after empty comment line
+  emptyCommentField: after empty line
 # Serializable custom object
 customObj:
   name: test
@@ -344,3 +350,9 @@ setWithNull:
 # This tests multiple @Comment annotations
 # on the same field
 repeatingCommentField: test value
+#
+# Field after space-only comment
+spaceCommentField: after space comment
+
+# Field after empty comment line
+emptyCommentField: after empty line

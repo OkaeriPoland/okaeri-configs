@@ -266,7 +266,9 @@
       null,
       "three"
     ],
-    "repeatingCommentField": "test value"
+    "repeatingCommentField": "test value",
+    "spaceCommentField": "after space comment",
+    "emptyCommentField": "after empty line"
   },
   "customObj": {
     "name": "test",
@@ -312,5 +314,7 @@
     null,
     "three"
   ],
-  "repeatingCommentField": "test value"
+  "repeatingCommentField": "test value",
+  "spaceCommentField": "after space comment",
+  "emptyCommentField": "after empty line"
 }

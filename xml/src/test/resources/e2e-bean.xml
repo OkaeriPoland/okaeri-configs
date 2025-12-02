@@ -871,6 +871,14 @@ Line 5 final</string>
      <string>repeatingCommentField</string>
      <string>test value</string>
     </void>
+    <void method="put">
+     <string>spaceCommentField</string>
+     <string>after space comment</string>
+    </void>
+    <void method="put">
+     <string>emptyCommentField</string>
+     <string>after empty line</string>
+    </void>
    </object>
   </void>
   <void method="put">
@@ -1015,6 +1023,14 @@ Line 5 final</string>
   <void method="put">
    <string>repeatingCommentField</string>
    <string>test value</string>
+  </void>
+  <void method="put">
+   <string>spaceCommentField</string>
+   <string>after space comment</string>
+  </void>
+  <void method="put">
+   <string>emptyCommentField</string>
+   <string>after empty line</string>
   </void>
  </object>
 </java>

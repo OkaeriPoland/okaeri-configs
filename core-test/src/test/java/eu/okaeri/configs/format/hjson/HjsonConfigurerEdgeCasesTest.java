@@ -2,6 +2,7 @@ package eu.okaeri.configs.format.hjson;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.hjson.HjsonConfigurer;
 import lombok.Data;
@@ -222,6 +223,29 @@ class HjsonConfigurerEdgeCasesTest {
         assertThat(config.isEnabled()).isFalse();
     }
 
+    @ParameterizedTest(name = "{0}: Empty comment creates blank line")
+    @MethodSource("hjsonConfigurers")
+    void testWrite_EmptyCommentCreatesBlankLine(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with empty comment annotation
+        EmptyCommentConfig config = ConfigManager.create(EmptyCommentConfig.class);
+        config.setConfigurer(configurer);
+
+        // When: Write to string
+        String hjson = config.saveToString();
+
+        // Then: @Comment(" ") creates "#", @Comment("") creates empty line (no #)
+        // Note: HJSON library adds 2-space indentation to empty lines in comments
+        assertThat(hjson).isEqualTo("""
+                {
+                  #
+                  # Field after space comment
+                  afterSpaceComment: value1
+                \s\s
+                  # Field after empty line
+                  afterEmptyLine: value2
+                }""");
+    }
+
     @ParameterizedTest(name = "{0}: Very deep nesting")
     @MethodSource("hjsonConfigurers")
     void testWrite_VeryDeepNesting(String configurerName, Configurer configurer) throws Exception {
@@ -311,5 +335,17 @@ class HjsonConfigurerEdgeCasesTest {
     @EqualsAndHashCode(callSuper = false)
     public static class DeepNestingConfig extends OkaeriConfig {
         private Map<String, Object> deepMap = new LinkedHashMap<>();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class EmptyCommentConfig extends OkaeriConfig {
+        @Comment(" ")
+        @Comment("Field after space comment")
+        private String afterSpaceComment = "value1";
+
+        @Comment("")
+        @Comment("Field after empty line")
+        private String afterEmptyLine = "value2";
     }
 }

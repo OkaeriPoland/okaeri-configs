@@ -2,6 +2,7 @@ package eu.okaeri.configs.format.toml;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.toml.TomlJacksonConfigurer;
 import lombok.Data;
@@ -282,6 +283,27 @@ class TomlConfigurerEdgeCasesTest {
         assertThat(loaded.getMinLong()).isEqualTo(Long.MIN_VALUE);
     }
 
+    @ParameterizedTest(name = "{0}: Empty comment creates blank line")
+    @MethodSource("tomlConfigurers")
+    void testWrite_EmptyCommentCreatesBlankLine(String configurerName, Configurer configurer) throws Exception {
+        // Given: Config with empty comment annotation
+        EmptyCommentConfig config = ConfigManager.create(EmptyCommentConfig.class);
+        config.setConfigurer(configurer);
+
+        // When: Write to string
+        String toml = config.saveToString();
+
+        // Then: @Comment(" ") creates "#", @Comment("") creates empty line (no #)
+        assertThat(toml).isEqualTo("""
+                #
+                # Field after space comment
+                afterSpaceComment = 'value1'
+
+                # Field after empty line
+                afterEmptyLine = 'value2'
+                """);
+    }
+
     @ParameterizedTest(name = "{0}: List with nulls round-trip")
     @MethodSource("tomlConfigurers")
     void testRoundTrip_ListWithNulls(String configurerName, Configurer configurer) throws Exception {
@@ -386,5 +408,17 @@ class TomlConfigurerEdgeCasesTest {
     @EqualsAndHashCode(callSuper = false)
     public static class NullListConfig extends OkaeriConfig {
         private List<String> items;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class EmptyCommentConfig extends OkaeriConfig {
+        @Comment(" ")
+        @Comment("Field after space comment")
+        private String afterSpaceComment = "value1";
+
+        @Comment("")
+        @Comment("Field after empty line")
+        private String afterEmptyLine = "value2";
     }
 }

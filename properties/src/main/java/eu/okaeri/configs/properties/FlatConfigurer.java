@@ -403,8 +403,18 @@ public abstract class FlatConfigurer extends Configurer {
             if (field.isPresent()) {
                 String[] comment = field.get().getComment();
                 if (comment != null) {
+                    String prefixTrimmed = this.commentPrefix.trim();
                     for (String line : comment) {
-                        sb.append(this.commentPrefix).append(line).append("\n");
+                        if (line.isEmpty()) {
+                            // @Comment("") -> empty line (no # at all)
+                            sb.append("\n");
+                        } else if (line.trim().isEmpty()) {
+                            // @Comment(" ") -> "#" (just the hash)
+                            sb.append(prefixTrimmed).append("\n");
+                        } else {
+                            // Normal comment text
+                            sb.append(this.commentPrefix).append(line).append("\n");
+                        }
                     }
                 }
                 written.add(pattern);
