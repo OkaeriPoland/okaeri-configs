@@ -1,6 +1,7 @@
 package eu.okaeri.configs.xml;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.postprocessor.format.SourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -72,6 +73,12 @@ public class XmlSimpleConfigurer extends Configurer {
     @Override
     public List<String> getExtensions() {
         return Collections.singletonList("xml");
+    }
+
+    @Override
+    public SourceWalker createSourceWalker() {
+        String raw = getRawContent();
+        return (raw != null) ? XmlSourceWalker.of(raw) : null;
     }
 
     @Override

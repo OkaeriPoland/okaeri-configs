@@ -13,10 +13,9 @@ import java.util.regex.Pattern;
  * Supports nested objects, lists, and maps for both comment insertion
  * and error position lookup.
  */
-public class YamlWalker {
+public class YamlWalker implements SourceWalker {
 
     private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("^(\\s*)([^#:\\-][^:]*?):\\s*(.*)$");
-    private static final Pattern KEY_ONLY_PATTERN = Pattern.compile("^(\\s*)([^#:\\-][^:]*?):\\s*$");
     private static final Pattern LIST_ITEM_PATTERN = Pattern.compile("^(\\s*)-\\s*(.*)$");
     private static final Set<String> MULTILINE_INDICATORS = new HashSet<>(Arrays.asList("|", "|-", ">", ">-"));
 
@@ -24,7 +23,7 @@ public class YamlWalker {
     private final List<YamlLine> lines = new ArrayList<>();
 
     @Getter
-    private final Map<String, YamlLine> pathToLine = new LinkedHashMap<>();
+    private final Map<ConfigPath, YamlLine> pathToLine = new LinkedHashMap<>();
 
     private final String content;
 
@@ -41,14 +40,23 @@ public class YamlWalker {
      * Find the line for a given ConfigPath.
      */
     public YamlLine findLine(@NonNull ConfigPath path) {
-        return this.pathToLine.get(path.toString());
+        return this.pathToLine.get(path);
     }
 
-    /**
-     * Find the line for a given path string.
-     */
-    public YamlLine findLine(@NonNull String path) {
-        return this.pathToLine.get(path);
+    @Override
+    public SourceLocation findPath(@NonNull ConfigPath path) {
+        YamlLine line = this.findLine(path);
+        if (line == null) {
+            return null;
+        }
+        return SourceLocation.builder()
+            .lineNumber(line.getLineNumber())
+            .rawLine(line.getRawLine())
+            .valueColumn(line.getValueColumn())
+            .value(line.getValue())
+            .keyColumn(line.getColumn())
+            .key(line.getKey())
+            .build();
     }
 
     private void parse() {
@@ -127,11 +135,9 @@ public class YamlWalker {
                 int listIndex = listIndices.getOrDefault(listIndent, -1) + 1;
                 listIndices.put(listIndent, listIndex);
 
-                // Build parent path
-                String parentPath = buildPath(pathStack);
-                String indexedPath = parentPath.isEmpty()
-                    ? "[" + listIndex + "]"
-                    : parentPath + "[" + listIndex + "]";
+                // Build indexed path from parent
+                ConfigPath parentPath = getParentPath(pathStack);
+                ConfigPath indexedPath = parentPath.index(listIndex);
 
                 // Check if list content is a key-value
                 if (listContent.contains(":")) {
@@ -139,7 +145,7 @@ public class YamlWalker {
                     String key = listContent.substring(0, colonPos).trim();
                     String value = listContent.substring(colonPos + 1).trim();
 
-                    String fullPath = indexedPath + "." + key;
+                    ConfigPath fullPath = indexedPath.property(key);
                     int keyColumn = rawLine.indexOf(key, listIndent + 2);
                     int valueColumn = value.isEmpty() ? -1 : rawLine.lastIndexOf(value);
 
@@ -153,14 +159,13 @@ public class YamlWalker {
                         .value(value.isEmpty() ? null : value)
                         .valueColumn(valueColumn)
                         .rawLine(rawLine)
-                        .path(fullPath)
+                        .configPath(fullPath)
                         .listIndex(listIndex)
                         .build();
                     this.lines.add(line);
                     this.pathToLine.put(fullPath, line);
 
                     // Push the indexed path (not the key path) for sibling keys in same list item
-                    // Use listIndent so siblings like "port:" at same effective indent can find parent
                     pathStack.add(new PathEntry(indexedPath, listIndent));
 
                     if (isMultilineIndicator(value)) {
@@ -179,7 +184,7 @@ public class YamlWalker {
                         .value(listContent.isEmpty() ? null : listContent)
                         .valueColumn(valueColumn)
                         .rawLine(rawLine)
-                        .path(indexedPath)
+                        .configPath(indexedPath)
                         .listIndex(listIndex)
                         .build();
                     this.lines.add(line);
@@ -194,8 +199,8 @@ public class YamlWalker {
                 String key = keyValueMatcher.group(2).trim();
                 String value = keyValueMatcher.group(3).trim();
 
-                String parentPath = buildPath(pathStack);
-                String fullPath = parentPath.isEmpty() ? key : parentPath + "." + key;
+                ConfigPath parentPath = getParentPath(pathStack);
+                ConfigPath fullPath = parentPath.property(key);
 
                 int keyColumn = rawLine.indexOf(key);
                 int valueColumn = value.isEmpty() ? -1 : rawLine.lastIndexOf(value);
@@ -210,7 +215,7 @@ public class YamlWalker {
                     .value(value.isEmpty() ? null : value)
                     .valueColumn(valueColumn)
                     .rawLine(rawLine)
-                    .path(fullPath)
+                    .configPath(fullPath)
                     .build();
                 this.lines.add(line);
                 this.pathToLine.put(fullPath, line);
@@ -236,9 +241,9 @@ public class YamlWalker {
         }
     }
 
-    private String buildPath(List<PathEntry> pathStack) {
+    private ConfigPath getParentPath(List<PathEntry> pathStack) {
         if (pathStack.isEmpty()) {
-            return "";
+            return ConfigPath.root();
         }
         return pathStack.get(pathStack.size() - 1).path;
     }
@@ -258,10 +263,10 @@ public class YamlWalker {
     }
 
     private static class PathEntry {
-        final String path;
+        final ConfigPath path;
         final int indent;
 
-        PathEntry(String path, int indent) {
+        PathEntry(ConfigPath path, int indent) {
             this.path = path;
             this.indent = indent;
         }

@@ -1,19 +1,16 @@
 package eu.okaeri.configs.exception;
 
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.postprocessor.format.YamlErrorMarker;
+import eu.okaeri.configs.postprocessor.format.SourceErrorMarker;
+import eu.okaeri.configs.postprocessor.format.SourceWalker;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.ConfigPath;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 @Getter
 public class OkaeriConfigException extends OkaeriException {
-
-    private static final List<String> YAML_EXTENSIONS = Arrays.asList("yml", "yaml");
 
     private final ConfigPath path;
     private final GenericsDeclaration expectedType;
@@ -57,7 +54,7 @@ public class OkaeriConfigException extends OkaeriException {
         StringBuilder sb = new StringBuilder();
 
         // Error code header like Rust's error[E0080]:
-        if (errorCode != null && !errorCode.isEmpty()) {
+        if ((errorCode != null) && !errorCode.isEmpty()) {
             sb.append("error[").append(errorCode).append("]: ");
         }
 
@@ -81,10 +78,10 @@ public class OkaeriConfigException extends OkaeriException {
             sb.append(" from ").append(actualType.getSimpleName());
         }
 
-        // Add source marker if raw content is available and format is supported
-        String rawContent = (configurer != null) ? configurer.getRawContent() : null;
-        boolean hasRustMarker = false;
-        if ((rawContent != null) && hasPath && isYamlFormat(configurer)) {
+        // Add source marker if walker is available
+        SourceWalker walker = (configurer != null) ? configurer.createSourceWalker() : null;
+        boolean hasSourceMarker = false;
+        if ((walker != null) && hasPath) {
             String hint = null;
             int valueOffset = -1;
             int valueLength = 1;
@@ -104,15 +101,15 @@ public class OkaeriConfigException extends OkaeriException {
                 hint = cause.getMessage();
             }
 
-            String marker = YamlErrorMarker.format(rawContent, path.toString(), sourceFile, hint, valueOffset, valueLength);
+            String marker = SourceErrorMarker.format(walker, path, sourceFile, hint, valueOffset, valueLength);
             if (!marker.isEmpty()) {
                 sb.append("\n").append(marker);
-                hasRustMarker = true;
+                hasSourceMarker = true;
             }
         }
 
-        // Show actual value when no Rust marker
-        if (!hasRustMarker && (actualValue != null)) {
+        // Show actual value when no source marker
+        if (!hasSourceMarker && (actualValue != null)) {
             sb.append(": ").append(formatValue(actualValue));
         }
 
@@ -134,13 +131,6 @@ public class OkaeriConfigException extends OkaeriException {
             sb.append(">");
         }
         return sb.toString();
-    }
-
-    private static boolean isYamlFormat(Configurer configurer) {
-        if (configurer == null) {
-            return false;
-        }
-        return configurer.getExtensions().stream().anyMatch(YAML_EXTENSIONS::contains);
     }
 
     private static String formatValue(Object value) {
@@ -229,7 +219,7 @@ public class OkaeriConfigException extends OkaeriException {
         }
 
         public Builder errorCode(Class<?> serdesClass) {
-            this.errorCode = serdesClass != null ? serdesClass.getSimpleName() : null;
+            this.errorCode = (serdesClass != null) ? serdesClass.getSimpleName() : null;
             return this;
         }
 

@@ -5,11 +5,13 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.TargetType;
 import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.exception.OkaeriException;
+import eu.okaeri.configs.postprocessor.format.SourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.*;
 import eu.okaeri.configs.serdes.standard.StandardSerdes;
+import eu.okaeri.configs.util.EnumMatcher;
 import eu.okaeri.configs.util.UnsafeUtil;
 import lombok.Getter;
 import lombok.NonNull;
@@ -60,6 +62,16 @@ public abstract class Configurer {
 
     public List<String> getExtensions() {
         return Collections.emptyList();
+    }
+
+    /**
+     * Creates a SourceWalker for the raw content to enable source-level error markers.
+     * Override in format-specific configurers to provide format-aware parsing.
+     *
+     * @return a SourceWalker, or null if this format doesn't support source markers
+     */
+    public SourceWalker createSourceWalker() {
+        return null;
     }
 
     public abstract void setValue(@NonNull String key, Object value, GenericsDeclaration genericType, FieldDeclaration field);
@@ -380,13 +392,14 @@ public abstract class Configurer {
                         }
                     }
                     // match fail
-                    String enumValuesStr = Arrays.stream(targetClazz.getEnumConstants()).map(item -> ((Enum) item).name()).collect(Collectors.joining(", "));
+                    String hint = EnumMatcher.suggest(strObject, (Class<? extends Enum<?>>) targetClazz);
                     throw OkaeriConfigException.builder()
-                        .message("Invalid enum value '" + strObject + "' (available: " + enumValuesStr + ")")
+                        .message("Cannot resolve")
                         .path(serdesContext.getPath())
                         .expectedType(target)
                         .actualValue(strObject)
                         .configurer(this)
+                        .cause(new IllegalArgumentException(hint))
                         .build();
                 }
                 if (source.isEnum() && (targetClazz == String.class)) {

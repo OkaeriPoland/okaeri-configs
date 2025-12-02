@@ -2,6 +2,7 @@ package eu.okaeri.configs.serdes;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.List;
  * Instances are immutable - each navigation method returns a new ConfigPath.
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@EqualsAndHashCode
 public class ConfigPath implements SerdesContextAttachment {
 
     public static final ConfigPath ROOT = new ConfigPath(Collections.emptyList());
@@ -46,6 +48,78 @@ public class ConfigPath implements SerdesContextAttachment {
      */
     public static ConfigPath of(@NonNull String name) {
         return ROOT.property(name);
+    }
+
+    /**
+     * Parses a path string into a ConfigPath.
+     * Supports properties, indices, and quoted keys.
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>{@code "database.host"} → property("database").property("host")</li>
+     *   <li>{@code "servers[0].name"} → property("servers").index(0).property("name")</li>
+     *   <li>{@code "settings[\"api-key\"]"} → property("settings").key("api-key")</li>
+     * </ul>
+     *
+     * @param path the path string to parse
+     * @return parsed ConfigPath
+     */
+    public static ConfigPath parse(@NonNull String path) {
+        if (path.isEmpty()) {
+            return ROOT;
+        }
+
+        ConfigPath result = ROOT;
+        int i = 0;
+        int len = path.length();
+
+        while (i < len) {
+            // Skip leading dot
+            if (path.charAt(i) == '.') {
+                i++;
+                continue;
+            }
+
+            // Index or key: [...]
+            if (path.charAt(i) == '[') {
+                int closeIndex = path.indexOf(']', i);
+                if (closeIndex == -1) {
+                    throw new IllegalArgumentException("Unclosed bracket in path: " + path);
+                }
+
+                String content = path.substring(i + 1, closeIndex);
+
+                // Quoted string key: ["key"] or ['key']
+                if ((content.startsWith("\"") && content.endsWith("\"")) ||
+                    (content.startsWith("'") && content.endsWith("'"))) {
+                    String key = content.substring(1, content.length() - 1);
+                    result = result.key(key);
+                } else {
+                    // Numeric index
+                    try {
+                        int index = Integer.parseInt(content);
+                        result = result.index(index);
+                    } catch (NumberFormatException e) {
+                        // Treat as unquoted key
+                        result = result.key(content);
+                    }
+                }
+                i = closeIndex + 1;
+            } else {
+                // Property name: read until . or [ or end
+                int end = i;
+                while (end < len && path.charAt(end) != '.' && path.charAt(end) != '[') {
+                    end++;
+                }
+                String propName = path.substring(i, end);
+                if (!propName.isEmpty()) {
+                    result = result.property(propName);
+                }
+                i = end;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -190,12 +264,31 @@ public class ConfigPath implements SerdesContextAttachment {
         public String toString() {
             return this.name;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            // PropertyNode("x") equals KeyNode("x")
+            if (o instanceof KeyNode) {
+                Object key = ((KeyNode) o).getKey();
+                return (key instanceof String) && this.name.equals(key);
+            }
+            if (!(o instanceof PropertyNode)) return false;
+            return this.name.equals(((PropertyNode) o).name);
+        }
+
+        @Override
+        public int hashCode() {
+            // Hash based on name only - matches KeyNode(String) hashCode
+            return this.name.hashCode();
+        }
     }
 
     /**
      * Represents a list/array index in the path.
      */
     @AllArgsConstructor
+    @EqualsAndHashCode
     public static class IndexNode implements PathNode {
         private final int index;
 
@@ -226,6 +319,23 @@ public class ConfigPath implements SerdesContextAttachment {
                 return "[\"" + this.key + "\"]";
             }
             return "[" + this.key + "]";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            // KeyNode("x") equals PropertyNode("x")
+            if ((this.key instanceof String) && (o instanceof PropertyNode)) {
+                return this.key.equals(((PropertyNode) o).getName());
+            }
+            if (!(o instanceof KeyNode)) return false;
+            return this.key.equals(((KeyNode) o).key);
+        }
+
+        @Override
+        public int hashCode() {
+            // For String keys, hash the string directly - matches PropertyNode hashCode
+            return this.key.hashCode();
         }
     }
 }

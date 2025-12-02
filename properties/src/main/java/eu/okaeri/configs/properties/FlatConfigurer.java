@@ -1,6 +1,7 @@
 package eu.okaeri.configs.properties;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.postprocessor.format.SourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -40,6 +41,12 @@ public abstract class FlatConfigurer extends Configurer {
 
     protected FlatConfigurer(@NonNull Map<String, Object> map) {
         this.map = map;
+    }
+
+    @Override
+    public SourceWalker createSourceWalker() {
+        String raw = this.getRawContent();
+        return (raw == null) ? null : IniSourceWalker.of(raw);
     }
 
     @Override

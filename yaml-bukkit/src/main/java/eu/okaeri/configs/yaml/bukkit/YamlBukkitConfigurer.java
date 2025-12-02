@@ -4,7 +4,9 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.postprocessor.ConfigLineInfo;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
+import eu.okaeri.configs.postprocessor.format.SourceWalker;
 import eu.okaeri.configs.postprocessor.format.YamlSectionWalker;
+import eu.okaeri.configs.postprocessor.format.YamlWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -37,6 +39,12 @@ public class YamlBukkitConfigurer extends Configurer {
     @Override
     public List<String> getExtensions() {
         return Arrays.asList("yml", "yaml");
+    }
+
+    @Override
+    public SourceWalker createSourceWalker() {
+        String raw = getRawContent();
+        return (raw != null) ? YamlWalker.of(raw) : null;
     }
 
     @Override

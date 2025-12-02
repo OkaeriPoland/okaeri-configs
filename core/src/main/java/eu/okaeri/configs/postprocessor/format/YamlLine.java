@@ -1,5 +1,6 @@
 package eu.okaeri.configs.postprocessor.format;
 
+import eu.okaeri.configs.serdes.ConfigPath;
 import lombok.Builder;
 import lombok.Data;
 
@@ -51,9 +52,9 @@ public class YamlLine {
     private final String rawLine;
 
     /**
-     * The full path to this element (e.g., "database.connections[0].host")
+     * The full path to this element (e.g., database.connections[0].host)
      */
-    private String path;
+    private ConfigPath configPath;
 
     /**
      * List index if this line is inside a list (-1 if not)
