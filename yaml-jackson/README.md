@@ -43,7 +43,6 @@ implementation("eu.okaeri:okaeri-configs-yaml-jackson:6.0.0-beta.12")
 
 ## Limitations
 
-- Comments do not work on the elements of Collection or Map.
 - Long strings with spaces use escaped line continuation style (`"text\ continues"`) instead of folded style.
 
 ## Usage

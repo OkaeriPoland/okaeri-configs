@@ -56,10 +56,6 @@ Additionally, if you want to serialize/deserialize [supported Bukkit objects](ht
 implementation("eu.okaeri:okaeri-configs-serdes-bukkit:6.0.0-beta.12")
 ```
 
-## Limitations
-
-- Comments do not work on the elements of Collection or Map.
-
 ## Usage
 
 Please use YamlBukkitConfigurer as your configurer:

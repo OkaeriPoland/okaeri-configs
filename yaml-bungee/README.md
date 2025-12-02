@@ -39,10 +39,6 @@ Add dependency to the `dependencies` section:
 implementation("eu.okaeri:okaeri-configs-yaml-bungee:6.0.0-beta.12")
 ```
 
-## Limitations
-
-- Comments do not work on the elements of Collection or Map.
-
 ## Usage
 
 Please use YamlBungeeConfigurer as your configurer:
