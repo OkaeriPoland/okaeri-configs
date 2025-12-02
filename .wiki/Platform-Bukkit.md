@@ -61,11 +61,13 @@ public class MyPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         this.config = ConfigManager.create(PluginConfig.class, (it) -> {
-            it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
-            it.withBindFile(new File(getDataFolder(), "config.yml"));
-            it.withRemoveOrphans(true);
+            it.configure(opt -> {
+                opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+                opt.bindFile(new File(getDataFolder(), "config.yml"));
+                opt.removeOrphans(true);
+            });
             it.saveDefaults();
-            it.load(true);
+            it.load(true); // load and save to update comments/new fields
         });
 
         getLogger().info("Config loaded successfully!");
@@ -166,9 +168,11 @@ import eu.okaeri.configs.yaml.bukkit.serdes.itemstack.ItemStackFailsafe;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.ItemStackSerializer;
 
 // Register with failsafe mode
-config.withSerdesPack(registry -> {
-    registry.registerExclusive(ItemStack.class,
-        new ItemStackSerializer(ItemStackFailsafe.BUKKIT));
+config.configure(opt -> {
+    opt.serdesPack(registry -> {
+        registry.registerExclusive(ItemStack.class,
+            new ItemStackSerializer(ItemStackFailsafe.BUKKIT));
+    });
 });
 ```
 
@@ -494,11 +498,13 @@ public class MyPlugin extends JavaPlugin {
     public void onEnable() {
         // Load configuration
         this.config = ConfigManager.create(PluginConfig.class, (it) -> {
-            it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
-            it.withBindFile(new File(getDataFolder(), "config.yml"));
-            it.withRemoveOrphans(true);
+            it.configure(opt -> {
+                opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+                opt.bindFile(new File(getDataFolder(), "config.yml"));
+                opt.removeOrphans(true);
+            });
             it.saveDefaults();
-            it.load(true);
+            it.load(true); // load and save to update comments/new fields
         });
 
         // Use configuration
@@ -521,7 +527,7 @@ public class MyPlugin extends JavaPlugin {
 
 1. **Use YamlBukkitConfigurer for Bukkit plugins:**
    ```java
-   it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+   opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit());
    ```
 
 2. **Use failsafe for items with custom NBT:**
@@ -546,19 +552,19 @@ public class MyPlugin extends JavaPlugin {
 1. **Don't use SnakeYAML configurer for Bukkit:**
    ```java
    // Wrong - Bukkit types won't serialize
-   it.withConfigurer(new YamlSnakeYamlConfigurer());
+   opt.configurer(new YamlSnakeYamlConfigurer());
 
    // Correct
-   it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+   opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit());
    ```
 
 2. **Don't forget SerdesBukkit:**
    ```java
    // Wrong - Bukkit types not registered
-   it.withConfigurer(new YamlBukkitConfigurer());
+   opt.configurer(new YamlBukkitConfigurer());
 
    // Correct
-   it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+   opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit());
    ```
 
 3. **Don't manually set durability:0 on 1.21+:**

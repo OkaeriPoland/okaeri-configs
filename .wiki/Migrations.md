@@ -553,9 +553,11 @@ INFO: C0002_Restructure_database: migrates database config to nested structure
 
 ```java
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("config.yml");
-    it.load();
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("config.yml");
+    });
+    it.load(); // load only, don't save after
 });
 
 // Apply single migration
@@ -577,9 +579,11 @@ config.migrate(
 
 ```java
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("config.yml");
-    it.load();
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("config.yml");
+    });
+    it.load(); // load only, don't save after
 
     // Migrate after loading
     it.migrate(

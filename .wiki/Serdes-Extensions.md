@@ -36,11 +36,13 @@ import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import eu.okaeri.configs.serdes.commons.SerdesCommons;
 
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    // Add serdes extension(s) after the configurer
-    it.withConfigurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
-    it.withBindFile("config.yml");
+    it.configure(opt -> {
+        // Add serdes extension(s) after the configurer
+        opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+        opt.bindFile("config.yml");
+    });
     it.saveDefaults();
-    it.load(true);
+    it.load(true); // load and save to update comments/new fields
 });
 ```
 
@@ -49,11 +51,13 @@ MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
 You can use multiple extensions together:
 
 ```java
-it.withConfigurer(
-    new YamlSnakeYamlConfigurer(),
-    new SerdesCommons(),  // For Duration, Instant, etc.
-    new SerdesBukkit()    // For Location, ItemStack, etc.
-);
+it.configure(opt -> {
+    opt.configurer(
+        new YamlSnakeYamlConfigurer(),
+        new SerdesCommons(),  // For Duration, Instant, etc.
+        new SerdesBukkit()    // For Location, ItemStack, etc.
+    );
+});
 ```
 
 ## Available Extensions
@@ -91,7 +95,9 @@ implementation("eu.okaeri:okaeri-configs-serdes-commons:{VERSION}")
 ### Usage
 
 ```java
-it.withConfigurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+it.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+});
 ```
 
 ### Supported Types
@@ -162,9 +168,11 @@ import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.yaml.bukkit.serdes.SerdesBukkit;
 
 config = ConfigManager.create(PluginConfig.class, (it) -> {
-    it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
-    it.withBindFile(new File(getDataFolder(), "config.yml"));
-    it.load(true);
+    it.configure(opt -> {
+        opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+        opt.bindFile(new File(getDataFolder(), "config.yml"));
+    });
+    it.load(true); // load and save to update comments/new fields
 });
 ```
 
@@ -186,7 +194,9 @@ Serializers for BungeeCord/Waterfall types.
 ### Usage
 
 ```java
-it.withConfigurer(new YamlBungeeConfigurer(), new SerdesBungee());
+it.configure(opt -> {
+    opt.configurer(new YamlBungeeConfigurer(), new SerdesBungee());
+});
 ```
 
 ### Supported Types
@@ -230,7 +240,9 @@ Serializers for Kyori Adventure text components.
 ### Usage
 
 ```java
-it.withConfigurer(new YamlSnakeYamlConfigurer(), new SerdesAdventure());
+it.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesAdventure());
+});
 ```
 
 ### Supported Types
@@ -280,11 +292,13 @@ Serializers for Bucket4j rate limiting.
 ### Usage
 
 ```java
-it.withConfigurer(
-    new YamlSnakeYamlConfigurer(),
-    new SerdesCommons(),   // Required for Duration support
-    new SerdesBucket4j()
-);
+it.configure(opt -> {
+    opt.configurer(
+        new YamlSnakeYamlConfigurer(),
+        new SerdesCommons(),   // Required for Duration support
+        new SerdesBucket4j()
+    );
+});
 ```
 
 ### Supported Types
@@ -338,7 +352,9 @@ Serializers for Okaeri Commons types.
 ### Usage
 
 ```java
-it.withConfigurer(new YamlSnakeYamlConfigurer(), new SerdesOkaeri());
+it.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesOkaeri());
+});
 ```
 
 ### Supported Types
@@ -366,7 +382,9 @@ Serializers for Okaeri Commons Bukkit types.
 ### Usage
 
 ```java
-it.withConfigurer(new YamlBukkitConfigurer(), new SerdesOkaeriBukkit());
+it.configure(opt -> {
+    opt.configurer(new YamlBukkitConfigurer(), new SerdesOkaeriBukkit());
+});
 ```
 
 ### Supported Types

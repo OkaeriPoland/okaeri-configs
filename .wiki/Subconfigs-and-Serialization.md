@@ -97,10 +97,12 @@ server:
 
 ```java
 AppConfig config = ConfigManager.create(AppConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("config.yml");
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("config.yml");
+    });
     it.saveDefaults();
-    it.load(true);
+    it.load(true); // load and save to update comments/new fields
 });
 
 // Read values

@@ -409,7 +409,14 @@ public record ServerConfig(String host, int port) {}
    public class MyConfig extends OkaeriConfig
    ```
 
-2. **Use @Data for Serializable POJOs:**
+2. **When using @Data on OkaeriConfig classes, add @EqualsAndHashCode(callSuper = false):**
+   ```java
+   @Data
+   @EqualsAndHashCode(callSuper = false)
+   public class MyConfig extends OkaeriConfig
+   ```
+
+3. **Use @Data for Serializable POJOs:**
    ```java
    @Data
    @NoArgsConstructor
@@ -417,41 +424,19 @@ public record ServerConfig(String host, int port) {}
    public class PlayerData implements Serializable
    ```
 
-3. **Use @NonNull for required fields:**
+4. **Use @NonNull for required fields:**
    ```java
    public void setApiKey(@NonNull String apiKey)
    ```
 
-4. **Keep Lombok dependency as `provided` or `compileOnly`:**
+5. **Keep Lombok dependency as `provided` or `compileOnly`:**
    ```xml
    <scope>provided</scope>
    ```
 
 ### ❌ Don'ts
 
-1. **Don't use @Data on OkaeriConfig classes:**
-   ```java
-   // Wrong - @Data generates toString, equals, hashCode which may cause issues
-   @Data
-   public class MyConfig extends OkaeriConfig
-
-   // Correct - Use @Getter @Setter only
-   @Getter
-   @Setter
-   public class MyConfig extends OkaeriConfig
-   ```
-
-2. **Don't use @Builder on config classes:**
-   ```java
-   // Wrong - Configs should use default constructors
-   @Builder
-   public class MyConfig extends OkaeriConfig
-
-   // Correct - No builder
-   public class MyConfig extends OkaeriConfig
-   ```
-
-3. **Don't use @Value for mutable configs:**
+1. **Don't use @Value for mutable configs:**
    ```java
    // Wrong - @Value creates immutable class
    @Value

@@ -561,7 +561,9 @@ Common Java types:
 ```java
 import eu.okaeri.configs.serdes.commons.SerdesCommons;
 
-config.withConfigurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+it.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+});
 ```
 
 See **[Serdes Extensions](Serdes-Extensions)** for details.

@@ -71,11 +71,13 @@ import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import eu.okaeri.configs.validator.okaeri.OkaeriValidator;
 
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    // Wrap configurer with validator
-    it.withConfigurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
-    it.withBindFile("config.yml");
+    it.configure(opt -> {
+        // Wrap configurer with validator
+        opt.configurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
+        opt.bindFile("config.yml");
+    });
     it.saveDefaults();
-    it.load(true);  // Validation happens here
+    it.load(true); // validation happens here
 });
 ```
 
@@ -146,10 +148,12 @@ implementation("eu.okaeri:okaeri-configs-validator-jakartaee:{VERSION}")
 import eu.okaeri.configs.validator.jakartaee.JakartaValidator;
 
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new JakartaValidator(new YamlSnakeYamlConfigurer()));
-    it.withBindFile("config.yml");
+    it.configure(opt -> {
+        opt.configurer(new JakartaValidator(new YamlSnakeYamlConfigurer()));
+        opt.bindFile("config.yml");
+    });
     it.saveDefaults();
-    it.load(true);
+    it.load(true); // validation happens here
 });
 ```
 
@@ -387,9 +391,11 @@ By default, null values are allowed:
 ```java
 // Default: nulls are allowed
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
-    it.withBindFile("config.yml");
-    it.load();
+    it.configure(opt -> {
+        opt.configurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
+        opt.bindFile("config.yml");
+    });
+    it.load(); // load only, don't save after
 });
 
 // These fields can be null without error
@@ -404,9 +410,11 @@ Enable strict validation to require all fields be non-null by default:
 ```java
 // Strict mode: all fields must be non-null by default
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new OkaeriValidator(new YamlSnakeYamlConfigurer(), true));  // true = strict
-    it.withBindFile("config.yml");
-    it.load();
+    it.configure(opt -> {
+        opt.configurer(new OkaeriValidator(new YamlSnakeYamlConfigurer(), true)); // true = strict
+        opt.bindFile("config.yml");
+    });
+    it.load(); // load only, don't save after
 });
 ```
 
@@ -518,10 +526,10 @@ public class Config extends OkaeriConfig {
 3. **Don't forget to wrap the configurer:**
    ```java
    // ❌ Forgot to wrap with validator!
-   it.withConfigurer(new YamlSnakeYamlConfigurer());
+   opt.configurer(new YamlSnakeYamlConfigurer());
 
    // ✅ Wrapped with validator
-   it.withConfigurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
+   opt.configurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
    ```
 
 4. **Don't use @NotNull when @NotBlank is needed:**

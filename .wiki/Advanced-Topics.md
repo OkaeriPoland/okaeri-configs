@@ -80,11 +80,13 @@ public class CoordinateSerializer implements ObjectSerializer<Coordinate> {
 
 ```java
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer(), registry -> {
-        registry.register(new CoordinateSerializer());
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer(), registry -> {
+            registry.register(new CoordinateSerializer());
+        });
+        opt.bindFile("config.yml");
     });
-    it.withBindFile("config.yml");
-    it.load();
+    it.load(); // load only, don't save after
 });
 ```
 
@@ -92,11 +94,13 @@ MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
 
 ```java
 MyConfig config = new MyConfig();
-config.withConfigurer(new YamlSnakeYamlConfigurer());
-config.withSerdesPack(registry -> {
-    registry.register(new CoordinateSerializer());
+config.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer());
+    opt.serdesPack(registry -> {
+        registry.register(new CoordinateSerializer());
+    });
+    opt.bindFile("config.yml");
 });
-config.withBindFile("config.yml");
 config.load();
 ```
 
@@ -241,15 +245,17 @@ public class ColorTransformer extends BidirectionalTransformer<String, Color> {
 
 ```java
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer(), registry -> {
-        // One-way transformer
-        registry.register(new LocaleTransformer());
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer(), registry -> {
+            // One-way transformer
+            registry.register(new LocaleTransformer());
 
-        // Bidirectional transformer (registers both directions)
-        registry.register(new ColorTransformer());
+            // Bidirectional transformer (registers both directions)
+            registry.register(new ColorTransformer());
+        });
+        opt.bindFile("config.yml");
     });
-    it.withBindFile("config.yml");
-    it.load();
+    it.load(); // load only, don't save after
 });
 ```
 
@@ -258,9 +264,11 @@ MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
 For transformers that serialize via `.toString()`:
 
 ```java
-config.withSerdesPack(registry -> {
-    registry.registerWithReversedToString(new StringToIntegerTransformer());
-    // Registers: String → Integer AND Integer → String (via toString)
+config.configure(opt -> {
+    opt.serdesPack(registry -> {
+        registry.registerWithReversedToString(new StringToIntegerTransformer());
+        // Registers: String → Integer AND Integer → String (via toString)
+    });
 });
 ```
 
@@ -432,13 +440,15 @@ public class MyCustomSerdes implements OkaeriSerdesPack {
 
 ```java
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(
-        new YamlSnakeYamlConfigurer(),
-        new SerdesCommons(),     // Built-in pack
-        new MyCustomSerdes()     // Your custom pack
-    );
-    it.withBindFile("config.yml");
-    it.load();
+    it.configure(opt -> {
+        opt.configurer(
+            new YamlSnakeYamlConfigurer(),
+            new SerdesCommons(),     // Built-in pack
+            new MyCustomSerdes()     // Your custom pack
+        );
+        opt.bindFile("config.yml");
+    });
+    it.load(); // load only, don't save after
 });
 ```
 
@@ -466,18 +476,20 @@ public class SerdesCommons implements OkaeriSerdesPack {
 
 ### Registration Methods
 
-**Preferred approach** (using withConfigurer/withSerdesPack):
+**Preferred approach** (using configure):
 
 ```java
-config.withConfigurer(new YamlSnakeYamlConfigurer(), registry -> {
-    // Standard registration (last wins)
-    registry.register(new MySerializer());
+config.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer(), registry -> {
+        // Standard registration (last wins)
+        registry.register(new MySerializer());
 
-    // Register first (high priority)
-    registry.registerFirst(new HighPrioritySerializer());
+        // Register first (high priority)
+        registry.registerFirst(new HighPrioritySerializer());
 
-    // Exclusive registration (removes others for this type)
-    registry.registerExclusive(MyType.class, new ExclusiveSerializer());
+        // Exclusive registration (removes others for this type)
+        registry.registerExclusive(MyType.class, new ExclusiveSerializer());
+    });
 });
 ```
 
@@ -591,17 +603,21 @@ registry.registerExclusive(ItemStack.class, new CustomItemStackSerializer());
    ```java
    // ❌ Too late - config already initialized
    MyConfig config = ConfigManager.create(...);
-   config.withSerdesPack(registry -> {
-       registry.register(new MySerializer());
+   config.configure(opt -> {
+       opt.serdesPack(registry -> {
+           registry.register(new MySerializer());
+       });
    });
 
    // ✅ Register during config creation
    MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-       it.withConfigurer(new YamlSnakeYamlConfigurer(), registry -> {
-           registry.register(new MySerializer());
+       it.configure(opt -> {
+           opt.configurer(new YamlSnakeYamlConfigurer(), registry -> {
+               registry.register(new MySerializer());
+           });
+           opt.bindFile("config.yml");
        });
-       it.withBindFile("config.yml");
-       it.load();
+       it.load(); // load only, don't save after
    });
    ```
 

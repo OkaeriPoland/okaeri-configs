@@ -303,31 +303,35 @@ This is useful for:
 Multiple ways to bind a configuration file:
 
 ```java
-// Using File
-config.withBindFile(new File("config.yml"));
+config.configure(opt -> {
+    // Using File
+    opt.bindFile(new File("config.yml"));
 
-// Using Path
-config.withBindFile(Paths.get("config.yml"));
+    // Or using Path
+    opt.bindFile(Paths.get("config.yml"));
 
-// Using String pathname
-config.withBindFile("config.yml");
+    // Or using String pathname
+    opt.bindFile("config.yml");
+});
 ```
 
 ### File Locations
 
 ```java
-// Relative to working directory
-config.withBindFile("config.yml");
+config.configure(opt -> {
+    // Relative to working directory
+    opt.bindFile("config.yml");
 
-// Absolute path
-config.withBindFile("/etc/myapp/config.yml");
+    // Absolute path
+    opt.bindFile("/etc/myapp/config.yml");
 
-// In subdirectory (creates parent directories automatically)
-config.withBindFile("configs/database/mysql.yml");
+    // In subdirectory (creates parent directories automatically)
+    opt.bindFile("configs/database/mysql.yml");
 
-// User home directory
-Path home = Paths.get(System.getProperty("user.home"));
-config.withBindFile(home.resolve("myapp/config.yml"));
+    // User home directory
+    Path home = Paths.get(System.getProperty("user.home"));
+    opt.bindFile(home.resolve("myapp/config.yml"));
+});
 ```
 
 ### Getting Current File
@@ -360,8 +364,10 @@ oldField: old value  # This is an orphan!
 ### Removing Orphans
 
 ```java
-config.withRemoveOrphans(true);  // Enable orphan removal
-config.load(true);               // Orphans will be deleted on save
+config.configure(opt -> {
+    opt.removeOrphans(true); // enable orphan removal
+});
+config.load(true); // load and save, orphans will be deleted on save
 ```
 
 **Console output:**
@@ -382,7 +388,9 @@ The **Configurer** handles the actual file format (YAML, JSON, etc.):
 
 ```java
 // Set configurer
-config.withConfigurer(new YamlSnakeYamlConfigurer());
+config.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer());
+});
 
 // Get current configurer
 Configurer configurer = config.getConfigurer();
@@ -394,13 +402,17 @@ You can change the format of an existing config:
 
 ```java
 // Load from YAML
-config.withConfigurer(new YamlSnakeYamlConfigurer());
-config.withBindFile("config.yml");
-config.load();
+config.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer());
+    opt.bindFile("config.yml");
+});
+config.load(); // load only, don't save after
 
 // Switch to JSON
-config.withConfigurer(new JsonGsonConfigurer());
-config.withBindFile("config.json");
+config.configure(opt -> {
+    opt.configurer(new JsonGsonConfigurer());
+    opt.bindFile("config.json");
+});
 config.save();  // Now saved as JSON!
 ```
 

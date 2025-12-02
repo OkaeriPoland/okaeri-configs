@@ -49,10 +49,12 @@ public class AppConfig extends OkaeriConfig {
 
 ```java
 AppConfig config = ConfigManager.create(AppConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile(new File("config.yml"));
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile(new File("config.yml"));
+    });
     it.saveDefaults();
-    it.load(true);
+    it.load(true); // load and save to update comments/new fields
 });
 
 // Access with type safety

@@ -27,10 +27,12 @@ No serializer found for type: java.time.Instant
 
 ```java
 // Add SerdesCommons for Instant, Duration, Locale, Pattern
-it.withConfigurer(
-    new YamlSnakeYamlConfigurer(),
-    new SerdesCommons()  // ← Add this
-);
+it.configure(opt -> {
+    opt.configurer(
+        new YamlSnakeYamlConfigurer(),
+        new SerdesCommons()  // ← Add this
+    );
+});
 ```
 
 See [Serdes Extensions](Serdes-Extensions) for available extensions.
@@ -237,10 +239,12 @@ FileNotFoundException: config.yml (No such file or directory)
 
 ```java
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("config.yml");
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("config.yml");
+    });
     it.saveDefaults();  // ← Creates file if missing
-    it.load();
+    it.load(); // load only, don't save after
 });
 ```
 
@@ -302,8 +306,10 @@ config.load(true);  // Saves after loading to update comments
 **Solution:** Enable orphan removal:
 
 ```java
-it.withRemoveOrphans(true);  // Remove undeclared keys
-it.load(true);  // Must save to apply changes
+it.configure(opt -> {
+    opt.removeOrphans(true); // remove undeclared keys
+});
+it.load(true); // load and save to apply changes
 ```
 
 **Warning:** This removes any keys not declared in your config class.
@@ -374,13 +380,13 @@ ValidationException: port (-1) is invalid: must be greater than or equal to 1
 
 ```java
 // ✅ Wrap configurer with validator
-it.withConfigurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
+opt.configurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
 ```
 
 Not:
 ```java
 // ❌ Validator not applied
-it.withConfigurer(new YamlSnakeYamlConfigurer());
+opt.configurer(new YamlSnakeYamlConfigurer());
 ```
 
 ## Annotation Issues
@@ -523,10 +529,10 @@ ServerConfig serverConfig = ConfigManager.create(ServerConfig.class, ...);
 2. Disable validation for non-critical configs:
 ```java
 // Only validate critical configs
-it.withConfigurer(new OkaeriValidator(configurer));  // Critical
+opt.configurer(new OkaeriValidator(configurer));  // Critical
 
 // Skip validation for non-critical
-it.withConfigurer(configurer);  // Non-critical, faster
+opt.configurer(configurer);  // Non-critical, faster
 ```
 
 3. Use HJSON instead of SnakeYAML for better performance:
@@ -743,7 +749,9 @@ Check what's being written:
 
 ```java
 MyConfig config = new MyConfig();
-config.withConfigurer(new YamlSnakeYamlConfigurer());
+config.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer());
+});
 
 // Print to console instead of file
 String yaml = config.saveToString();
@@ -762,7 +770,9 @@ original.setPort(8080);
 // Save and reload
 String yaml = original.saveToString();
 MyConfig reloaded = new MyConfig();
-reloaded.withConfigurer(new YamlSnakeYamlConfigurer());
+reloaded.configure(opt -> {
+    opt.configurer(new YamlSnakeYamlConfigurer());
+});
 reloaded.load(yaml);
 
 // Compare

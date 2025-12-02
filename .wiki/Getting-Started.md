@@ -21,6 +21,8 @@ Okaeri Configs supports multiple configuration formats. Choose the one that best
 | **YAML (Bukkit)** | `okaeri-configs-yaml-bukkit`                        | Minecraft Bukkit/Spigot/Paper plugins       |
 | **YAML (Bungee)** | `okaeri-configs-yaml-bungee`                        | Minecraft BungeeCord/Waterfall plugins      |
 
+> 📋 **More formats available**: TOML, HJSON, and additional JSON/YAML backends. See **[Home](Home#zero-external-dependencies)** for full comparison.
+
 ### Maven Setup
 
 1. **Add the repository:**
@@ -126,10 +128,12 @@ public class Main {
     public static void main(String[] args) {
 
         MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-            it.withConfigurer(new YamlSnakeYamlConfigurer()); // Set format
-            it.withBindFile(new File("config.yml"));           // Set file location
-            it.saveDefaults();                                  // Create file if it doesn't exist
-            it.load(true);                                      // Load and update with comments
+            it.configure(opt -> {
+                opt.configurer(new YamlSnakeYamlConfigurer());    // Set format
+                opt.bindFile(new File("config.yml"));             // Set file location
+            });
+            it.saveDefaults();                                    // Create file if it doesn't exist
+            it.load(true);                                        // Load and update with comments
         });
 
         // Use the config
@@ -147,8 +151,10 @@ public class Main {
 
 ```java
 MyConfig config = (MyConfig) ConfigManager.create(MyConfig.class)
-    .withConfigurer(new YamlSnakeYamlConfigurer())
-    .withBindFile(new File("config.yml"))
+    .configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile(new File("config.yml"));
+    })
     .saveDefaults()
     .load(true);
 
@@ -178,11 +184,10 @@ debug: false
 Understanding the config lifecycle is important:
 
 1. **Create**: `ConfigManager.create()` instantiates your config class
-2. **Configure**: `withConfigurer()` sets the file format handler
-3. **Bind**: `withBindFile()` associates a file with the config
-4. **Save Defaults**: `saveDefaults()` creates the file with default values if it doesn't exist
-5. **Load**: `load()` reads the file and populates your config object
-6. **Update**: `load(true)` also saves after loading to update comments and new fields
+2. **Configure**: `configure(opt -> { ... })` sets format, file, and other options
+3. **Save Defaults**: `saveDefaults()` creates the file with default values if it doesn't exist
+4. **Load**: `load()` reads the file and populates your config object
+5. **Update**: `load(true)` also saves after loading to update comments and new fields
 
 ## Common Patterns
 
@@ -191,10 +196,12 @@ Understanding the config lifecycle is important:
 ```java
 // Creates file with defaults if missing, then loads it
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("config.yml");
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("config.yml");
+    });
     it.saveDefaults();
-    it.load();
+    it.load(); // load only, don't save after
 });
 ```
 
@@ -203,10 +210,12 @@ MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
 ```java
 // Creates file, loads it, and updates with any new fields/comments
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("config.yml");
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("config.yml");
+    });
     it.saveDefaults();
-    it.load(true);  // true = save after loading
+    it.load(true); // load and save to update comments/new fields
 });
 ```
 
@@ -215,11 +224,13 @@ MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
 ```java
 // Removes keys from file that don't exist in your config class
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("config.yml");
-    it.withRemoveOrphans(true);  // Remove undeclared keys
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("config.yml");
+        opt.removeOrphans(true); // remove undeclared keys
+    });
     it.saveDefaults();
-    it.load(true);
+    it.load(true); // load and save to update comments/new fields
 });
 ```
 
@@ -264,10 +275,12 @@ import java.nio.file.Paths;
 Path configPath = Paths.get("config.yml");
 
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile(configPath);
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile(configPath);
+    });
     it.saveDefaults();
-    it.load(true);
+    it.load(true); // load and save to update comments/new fields
 });
 ```
 
@@ -275,10 +288,12 @@ Or even use a string pathname directly:
 
 ```java
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("configs/myapp.yml");  // String pathname
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("configs/myapp.yml"); // string pathname
+    });
     it.saveDefaults();
-    it.load(true);
+    it.load(true); // load and save to update comments/new fields
 });
 ```
 
@@ -319,8 +334,10 @@ private Integer port;  // Can be null
 
 ```java
 MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
-    it.withConfigurer(new YamlSnakeYamlConfigurer());
-    it.withBindFile("config.yml");
+    it.configure(opt -> {
+        opt.configurer(new YamlSnakeYamlConfigurer());
+        opt.bindFile("config.yml");
+    });
     // Forgot to load!
 });
 // Config has only default values, file contents are ignored
@@ -329,7 +346,8 @@ MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
 **Solution**: Always call `load()` or `load(true)`:
 
 ```java
-it.load(true);
+it.load();     // load only, don't save after
+it.load(true); // load and save to update comments/new fields
 ```
 
 ### ❌ Using transient Fields for Config Values

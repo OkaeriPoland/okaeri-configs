@@ -130,11 +130,13 @@ import eu.okaeri.configs.validator.okaeri.OkaeriValidator;
 public class Application {
     public static void main(String[] args) {
         AppConfig config = ConfigManager.create(AppConfig.class, (it) -> {
-            it.withConfigurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
-            it.withBindFile("config.yml");
-            it.withRemoveOrphans(true);
+            it.configure(opt -> {
+                opt.configurer(new OkaeriValidator(new YamlSnakeYamlConfigurer()));
+                opt.bindFile("config.yml");
+                opt.removeOrphans(true);
+            });
             it.saveDefaults();
-            it.load(true);
+            it.load(true); // load and save to update comments/new fields
         });
 
         // Use configuration
@@ -514,11 +516,13 @@ public class MyPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         this.config = ConfigManager.create(PluginConfig.class, (it) -> {
-            it.withConfigurer(new YamlBukkitConfigurer(), new SerdesBukkit());
-            it.withBindFile(new File(getDataFolder(), "config.yml"));
-            it.withRemoveOrphans(true);
+            it.configure(opt -> {
+                opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit());
+                opt.bindFile(new File(getDataFolder(), "config.yml"));
+                opt.removeOrphans(true);
+            });
             it.saveDefaults();
-            it.load(true);
+            it.load(true); // load and save to update comments/new fields
         });
 
         getLogger().info("Loaded configuration for " + config.getPlugin().getLanguage());
