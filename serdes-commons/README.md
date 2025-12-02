@@ -16,7 +16,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-commons</artifactId>
-  <version>6.0.0-beta.11</version>
+  <version>6.0.0-beta.12</version>
 </dependency>
 ```
 
@@ -25,7 +25,7 @@ Add dependency to the `dependencies` section:
 Add dependency to the `dependencies` section:
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-serdes-commons:6.0.0-beta.11")
+implementation("eu.okaeri:okaeri-configs-serdes-commons:6.0.0-beta.12")
 ```
 
 ## Supported types
