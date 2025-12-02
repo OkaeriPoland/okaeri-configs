@@ -112,22 +112,10 @@ public class YamlBukkitConfigurer extends Configurer {
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        // bukkit's save
-        String contents = this.config.saveToString();
-
-        // remove existing comments and leading empty lines
-        contents = ConfigPostprocessor.of(contents)
-            .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-            .removeLinesUntil((line) -> line.chars().anyMatch(x -> !Character.isWhitespace(x)))
-            .getContext();
-
-        // insert comments using the source walker
-        YamlSourceWalker walker = YamlSourceWalker.of(contents);
-        contents = walker.insertComments(declaration, this.commentPrefix);
-
-        // add header and write
-        ConfigPostprocessor.of(contents)
-            .prependContextComment(this.commentPrefix, declaration.getHeader())
+        ConfigPostprocessor.of(this.config.saveToString())
+            .removeLines(line -> line.startsWith(this.commentPrefix.trim()))
+            .removeLinesUntil(line -> line.chars().anyMatch(x -> !Character.isWhitespace(x)))
+            .updateContext(ctx -> YamlSourceWalker.of(ctx).insertComments(declaration, this.commentPrefix))
             .write(outputStream);
     }
 }

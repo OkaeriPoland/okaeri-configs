@@ -114,23 +114,13 @@ public class YamlJacksonConfigurer extends Configurer {
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        // Render to string first for post-processing
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         this.mapper.writeValue(baos, this.map);
-        String contents = baos.toString(StandardCharsets.UTF_8.name());
 
-        // Remove existing comments
-        contents = ConfigPostprocessor.of(contents)
-            .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-            .getContext();
-
-        // Insert comments using the source walker
-        YamlSourceWalker walker = YamlSourceWalker.of(contents);
-        contents = walker.insertComments(declaration, this.commentPrefix);
-
-        // Add header and write
-        ConfigPostprocessor.of(contents)
-            .prependContextComment(this.commentPrefix, declaration.getHeader())
+        ConfigPostprocessor.of(baos.toString(StandardCharsets.UTF_8.name()))
+            .removeLines(line -> line.startsWith(this.commentPrefix.trim()))
+            .updateContext(ctx -> YamlSourceWalker.of(ctx).insertComments(declaration, this.commentPrefix))
             .write(outputStream);
     }
 }

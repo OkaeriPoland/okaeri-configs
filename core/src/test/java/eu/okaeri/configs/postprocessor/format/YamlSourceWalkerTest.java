@@ -219,6 +219,208 @@ class YamlSourceWalkerTest {
         assertThat(walker.findPath(ConfigPath.parse("app.settings.timeout")).getValue()).isEqualTo("30");
     }
 
+    // ==================== Edge Cases ====================
+
+    @Test
+    void testEmptyFile() {
+        String yaml = "";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        assertThat(walker.findPath(ConfigPath.parse("anything"))).isNull();
+        assertThat(walker.getLocations()).hasSize(1); // Single empty line
+    }
+
+    @Test
+    void testPathNotFound() {
+        String yaml = "name: value";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        assertThat(walker.findPath(ConfigPath.parse("nonexistent"))).isNull();
+        assertThat(walker.findPath(ConfigPath.parse("name.nested"))).isNull();
+        assertThat(walker.findPath(ConfigPath.parse("name[0]"))).isNull();
+    }
+
+    @Test
+    void testTabIndentation() {
+        // Tab characters are counted as 2 spaces in indent calculation
+        String yaml = "parent:\n\tchild: value";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        SourceLocation childLine = walker.findPath(ConfigPath.parse("parent.child"));
+        assertThat(childLine).isNotNull();
+        assertThat(childLine.getValue()).isEqualTo("value");
+        assertThat(childLine.getIndent()).isEqualTo(2); // Tab = 2 spaces
+    }
+
+    @Test
+    void testMultilineIndicator_LiteralStrip() {
+        // |- indicator (literal strip)
+        String yaml = """
+            text: |-
+              line1
+              line2
+            next: value""";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        SourceLocation textLine = walker.findPath(ConfigPath.parse("text"));
+        assertThat(textLine).isNotNull();
+        assertThat(textLine.getValue()).isEqualTo("|-");
+
+        // Multiline content has no configPath
+        assertThat(walker.getLocations().get(1).getConfigPath()).isNull();
+        assertThat(walker.getLocations().get(2).getConfigPath()).isNull();
+
+        SourceLocation nextLine = walker.findPath(ConfigPath.parse("next"));
+        assertThat(nextLine).isNotNull();
+        assertThat(nextLine.getLineNumber()).isEqualTo(4);
+    }
+
+    @Test
+    void testMultilineIndicator_Folded() {
+        // > indicator (folded)
+        String yaml = """
+            text: >
+              folded
+              content
+            next: value""";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        SourceLocation textLine = walker.findPath(ConfigPath.parse("text"));
+        assertThat(textLine).isNotNull();
+        assertThat(textLine.getValue()).isEqualTo(">");
+
+        SourceLocation nextLine = walker.findPath(ConfigPath.parse("next"));
+        assertThat(nextLine).isNotNull();
+        assertThat(nextLine.getLineNumber()).isEqualTo(4);
+    }
+
+    @Test
+    void testMultilineIndicator_FoldedStrip() {
+        // >- indicator (folded strip)
+        String yaml = """
+            text: >-
+              folded strip
+            next: value""";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        SourceLocation textLine = walker.findPath(ConfigPath.parse("text"));
+        assertThat(textLine).isNotNull();
+        assertThat(textLine.getValue()).isEqualTo(">-");
+
+        SourceLocation nextLine = walker.findPath(ConfigPath.parse("next"));
+        assertThat(nextLine).isNotNull();
+        assertThat(nextLine.getLineNumber()).isEqualTo(3);
+    }
+
+    @Test
+    void testTopLevelList() {
+        // List at root level (getListParentPath returns root)
+        String yaml = """
+            - first
+            - second
+            - third""";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        SourceLocation item0 = walker.findPath(ConfigPath.parse("[0]"));
+        assertThat(item0).isNotNull();
+        assertThat(item0.getLineNumber()).isEqualTo(1);
+        assertThat(item0.getValue()).isEqualTo("first");
+
+        SourceLocation item1 = walker.findPath(ConfigPath.parse("[1]"));
+        assertThat(item1).isNotNull();
+        assertThat(item1.getLineNumber()).isEqualTo(2);
+        assertThat(item1.getValue()).isEqualTo("second");
+    }
+
+    @Test
+    void testTopLevelListOfObjects() {
+        String yaml = """
+            - name: first
+              value: 1
+            - name: second
+              value: 2""";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        SourceLocation item0Name = walker.findPath(ConfigPath.parse("[0].name"));
+        assertThat(item0Name).isNotNull();
+        assertThat(item0Name.getValue()).isEqualTo("first");
+
+        SourceLocation item1Value = walker.findPath(ConfigPath.parse("[1].value"));
+        assertThat(item1Value).isNotNull();
+        assertThat(item1Value.getValue()).isEqualTo("2");
+    }
+
+    @Test
+    void testEmptyListItem() {
+        String yaml = """
+            items:
+              -
+              - value""";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        SourceLocation item0 = walker.findPath(ConfigPath.parse("items[0]"));
+        assertThat(item0).isNotNull();
+        assertThat(item0.getValue()).isNull(); // Empty list item
+
+        SourceLocation item1 = walker.findPath(ConfigPath.parse("items[1]"));
+        assertThat(item1).isNotNull();
+        assertThat(item1.getValue()).isEqualTo("value");
+    }
+
+    @Test
+    void testWhitespaceOnlyFile() {
+        String yaml = "   \n   \n   ";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        assertThat(walker.findPath(ConfigPath.parse("anything"))).isNull();
+        // All lines are blank
+        assertThat(walker.getLocations()).hasSize(3);
+    }
+
+    @Test
+    void testOnlyComments() {
+        String yaml = """
+            # Comment 1
+            # Comment 2
+            # Comment 3""";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        assertThat(walker.findPath(ConfigPath.parse("anything"))).isNull();
+        assertThat(walker.getLocations()).hasSize(3);
+        // All lines are comments
+        walker.getLocations().forEach(loc -> {
+            assertThat(loc.getConfigPath()).isNull();
+            assertThat(loc.getRawLine()).startsWith("#");
+        });
+    }
+
+    @Test
+    void testNestedMultilineFollowedBySibling() {
+        // Multiline in nested object, followed by sibling at same level
+        String yaml = """
+            config:
+              desc: |
+                multiline
+                content
+              name: test""";
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+
+        SourceLocation descLine = walker.findPath(ConfigPath.parse("config.desc"));
+        assertThat(descLine).isNotNull();
+        assertThat(descLine.getValue()).isEqualTo("|");
+
+        // Locations: [0]=config:, [1]=desc:|, [2]=multiline, [3]=content, [4]=name:test
+        // Multiline content lines have no configPath
+        assertThat(walker.getLocations().get(2).getConfigPath()).isNull();
+        assertThat(walker.getLocations().get(3).getConfigPath()).isNull();
+
+        SourceLocation nameLine = walker.findPath(ConfigPath.parse("config.name"));
+        assertThat(nameLine).isNotNull();
+        assertThat(nameLine.getValue()).isEqualTo("test");
+    }
+
+    // ==================== insertComments Tests ====================
+
     @Test
     void testInsertComments_ListOfConfigs() {
         String yaml = """

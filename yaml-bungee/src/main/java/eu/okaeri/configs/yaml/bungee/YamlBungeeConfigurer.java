@@ -121,23 +121,13 @@ public class YamlBungeeConfigurer extends Configurer {
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        // bungee's save
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ConfigurationProvider.getProvider(YamlConfiguration.class).save(this.config, new OutputStreamWriter(baos, StandardCharsets.UTF_8));
-        String contents = new String(baos.toByteArray(), StandardCharsets.UTF_8);
 
-        // remove existing comments
-        contents = ConfigPostprocessor.of(contents)
-            .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-            .getContext();
-
-        // insert comments using the source walker
-        YamlSourceWalker walker = YamlSourceWalker.of(contents);
-        contents = walker.insertComments(declaration, this.commentPrefix);
-
-        // add header and write
-        ConfigPostprocessor.of(contents)
-            .prependContextComment(this.commentPrefix, declaration.getHeader())
+        ConfigPostprocessor.of(baos.toString(StandardCharsets.UTF_8.name()))
+            .removeLines(line -> line.startsWith(this.commentPrefix.trim()))
+            .updateContext(ctx -> YamlSourceWalker.of(ctx).insertComments(declaration, this.commentPrefix))
             .write(outputStream);
     }
 }

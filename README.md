@@ -11,34 +11,47 @@
 
 Uses only Java built-in APIs. Great for minimal footprint.
 
-| Format         | Module                                                                              | Comments | Notes                            |
-|----------------|-------------------------------------------------------------------------------------|----------|----------------------------------|
-| **XML**        | 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml)            | ✅ Full   | Uses Java built-in XML APIs      |
-| **Properties** | [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties) | ✅ Full   | Flat `key=value` format          |
-| **INI**        | [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties) | ✅ Full   | Section-based `[section]` format |
+| Format         | Module                                                                              | Comments | Errors | Notes                            |
+|----------------|-------------------------------------------------------------------------------------|----------|--------|----------------------------------|
+| **XML**        | 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml)            | ✅        | ✅      | Uses Java built-in XML APIs      |
+| **Properties** | [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties) | ✅        | ✅      | Flat `key=value` format          |
+| **INI**        | [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties) | ✅        | ✅      | Section-based `[section]` format |
 
 ### With external dependencies
 
-| Format    | Module                                                                                         | Comments     | Notes                                |
-|-----------|------------------------------------------------------------------------------------------------|--------------|--------------------------------------|
-| **YAML**  | 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml) | ✅ Full       | Via SnakeYAML                        |
-| **YAML**  | [yaml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-jackson)        | ✅ Full       | Via Jackson (SnakeYAML underneath)   |
-| **TOML**  | [toml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/toml-jackson)        | ✅ Full       | TOML 1.0 via Jackson                 |
-| **HJSON** | [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson)                      | ✅ Full       | Human JSON via hjson-java            |
-| **JSON**  | [json-gson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson)              | ❌ None       | Via Google GSON                      |
-| **JSON**  | [json-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-jackson)        | ❌ None       | Via Jackson                          |
-| **JSON**  | [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple)          | ❌ None       | Via json-simple, no pretty print     |
-| **HOCON** | [hocon-lightbend](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hocon-lightbend)  | ⚠️ Top-level | Severely limited (see module README) |
+| Format    | Module                                                                                         | Comments | Errors | Notes                              |
+|-----------|------------------------------------------------------------------------------------------------|----------|--------|------------------------------------|
+| **YAML**  | 🌟 [yaml-snakeyaml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-snakeyaml) | ✅        | ✅      | Via SnakeYAML                      |
+| **YAML**  | [yaml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-jackson)        | ✅        | ✅      | Via Jackson (SnakeYAML underneath) |
+| **TOML**  | [toml-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/toml-jackson)        | ✅        | ✅      | TOML 1.0 via Jackson               |
+| **HJSON** | [hjson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/hjson)                      | ✅        | ❌      | Human JSON via hjson-java          |
+| **JSON**  | [json-gson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-gson)              | ❌        | ❌      | Via Google GSON                    |
+| **JSON**  | [json-jackson](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-jackson)        | ❌        | ❌      | Via Jackson                        |
+| **JSON**  | [json-simple](https://github.com/OkaeriPoland/okaeri-configs/tree/master/json-simple)          | ❌        | ❌      | Via json-simple, no pretty print   |
 
 ### Environment dependent
 
 Special implementations for safe use in specific environments, e.g., game servers.
 
-| Platform                 | Module                                                                                   | Comments    | Notes                                                                                                |
-|--------------------------|------------------------------------------------------------------------------------------|-------------|------------------------------------------------------------------------------------------------------|
-| **Bukkit/Spigot/Paper**  | 🌟 [yaml-bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit) | ✅ Full       | No extra dependencies (best with [okaeri-platform](https://github.com/OkaeriPoland/okaeri-platform)) |
-| **BungeeCord/Waterfall** | 🌟 [yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee) | ✅ Full       | No extra dependencies needed                                                                         |
-| **Velocity/Sponge**      | json-gson, hocon-lightbend, or yaml-snakeyaml                                            | Varies       | Exclude format deps when shading (provided by environment)                                           |
+| Platform                 | Module                                                                                   | Comments | Errors | Notes                                                                                                |
+|--------------------------|------------------------------------------------------------------------------------------|----------|--------|------------------------------------------------------------------------------------------------------|
+| **Bukkit/Spigot/Paper**  | 🌟 [yaml-bukkit](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bukkit) | ✅        | ✅      | No extra dependencies (best with [okaeri-platform](https://github.com/OkaeriPoland/okaeri-platform)) |
+| **BungeeCord/Waterfall** | 🌟 [yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee) | ✅        | ✅      | No extra dependencies needed                                                                         |
+| **Velocity/Sponge**      | yaml-snakeyaml or json-gson                                                              | Varies   | Varies | Exclude format deps when shading (provided by environment)                                           |
+
+**Legend:** Comments = `@Comment`/`@Header` support | Errors = Rust-style error markers (see below)
+
+### Rust-style error messages
+
+Supported formats provide precise error messages that pinpoint exactly where serdes failed:
+
+```
+error[StringToIntegerTransformer]: Cannot transform 'database.port' to Integer from String
+ --> config.yml:3:9
+  |
+3 |   port: not_a_port
+  |         ^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)
+```
 
 ## Validation extensions
 

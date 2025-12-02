@@ -123,7 +123,7 @@ public class HjsonConfigurer extends Configurer {
         this.addComments(this.json, declaration, null);
 
         // header
-        String header = ConfigPostprocessor.createCommentOrEmpty(this.commentPrefix, declaration.getHeader());
+        String header = this.formatComment(declaration.getHeader());
         this.json.setFullComment(CommentType.BOL, header);
 
         // save
@@ -175,8 +175,24 @@ public class HjsonConfigurer extends Configurer {
             return;
         }
 
-        String commentOrEmpty = ConfigPostprocessor.createCommentOrEmpty(this.commentPrefix, comment);
+        String commentOrEmpty = this.formatComment(comment);
         value.setFullComment(CommentType.BOL, commentOrEmpty);
+    }
+
+    private String formatComment(String[] lines) {
+        if (lines == null) return "";
+
+        StringBuilder result = new StringBuilder();
+        for (String line : lines) {
+            if (line.isEmpty()) {
+                result.append("\n");
+            } else if (line.startsWith(this.commentPrefix.trim())) {
+                result.append(line).append("\n");
+            } else {
+                result.append(this.commentPrefix).append(line).append("\n");
+            }
+        }
+        return result.toString();
     }
 
     @SuppressWarnings("unchecked")

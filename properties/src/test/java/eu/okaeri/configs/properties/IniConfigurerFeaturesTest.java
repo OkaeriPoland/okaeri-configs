@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -111,6 +113,25 @@ class IniConfigurerFeaturesTest {
         assertThat(ini).contains("[level1.level2]");
         assertThat(ini).contains("value=deep");
     }
+
+    // ==================== Constructor Tests ====================
+
+    @Test
+    void testDefaultConstructor() {
+        IniConfigurer configurer = new IniConfigurer();
+        assertThat(configurer).isNotNull();
+    }
+
+    @Test
+    void testConstructorWithMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("key", "value");
+        IniConfigurer configurer = new IniConfigurer(map);
+        assertThat(configurer).isNotNull();
+        assertThat(configurer.getValue("key")).isEqualTo("value");
+    }
+
+    // ==================== getExtensions Tests ====================
 
     @Test
     void testFileExtensions() {

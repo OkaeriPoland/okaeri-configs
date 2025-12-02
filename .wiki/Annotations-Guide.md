@@ -687,25 +687,20 @@ public class LegacyConfig extends OkaeriConfig {
 
 ## Format-Specific Behavior
 
-### YAML (SnakeYAML, Bukkit, Bungee)
+### Full Comment Support
 
-- ✅ @Header: Full support
-- ✅ @Comment: Full support for all fields
+These formats support both `@Header` and `@Comment`:
 
-### HJSON
+- **YAML** (SnakeYAML, Jackson, Bukkit, Bungee)
+- **TOML** (Jackson)
+- **HJSON**
+- **XML**
+- **Properties**
+- **INI**
 
-- ✅ @Header: Full support
-- ✅ @Comment: Full support for all fields
+### No Comment Support
 
-### JSON (GSON, json-simple)
-
-- ❌ @Header: Ignored (JSON has no comment syntax)
-- ❌ @Comment: Ignored (JSON has no comment syntax)
-
-### HOCON (Lightbend)
-
-- ⚠️ @Header: Works
-- ⚠️ @Comment: **Only top-level fields** - nested subconfig comments don't work
+- **JSON** (GSON, Jackson, json-simple) - JSON has no comment syntax
 
 ## Next Steps
 
@@ -717,4 +712,4 @@ public class LegacyConfig extends OkaeriConfig {
 ## See Also
 
 - **[Getting Started](Getting-Started)** - First config setup
-- **[Format Guides](Format-Guides)** - Format-specific features and limitations
+- **[Home](Home)** - Format comparison and features

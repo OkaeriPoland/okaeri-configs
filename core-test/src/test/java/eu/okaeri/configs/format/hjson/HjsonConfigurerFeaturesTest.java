@@ -8,6 +8,7 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.hjson.HjsonConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -212,7 +213,23 @@ class HjsonConfigurerFeaturesTest {
         assertThat(config.isEnabled()).isTrue();
     }
 
-    // Test config classes
+    // ==================== Constructor Tests ====================
+
+    @Test
+    void testDefaultConstructor() {
+        HjsonConfigurer configurer = new HjsonConfigurer();
+        assertThat(configurer).isNotNull();
+    }
+
+    // ==================== getExtensions Tests ====================
+
+    @Test
+    void testGetExtensions() {
+        HjsonConfigurer configurer = new HjsonConfigurer();
+        assertThat(configurer.getExtensions()).containsExactly("hjson");
+    }
+
+    // ==================== Test Config Classes ====================
 
     @Data
     @EqualsAndHashCode(callSuper = false)

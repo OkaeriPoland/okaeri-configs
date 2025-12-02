@@ -6,8 +6,11 @@ import eu.okaeri.configs.annotation.Comment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.ByteArrayOutputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +39,40 @@ class YamlSnakeYamlConfigurerFeaturesTest {
         assertThat(yaml).doesNotContain("# This is a simple field comment");
     }
 
-    // Test config class
+    // ==================== Constructor Tests ====================
+
+    @Test
+    void testDefaultConstructor() {
+        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
+        assertThat(configurer).isNotNull();
+    }
+
+    @Test
+    void testConstructorWithYaml() {
+        Yaml yaml = new Yaml();
+        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer(yaml);
+        assertThat(configurer).isNotNull();
+    }
+
+    @Test
+    void testConstructorWithYamlAndMap() {
+        Yaml yaml = new Yaml();
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("key", "value");
+        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer(yaml, map);
+        assertThat(configurer).isNotNull();
+        assertThat(configurer.getValue("key")).isEqualTo("value");
+    }
+
+    // ==================== getExtensions Tests ====================
+
+    @Test
+    void testGetExtensions() {
+        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
+        assertThat(configurer.getExtensions()).containsExactly("yml", "yaml");
+    }
+
+    // ==================== Test Config Classes ====================
 
     @Data
     @EqualsAndHashCode(callSuper = false)

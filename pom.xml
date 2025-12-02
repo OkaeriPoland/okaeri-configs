@@ -17,6 +17,7 @@
         <!-- test -->
         <junit.version>5.13.4</junit.version>
         <assertj.version>3.27.6</assertj.version>
+        <mockito.version>5.18.0</mockito.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
 
         <!-- format libraries -->
@@ -25,7 +26,6 @@
         <gson.version>2.13.2</gson.version>
         <json-simple.version>1.1.1</json-simple.version>
         <okaeri-hjson.version>4.0.0</okaeri-hjson.version>
-        <hocon.version>1.4.5</hocon.version>
 
         <!-- validation -->
         <okaeri-validator.version>2.0.1</okaeri-validator.version>
@@ -65,9 +65,6 @@
         <module>json-gson</module>
         <module>json-jackson</module>
         <module>json-simple</module>
-
-        <!-- hocon modules -->
-        <module>hocon-lightbend</module>
 
         <!-- xml modules -->
         <module>xml</module>
@@ -205,9 +202,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

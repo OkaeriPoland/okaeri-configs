@@ -7,9 +7,8 @@ import lombok.SneakyThrows;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -30,48 +29,6 @@ public class ConfigPostprocessor {
         return postprocessor;
     }
 
-    public static int countIndent(@NonNull String line) {
-        int whitespaces = 0;
-        for (char c : line.toCharArray()) {
-            if (!Character.isWhitespace(c)) {
-                return whitespaces;
-            }
-            whitespaces++;
-        }
-        return whitespaces;
-    }
-
-    public static String addIndent(@NonNull String line, int size) {
-
-        StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < size; i++) buf.append(" ");
-        String indent = buf.toString();
-
-        return Arrays.stream(line.split("\n"))
-            .map(part -> indent + part)
-            .collect(Collectors.joining("\n"))
-            + "\n";
-    }
-
-    public static String createCommentOrEmpty(String commentPrefix, String[] strings) {
-        return (strings == null) ? "" : createComment(commentPrefix, strings);
-    }
-
-    public static String createComment(String commentPrefix, String[] strings) {
-
-        if (strings == null) return null;
-        if (commentPrefix == null) commentPrefix = "";
-        List<String> lines = new ArrayList<>();
-
-        for (String line : strings) {
-            String[] parts = line.split("\n");
-            String prefix = line.startsWith(commentPrefix.trim()) ? "" : commentPrefix;
-            lines.add((line.isEmpty() ? "" : prefix) + line);
-        }
-
-        return String.join("\n", lines) + "\n";
-    }
-
     private static String readInput(InputStream inputStream) {
         return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines()
             .collect(Collectors.joining("\n"));
@@ -88,13 +45,13 @@ public class ConfigPostprocessor {
         return this;
     }
 
-    public ConfigPostprocessor removeLines(@NonNull ConfigLineFilter filter) {
+    public ConfigPostprocessor removeLines(@NonNull Predicate<String> shouldRemove) {
 
         String[] lines = this.context.split("\n");
         StringBuilder buf = new StringBuilder();
 
         for (String line : lines) {
-            if (filter.remove(line)) {
+            if (shouldRemove.test(line)) {
                 continue;
             }
             buf.append(line).append("\n");
@@ -121,35 +78,21 @@ public class ConfigPostprocessor {
         return this;
     }
 
-    public ConfigPostprocessor updateLines(@NonNull ConfigContextManipulator manipulator) {
+    public ConfigPostprocessor updateLines(@NonNull Function<String, String> transform) {
 
         String[] lines = this.context.split("\n");
         StringBuilder buf = new StringBuilder();
 
         for (String line : lines) {
-            buf.append(manipulator.convert(line)).append("\n");
+            buf.append(transform.apply(line)).append("\n");
         }
 
         this.context = buf.toString();
         return this;
     }
 
-    public ConfigPostprocessor updateContext(@NonNull ConfigContextManipulator manipulator) {
-        this.context = manipulator.convert(this.context);
-        return this;
-    }
-
-    public ConfigPostprocessor prependContextComment(String prefix, String[] strings) {
-        if (strings != null) this.context = createComment(prefix, strings) + this.context;
-        return this;
-    }
-
-    public ConfigPostprocessor appendContextComment(String prefix, String[] strings) {
-        return this.appendContextComment(prefix, "", strings);
-    }
-
-    public ConfigPostprocessor appendContextComment(String prefix, String separator, String[] strings) {
-        if (strings != null) this.context += separator + createComment(prefix, strings);
+    public ConfigPostprocessor updateContext(@NonNull Function<String, String> transform) {
+        this.context = transform.apply(this.context);
         return this;
     }
 }

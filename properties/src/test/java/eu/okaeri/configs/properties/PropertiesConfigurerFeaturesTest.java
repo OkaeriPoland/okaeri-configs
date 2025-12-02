@@ -8,7 +8,9 @@ import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -77,7 +79,32 @@ class PropertiesConfigurerFeaturesTest {
         assertThat(properties).contains("items=very-long-item-one,very-long-item-two,very-long-item-three,very-long-item-four");
     }
 
-    // Test config classes
+    // ==================== Constructor Tests ====================
+
+    @Test
+    void testDefaultConstructor() {
+        PropertiesConfigurer configurer = new PropertiesConfigurer();
+        assertThat(configurer).isNotNull();
+    }
+
+    @Test
+    void testConstructorWithMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("key", "value");
+        PropertiesConfigurer configurer = new PropertiesConfigurer(map);
+        assertThat(configurer).isNotNull();
+        assertThat(configurer.getValue("key")).isEqualTo("value");
+    }
+
+    // ==================== getExtensions Tests ====================
+
+    @Test
+    void testGetExtensions() {
+        PropertiesConfigurer configurer = new PropertiesConfigurer();
+        assertThat(configurer.getExtensions()).containsExactly("properties");
+    }
+
+    // ==================== Test Config Classes ====================
 
     @Data
     @EqualsAndHashCode(callSuper = false)

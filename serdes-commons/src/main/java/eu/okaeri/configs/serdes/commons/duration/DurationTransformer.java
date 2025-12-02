@@ -179,10 +179,10 @@ public class DurationTransformer extends BidirectionalTransformer<String, Durati
             String unit = matcher.group("unit").toLowerCase(Locale.ROOT);
             // value represents multiple of full days in hours and fallback unit is not hours
             if ("h".equals(unit) && ((longValue % 24) == 0) && (fallbackUnit != ChronoUnit.HOURS)) {
-                return (longValue < 0 ? "-" : "") + (longValue / 24) + "d";
+                return (longValue / 24) + "d";
             }
             // save as provided by Duration
-            return (longValue < 0 ? "-" : "") + longValue + unit;
+            return longValue + unit;
         }
 
         // matcher for sub-second format

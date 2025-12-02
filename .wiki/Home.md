@@ -12,7 +12,7 @@ Okaeri Configs is a modern Java configuration library that allows you to use Jav
 
 - 🎯 **Type-Safe Configurations**: Use Java classes with getters/setters for compile-time safety
 - 💬 **Comment Support**: Add persistent comments and headers to your config files
-- 🔄 **Multiple Formats**: YAML, JSON, HJSON, HOCON support out of the box
+- 🔄 **Multiple Formats**: YAML, JSON, HJSON support out of the box
 - 🎮 **Platform Support**: Special integrations for Bukkit, Bungee, and more
 - 📦 **Lightweight**: Core library is only ~129kB
 - ✅ **Validation**: Built-in validation support (Okaeri Validator, Jakarta EE)
@@ -120,17 +120,70 @@ See **[Getting Started](Getting-Started)** for detailed installation instruction
 | **General Purpose**   | YAML (SnakeYAML)  | `okaeri-configs-yaml-snakeyaml`                               |
 | **Standalone Apps**   | HJSON (~193kB)    | `okaeri-configs-hjson` + `okaeri-configs-validator-okaeri`    |
 
-### All Format Modules
+### Zero External Dependencies
 
-| Format               | Artifact ID                       | Notes                                                                      |
-|----------------------|-----------------------------------|----------------------------------------------------------------------------|
-| **YAML (SnakeYAML)** | `okaeri-configs-yaml-snakeyaml`   | General-purpose YAML. Good balance of features and compatibility.          |
-| **YAML (Bukkit)**    | `okaeri-configs-yaml-bukkit`      | Uses Bukkit's built-in YAML library. Useful for Bukkit plugins.            |
-| **YAML (Bungee)**    | `okaeri-configs-yaml-bungee`      | Uses BungeeCord's YAML library. Useful for Bungee plugins.                 |
-| **JSON (Gson)**      | `okaeri-configs-json-gson`        | Based on Google's Gson. No comment support.                                |
-| **JSON (Simple)**    | `okaeri-configs-json-simple`      | Based on json-simple. No indentation, no comments.                         |
-| **HJSON**            | `okaeri-configs-hjson`            | Human-friendly JSON. Supports comments. Recommended for standalone apps.   |
-| **HOCON**            | `okaeri-configs-hocon-lightbend`  | Based on Lightbend Config. Limited comments/ordering. **Not recommended.** |
+Uses only Java built-in APIs. Great for minimal footprint.
+
+| Format         | Module                        | Comments | Errors | Notes                            |
+|----------------|-------------------------------|----------|--------|----------------------------------|
+| **XML**        | `okaeri-configs-xml`          | ✅       | ✅     | Uses Java built-in XML APIs      |
+| **Properties** | `okaeri-configs-properties`   | ✅       | ✅     | Flat `key=value` format          |
+| **INI**        | `okaeri-configs-properties`   | ✅       | ✅     | Section-based `[section]` format |
+
+### With External Dependencies
+
+| Format    | Module                            | Comments | Errors | Notes                              |
+|-----------|-----------------------------------|----------|--------|------------------------------------|
+| **YAML**  | `okaeri-configs-yaml-snakeyaml`   | ✅       | ✅     | Via SnakeYAML                      |
+| **YAML**  | `okaeri-configs-yaml-jackson`     | ✅       | ✅     | Via Jackson (SnakeYAML underneath) |
+| **TOML**  | `okaeri-configs-toml-jackson`     | ✅       | ✅     | TOML 1.0 via Jackson               |
+| **HJSON** | `okaeri-configs-hjson`            | ✅       | ❌     | Human JSON via hjson-java          |
+| **JSON**  | `okaeri-configs-json-gson`        | ❌       | ❌     | Via Google GSON                    |
+| **JSON**  | `okaeri-configs-json-jackson`     | ❌       | ❌     | Via Jackson                        |
+| **JSON**  | `okaeri-configs-json-simple`      | ❌       | ❌     | Via json-simple, no pretty print   |
+
+### Environment Dependent
+
+Special implementations for safe use in specific environments, e.g., game servers.
+
+| Platform                 | Module                        | Comments | Errors | Notes                              |
+|--------------------------|-------------------------------|----------|--------|------------------------------------|
+| **Bukkit/Spigot/Paper**  | `okaeri-configs-yaml-bukkit`  | ✅       | ✅     | No extra dependencies needed       |
+| **BungeeCord/Waterfall** | `okaeri-configs-yaml-bungee`  | ✅       | ✅     | No extra dependencies needed       |
+
+**Legend:** Comments = `@Comment`/`@Header` support | Errors = [Rust-style error markers](#rust-style-error-messages)
+
+## Rust-Style Error Messages
+
+Supported formats provide precise, Rust-style error messages that pinpoint exactly where serdes failed:
+
+```
+error[StringToIntegerTransformer]: Cannot transform 'database.port' to Integer from String
+ --> config.yml:3:9
+  |
+3 |   port: not_a_port
+  |         ^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)
+```
+
+Works with nested paths, lists, and maps:
+
+```
+error[StringToIntegerTransformer]: Cannot transform 'servers[1].port' to Integer from String
+ --> config.yml:5:11
+  |
+5 |     port: invalid
+  |           ^^^^^^^ Expected whole number (e.g. 42, -10, 0)
+```
+
+Even deeply nested structures:
+
+```
+error[StringToIntegerTransformer]: Cannot transform 'environments["production"].clusters[0].nodes[0].resources.cpu' to Integer from String
+ --> config.yml:9:20
+  |
+9 |               cpu: invalid_cores
+  |                    ^^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)
+```
 
 ## Community & Support
 

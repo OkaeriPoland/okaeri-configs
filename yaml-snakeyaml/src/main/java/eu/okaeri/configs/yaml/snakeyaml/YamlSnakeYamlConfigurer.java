@@ -111,21 +111,9 @@ public class YamlSnakeYamlConfigurer extends Configurer {
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        // render to string
-        String contents = this.yaml.dump(this.map);
-
-        // remove existing comments and insert new ones using the walker
-        contents = ConfigPostprocessor.of(contents)
-            .removeLines((line) -> line.startsWith(this.commentPrefix.trim()))
-            .getContext();
-
-        // insert comments using the source walker
-        YamlSourceWalker walker = YamlSourceWalker.of(contents);
-        contents = walker.insertComments(declaration, this.commentPrefix);
-
-        // add header and write
-        ConfigPostprocessor.of(contents)
-            .prependContextComment(this.commentPrefix, declaration.getHeader())
+        ConfigPostprocessor.of(this.yaml.dump(this.map))
+            .removeLines(line -> line.startsWith(this.commentPrefix.trim()))
+            .updateContext(ctx -> YamlSourceWalker.of(ctx).insertComments(declaration, this.commentPrefix))
             .write(outputStream);
     }
 }

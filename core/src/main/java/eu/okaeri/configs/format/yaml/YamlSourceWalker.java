@@ -2,7 +2,6 @@ package eu.okaeri.configs.format.yaml;
 
 import eu.okaeri.configs.format.SourceLocation;
 import eu.okaeri.configs.format.SourceWalker;
-import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.serdes.ConfigPath;
@@ -48,7 +47,7 @@ public class YamlSourceWalker implements SourceWalker {
 
     /**
      * Inserts comments from the ConfigDeclaration into the YAML content.
-     * Handles nested configs, lists, and maps.
+     * Handles header comments, nested configs, lists, and maps.
      *
      * @param declaration   the config declaration with comment annotations
      * @param commentPrefix the prefix for comments (e.g., "# ")
@@ -61,6 +60,12 @@ public class YamlSourceWalker implements SourceWalker {
         // Build new content with comments
         StringBuilder result = new StringBuilder();
 
+        // Prepend header comment if present
+        String[] header = declaration.getHeader();
+        if (header != null) {
+            result.append(formatComment(commentPrefix, header));
+        }
+
         for (int i = 0; i < this.locations.size(); i++) {
             SourceLocation location = this.locations.get(i);
             ConfigPath path = location.getConfigPath();
@@ -71,8 +76,8 @@ public class YamlSourceWalker implements SourceWalker {
                 if (!commentedPatterns.contains(pattern)) {
                     String[] comment = resolveComment(path, declaration);
                     if (comment != null) {
-                        String commentStr = ConfigPostprocessor.createComment(commentPrefix, comment);
-                        result.append(ConfigPostprocessor.addIndent(commentStr, location.getIndent()));
+                        String commentStr = formatComment(commentPrefix, comment);
+                        result.append(indent(commentStr, location.getIndent()));
                     }
                     commentedPatterns.add(pattern);
                 }
@@ -320,6 +325,39 @@ public class YamlSourceWalker implements SourceWalker {
 
     private static boolean isMultilineIndicator(String value) {
         return MULTILINE_INDICATORS.contains(value);
+    }
+
+    private static String formatComment(String prefix, String[] lines) {
+        if (lines == null) return "";
+        if (prefix == null) prefix = "";
+
+        StringBuilder result = new StringBuilder();
+        for (String line : lines) {
+            if (line.isEmpty()) {
+                result.append("\n");
+            } else if (line.startsWith(prefix.trim())) {
+                result.append(line).append("\n");
+            } else {
+                result.append(prefix).append(line).append("\n");
+            }
+        }
+        return result.toString();
+    }
+
+    private static String indent(String text, int spaces) {
+        if (spaces <= 0) return text;
+
+        StringBuilder indentStr = new StringBuilder();
+        for (int i = 0; i < spaces; i++) {
+            indentStr.append(" ");
+        }
+        String indent = indentStr.toString();
+
+        StringBuilder result = new StringBuilder();
+        for (String line : text.split("\n")) {
+            result.append(indent).append(line).append("\n");
+        }
+        return result.toString();
     }
 
     private static class PathEntry {

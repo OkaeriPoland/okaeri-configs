@@ -20,7 +20,6 @@ Okaeri Configs supports multiple configuration formats. Choose the one that best
 | **JSON** | `okaeri-configs-json-gson` | In-app storage, GSON users |
 | **YAML (Bukkit)** | `okaeri-configs-yaml-bukkit` | Minecraft Bukkit/Spigot/Paper plugins |
 | **YAML (Bungee)** | `okaeri-configs-yaml-bungee` | Minecraft BungeeCord/Waterfall plugins |
-| **HOCON** | `okaeri-configs-hocon-lightbend` | Lightbend ecosystem (limited features) |
 
 ### Maven Setup
 
@@ -229,26 +228,29 @@ MyConfig config = ConfigManager.create(MyConfig.class, (it) -> {
 Depending on your chosen format, use the appropriate configurer:
 
 ```java
-// YAML (SnakeYAML)
-new YamlSnakeYamlConfigurer()
+// YAML
+new YamlSnakeYamlConfigurer()      // General purpose
+new YamlJacksonConfigurer()        // Via Jackson
+new YamlBukkitConfigurer()         // Bukkit/Spigot/Paper
+new YamlBungeeConfigurer()         // BungeeCord/Waterfall
 
-// YAML (Bukkit) - for Bukkit/Spigot/Paper
-new YamlBukkitConfigurer()
+// TOML
+new TomlJacksonConfigurer()        // TOML 1.0 via Jackson
 
-// YAML (Bungee) - for BungeeCord/Waterfall
-new YamlBungeeConfigurer()
-
-// JSON (GSON)
-new JsonGsonConfigurer()
-
-// JSON (simple)
-new JsonSimpleConfigurer()
+// JSON
+new JsonGsonConfigurer()           // Via Google GSON
+new JsonJacksonConfigurer()        // Via Jackson
+new JsonSimpleConfigurer()         // Via json-simple
 
 // HJSON
-new HjsonConfigurer()
+new HjsonConfigurer()              // Human-friendly JSON
 
-// HOCON
-new HoconLightbendConfigurer()
+// XML
+new XmlSimpleConfigurer()          // Human-readable XML
+
+// Properties/INI (zero dependencies)
+new PropertiesConfigurer()         // key=value format
+new IniConfigurer()                // [section] format
 ```
 
 ## Using Path Instead of File

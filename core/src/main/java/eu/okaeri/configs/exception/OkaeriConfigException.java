@@ -82,6 +82,8 @@ public class OkaeriConfigException extends OkaeriException {
         String hint = null;
         int valueOffset = -1;
         int valueLength = 1;
+        int contextLinesBefore = ValueIndexedException.DEFAULT_CONTEXT_BEFORE;
+        int contextLinesAfter = ValueIndexedException.DEFAULT_CONTEXT_AFTER;
 
         if (cause instanceof ValueIndexedException) {
             // Generic indexed exception - preferred way
@@ -89,6 +91,8 @@ public class OkaeriConfigException extends OkaeriException {
             hint = vie.getMessage();
             valueOffset = vie.getStartIndex();
             valueLength = vie.getLength();
+            contextLinesBefore = vie.getContextLinesBefore();
+            contextLinesAfter = vie.getContextLinesAfter();
         } else if (cause instanceof PatternSyntaxException) {
             // Backwards compatibility for direct PatternSyntaxException
             PatternSyntaxException pse = (PatternSyntaxException) cause;
@@ -100,9 +104,10 @@ public class OkaeriConfigException extends OkaeriException {
 
         // Add source marker if walker is available
         SourceWalker walker = (configurer != null) ? configurer.createSourceWalker() : null;
+        String rawContent = (configurer != null) ? configurer.getRawContent() : null;
         boolean hasSourceMarker = false;
         if ((walker != null) && hasPath) {
-            String marker = SourceErrorMarker.format(walker, path, sourceFile, hint, valueOffset, valueLength);
+            String marker = SourceErrorMarker.format(walker, path, sourceFile, hint, valueOffset, valueLength, rawContent, contextLinesBefore, contextLinesAfter);
             if (!marker.isEmpty()) {
                 sb.append("\n").append(marker);
                 hasSourceMarker = true;

@@ -1,5 +1,6 @@
 package eu.okaeri.configs.format.json;
 
+import com.google.gson.Gson;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.Configurer;
@@ -8,6 +9,8 @@ import eu.okaeri.configs.json.jackson.JsonJacksonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.json.simple.parser.JSONParser;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,6 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -188,7 +192,69 @@ class JsonConfigurerFeaturesTest {
         assertThat(savedJson).contains("\"settings\":");
     }
 
-    // Test config classes
+    // ==================== JsonGsonConfigurer Constructor Tests ====================
+
+    @Test
+    void testJsonGson_DefaultConstructor() {
+        JsonGsonConfigurer configurer = new JsonGsonConfigurer();
+        assertThat(configurer).isNotNull();
+    }
+
+    @Test
+    void testJsonGson_ConstructorWithGson() {
+        Gson gson = new Gson();
+        JsonGsonConfigurer configurer = new JsonGsonConfigurer(gson);
+        assertThat(configurer).isNotNull();
+    }
+
+    @Test
+    void testJsonGson_ConstructorWithGsonAndMap() {
+        Gson gson = new Gson();
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("key", "value");
+        JsonGsonConfigurer configurer = new JsonGsonConfigurer(gson, map);
+        assertThat(configurer).isNotNull();
+        assertThat(configurer.getValue("key")).isEqualTo("value");
+    }
+
+    @Test
+    void testJsonGson_GetExtensions() {
+        JsonGsonConfigurer configurer = new JsonGsonConfigurer();
+        assertThat(configurer.getExtensions()).containsExactly("json");
+    }
+
+    // ==================== JsonSimpleConfigurer Constructor Tests ====================
+
+    @Test
+    void testJsonSimple_DefaultConstructor() {
+        JsonSimpleConfigurer configurer = new JsonSimpleConfigurer();
+        assertThat(configurer).isNotNull();
+    }
+
+    @Test
+    void testJsonSimple_ConstructorWithParser() {
+        JSONParser parser = new JSONParser();
+        JsonSimpleConfigurer configurer = new JsonSimpleConfigurer(parser);
+        assertThat(configurer).isNotNull();
+    }
+
+    @Test
+    void testJsonSimple_ConstructorWithParserAndMap() {
+        JSONParser parser = new JSONParser();
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("key", "value");
+        JsonSimpleConfigurer configurer = new JsonSimpleConfigurer(parser, map);
+        assertThat(configurer).isNotNull();
+        assertThat(configurer.getValue("key")).isEqualTo("value");
+    }
+
+    @Test
+    void testJsonSimple_GetExtensions() {
+        JsonSimpleConfigurer configurer = new JsonSimpleConfigurer();
+        assertThat(configurer.getExtensions()).containsExactly("json");
+    }
+
+    // ==================== Test Config Classes ====================
 
     @Data
     @EqualsAndHashCode(callSuper = false)

@@ -19,7 +19,7 @@ import java.util.*;
  *   <li>Nested structures via dot notation: {@code database.host=localhost}</li>
  *   <li>Simple lists via comma notation: {@code tags=a,b,c} (when line ≤80 chars)</li>
  *   <li>Complex lists via index notation: {@code items.0=first}, {@code items.1=second}</li>
- *   <li>Write-only comments using {@code #} prefix</li>
+ *   <li>Header and field comments using {@code #} prefix</li>
  *   <li>Zero external dependencies (uses java.util.Properties)</li>
  * </ul>
  */
