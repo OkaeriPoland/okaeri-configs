@@ -12,9 +12,9 @@ Okaeri Configs is a modern Java configuration library that allows you to use Jav
 
 - 🎯 **Type-Safe Configurations**: Use Java classes with getters/setters for compile-time safety
 - 💬 **Comment Support**: Add persistent comments and headers to your config files
-- 🔄 **Multiple Formats**: YAML, JSON, HJSON support out of the box
+- 🔄 **Multiple Formats**: YAML, JSON, HJSON, TOML, XML, Properties, INI
 - 🎮 **Platform Support**: Special integrations for Bukkit, Bungee, and more
-- 📦 **Lightweight**: Core library is only ~129kB
+- 📦 **Lightweight**: Core library is only ~177kB
 - ✅ **Validation**: Built-in validation support (Okaeri Validator, Jakarta EE)
 - 🔌 **Extensible**: Custom serializers, transformers, and format support
 - 🌍 **Environment Variables**: Built-in support for environment variable substitution
@@ -113,12 +113,12 @@ See **[Getting Started](Getting-Started)** for detailed installation instruction
 
 ### Common Configurations
 
-| Use Case              | Format            | Additional Dependencies                                       |
-|-----------------------|-------------------|---------------------------------------------------------------|
-| **Bukkit Plugins**    | YAML (Bukkit)     | `okaeri-configs-yaml-bukkit` + `okaeri-configs-serdes-bukkit` |
-| **Bungee Plugins**    | YAML (Bungee)     | `okaeri-configs-yaml-bungee`                                  |
-| **General Purpose**   | YAML (SnakeYAML)  | `okaeri-configs-yaml-snakeyaml`                               |
-| **Standalone Apps**   | HJSON (~193kB)    | `okaeri-configs-hjson` + `okaeri-configs-validator-okaeri`    |
+| Use Case              | Format            | Additional Dependencies                                         |
+|-----------------------|-------------------|-----------------------------------------------------------------|
+| **Bukkit Plugins**    | YAML (Bukkit)     | `okaeri-configs-yaml-bukkit` + `okaeri-configs-serdes-bukkit`   |
+| **Bungee Plugins**    | YAML (Bungee)     | `okaeri-configs-yaml-bungee`                                    |
+| **General Purpose**   | YAML (SnakeYAML)  | `okaeri-configs-yaml-snakeyaml`                                 |
+| **Standalone Apps**   | XML or INI        | `okaeri-configs-xml` or `okaeri-configs-properties` (zero deps) |
 
 ### Zero External Dependencies
 
@@ -126,30 +126,30 @@ Uses only Java built-in APIs. Great for minimal footprint.
 
 | Format         | Module                        | Comments | Errors | Notes                            |
 |----------------|-------------------------------|----------|--------|----------------------------------|
-| **XML**        | `okaeri-configs-xml`          | ✅       | ✅     | Uses Java built-in XML APIs      |
-| **Properties** | `okaeri-configs-properties`   | ✅       | ✅     | Flat `key=value` format          |
-| **INI**        | `okaeri-configs-properties`   | ✅       | ✅     | Section-based `[section]` format |
+| **XML**        | `okaeri-configs-xml`          | ✅        | ✅      | Uses Java built-in XML APIs      |
+| **Properties** | `okaeri-configs-properties`   | ✅        | ✅      | Flat `key=value` format          |
+| **INI**        | `okaeri-configs-properties`   | ✅        | ✅      | Section-based `[section]` format |
 
 ### With External Dependencies
 
 | Format    | Module                            | Comments | Errors | Notes                              |
 |-----------|-----------------------------------|----------|--------|------------------------------------|
-| **YAML**  | `okaeri-configs-yaml-snakeyaml`   | ✅       | ✅     | Via SnakeYAML                      |
-| **YAML**  | `okaeri-configs-yaml-jackson`     | ✅       | ✅     | Via Jackson (SnakeYAML underneath) |
-| **TOML**  | `okaeri-configs-toml-jackson`     | ✅       | ✅     | TOML 1.0 via Jackson               |
-| **HJSON** | `okaeri-configs-hjson`            | ✅       | ❌     | Human JSON via hjson-java          |
-| **JSON**  | `okaeri-configs-json-gson`        | ❌       | ❌     | Via Google GSON                    |
-| **JSON**  | `okaeri-configs-json-jackson`     | ❌       | ❌     | Via Jackson                        |
-| **JSON**  | `okaeri-configs-json-simple`      | ❌       | ❌     | Via json-simple, no pretty print   |
+| **YAML**  | `okaeri-configs-yaml-snakeyaml`   | ✅        | ✅      | Via SnakeYAML                      |
+| **YAML**  | `okaeri-configs-yaml-jackson`     | ✅        | ✅      | Via Jackson (SnakeYAML underneath) |
+| **TOML**  | `okaeri-configs-toml-jackson`     | ✅        | ✅      | TOML 1.0 via Jackson               |
+| **HJSON** | `okaeri-configs-hjson`            | ✅        | ❌      | Human JSON via hjson-java          |
+| **JSON**  | `okaeri-configs-json-gson`        | ❌        | ❌      | Via Google GSON                    |
+| **JSON**  | `okaeri-configs-json-jackson`     | ❌        | ❌      | Via Jackson                        |
+| **JSON**  | `okaeri-configs-json-simple`      | ❌        | ❌      | Via json-simple, no pretty print   |
 
 ### Environment Dependent
 
 Special implementations for safe use in specific environments, e.g., game servers.
 
-| Platform                 | Module                        | Comments | Errors | Notes                              |
-|--------------------------|-------------------------------|----------|--------|------------------------------------|
-| **Bukkit/Spigot/Paper**  | `okaeri-configs-yaml-bukkit`  | ✅       | ✅     | No extra dependencies needed       |
-| **BungeeCord/Waterfall** | `okaeri-configs-yaml-bungee`  | ✅       | ✅     | No extra dependencies needed       |
+| Platform                 | Module                       | Comments  | Errors | Notes                        |
+|--------------------------|------------------------------|-----------|--------|------------------------------|
+| **Bukkit/Spigot/Paper**  | `okaeri-configs-yaml-bukkit` | ✅         | ✅      | No extra dependencies needed |
+| **BungeeCord/Waterfall** | `okaeri-configs-yaml-bungee` | ✅         | ✅      | No extra dependencies needed |
 
 **Legend:** Comments = `@Comment`/`@Header` support | Errors = [Rust-style error markers](#rust-style-error-messages)
 

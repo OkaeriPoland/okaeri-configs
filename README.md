@@ -83,7 +83,7 @@ Okaeri's configuration library is an easy way to use Java classes as config adap
 - Allows for even complex types to be serialized/deserialized
 - Enhances your configs with durable comments and strongly-typed fields
 - Provides the ability to access typed fields with classic getters and setters
-- Core library is just ~133kB in size, most of the adapters require only ~100 lines of code
+- Core library is just ~177kB in size, most of the adapters require only ~100 lines of code
 
 ## Example
 

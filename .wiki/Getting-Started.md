@@ -13,13 +13,13 @@ This guide will help you set up Okaeri Configs in your project and create your f
 
 Okaeri Configs supports multiple configuration formats. Choose the one that best fits your needs:
 
-| Format | Module | Best For |
-|--------|--------|----------|
-| **YAML** | `okaeri-configs-yaml-snakeyaml` | General purpose, widely recognized |
-| **HJSON** | `okaeri-configs-hjson` | Standalone apps, small footprint (~193kB total) |
-| **JSON** | `okaeri-configs-json-gson` | In-app storage, GSON users |
-| **YAML (Bukkit)** | `okaeri-configs-yaml-bukkit` | Minecraft Bukkit/Spigot/Paper plugins |
-| **YAML (Bungee)** | `okaeri-configs-yaml-bungee` | Minecraft BungeeCord/Waterfall plugins |
+| Format            | Module                                              | Best For                                    |
+|-------------------|-----------------------------------------------------|---------------------------------------------|
+| **YAML**          | `okaeri-configs-yaml-snakeyaml`                     | General purpose, widely recognized          |
+| **XML/INI**       | `okaeri-configs-xml` or `okaeri-configs-properties` | Standalone apps, zero external dependencies |
+| **JSON**          | `okaeri-configs-json-gson`                          | In-app storage, GSON users                  |
+| **YAML (Bukkit)** | `okaeri-configs-yaml-bukkit`                        | Minecraft Bukkit/Spigot/Paper plugins       |
+| **YAML (Bungee)** | `okaeri-configs-yaml-bungee`                        | Minecraft BungeeCord/Waterfall plugins      |
 
 ### Maven Setup
 
