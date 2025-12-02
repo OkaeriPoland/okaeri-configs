@@ -403,9 +403,20 @@ public abstract class OkaeriConfig {
      * @throws OkaeriException if {@link #configurer} is null or saving fails
      */
     public String saveToString() throws OkaeriException {
+        return new String(this.saveToBytes(), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Saves current configuration state as byte array.
+     * Useful for binary formats or when raw bytes are needed.
+     *
+     * @return saved configuration bytes
+     * @throws OkaeriException if {@link #configurer} is null or saving fails
+     */
+    public byte[] saveToBytes() throws OkaeriException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         this.save(outputStream);
-        return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        return outputStream.toByteArray();
     }
 
     /**
@@ -532,12 +543,24 @@ public abstract class OkaeriConfig {
      * @throws OkaeriException if {@link #configurer} is null or loading fails
      */
     public OkaeriConfig load(@NonNull String data) throws OkaeriException {
+        return this.load(data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Loads new state to the configuration from the provided byte array.
+     * Useful for binary formats or when raw bytes are available.
+     *
+     * @param data byte representation of the configuration
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or loading fails
+     */
+    public OkaeriConfig load(byte @NonNull [] data) throws OkaeriException {
 
         if (this.getConfigurer() == null) {
             throw new IllegalStateException("configurer cannot be null");
         }
 
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
         return this.load(inputStream);
     }
 

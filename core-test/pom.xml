@@ -140,6 +140,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Binary for parameterized format testing -->
+        <dependency>
+            <groupId>eu.okaeri</groupId>
+            <artifactId>okaeri-configs-binary</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Serdes Commons for extended type testing -->
         <dependency>
             <groupId>eu.okaeri</groupId>

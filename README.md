@@ -16,6 +16,7 @@ Uses only Java built-in APIs. Great for minimal footprint.
 | **XML**        | 🌟 [xml](https://github.com/OkaeriPoland/okaeri-configs/tree/master/xml)            | ✅        | ✅      | Uses Java built-in XML APIs      |
 | **Properties** | [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties) | ✅        | ✅      | Flat `key=value` format          |
 | **INI**        | [properties](https://github.com/OkaeriPoland/okaeri-configs/tree/master/properties) | ✅        | ✅      | Section-based `[section]` format |
+| **Binary**     | [binary](https://github.com/OkaeriPoland/okaeri-configs/tree/master/binary)         | ❌        | ❌      | Java ObjectStream serialization  |
 
 ### With external dependencies
 
@@ -83,7 +84,7 @@ Okaeri's configuration library is an easy way to use Java classes as config adap
 - Allows for even complex types to be serialized/deserialized
 - Enhances your configs with durable comments and strongly-typed fields
 - Provides the ability to access typed fields with classic getters and setters
-- Core library is just ~177kB in size, most of the adapters require only ~100 lines of code
+- Core library is just ~177kB in size, most of the adapters require only ~200 lines of code
 
 ## Example
 

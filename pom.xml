@@ -69,6 +69,9 @@
         <!-- xml modules -->
         <module>xml</module>
 
+        <!-- binary modules -->
+        <module>binary</module>
+
         <!-- properties modules -->
         <module>properties</module>
 
