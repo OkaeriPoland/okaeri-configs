@@ -7,7 +7,6 @@ import eu.okaeri.configs.annotation.NameModifier;
 import eu.okaeri.configs.annotation.NameStrategy;
 import eu.okaeri.configs.annotation.Names;
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.configurer.WrappedConfigurer;
 import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.exception.ValueIndexedException;
 import eu.okaeri.configs.schema.GenericsPair;
@@ -662,67 +661,6 @@ class YamlErrorMessageTest {
                       |
                     9 |               cpu: invalid_cores
                       |                    ^^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
-            });
-    }
-
-    // ==================== WrappedConfigurer Integration Tests ====================
-
-    /**
-     * Integration test for WrappedConfigurer wrapping format configurer.
-     * <p>
-     * This tests that rawContent is properly propagated to the wrapped configurer
-     * so that createSourceWalker() (which is delegated) can access it via this.getRawContent().
-     */
-    @ParameterizedTest(name = "{0}: WrappedConfigurer integration - @Names HYPHEN_CASE subconfig")
-    @MethodSource("yamlConfigurers")
-    void testError_WrappedConfigurer_HyphenCaseSubconfig(String name, Configurer configurer) {
-        String yaml = """
-            scoreboard:
-              dummy:
-                update-rate: invalid_duration
-            """;
-
-        // Wrap the configurer (simulates validator wrapping format configurer)
-        WrappedConfigurer wrappedConfigurer = new WrappedConfigurer(configurer);
-        wrappedConfigurer.register(new SerdesCommons());
-
-        assertThatThrownBy(() -> this.loadConfig(ScoreboardConfig.class, wrappedConfigurer, yaml))
-            .isInstanceOf(OkaeriConfigException.class)
-            .satisfies(ex -> {
-                OkaeriConfigException e = (OkaeriConfigException) ex;
-                assertThat(e.getPath().toString()).isEqualTo("scoreboard.dummy.update-rate");
-                assertThat(e.getMessage()).isEqualTo("""
-                    error[DurationTransformer]: Cannot transform 'scoreboard.dummy.update-rate' to Duration from String
-                     --> 3:18
-                      |
-                    3 |     update-rate: invalid_duration
-                      |                  ^^^^^^^^^^^^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)""");
-            });
-    }
-
-    /**
-     * Integration test for WrappedConfigurer with @CustomKey annotation.
-     * Ensures source walker works correctly when createSourceWalker() is delegated.
-     */
-    @ParameterizedTest(name = "{0}: WrappedConfigurer integration - @CustomKey")
-    @MethodSource("yamlConfigurers")
-    void testError_WrappedConfigurer_CustomKey(String name, Configurer configurer) {
-        String yaml = "custom-value: not_a_number";
-
-        // Wrap the configurer (simulates validator wrapping format configurer)
-        WrappedConfigurer wrappedConfigurer = new WrappedConfigurer(configurer);
-
-        assertThatThrownBy(() -> this.loadConfig(CustomKeyConfig.class, wrappedConfigurer, yaml))
-            .isInstanceOf(OkaeriConfigException.class)
-            .satisfies(ex -> {
-                OkaeriConfigException e = (OkaeriConfigException) ex;
-                assertThat(e.getPath().toString()).isEqualTo("custom-value");
-                assertThat(e.getMessage()).isEqualTo("""
-                    error[StringToIntegerTransformer]: Cannot transform 'custom-value' to Integer from String
-                     --> 1:15
-                      |
-                    1 | custom-value: not_a_number
-                      |               ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
             });
     }
 
@@ -1512,6 +1450,71 @@ class YamlErrorMessageTest {
                     4 | # This is the only comment directly above
                     5 | value: invalid
                       |        ^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    /**
+     * Tests that errorComments(true) works for fields inside nested configs.
+     * The root config has errorComments enabled, and comments above nested fields should be shown.
+     */
+    @ParameterizedTest(name = "{0}: errorComments works for nested config fields")
+    @MethodSource("yamlConfigurers")
+    void testError_ErrorCommentsOption_NestedConfigField(String name, Configurer configurer) {
+        String yaml = """
+            database:
+              host: localhost
+              # The port must be a valid integer
+              # Range: 1-65535
+              port: invalid
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithErrorComments(NestedConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("database.port");
+                // errorComments(true) should include comments above nested field
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'database.port' to Integer from String
+                     --> 5:9
+                      |
+                    3 |   # The port must be a valid integer
+                    4 |   # Range: 1-65535
+                    5 |   port: invalid
+                      |         ^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    /**
+     * Tests that errorComments(true) works for deeply nested configs (3+ levels).
+     * This matches real-world usage like FunnyGuilds' scoreboard.dummy.update-rate.
+     */
+    @ParameterizedTest(name = "{0}: errorComments works for deeply nested config fields")
+    @MethodSource("yamlConfigurers")
+    void testError_ErrorCommentsOption_DeeplyNestedConfigField(String name, Configurer configurer) {
+        String yaml = """
+            level1:
+              level2:
+                level3:
+                  # This value must be a valid integer
+                  # It controls an important setting
+                  value: invalid
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithErrorComments(DeepNestedConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("level1.level2.level3.value");
+                // errorComments(true) should include comments above deeply nested field
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'level1.level2.level3.value' to Integer from String
+                     --> 6:14
+                      |
+                    4 |       # This value must be a valid integer
+                    5 |       # It controls an important setting
+                    6 |       value: invalid
+                      |              ^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
             });
     }
 

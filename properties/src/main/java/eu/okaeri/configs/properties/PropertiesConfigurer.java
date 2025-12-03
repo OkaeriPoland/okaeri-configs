@@ -32,20 +32,13 @@ public class PropertiesConfigurer extends FlatConfigurer {
      */
     private @Setter boolean escapeUnicode = false;
 
-    public PropertiesConfigurer() {
-    }
-
-    public PropertiesConfigurer(@NonNull Map<String, Object> map) {
-        super(map);
-    }
-
     @Override
     public List<String> getExtensions() {
         return Collections.singletonList("properties");
     }
 
     @Override
-    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         OrderedProperties props = new OrderedProperties();
         props.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
@@ -54,23 +47,23 @@ public class PropertiesConfigurer extends FlatConfigurer {
             flat.put(key, props.getProperty(key));
         }
 
-        this.map = this.unflatten(flat, declaration);
+        return this.unflatten(flat, declaration);
     }
 
     @Override
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
         StringBuilder sb = new StringBuilder();
 
         this.writeHeader(sb, declaration);
-        this.writeProperties(sb, declaration);
+        this.writeProperties(sb, data, declaration);
 
         this.writeOutput(outputStream, sb);
     }
 
     // ==================== Properties-Specific Writing ====================
 
-    private void writeProperties(StringBuilder sb, ConfigDeclaration declaration) {
-        Map<String, String> flat = this.flatten(this.map);
+    private void writeProperties(StringBuilder sb, Map<String, Object> data, ConfigDeclaration declaration) {
+        Map<String, String> flat = this.flatten(data);
         Set<String> writtenCommentPaths = new HashSet<>();
 
         for (Map.Entry<String, String> entry : flat.entrySet()) {

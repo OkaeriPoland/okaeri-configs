@@ -126,22 +126,6 @@ class TomlJacksonConfigurerFeaturesTest {
         assertThat(toml).contains("name = 'test'");
     }
 
-    @Test
-    void testMapConstructor() throws Exception {
-        // Given: Configurer created with initial map
-        Map<String, Object> initialMap = new LinkedHashMap<>();
-        initialMap.put("name", "from-map");
-        initialMap.put("count", 42);
-        TomlJacksonConfigurer configurer = new TomlJacksonConfigurer(initialMap);
-
-        // When: Check values
-        Object name = configurer.getValue("name");
-        Object count = configurer.getValue("count");
-
-        // Then: Initial values are present
-        assertThat(name).isEqualTo("from-map");
-        assertThat(count).isEqualTo(42);
-    }
 
     @Test
     void testHeaderComment() throws Exception {

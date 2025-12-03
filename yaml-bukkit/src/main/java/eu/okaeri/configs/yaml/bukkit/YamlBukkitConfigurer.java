@@ -6,7 +6,6 @@ import eu.okaeri.configs.format.SourceWalker;
 import eu.okaeri.configs.format.yaml.YamlSourceWalker;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
-import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
@@ -22,17 +21,7 @@ import java.util.*;
 @Accessors(chain = true)
 public class YamlBukkitConfigurer extends Configurer {
 
-    private YamlConfiguration config;
     @Setter private String commentPrefix = "# ";
-
-    public YamlBukkitConfigurer(@NonNull YamlConfiguration config) {
-        this.config = config;
-    }
-
-    public YamlBukkitConfigurer() {
-        this(new YamlConfiguration());
-        this.config.options().pathSeparator((char) 29);
-    }
 
     @Override
     public List<String> getExtensions() {
@@ -73,54 +62,48 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
-        this.config.set(key, simplified);
+    public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.options().pathSeparator((char) 29);
+        config.loadFromString(ConfigPostprocessor.of(inputStream).getContext());
+
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (String key : config.getKeys(false)) {
+            Object value = config.get(key);
+            // Convert MemorySection to Map for nested objects
+            if (value instanceof MemorySection) {
+                value = memorySectionToMap((MemorySection) value);
+            }
+            map.put(key, value);
+        }
+        return map;
     }
 
     @Override
-    public void setValueUnsafe(@NonNull String key, Object value) {
-        this.config.set(key, value);
-    }
+    public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.options().pathSeparator((char) 29);
 
-    @Override
-    public Object getValue(@NonNull String key) {
-        return this.config.get(key);
-    }
-
-    @Override
-    public Object remove(@NonNull String key) {
-
-        if (!this.keyExists(key)) {
-            return null;
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            config.set(entry.getKey(), entry.getValue());
         }
 
-        Object old = this.config.get(key);
-        this.config.set(key, null);
-        return old;
-    }
-
-    @Override
-    public boolean keyExists(@NonNull String key) {
-        return this.config.getKeys(false).contains(key);
-    }
-
-    @Override
-    public List<String> getAllKeys() {
-        return Collections.unmodifiableList(new ArrayList<>(this.config.getKeys(false)));
-    }
-
-    @Override
-    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        this.config.loadFromString(ConfigPostprocessor.of(inputStream).getContext());
-    }
-
-    @Override
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        ConfigPostprocessor.of(this.config.saveToString())
+        ConfigPostprocessor.of(config.saveToString())
             .removeLines(line -> line.startsWith(this.commentPrefix.trim()))
             .removeLinesUntil(line -> line.chars().anyMatch(x -> !Character.isWhitespace(x)))
             .updateContext(ctx -> YamlSourceWalker.of(ctx).insertComments(declaration, this.commentPrefix))
             .write(outputStream);
+    }
+
+    private Map<String, Object> memorySectionToMap(MemorySection section) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (String key : section.getKeys(false)) {
+            Object value = section.get(key);
+            if (value instanceof MemorySection) {
+                value = memorySectionToMap((MemorySection) value);
+            }
+            map.put(key, value);
+        }
+        return map;
     }
 }

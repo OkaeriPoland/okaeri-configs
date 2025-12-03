@@ -40,7 +40,6 @@ public class YamlJacksonConfigurer extends Configurer {
     private static final TypeReference<LinkedHashMap<String, Object>> MAP_TYPE = new TypeReference<LinkedHashMap<String, Object>>() {
     };
 
-    private Map<String, Object> map = new LinkedHashMap<>();
     private @Setter ObjectMapper mapper;
     private @Setter String commentPrefix = "# ";
 
@@ -50,11 +49,6 @@ public class YamlJacksonConfigurer extends Configurer {
 
     public YamlJacksonConfigurer(@NonNull ObjectMapper mapper) {
         this.mapper = mapper;
-    }
-
-    public YamlJacksonConfigurer(@NonNull Map<String, Object> map) {
-        this();
-        this.map = map;
     }
 
     private static ObjectMapper createDefaultMapper() {
@@ -74,49 +68,15 @@ public class YamlJacksonConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
-        this.map.put(key, simplified);
+    public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+        return this.mapper.readValue(inputStream, MAP_TYPE);
     }
 
     @Override
-    public void setValueUnsafe(@NonNull String key, Object value) {
-        this.map.put(key, value);
-    }
-
-    @Override
-    public Object getValue(@NonNull String key) {
-        return this.map.get(key);
-    }
-
-    @Override
-    public Object remove(@NonNull String key) {
-        return this.map.remove(key);
-    }
-
-    @Override
-    public boolean keyExists(@NonNull String key) {
-        return this.map.containsKey(key);
-    }
-
-    @Override
-    public List<String> getAllKeys() {
-        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
-    }
-
-    @Override
-    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        this.map = this.mapper.readValue(inputStream, MAP_TYPE);
-        if (this.map == null) {
-            this.map = new LinkedHashMap<>();
-        }
-    }
-
-    @Override
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        this.mapper.writeValue(baos, this.map);
+        this.mapper.writeValue(baos, data);
 
         ConfigPostprocessor.of(baos.toString(StandardCharsets.UTF_8.name()))
             .removeLines(line -> line.startsWith(this.commentPrefix.trim()))

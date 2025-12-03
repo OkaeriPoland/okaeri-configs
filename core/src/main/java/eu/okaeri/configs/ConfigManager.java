@@ -12,6 +12,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -115,6 +117,8 @@ public final class ConfigManager {
         }
 
         // Process each field in target declaration
+        Map<String, Object> sourceState = config.getInternalState();
+
         copyDeclaration.getFields().forEach(targetField -> {
             String fieldName = targetField.getName();
             Object value;
@@ -133,9 +137,9 @@ public final class ConfigManager {
 
                 generics = GenericsDeclaration.of(value);
             }
-            // Fallback to configurer (preserves orphans for wrapper pattern)
-            else if (configurer.keyExists(fieldName)) {
-                value = configurer.getValue(fieldName);
+            // Fallback to internalState (preserves orphans)
+            else if (sourceState != null && sourceState.containsKey(fieldName)) {
+                value = sourceState.get(fieldName);
                 generics = GenericsDeclaration.of(value);
             }
             // Field doesn't exist in source
@@ -180,13 +184,15 @@ public final class ConfigManager {
             copy.setBindFile(config.getBindFile());
         }
 
-        // special handling for InMemoryConfigurer - use serialize/deserialize for deep copy
+        // special handling for InMemoryConfigurer - copy internalState directly
         if (config.getConfigurer() instanceof InMemoryConfigurer) {
-            // deep copy each value field by field
+            // Build internalState from fields
+            Map<String, Object> state = new LinkedHashMap<>();
             for (FieldDeclaration field : config.getDeclaration().getFields()) {
-                newConfigurer.setValue(field.getName(), field.getValue(), field.getType(), field);
+                Object simplified = newConfigurer.simplifyField(field.getValue(), field.getType(), field);
+                state.put(field.getName(), simplified);
             }
-            // update fields from configurer
+            copy.setInternalState(state);
             copy.update();
             return copy;
         }

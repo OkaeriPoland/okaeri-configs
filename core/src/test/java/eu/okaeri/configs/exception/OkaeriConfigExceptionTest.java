@@ -108,8 +108,9 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             SimpleConfig config = ConfigManager.create(SimpleConfig.class);
-            config.setConfigurer(new InMemoryConfigurer(data));
-            config.update(); // load from InMemoryConfigurer
+            config.setConfigurer(new InMemoryConfigurer());
+            config.setInternalState(data);
+            config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
             .satisfies(ex -> {
@@ -129,7 +130,8 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             SimpleConfig config = ConfigManager.create(SimpleConfig.class);
-            config.setConfigurer(new InMemoryConfigurer(data));
+            config.setConfigurer(new InMemoryConfigurer());
+            config.setInternalState(data);
             config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
@@ -159,8 +161,9 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             NestedConfig config = ConfigManager.create(NestedConfig.class);
-            config.setConfigurer(new InMemoryConfigurer(data));
-            config.update(); // load from InMemoryConfigurer
+            config.setConfigurer(new InMemoryConfigurer());
+            config.setInternalState(data);
+            config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
             .satisfies(ex -> {
@@ -178,8 +181,9 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             ListConfig config = ConfigManager.create(ListConfig.class);
-            config.setConfigurer(new InMemoryConfigurer(data));
-            config.update(); // load from InMemoryConfigurer
+            config.setConfigurer(new InMemoryConfigurer());
+            config.setInternalState(data);
+            config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
             .satisfies(ex -> {
@@ -201,8 +205,9 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             MapConfig config = ConfigManager.create(MapConfig.class);
-            config.setConfigurer(new InMemoryConfigurer(data));
-            config.update(); // load from InMemoryConfigurer
+            config.setConfigurer(new InMemoryConfigurer());
+            config.setInternalState(data);
+            config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
             .satisfies(ex -> {
@@ -220,8 +225,9 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             EnumConfig config = ConfigManager.create(EnumConfig.class);
-            config.setConfigurer(new InMemoryConfigurer(data));
-            config.update(); // load from InMemoryConfigurer
+            config.setConfigurer(new InMemoryConfigurer());
+            config.setInternalState(data);
+            config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
             .satisfies(ex -> {
@@ -250,8 +256,9 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             DeepNestedConfig config = ConfigManager.create(DeepNestedConfig.class);
-            config.setConfigurer(new InMemoryConfigurer(data));
-            config.update(); // load from InMemoryConfigurer
+            config.setConfigurer(new InMemoryConfigurer());
+            config.setInternalState(data);
+            config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
             .satisfies(ex -> {
@@ -276,9 +283,10 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             CustomSerializerConfig config = ConfigManager.create(CustomSerializerConfig.class);
-            InMemoryConfigurer configurer = new InMemoryConfigurer(data);
+            InMemoryConfigurer configurer = new InMemoryConfigurer();
             configurer.getRegistry().register(new PersonSerializer());
             config.setConfigurer(configurer);
+            config.setInternalState(data);
             config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
@@ -302,9 +310,10 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             CustomSerializerConfig config = ConfigManager.create(CustomSerializerConfig.class);
-            InMemoryConfigurer configurer = new InMemoryConfigurer(data);
+            InMemoryConfigurer configurer = new InMemoryConfigurer();
             // Intentionally NOT registering PersonSerializer
             config.setConfigurer(configurer);
+            config.setInternalState(data);
             config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)
@@ -331,9 +340,10 @@ class OkaeriConfigExceptionTest {
 
         assertThatThrownBy(() -> {
             TeamConfig config = ConfigManager.create(TeamConfig.class);
-            InMemoryConfigurer configurer = new InMemoryConfigurer(data);
+            InMemoryConfigurer configurer = new InMemoryConfigurer();
             configurer.getRegistry().register(new TeamSerializer());
             config.setConfigurer(configurer);
+            config.setInternalState(data);
             config.update();
         })
             .isInstanceOf(OkaeriConfigException.class)

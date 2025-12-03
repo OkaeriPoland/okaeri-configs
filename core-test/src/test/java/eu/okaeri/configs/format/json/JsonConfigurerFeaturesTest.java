@@ -96,65 +96,6 @@ class JsonConfigurerFeaturesTest {
         assertThat(thirdPos).isLessThan(fourthPos);
     }
 
-    @ParameterizedTest(name = "{0}: Load from InputStream")
-    @MethodSource("jsonConfigurers")
-    void testLoadFromInputStream_PopulatesInternalMap(String configurerName, Configurer configurer) throws Exception {
-        // Given: JSON content as InputStream
-        String json = """
-            {
-              "name": "Test Config",
-              "value": 42,
-              "enabled": true
-            }
-            """;
-
-        // When: Load from InputStream
-        TestConfig config = ConfigManager.create(TestConfig.class);
-        configurer.load(new ByteArrayInputStream(json.getBytes()), config.getDeclaration());
-
-        // Then: Internal map is populated correctly
-        assertThat(configurer.getValue("name")).isEqualTo("Test Config");
-        assertThat(configurer.getValue("value")).isIn(42, 42.0, 42L);
-        assertThat(configurer.getValue("enabled")).isEqualTo(true);
-        assertThat(configurer.getAllKeys()).contains("name", "value", "enabled");
-    }
-
-    @ParameterizedTest(name = "{0}: Set/get value operations")
-    @MethodSource("jsonConfigurers")
-    void testSetValueGetValue_InternalMapOperations(String configurerName, Configurer configurer) {
-        // Given: Fresh configurer
-        TestConfig config = ConfigManager.create(TestConfig.class);
-
-        // When: Set values using configurer API
-        configurer.setValue("key1", "value1", null, null);
-        configurer.setValue("key2", 123, null, null);
-        configurer.setValueUnsafe("key3", true);
-
-        // Then: Values are retrievable from internal map
-        assertThat(configurer.getValue("key1")).isEqualTo("value1");
-        assertThat(configurer.getValue("key2")).isEqualTo(123);
-        assertThat(configurer.getValue("key3")).isEqualTo(true);
-        assertThat(configurer.keyExists("key1")).isTrue();
-        assertThat(configurer.keyExists("nonexistent")).isFalse();
-    }
-
-    @ParameterizedTest(name = "{0}: Remove key operation")
-    @MethodSource("jsonConfigurers")
-    void testRemoveKey_ModifiesInternalMap(String configurerName, Configurer configurer) {
-        // Given: Configurer with some keys
-        configurer.setValueUnsafe("key1", "value1");
-        configurer.setValueUnsafe("key2", "value2");
-
-        // When: Remove a key
-        Object removed = configurer.remove("key1");
-
-        // Then: Key is removed from internal map
-        assertThat(removed).isEqualTo("value1");
-        assertThat(configurer.keyExists("key1")).isFalse();
-        assertThat(configurer.keyExists("key2")).isTrue();
-        assertThat(configurer.getAllKeys()).contains("key2");
-    }
-
     @ParameterizedTest(name = "{0}: Round-trip structure maintenance")
     @MethodSource("jsonConfigurers")
     void testRoundTrip_MaintainsStructure(String configurerName, Configurer configurer, @TempDir Path tempDir) throws Exception {
@@ -207,15 +148,6 @@ class JsonConfigurerFeaturesTest {
         assertThat(configurer).isNotNull();
     }
 
-    @Test
-    void testJsonGson_ConstructorWithGsonAndMap() {
-        Gson gson = new Gson();
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("key", "value");
-        JsonGsonConfigurer configurer = new JsonGsonConfigurer(gson, map);
-        assertThat(configurer).isNotNull();
-        assertThat(configurer.getValue("key")).isEqualTo("value");
-    }
 
     @Test
     void testJsonGson_GetExtensions() {
@@ -238,15 +170,6 @@ class JsonConfigurerFeaturesTest {
         assertThat(configurer).isNotNull();
     }
 
-    @Test
-    void testJsonSimple_ConstructorWithParserAndMap() {
-        JSONParser parser = new JSONParser();
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("key", "value");
-        JsonSimpleConfigurer configurer = new JsonSimpleConfigurer(parser, map);
-        assertThat(configurer).isNotNull();
-        assertThat(configurer.getValue("key")).isEqualTo("value");
-    }
 
     @Test
     void testJsonSimple_GetExtensions() {

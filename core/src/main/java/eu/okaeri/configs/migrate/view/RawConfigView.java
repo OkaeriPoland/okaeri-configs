@@ -41,9 +41,12 @@ public class RawConfigView {
         Map<String, Object> document = this.config.asMap(this.config.getConfigurer(), true);
         Object old = this.valueRemove(document, key);
 
-        // top-level keys may require manual remove
+        // top-level keys need to be removed from internalState as well
         if (key.split(this.nestedSeparator).length == 1) {
-            this.config.getConfigurer().remove(key);
+            Map<String, Object> internalState = this.config.getInternalState();
+            if (internalState != null) {
+                internalState.remove(key);
+            }
         }
 
         // mutate parent

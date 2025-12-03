@@ -207,7 +207,7 @@ class CustomKeyAnnotationTest {
         config.set("third-custom", config.getField3());
 
         // Then
-        assertThat(config.getConfigurer().getAllKeys()).containsExactlyInAnyOrder(
+        assertThat(config.getInternalState().keySet()).containsExactlyInAnyOrder(
             "first-custom",
             "second-custom",
             "third-custom"

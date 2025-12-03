@@ -2,6 +2,7 @@ package eu.okaeri.configs;
 
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.validator.ConfigValidator;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -146,9 +147,14 @@ public class OkaeriConfigOptions {
      *
      * @param removeOrphans true to remove orphans, false otherwise
      * @return this configurer for chaining
+     * @throws IllegalStateException if context is not initialized (configurer not set)
      */
     public OkaeriConfigOptions removeOrphans(boolean removeOrphans) {
-        this.config.setRemoveOrphans(removeOrphans);
+        ConfigContext context = this.config.getContext();
+        if (context == null) {
+            throw new IllegalStateException("configurer must be set before setting removeOrphans");
+        }
+        context.setRemoveOrphans(removeOrphans);
         return this;
     }
 
@@ -159,9 +165,42 @@ public class OkaeriConfigOptions {
      *
      * @param errorComments true to include comments in errors, false otherwise
      * @return this configurer for chaining
+     * @throws IllegalStateException if context is not initialized (configurer not set)
      */
     public OkaeriConfigOptions errorComments(boolean errorComments) {
-        this.config.setErrorComments(errorComments);
+        ConfigContext context = this.config.getContext();
+        if (context == null) {
+            throw new IllegalStateException("configurer must be set before setting errorComments");
+        }
+        context.setErrorComments(errorComments);
+        return this;
+    }
+
+    /**
+     * Sets the validator for this configuration.
+     * <p>
+     * The validator is invoked during load and save operations to check field values.
+     * Only one validator is supported. If you need multiple validators, create a
+     * composite validator that delegates to multiple implementations.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * config.configure(opt -> {
+     *     opt.configurer(new YamlBukkitConfigurer());
+     *     opt.validator(new OkaeriValidator());
+     * });
+     * }</pre>
+     *
+     * @param validator the validator to set
+     * @return this configurer for chaining
+     * @throws IllegalStateException if context is not initialized (configurer not set)
+     */
+    public OkaeriConfigOptions validator(@NonNull ConfigValidator validator) {
+        ConfigContext context = this.config.getContext();
+        if (context == null) {
+            throw new IllegalStateException("configurer must be set before setting validator");
+        }
+        context.setValidator(validator);
         return this;
     }
 }

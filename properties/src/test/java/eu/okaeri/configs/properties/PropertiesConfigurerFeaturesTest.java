@@ -8,9 +8,7 @@ import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,14 +85,6 @@ class PropertiesConfigurerFeaturesTest {
         assertThat(configurer).isNotNull();
     }
 
-    @Test
-    void testConstructorWithMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("key", "value");
-        PropertiesConfigurer configurer = new PropertiesConfigurer(map);
-        assertThat(configurer).isNotNull();
-        assertThat(configurer.getValue("key")).isEqualTo("value");
-    }
 
     // ==================== getExtensions Tests ====================
 

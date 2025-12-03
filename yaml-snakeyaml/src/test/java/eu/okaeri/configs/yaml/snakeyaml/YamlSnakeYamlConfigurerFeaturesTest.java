@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.ByteArrayOutputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,15 +52,6 @@ class YamlSnakeYamlConfigurerFeaturesTest {
         assertThat(configurer).isNotNull();
     }
 
-    @Test
-    void testConstructorWithYamlAndMap() {
-        Yaml yaml = new Yaml();
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("key", "value");
-        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer(yaml, map);
-        assertThat(configurer).isNotNull();
-        assertThat(configurer.getValue("key")).isEqualTo("value");
-    }
 
     // ==================== getExtensions Tests ====================
 

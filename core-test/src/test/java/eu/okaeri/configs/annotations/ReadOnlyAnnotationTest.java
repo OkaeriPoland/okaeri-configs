@@ -140,10 +140,10 @@ class ReadOnlyAnnotationTest {
         String saved = config.saveToString();
 
         // Then - ReadOnly field SHOULD be saved with its original (default) value
-        assertThat(config.getConfigurer().keyExists("readOnlyField")).isTrue();
-        assertThat(config.getConfigurer().keyExists("normalField")).isTrue();
-        assertThat(config.getConfigurer().getValue("readOnlyField")).isEqualTo("readonly");
-        assertThat(config.getConfigurer().getValue("normalField")).isEqualTo("normal");
+        assertThat(config.getInternalState().containsKey("readOnlyField")).isTrue();
+        assertThat(config.getInternalState().containsKey("normalField")).isTrue();
+        assertThat(config.getInternalState().get("readOnlyField")).isEqualTo("readonly");
+        assertThat(config.getInternalState().get("normalField")).isEqualTo("normal");
     }
 
     @Test
@@ -201,10 +201,10 @@ class ReadOnlyAnnotationTest {
         String saved = config.saveToString();
 
         // Then - normalField saves modified value, readOnlyField saves original value
-        assertThat(config.getConfigurer().keyExists("normalField")).isTrue();
-        assertThat(config.getConfigurer().keyExists("readOnlyField")).isTrue();
-        assertThat(config.getConfigurer().getValue("normalField")).isEqualTo("modified_normal");
-        assertThat(config.getConfigurer().getValue("readOnlyField")).isEqualTo("readonly"); // Original default value
+        assertThat(config.getInternalState().containsKey("normalField")).isTrue();
+        assertThat(config.getInternalState().containsKey("readOnlyField")).isTrue();
+        assertThat(config.getInternalState().get("normalField")).isEqualTo("modified_normal");
+        assertThat(config.getInternalState().get("readOnlyField")).isEqualTo("readonly"); // Original default value
 
         // Fields still have modified values in memory
         assertThat(config.getNormalField()).isEqualTo("modified_normal");
@@ -237,7 +237,7 @@ class ReadOnlyAnnotationTest {
         config.saveToString();
 
         // Then - ALL fields should be saved (including read-only with their original values)
-        assertThat(config.getConfigurer().getAllKeys()).containsExactlyInAnyOrder(
+        assertThat(config.getInternalState().keySet()).containsExactlyInAnyOrder(
             "field1", "field2", "readOnly1", "readOnly2", "readOnly3");
     }
 
@@ -251,9 +251,9 @@ class ReadOnlyAnnotationTest {
         config.saveToString();
 
         // Then - All fields should be saved with their default values
-        assertThat(config.getConfigurer().getAllKeys()).containsExactlyInAnyOrder("field1", "field2");
-        assertThat(config.getConfigurer().getValue("field1")).isEqualTo("value1");
-        assertThat(config.getConfigurer().getValue("field2")).isEqualTo("value2");
+        assertThat(config.getInternalState().keySet()).containsExactlyInAnyOrder("field1", "field2");
+        assertThat(config.getInternalState().get("field1")).isEqualTo("value1");
+        assertThat(config.getInternalState().get("field2")).isEqualTo("value2");
     }
 
     @Test
@@ -293,8 +293,8 @@ class ReadOnlyAnnotationTest {
         config.saveToString();
 
         // Then - ReadOnly nested config SHOULD be saved with its original value
-        assertThat(config.getConfigurer().keyExists("readOnlySubConfig")).isTrue();
-        assertThat(config.getConfigurer().keyExists("normalField")).isTrue();
+        assertThat(config.getInternalState().containsKey("readOnlySubConfig")).isTrue();
+        assertThat(config.getInternalState().containsKey("normalField")).isTrue();
     }
 
     @Test
@@ -318,7 +318,7 @@ class ReadOnlyAnnotationTest {
 
         // When
         config.saveToString();
-        int savedCount = config.getConfigurer().getAllKeys().size();
+        int savedCount = config.getInternalState().keySet().size();
 
         // Then - All fields should be saved (5 total: 2 normal + 3 read-only)
         assertThat(savedCount).isEqualTo(5);
@@ -339,9 +339,9 @@ class ReadOnlyAnnotationTest {
 
         // Then - both fields should be saved
         // normalField has modified value, readOnlyField has original default value
-        assertThat(config1.getConfigurer().getAllKeys()).containsExactlyInAnyOrder("normalField", "readOnlyField");
-        assertThat(config1.getConfigurer().getValue("normalField")).isEqualTo("modified_normal");
-        assertThat(config1.getConfigurer().getValue("readOnlyField")).isEqualTo("readonly"); // Original default
+        assertThat(config1.getInternalState().keySet()).containsExactlyInAnyOrder("normalField", "readOnlyField");
+        assertThat(config1.getInternalState().get("normalField")).isEqualTo("modified_normal");
+        assertThat(config1.getInternalState().get("readOnlyField")).isEqualTo("readonly"); // Original default
 
         // Fields still have modified values in memory
         assertThat(config1.getNormalField()).isEqualTo("modified_normal");

@@ -33,21 +33,15 @@ class ConfigUpdateTest {
     Path tempDir;
 
     @Test
-    void testUpdate_SynchronizesConfigurerToFields() throws Exception {
+    void testUpdate_SynchronizesInternalStateToFields() throws Exception {
         // Arrange
-        String yamlContent = """
-            boolValue: false
-            intValue: 999
-            doubleValue: 7.77
-            """;
-
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
 
-        // Load data into configurer
-        Path tempFile = this.tempDir.resolve("test.yml");
-        Files.writeString(tempFile, yamlContent);
-        config.getConfigurer().load(Files.newInputStream(tempFile), config.getDeclaration());
+        // Simulate loaded data by putting values in internalState directly
+        config.getInternalState().put("boolValue", false);
+        config.getInternalState().put("intValue", 999);
+        config.getInternalState().put("doubleValue", 7.77);
 
         // Fields still have defaults at this point
         assertThat(config.isBoolValue()).isTrue();
@@ -56,7 +50,7 @@ class ConfigUpdateTest {
         // Act
         config.update();
 
-        // Assert - fields should now match configurer data
+        // Assert - fields should now match internalState data
         assertThat(config.isBoolValue()).isFalse();
         assertThat(config.getIntValue()).isEqualTo(999);
         assertThat(config.getDoubleValue()).isEqualTo(7.77);

@@ -7,9 +7,6 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.ConfigPath;
-import eu.okaeri.configs.serdes.SerdesContext;
-import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
@@ -33,16 +30,10 @@ public abstract class FlatConfigurer extends Configurer {
     protected static final String NULL_MARKER = "__null__";
     protected static final int DEFAULT_SIMPLE_LIST_MAX_LINE_LENGTH = 80;
 
-    protected @Getter Map<String, Object> map = new LinkedHashMap<>();
-
     protected @Setter String commentPrefix = "# ";
     protected @Setter int simpleListMaxLineLength = DEFAULT_SIMPLE_LIST_MAX_LINE_LENGTH;
 
     protected FlatConfigurer() {
-    }
-
-    protected FlatConfigurer(@NonNull Map<String, Object> map) {
-        this.map = map;
     }
 
     @Override
@@ -55,37 +46,6 @@ public abstract class FlatConfigurer extends Configurer {
     public boolean isCommentLine(String line) {
         String trimmed = line.trim();
         return trimmed.startsWith(";") || trimmed.startsWith("#");
-    }
-
-    @Override
-    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), false);
-        this.map.put(key, simplified);
-    }
-
-    @Override
-    public void setValueUnsafe(@NonNull String key, Object value) {
-        this.map.put(key, value);
-    }
-
-    @Override
-    public Object getValue(@NonNull String key) {
-        return this.map.get(key);
-    }
-
-    @Override
-    public Object remove(@NonNull String key) {
-        return this.map.remove(key);
-    }
-
-    @Override
-    public boolean keyExists(@NonNull String key) {
-        return this.map.containsKey(key);
-    }
-
-    @Override
-    public List<String> getAllKeys() {
-        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
     }
 
     // ==================== Header Writing ====================

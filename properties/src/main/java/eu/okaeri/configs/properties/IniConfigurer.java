@@ -47,18 +47,13 @@ public class IniConfigurer extends FlatConfigurer {
         this.commentPrefix = "; ";
     }
 
-    public IniConfigurer(@NonNull Map<String, Object> map) {
-        super(map);
-        this.commentPrefix = "; ";
-    }
-
     @Override
     public List<String> getExtensions() {
         return Arrays.asList("ini", "cfg");
     }
 
     @Override
-    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         Map<String, String> flat = new LinkedHashMap<>();
 
@@ -94,23 +89,23 @@ public class IniConfigurer extends FlatConfigurer {
             }
         }
 
-        this.map = this.unflatten(flat, declaration);
+        return this.unflatten(flat, declaration);
     }
 
     @Override
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
         StringBuilder sb = new StringBuilder();
 
         this.writeHeader(sb, declaration);
-        this.writeIni(sb, declaration);
+        this.writeIni(sb, data, declaration);
 
         this.writeOutput(outputStream, sb);
     }
 
     // ==================== INI-Specific Writing ====================
 
-    private void writeIni(StringBuilder sb, ConfigDeclaration declaration) {
-        Map<String, String> flat = this.flatten(this.map);
+    private void writeIni(StringBuilder sb, Map<String, Object> data, ConfigDeclaration declaration) {
+        Map<String, String> flat = this.flatten(data);
 
         // Group entries by section
         Map<String, List<Map.Entry<String, String>>> sections = new LinkedHashMap<>();

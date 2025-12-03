@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class Configurer {
 
@@ -41,12 +40,23 @@ public abstract class Configurer {
     private ConfigPath basePath = ConfigPath.root();
 
     /**
-     * Raw configuration content for error reporting.
-     * Stored during load to enable source-level error markers.
+     * Gets the raw content from the config's context for error reporting.
+     *
+     * @return raw content string, or null if not set
      */
-    @Getter
-    @Setter
-    private String rawContent;
+    public String getRawContent() {
+        return this.parent.getContext().getRawContent();
+    }
+
+    /**
+     * Checks if errorComments is enabled for this configurer's config hierarchy.
+     * This method checks the parent config's context setting.
+     *
+     * @return true if errorComments is enabled
+     */
+    public boolean isErrorCommentsEnabled() {
+        return this.parent.getContext().isErrorComments();
+    }
 
     @Setter
     @Getter
@@ -85,18 +95,6 @@ public abstract class Configurer {
     public boolean isCommentLine(String line) {
         return false;
     }
-
-    public abstract void setValue(@NonNull String key, Object value, GenericsDeclaration genericType, FieldDeclaration field);
-
-    public abstract void setValueUnsafe(@NonNull String key, Object value);
-
-    public abstract Object getValue(@NonNull String key);
-
-    public Object getValueUnsafe(@NonNull String key) {
-        return this.getValue(key);
-    }
-
-    public abstract Object remove(@NonNull String key);
 
     public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType, SerdesContext serdesContext) {
 
@@ -259,8 +257,30 @@ public abstract class Configurer {
         return this.simplifyMap(serializationMap, GenericsDeclaration.of(Map.class, Collections.singletonList(String.class)), serdesContext, conservative);
     }
 
-    public <T> T getValue(@NonNull String key, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
-        Object value = this.getValue(key);
+    /**
+     * Simplifies a value for storage in a map.
+     * This is a convenience method that combines simplify with setValue semantics.
+     *
+     * @param value the value to simplify
+     * @param type  the generic type declaration
+     * @param field the field declaration (may be null)
+     * @return the simplified value ready for storage
+     */
+    public Object simplifyField(Object value, GenericsDeclaration type, FieldDeclaration field) {
+        return this.simplify(value, type, SerdesContext.of(this, field), true);
+    }
+
+    /**
+     * Resolves a raw value from the map to the target type.
+     * This is a convenience method for deserializing map values.
+     *
+     * @param value       the raw value from the map
+     * @param clazz       the target class
+     * @param genericType the generic type declaration
+     * @param serdesContext the serialization context
+     * @return the resolved value, or null if input is null
+     */
+    public <T> T resolveValue(Object value, @NonNull Class<T> clazz, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext) {
         if (value == null) return null;
         return this.resolveType(value, GenericsDeclaration.of(value), clazz, genericType, serdesContext);
     }
@@ -326,12 +346,17 @@ public abstract class Configurer {
         // subconfig
         if (OkaeriConfig.class.isAssignableFrom(workingClazz)) {
             OkaeriConfig config = ConfigManager.createUnsafe((Class<? extends OkaeriConfig>) targetClazz);
-            Map configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
-            InMemoryWrappedConfigurer childConfigurer = new InMemoryWrappedConfigurer(this, configMap);
-            // Propagate the current path as base path for error reporting in the child config
-            childConfigurer.setBasePath(serdesContext.getPath());
-            config.setConfigurer(childConfigurer);
-            return (T) config.update();
+            Map<String, Object> configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
+
+            // Initialize subconfig with its data and path context
+            OkaeriConfig parentConfig = this.getParent();
+            config.setInternalState(configMap);
+            config.setBasePath(serdesContext.getPath());
+            if (parentConfig != null) {
+                config.setContext(parentConfig.getContext());
+            }
+
+            return (T) config.updateFromInternalState();
         }
 
         // generics
@@ -626,43 +651,23 @@ public abstract class Configurer {
         }
     }
 
-    public boolean keyExists(@NonNull String key) {
-        return this.getValue(key) != null;
-    }
+    /**
+     * Parses the input stream and returns the configuration data as a map.
+     *
+     * @param inputStream the input stream to read from
+     * @param declaration the config declaration (for format-specific handling)
+     * @return the parsed configuration data
+     * @throws Exception if parsing fails
+     */
+    public abstract Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception;
 
-    public boolean isValid(@NonNull FieldDeclaration declaration, Object value) {
-        return true;
-    }
-
-    public List<String> getAllKeys() {
-        return this.getParent().getDeclaration().getFields().stream()
-            .map(FieldDeclaration::getName)
-            .collect(Collectors.toList());
-    }
-
-    public Set<String> sort(@NonNull ConfigDeclaration declaration) {
-
-        // extract current data in declaration order
-        Map<String, Object> reordered = declaration.getFields().stream().collect(
-            LinkedHashMap::new,
-            (map, field) -> {
-                Object oldValue = this.getValueUnsafe(field.getName());
-                this.remove(field.getName());
-                map.put(field.getName(), oldValue);
-            },
-            LinkedHashMap::putAll);
-
-        // save the orphans!
-        Set<String> orphans = new LinkedHashSet<>(this.getAllKeys());
-
-        // load new order
-        reordered.forEach(this::setValueUnsafe);
-
-        // get rid of the problem
-        return orphans;
-    }
-
-    public abstract void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception;
-
-    public abstract void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception;
+    /**
+     * Writes the configuration data to the output stream.
+     *
+     * @param outputStream the output stream to write to
+     * @param data         the configuration data to write
+     * @param declaration  the config declaration (for comments, formatting)
+     * @throws Exception if writing fails
+     */
+    public abstract void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception;
 }

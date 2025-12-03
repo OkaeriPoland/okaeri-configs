@@ -19,7 +19,6 @@ import java.util.*;
 @Accessors(chain = true)
 public class HjsonConfigurer extends Configurer {
 
-    private JsonObject json = new JsonObject();
     @Setter private String commentPrefix = "# ";
 
     @Override
@@ -76,64 +75,42 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
-        JsonValue jsonValue = this.toJsonValue(simplified);
-        this.json.set(key, jsonValue);
-    }
-
-    @Override
-    public void setValueUnsafe(@NonNull String key, Object value) {
-        this.json.set(key, (JsonValue) value);
-    }
-
-    @Override
-    public Object getValue(@NonNull String key) {
-        return this.fromJsonValue(this.json.get(key));
-    }
-
-    @Override
-    public Object getValueUnsafe(@NonNull String key) {
-        return this.json.get(key);
-    }
-
-    @Override
-    public Object remove(@NonNull String key) {
-        return this.json.remove(key);
-    }
-
-    @Override
-    public boolean keyExists(@NonNull String key) {
-        return this.json.has(key);
-    }
-
-    @Override
-    public List<String> getAllKeys() {
-        List<String> keys = new ArrayList<>();
-        for (JsonObject.Member member : this.json) {
-            keys.add(member.getName());
-        }
-        return Collections.unmodifiableList(keys);
-    }
-
-    @Override
-    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         String data = ConfigPostprocessor.of(inputStream).getContext();
-        this.json = JsonValue.readHjson(data).asObject();
+        JsonObject json = JsonValue.readHjson(data).asObject();
+        return this.jsonObjectToMap(json);
     }
 
     @Override
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
+        JsonObject json = this.mapToJsonObject(data);
 
         // add comments to nodes
-        this.addComments(this.json, declaration, null);
+        this.addComments(json, declaration, null);
 
         // header
         String header = this.formatComment(declaration.getHeader());
-        this.json.setFullComment(CommentType.BOL, header);
+        json.setFullComment(CommentType.BOL, header);
 
         // save
-        ConfigPostprocessor.of(this.json.toString(Stringify.HJSON_COMMENTS)).write(outputStream);
+        ConfigPostprocessor.of(json.toString(Stringify.HJSON_COMMENTS)).write(outputStream);
+    }
+
+    @SuppressWarnings("unchecked")
+    private JsonObject mapToJsonObject(Map<String, Object> map) {
+        JsonObject json = new JsonObject();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            json.add(entry.getKey(), this.toJsonValue(entry.getValue()));
+        }
+        return json;
+    }
+
+    private Map<String, Object> jsonObjectToMap(JsonObject json) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (JsonObject.Member member : json) {
+            map.put(member.getName(), this.fromJsonValue(member.getValue()));
+        }
+        return map;
     }
 
     private void addComments(Object object, ConfigDeclaration declaration, String key) {

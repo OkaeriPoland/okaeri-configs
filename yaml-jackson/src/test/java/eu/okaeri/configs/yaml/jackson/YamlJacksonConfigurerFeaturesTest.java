@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -30,14 +27,6 @@ class YamlJacksonConfigurerFeaturesTest {
         assertThat(configurer).isNotNull();
     }
 
-    @Test
-    void testConstructorWithMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("key", "value");
-        YamlJacksonConfigurer configurer = new YamlJacksonConfigurer(map);
-        assertThat(configurer).isNotNull();
-        assertThat(configurer.getValue("key")).isEqualTo("value");
-    }
 
     // ==================== getExtensions Tests ====================
 

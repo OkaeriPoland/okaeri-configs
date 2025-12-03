@@ -6,7 +6,6 @@ import eu.okaeri.configs.format.xml.XmlSourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
-import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -59,17 +58,8 @@ public class XmlSimpleConfigurer extends Configurer {
     private static final String KEY_ATTRIBUTE = "key";
     private static final String NULL_ELEMENT = "null";
 
-    private Map<String, Object> map = new LinkedHashMap<>();
-
     private @Setter int indent = 2;
     private @Setter String rootElement = DEFAULT_ROOT_ELEMENT;
-
-    public XmlSimpleConfigurer() {
-    }
-
-    public XmlSimpleConfigurer(@NonNull Map<String, Object> map) {
-        this.map = map;
-    }
 
     @Override
     public List<String> getExtensions() {
@@ -88,47 +78,16 @@ public class XmlSimpleConfigurer extends Configurer {
         return trimmed.startsWith("<!--");
     }
 
-    @Override
-    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), false);
-        this.map.put(key, simplified);
-    }
-
-    @Override
-    public void setValueUnsafe(@NonNull String key, Object value) {
-        this.map.put(key, value);
-    }
-
-    @Override
-    public Object getValue(@NonNull String key) {
-        return this.map.get(key);
-    }
-
-    @Override
-    public Object remove(@NonNull String key) {
-        return this.map.remove(key);
-    }
-
-    @Override
-    public boolean keyExists(@NonNull String key) {
-        return this.map.containsKey(key);
-    }
-
-    @Override
-    public List<String> getAllKeys() {
-        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
-    }
-
     // ==================== Loading ====================
 
     @Override
-    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         Document document = this.parseDocument(inputStream);
         Element root = document.getDocumentElement();
         if (root == null) {
             throw new IllegalStateException("XML document has no root element");
         }
-        this.map = this.parseMap(root, declaration);
+        return this.parseMap(root, declaration);
     }
 
     private Document parseDocument(InputStream inputStream) throws Exception {
@@ -227,14 +186,14 @@ public class XmlSimpleConfigurer extends Configurer {
     // ==================== Writing ====================
 
     @Override
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+    public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
         Document document = this.createDocument();
 
         this.writeHeaderComments(document, declaration);
 
         Element root = document.createElement(this.rootElement);
         document.appendChild(root);
-        this.writeMap(document, root, this.map, declaration);
+        this.writeMap(document, root, data, declaration);
 
         String xml = this.transformToString(document);
         xml = this.postProcessHeaderComments(xml);

@@ -12,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -81,65 +80,6 @@ class XmlConfigurerFeaturesTest {
         assertThat(firstPos).isLessThan(secondPos);
         assertThat(secondPos).isLessThan(thirdPos);
         assertThat(thirdPos).isLessThan(fourthPos);
-    }
-
-    @ParameterizedTest(name = "{0}: Load from InputStream")
-    @MethodSource("xmlConfigurers")
-    void testLoadFromInputStream_PopulatesInternalMap(String configurerName, Configurer configurer, @TempDir Path tempDir) throws Exception {
-        // Given: Config saved to file
-        TestConfig original = ConfigManager.create(TestConfig.class);
-        original.setConfigurer(configurer);
-        original.setName("Test Config");
-        original.setValue(42);
-        original.setEnabled(true);
-
-        Path file = tempDir.resolve("test.xml");
-        original.save(file);
-        byte[] bytes = Files.readAllBytes(file);
-
-        // When: Load from InputStream
-        TestConfig loaded = ConfigManager.create(TestConfig.class);
-        configurer.load(new ByteArrayInputStream(bytes), loaded.getDeclaration());
-
-        // Then: Internal map is populated correctly
-        assertThat(configurer.getValue("name")).isEqualTo("Test Config");
-        // XmlSimple stores as strings, XmlBean preserves types
-        assertThat(configurer.getValue("enabled")).isIn(true, "true");
-        assertThat(configurer.getAllKeys()).contains("name", "value", "enabled");
-    }
-
-    @ParameterizedTest(name = "{0}: Set/get value operations")
-    @MethodSource("xmlConfigurers")
-    void testSetValueGetValue_InternalMapOperations(String configurerName, Configurer configurer) {
-        // When: Set values using configurer API
-        configurer.setValue("key1", "value1", null, null);
-        configurer.setValue("key2", 123, null, null);
-        configurer.setValueUnsafe("key3", true);
-
-        // Then: Values are retrievable from internal map
-        assertThat(configurer.getValue("key1")).isEqualTo("value1");
-        // XmlSimple stores as strings, XmlBean preserves types
-        assertThat(configurer.getValue("key2")).isIn(123, "123");
-        assertThat(configurer.getValue("key3")).isIn(true, "true");
-        assertThat(configurer.keyExists("key1")).isTrue();
-        assertThat(configurer.keyExists("nonexistent")).isFalse();
-    }
-
-    @ParameterizedTest(name = "{0}: Remove key operation")
-    @MethodSource("xmlConfigurers")
-    void testRemoveKey_ModifiesInternalMap(String configurerName, Configurer configurer) {
-        // Given: Configurer with some keys
-        configurer.setValueUnsafe("key1", "value1");
-        configurer.setValueUnsafe("key2", "value2");
-
-        // When: Remove a key
-        Object removed = configurer.remove("key1");
-
-        // Then: Key is removed from internal map
-        assertThat(removed).isEqualTo("value1");
-        assertThat(configurer.keyExists("key1")).isFalse();
-        assertThat(configurer.keyExists("key2")).isTrue();
-        assertThat(configurer.getAllKeys()).contains("key2");
     }
 
     @ParameterizedTest(name = "{0}: Round-trip structure maintenance")

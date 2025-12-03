@@ -7,6 +7,7 @@ import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +45,7 @@ class ConfigGetSetTest {
     }
 
     @Test
-    void testSet_UpdatesConfigurer() throws Exception {
+    void testSet_UpdatesInternalState() throws Exception {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -52,8 +53,8 @@ class ConfigGetSetTest {
         // Act
         config.set("intValue", 777);
 
-        // Assert - configurer should also have the value
-        assertThat(config.getConfigurer().getValue("intValue")).isEqualTo(777);
+        // Assert - internalState should have the value
+        assertThat(config.getInternalState().get("intValue")).isEqualTo(777);
     }
 
     @Test
@@ -96,7 +97,7 @@ class ConfigGetSetTest {
     }
 
     @Test
-    void testSet_UndeclaredKey_StoresInConfigurer() throws Exception {
+    void testSet_UndeclaredKey_StoresInInternalState() throws Exception {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
@@ -104,8 +105,8 @@ class ConfigGetSetTest {
         // Act - set key that's not a field
         config.set("customKey", "custom value");
 
-        // Assert - should be stored in configurer
-        assertThat(config.getConfigurer().getValue("customKey")).isEqualTo("custom value");
+        // Assert - should be stored in internalState
+        assertThat(config.getInternalState().get("customKey")).isEqualTo("custom value");
     }
 
     @Test
@@ -123,11 +124,11 @@ class ConfigGetSetTest {
     }
 
     @Test
-    void testGet_UndeclaredKey_ReturnsConfigurerValue() throws Exception {
+    void testGet_UndeclaredKey_ReturnsInternalStateValue() throws Exception {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        config.getConfigurer().setValue("orphanKey", "orphan value", null, null);
+        config.getInternalState().put("orphanKey", "orphan value");
 
         // Act
         Object value = config.get("orphanKey");
@@ -169,7 +170,7 @@ class ConfigGetSetTest {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
         config.withConfigurer(new YamlSnakeYamlConfigurer());
-        config.getConfigurer().setValue("stringBool", "true", null, null);
+        config.getInternalState().put("stringBool", "true");
 
         // Act
         Boolean value = config.get("stringBool", Boolean.class);
@@ -201,9 +202,9 @@ class ConfigGetSetTest {
         List<String> testList = Arrays.asList("a", "b", "c");
         config.set("testList", testList);
 
-        // Act - get with generic type
+        // Act - get with generic type (must specify full generic type including element type)
         @SuppressWarnings("unchecked")
-        List<String> value = config.get("testList", GenericsDeclaration.of(List.class));
+        List<String> value = config.get("testList", GenericsDeclaration.of(List.class, Collections.singletonList(String.class)));
 
         // Assert
         assertThat(value).containsExactly("a", "b", "c");
@@ -254,14 +255,15 @@ class ConfigGetSetTest {
     }
 
     @Test
-    void testGet_WithoutConfigurer_ThrowsException() {
+    void testGet_WithoutConfigurer_ReturnsFieldValue() {
         // Arrange
         PrimitivesTestConfig config = ConfigManager.create(PrimitivesTestConfig.class);
 
-        // Act & Assert
-        assertThatThrownBy(() -> config.get("intValue"))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("configurer cannot be null");
+        // Act - simple get() doesn't require configurer, just returns field value
+        Object value = config.get("intValue");
+
+        // Assert
+        assertThat(value).isEqualTo(42); // Default value from PrimitivesTestConfig
     }
 
     @Test

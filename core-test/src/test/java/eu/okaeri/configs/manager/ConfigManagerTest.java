@@ -79,12 +79,11 @@ class ConfigManagerTest {
     void testTransformCopy_DocumentWrapperPattern() {
         // Given: Generic Document wrapper loaded with data (like in okaeri-persistence)
         GenericDocument document = ConfigManager.create(GenericDocument.class);
-        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
-        document.withConfigurer(configurer);
+        document.withConfigurer(new YamlSnakeYamlConfigurer());
         // Simulate loading data that matches UserDocument structure
-        configurer.setValueUnsafe("userId", 12345);
-        configurer.setValueUnsafe("username", "testuser");
-        configurer.setValueUnsafe("email", "test@example.com");
+        document.getInternalState().put("userId", 12345);
+        document.getInternalState().put("username", "testuser");
+        document.getInternalState().put("email", "test@example.com");
 
         // When: Transforming Document wrapper into specific UserDocument type
         UserDocument userDoc = ConfigManager.transformCopy(document, UserDocument.class);
@@ -112,12 +111,11 @@ class ConfigManagerTest {
 
     @Test
     void testTransformCopy_WithTypeConversion() {
-        // Given: Source config with String value in configurer
+        // Given: Source config with String value in internalState
         SourceConfig source = ConfigManager.create(SourceConfig.class);
-        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
-        source.withConfigurer(configurer);
-        // Use setValueUnsafe for dynamic key that doesn't exist in source declaration
-        configurer.setValueUnsafe("numberAsString", "456");
+        source.withConfigurer(new YamlSnakeYamlConfigurer());
+        // Use internalState for dynamic key that doesn't exist in source declaration
+        source.getInternalState().put("numberAsString", "456");
 
         // When: Transforming to config expecting Integer
         ConfigWithNumber copy = ConfigManager.transformCopy(source, ConfigWithNumber.class);

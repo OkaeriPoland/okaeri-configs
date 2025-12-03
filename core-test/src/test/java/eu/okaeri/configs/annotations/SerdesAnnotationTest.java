@@ -216,8 +216,8 @@ class SerdesAnnotationTest {
         config.saveToString();
 
         // Then - custom serializer should prefix with "A:"
-        assertThat(config.getConfigurer().getValue("customField")).isEqualTo("A:custom");
-        assertThat(config.getConfigurer().getValue("normalField")).isEqualTo("normal");
+        assertThat(config.getInternalState().get("customField")).isEqualTo("A:custom");
+        assertThat(config.getInternalState().get("normalField")).isEqualTo("normal");
     }
 
     @Test
@@ -263,10 +263,10 @@ class SerdesAnnotationTest {
         config.saveToString();
 
         // Then - each field uses its own serializer
-        assertThat(config.getConfigurer().getValue("defaultField")).isEqualTo("default");
-        assertThat(config.getConfigurer().getValue("fieldA")).isEqualTo("A:valueA");
-        assertThat(config.getConfigurer().getValue("fieldB")).isEqualTo("B:valueB");
-        assertThat(config.getConfigurer().getValue("anotherDefault")).isEqualTo("default2");
+        assertThat(config.getInternalState().get("defaultField")).isEqualTo("default");
+        assertThat(config.getInternalState().get("fieldA")).isEqualTo("A:valueA");
+        assertThat(config.getInternalState().get("fieldB")).isEqualTo("B:valueB");
+        assertThat(config.getInternalState().get("anotherDefault")).isEqualTo("default2");
     }
 
     @Test
@@ -279,9 +279,9 @@ class SerdesAnnotationTest {
         config.saveToString();
 
         // Then - normalField uses standard serializer (no prefix)
-        assertThat(config.getConfigurer().getValue("normalField")).isEqualTo("normal");
-        assertThat(config.getConfigurer().getValue("normalField").toString()).doesNotContain("A:");
-        assertThat(config.getConfigurer().getValue("normalField").toString()).doesNotContain("B:");
+        assertThat(config.getInternalState().get("normalField")).isEqualTo("normal");
+        assertThat(config.getInternalState().get("normalField").toString()).doesNotContain("A:");
+        assertThat(config.getInternalState().get("normalField").toString()).doesNotContain("B:");
     }
 
     // Static inner classes for error testing
@@ -322,8 +322,8 @@ class SerdesAnnotationTest {
 
         // Then - nested config's @Serdes field uses custom serializer
         // The innerField value will be in the nested map under "sub"
-        assertThat(config.getConfigurer().keyExists("sub")).isTrue();
-        assertThat(config.getConfigurer().getValue("topLevel")).isEqualTo("top");
+        assertThat(config.getInternalState().containsKey("sub")).isTrue();
+        assertThat(config.getInternalState().get("topLevel")).isEqualTo("top");
     }
 
     @Test
@@ -339,7 +339,7 @@ class SerdesAnnotationTest {
         FieldDeclaration field = config.getDeclaration().getField("customField").orElse(null);
         assertThat(field).isNotNull();
         assertThat(field.getComment()).contains("This is a custom field");
-        assertThat(config.getConfigurer().getValue("customField")).isEqualTo("A:value");
+        assertThat(config.getInternalState().get("customField")).isEqualTo("A:value");
     }
 
     @Test

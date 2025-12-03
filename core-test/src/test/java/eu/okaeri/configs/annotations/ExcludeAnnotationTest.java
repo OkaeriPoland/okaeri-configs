@@ -140,8 +140,8 @@ class ExcludeAnnotationTest {
         }
 
         // Then - Excluded field should not be in configurer
-        assertThat(config.getConfigurer().getAllKeys()).doesNotContain("excludedField");
-        assertThat(config.getConfigurer().getAllKeys()).contains("normalField");
+        assertThat(config.getInternalState().keySet()).doesNotContain("excludedField");
+        assertThat(config.getInternalState().keySet()).contains("normalField");
     }
 
     @Test
@@ -211,6 +211,6 @@ class ExcludeAnnotationTest {
         }
 
         // Then
-        assertThat(config.getConfigurer().getAllKeys()).containsExactlyInAnyOrder("field1", "field2");
+        assertThat(config.getInternalState().keySet()).containsExactlyInAnyOrder("field1", "field2");
     }
 }

@@ -5,7 +5,6 @@ import eu.okaeri.configs.annotation.Variable;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.exception.OkaeriException;
-import eu.okaeri.configs.exception.ValidationException;
 import eu.okaeri.configs.migrate.ConfigMigration;
 import eu.okaeri.configs.migrate.builtin.NamedMigration;
 import eu.okaeri.configs.migrate.view.RawConfigView;
@@ -19,6 +18,7 @@ import eu.okaeri.configs.serdes.SerdesRegistry;
 import lombok.*;
 
 import java.io.*;
+import java.util.Map;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,13 +43,57 @@ public abstract class OkaeriConfig {
     @Setter(AccessLevel.PROTECTED)
     private ConfigDeclaration declaration;
 
+    /**
+     * Shared context for the configuration tree.
+     * Root configs create their own context, subconfigs share parent's context.
+     */
     @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private boolean removeOrphans = false;
+    @Setter
+    private ConfigContext context;
 
+    /**
+     * Internal state holding the raw configuration data.
+     * This is the parsed data from file or the data to be written.
+     * Used for orphan preservation and subconfig data storage.
+     */
     @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private boolean errorComments = false;
+    @Setter
+    private Map<String, Object> internalState = new LinkedHashMap<>();
+
+    /**
+     * Base path for error reporting in nested configs.
+     * Shows the full path from root config to this config's location.
+     */
+    @Getter
+    @Setter
+    private ConfigPath basePath = ConfigPath.root();
+
+    /**
+     * Checks if this config is a subconfig (nested within another config).
+     * A subconfig has no direct configurer but shares context with the root.
+     *
+     * @return true if this is a subconfig
+     */
+    public boolean isSubconfig() {
+        return (this.configurer == null) && (this.context != null);
+    }
+
+    /**
+     * Gets the effective configurer for this config.
+     * For root configs, returns the direct configurer.
+     * For subconfigs, returns the root config's configurer via context.
+     *
+     * @return the effective configurer, or null if not configured
+     */
+    public Configurer getEffectiveConfigurer() {
+        if (this.configurer != null) {
+            return this.configurer;
+        }
+        if (this.context != null) {
+            return this.context.getRootConfig().getConfigurer();
+        }
+        return null;
+    }
 
     /**
      * Gets the configuration declaration, initializing it lazily on first access.
@@ -80,12 +124,17 @@ public abstract class OkaeriConfig {
     /**
      * Replaces the current configurer with the provided.
      * Sets parent field of the configurer to this instance.
+     * Also initializes the context if this is a root config.
      *
      * @param configurer new configurer
      */
     public void setConfigurer(@NonNull Configurer configurer) {
         this.configurer = configurer;
         this.configurer.setParent(this);
+        // Initialize context for root configs (non-subconfigs)
+        if ((this.context == null) && !this.isSubconfig()) {
+            this.context = new ConfigContext(this);
+        }
     }
 
     /**
@@ -239,7 +288,9 @@ public abstract class OkaeriConfig {
      */
     @Deprecated
     public OkaeriConfig withRemoveOrphans(boolean removeOrphans) {
-        this.setRemoveOrphans(removeOrphans);
+        if (this.context != null) {
+            this.context.setRemoveOrphans(removeOrphans);
+        }
         return this;
     }
 
@@ -249,22 +300,25 @@ public abstract class OkaeriConfig {
      *
      * @param key   target key
      * @param value target value
-     * @throws OkaeriException if {@link #configurer} is null or value processing fails
+     * @throws OkaeriException if no configurer is available or value processing fails
      */
     public void set(@NonNull String key, Object value) throws OkaeriException {
 
-        if (this.getConfigurer() == null) {
+        Configurer effectiveConfigurer = this.getEffectiveConfigurer();
+        if (effectiveConfigurer == null) {
             throw new IllegalStateException("configurer cannot be null");
         }
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            value = this.getConfigurer().resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType(), SerdesContext.of(this.configurer, field));
+            value = effectiveConfigurer.resolveType(value, GenericsDeclaration.of(value), field.getType().getType(), field.getType(), SerdesContext.of(effectiveConfigurer, field));
             field.updateValue(value);
         }
 
+        // Store in internalState for non-declared keys (orphans)
         GenericsDeclaration fieldGenerics = (field == null) ? null : field.getType();
-        this.getConfigurer().setValue(key, value, fieldGenerics, field);
+        Object simplified = effectiveConfigurer.simplifyField(value, fieldGenerics, field);
+        this.internalState.put(key, simplified);
     }
 
     /**
@@ -272,20 +326,17 @@ public abstract class OkaeriConfig {
      *
      * @param key target key
      * @return the resolved value
-     * @throws OkaeriException if {@link #configurer} is null or getting the value fails
+     * @throws OkaeriException if getting the value fails
      */
     public Object get(@NonNull String key) throws OkaeriException {
-
-        if (this.getConfigurer() == null) {
-            throw new IllegalStateException("configurer cannot be null");
-        }
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
             return field.getValue();
         }
 
-        return this.getConfigurer().getValue(key);
+        // Return from internalState for non-declared keys
+        return this.internalState.get(key);
     }
 
     /**
@@ -296,7 +347,7 @@ public abstract class OkaeriConfig {
      * @param clazz target class for value
      * @param <T>   target value type
      * @return the resolved value
-     * @throws OkaeriException if {@link #configurer} is null or the value processing fails
+     * @throws OkaeriException if no configurer is available or the value processing fails
      */
     public <T> T get(@NonNull String key, @NonNull Class<T> clazz) throws OkaeriException {
         return this.get(key, GenericsDeclaration.of(clazz));
@@ -310,21 +361,23 @@ public abstract class OkaeriConfig {
      * @param generics target type for value
      * @param <T>      target value type
      * @return the resolved value
-     * @throws OkaeriException if {@link #configurer} is null or the value processing fails
+     * @throws OkaeriException if no configurer is available or the value processing fails
      */
     @SuppressWarnings("unchecked")
     public <T> T get(@NonNull String key, @NonNull GenericsDeclaration generics) throws OkaeriException {
 
-        if (this.getConfigurer() == null) {
+        Configurer effectiveConfigurer = this.getEffectiveConfigurer();
+        if (effectiveConfigurer == null) {
             throw new IllegalStateException("configurer cannot be null");
         }
 
         FieldDeclaration field = this.getDeclaration().getField(key).orElse(null);
         if (field != null) {
-            return (T) this.getConfigurer().resolveType(field.getValue(), field.getType(), generics.getType(), generics, SerdesContext.of(this.configurer, field));
+            return (T) effectiveConfigurer.resolveType(field.getValue(), field.getType(), generics.getType(), generics, SerdesContext.of(effectiveConfigurer, field));
         }
 
-        return (T) this.getConfigurer().getValue(key, generics.getType(), null, SerdesContext.of(this.configurer));
+        Object rawValue = (this.internalState != null) ? this.internalState.get(key) : null;
+        return (T) effectiveConfigurer.resolveValue(rawValue, generics.getType(), generics, SerdesContext.of(effectiveConfigurer));
     }
 
     /**
@@ -436,42 +489,54 @@ public abstract class OkaeriConfig {
             throw new IllegalStateException("configurer cannot be null");
         }
 
-        for (FieldDeclaration field : this.getDeclaration().getFields()) {
+        // Build the data map from declared fields
+        Map<String, Object> data = new LinkedHashMap<>();
 
+        for (FieldDeclaration field : this.getDeclaration().getFields()) {
             Object valueToSave = field.getAnnotation(ReadOnly.class).isPresent()
                 ? field.getStartingValue()
                 : field.getValue();
 
-            if (!this.getConfigurer().isValid(field, valueToSave)) {
-                throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+            // Validate using context validators
+            if ((this.context != null) && this.context.hasValidator()) {
+                this.context.validate(field, valueToSave, false);
             }
 
             try {
-                this.getConfigurer().setValue(field.getName(), valueToSave, field.getType(), field);
+                Object simplified = this.getConfigurer().simplifyField(valueToSave, field.getType(), field);
+                data.put(field.getName(), simplified);
             } catch (Exception exception) {
-                throw new OkaeriException("failed to #setValue for " + field.getName(), exception);
+                throw new OkaeriException("failed to simplify " + field.getName(), exception);
             }
         }
 
-        try {
-            // sort (for formatting) + resolve orphans
-            Set<String> orphans = this.getConfigurer().sort(this.getDeclaration());
-
-            // remove orphans if enabled
-            if (this.isRemoveOrphans()) {
-                Set<String> allOrphans = new LinkedHashSet<>();
-                if (!orphans.isEmpty()) {
-                    allOrphans.addAll(orphans);
-                    orphans.forEach(orphan -> this.getConfigurer().remove(orphan));
-                }
-                this.removeOrphansRecursively(this.getDeclaration(), "", allOrphans);
-                if (!allOrphans.isEmpty()) {
-                    this.logger.warning("Removed orphaned (undeclared) keys: " + allOrphans);
+        // Handle orphans from internalState
+        Set<String> allOrphans = new LinkedHashSet<>();
+        if (this.internalState != null) {
+            for (String key : this.internalState.keySet()) {
+                if (!data.containsKey(key)) {
+                    if (this.context.isRemoveOrphans()) {
+                        allOrphans.add(key);
+                    } else {
+                        data.put(key, this.internalState.get(key));
+                    }
                 }
             }
+        }
 
-            // dump into the stream
-            this.getConfigurer().write(outputStream, this.getDeclaration());
+        // Remove orphans recursively from nested configs
+        if (this.context.isRemoveOrphans()) {
+            this.removeOrphansRecursively(this.getDeclaration(), data, "", allOrphans);
+            if (!allOrphans.isEmpty()) {
+                this.logger.warning("Removed orphaned (undeclared) keys: " + allOrphans);
+            }
+        }
+
+        // Update internalState with the serialized data
+        this.internalState = data;
+
+        try {
+            this.getConfigurer().write(outputStream, data, this.getDeclaration());
         } catch (Exception exception) {
             throw new OkaeriException("failed #write", exception);
         }
@@ -504,21 +569,14 @@ public abstract class OkaeriConfig {
             map.put(field.getName(), simplified);
         }
 
-        // no configurer, no additional properties possible
-        if (this.getConfigurer() == null) {
-            return map;
-        }
-
-        // fetch remaining, non-declared
-        for (String keyName : this.getConfigurer().getAllKeys()) {
-
-            if (map.containsKey(keyName)) {
-                continue;
+        // include undeclared keys from internalState (orphans)
+        if (this.internalState != null) {
+            for (Map.Entry<String, Object> entry : this.internalState.entrySet()) {
+                if (!map.containsKey(entry.getKey())) {
+                    Object simplified = configurer.simplify(entry.getValue(), GenericsDeclaration.of(entry.getValue()), SerdesContext.of(configurer, null), conservative);
+                    map.put(entry.getKey(), simplified);
+                }
             }
-
-            Object value = this.getConfigurer().getValue(keyName);
-            Object simplified = configurer.simplify(value, GenericsDeclaration.of(value), SerdesContext.of(configurer, null), conservative);
-            map.put(keyName, simplified);
         }
 
         return map;
@@ -591,11 +649,16 @@ public abstract class OkaeriConfig {
             }
             byte[] contentBytes = buffer.toByteArray();
             String rawContent = new String(contentBytes, StandardCharsets.UTF_8);
-            this.getConfigurer().setRawContent(rawContent);
 
-            // Parse from buffered content
-            this.getConfigurer().load(new ByteArrayInputStream(contentBytes), this.getDeclaration());
-        } catch (Exception exception) {
+            // Store raw content on context for error reporting
+            if (this.context != null) {
+                this.context.setRawContent(rawContent);
+            }
+
+            // Parse from buffered content and store in internalState
+            this.internalState = this.getConfigurer().load(new ByteArrayInputStream(contentBytes), this.getDeclaration());
+        }
+        catch (Exception exception) {
             throw new OkaeriException("failed #load", exception);
         }
 
@@ -752,7 +815,7 @@ public abstract class OkaeriConfig {
     }
 
     /**
-     * Updates state of the configuration with values provided by the Configurer,
+     * Updates state of the configuration with values from internalState,
      * also applying {@link Variable} annotation to the fields if present.
      *
      * @return this instance
@@ -764,56 +827,83 @@ public abstract class OkaeriConfig {
             throw new IllegalStateException("declaration cannot be null: config not initialized");
         }
 
-        this.loadValuesFromConfigurer();
+        this.loadValuesFromInternalState();
         this.processVariablesRecursively(this.getDeclaration(), this, new HashSet<>());
         return this;
     }
 
     /**
-     * Loads values from the configurer into the declared fields.
-     * For each field that exists in the configurer, retrieves the value,
+     * Updates a config from its internalState.
+     * Called by Configurer.resolveType() when loading nested configs.
+     *
+     * @return this instance
+     * @throws OkaeriException if internalState is null or update fails
+     */
+    public OkaeriConfig updateFromInternalState() throws OkaeriException {
+        if (this.internalState == null) {
+            throw new IllegalStateException("internalState cannot be null for update");
+        }
+        if (this.getDeclaration() == null) {
+            throw new IllegalStateException("declaration cannot be null: config not initialized");
+        }
+
+        this.loadValuesFromInternalState();
+        this.processVariablesRecursively(this.getDeclaration(), this, new HashSet<>());
+        return this;
+    }
+
+    /**
+     * Loads values from internalState into the declared fields.
+     * For each field that exists in internalState, retrieves the value,
      * validates it, and updates both the field value and starting value.
      *
      * @throws OkaeriException if value retrieval or validation fails
      */
-    private void loadValuesFromConfigurer() throws OkaeriException {
-        for (FieldDeclaration field : this.getDeclaration().getFields()) {
+    private void loadValuesFromInternalState() throws OkaeriException {
+        Configurer effectiveConfigurer = this.getEffectiveConfigurer();
+        if (effectiveConfigurer == null) {
+            throw new IllegalStateException("no effective configurer available");
+        }
 
+        if (this.internalState == null) {
+            return; // Nothing to load
+        }
+
+        for (FieldDeclaration field : this.getDeclaration().getFields()) {
             String fieldName = field.getName();
             GenericsDeclaration genericType = field.getType();
             Class<?> type = field.getType().getType();
 
-            if (!this.getConfigurer().keyExists(fieldName)) {
+            if (!this.internalState.containsKey(fieldName)) {
                 continue;
             }
 
-            // Build path including any base path from parent configs
-            ConfigPath basePath = this.configurer.getBasePath();
-            ConfigPath fieldPath = (basePath == null || basePath.isEmpty())
+            // Build path including any base path
+            ConfigPath fieldPath = ((this.basePath == null) || this.basePath.isEmpty())
                 ? ConfigPath.of(fieldName)
-                : basePath.property(fieldName);
-            SerdesContext serdesContext = SerdesContext.of(this.configurer, field)
+                : this.basePath.property(fieldName);
+            SerdesContext serdesContext = SerdesContext.of(effectiveConfigurer, field)
                 .withPath(fieldPath);
 
+            Object rawValue = this.internalState.get(fieldName);
             Object value;
             try {
-                value = this.getConfigurer().getValue(fieldName, type, genericType, serdesContext);
+                value = effectiveConfigurer.resolveValue(rawValue, type, genericType, serdesContext);
             } catch (OkaeriConfigException exception) {
-                // Already has structured info, just rethrow
                 throw exception;
             } catch (Exception exception) {
-                // Wrap with structured info
                 throw OkaeriConfigException.builder()
                     .message("Cannot deserialize")
                     .path(fieldPath)
                     .expectedType(genericType)
-                    .configurer(this.configurer)
+                    .configurer(effectiveConfigurer)
                     .cause(exception)
                     .build();
             }
 
-            if (!this.getConfigurer().isValid(field, value)) {
-                throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+            // Validate using context validators
+            if ((this.context != null) && this.context.hasValidator()) {
+                this.context.validate(field, value, true);
             }
 
             field.updateValue(value);
@@ -830,6 +920,8 @@ public abstract class OkaeriConfig {
      * @param visited        set of already visited objects to prevent infinite recursion
      */
     private void processVariablesRecursively(@NonNull ConfigDeclaration declaration, @NonNull Object configInstance, @NonNull Set<Object> visited) {
+        Configurer effectiveConfigurer = this.getEffectiveConfigurer();
+
         // Prevent infinite recursion on circular references
         if (!visited.add(configInstance)) {
             return;
@@ -840,22 +932,21 @@ public abstract class OkaeriConfig {
 
             // Process @Variable for this field
             Variable variable = field.getVariable();
-            if (variable != null) {
+            if ((variable != null) && (effectiveConfigurer != null)) {
                 String rawProperty = System.getProperty(variable.value());
                 String property = (rawProperty == null) ? System.getenv(variable.value()) : rawProperty;
 
                 if (property != null) {
                     GenericsDeclaration fieldType = field.getType();
-                    // Build path including any base path from parent configs
-                    ConfigPath basePath = this.configurer.getBasePath();
-                    ConfigPath fieldPath = (basePath == null || basePath.isEmpty())
+                    // Build path including any base path
+                    ConfigPath fieldPath = ((this.basePath == null) || this.basePath.isEmpty())
                         ? ConfigPath.of(field.getName())
-                        : basePath.property(field.getName());
-                    SerdesContext serdesContext = SerdesContext.of(this.configurer, field).withPath(fieldPath);
+                        : this.basePath.property(field.getName());
+                    SerdesContext serdesContext = SerdesContext.of(effectiveConfigurer, field).withPath(fieldPath);
 
                     Object value;
                     try {
-                        value = this.getConfigurer().resolveType(property, GenericsDeclaration.of(property), fieldType.getType(), fieldType, serdesContext);
+                        value = effectiveConfigurer.resolveType(property, GenericsDeclaration.of(property), fieldType.getType(), fieldType, serdesContext);
                     } catch (OkaeriConfigException exception) {
                         throw exception;
                     } catch (Exception exception) {
@@ -864,13 +955,14 @@ public abstract class OkaeriConfig {
                             .path(fieldPath)
                             .expectedType(fieldType)
                             .actualValue(property)
-                            .configurer(this.configurer)
+                            .configurer(effectiveConfigurer)
                             .cause(exception)
                             .build();
                     }
 
-                    if (!this.getConfigurer().isValid(field, value)) {
-                        throw new ValidationException(this.getConfigurer().getClass() + " marked " + field.getName() + " as invalid without throwing an exception");
+                    // Validate using context validators
+                    if ((this.context != null) && this.context.hasValidator()) {
+                        this.context.validate(field, value, true);
                     }
 
                     field.updateValue(value);
@@ -901,7 +993,7 @@ public abstract class OkaeriConfig {
     }
 
     /**
-     * Recursively removes orphaned keys from nested configs.
+     * Recursively removes orphaned keys from nested configs in the data map.
      * Walks the configuration tree and removes undeclared keys at all levels.
      * <p>
      * Note: If a nested field type has a custom ObjectSerializer registered,
@@ -909,12 +1001,14 @@ public abstract class OkaeriConfig {
      * form were intentionally added by the serializer.
      *
      * @param declaration the declaration to process
+     * @param data        the data map to modify
      * @param keyPrefix   the key prefix for nested paths (empty for root)
      * @param allOrphans  set to collect all removed orphan key paths
      */
-    private void removeOrphansRecursively(@NonNull ConfigDeclaration declaration, @NonNull String keyPrefix, @NonNull Set<String> allOrphans) {
-        for (FieldDeclaration field : declaration.getFields()) {
+    private void removeOrphansRecursively(@NonNull ConfigDeclaration declaration, @NonNull Map<String, Object> data, @NonNull String keyPrefix, @NonNull Set<String> allOrphans) {
+        Configurer effectiveConfigurer = this.getEffectiveConfigurer();
 
+        for (FieldDeclaration field : declaration.getFields()) {
             String fieldName = field.getName();
             String fullPath = keyPrefix.isEmpty() ? fieldName : (keyPrefix + "." + fieldName);
 
@@ -923,7 +1017,7 @@ public abstract class OkaeriConfig {
                 continue;
             }
 
-            Object nestedValue = this.getConfigurer().getValue(fieldName);
+            Object nestedValue = data.get(fieldName);
             if (!(nestedValue instanceof Map)) {
                 continue;
             }
@@ -933,7 +1027,7 @@ public abstract class OkaeriConfig {
 
             // Check if this field type has a custom serializer
             // If it does, don't remove any keys - they were added by the serializer
-            if (this.getConfigurer().getRegistry().getSerializer(fieldType.getType()) != null) {
+            if ((effectiveConfigurer != null) && (effectiveConfigurer.getRegistry().getSerializer(fieldType.getType()) != null)) {
                 continue;
             }
 
@@ -948,7 +1042,7 @@ public abstract class OkaeriConfig {
                 allOrphans.add(fullPath + "." + orphanKey);
             }
 
-            this.removeOrphansRecursively(nestedDeclaration, fullPath, allOrphans);
+            this.removeOrphansRecursively(nestedDeclaration, nestedMap, fullPath, allOrphans);
         }
     }
 }

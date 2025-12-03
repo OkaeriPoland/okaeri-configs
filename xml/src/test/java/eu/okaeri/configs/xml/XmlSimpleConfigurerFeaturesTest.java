@@ -11,8 +11,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,14 +71,6 @@ class XmlSimpleConfigurerFeaturesTest {
         assertThat(configurer).isNotNull();
     }
 
-    @Test
-    void testConstructorWithMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("key", "value");
-        XmlSimpleConfigurer configurer = new XmlSimpleConfigurer(map);
-        assertThat(configurer).isNotNull();
-        assertThat(configurer.getValue("key")).isEqualTo("value");
-    }
 
     // ==================== getExtensions Tests ====================
 

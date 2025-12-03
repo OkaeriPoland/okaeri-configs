@@ -31,21 +31,14 @@ public class JsonSimpleConfigurer extends Configurer {
         }
     };
 
-    private Map<String, Object> map;
     private JSONParser parser;
 
     public JsonSimpleConfigurer() {
         this.parser = new JSONParser();
-        this.map = new LinkedHashMap<>();
     }
 
     public JsonSimpleConfigurer(@NonNull JSONParser parser) {
-        this(parser, new LinkedHashMap<>());
-    }
-
-    public JsonSimpleConfigurer(@NonNull JSONParser parser, @NonNull Map<String, Object> map) {
         this.parser = parser;
-        this.map = map;
     }
 
     @Override
@@ -69,58 +62,16 @@ public class JsonSimpleConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        if (value == null) {
-            this.map.remove(key);
-            return;
-        }
-        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
-        this.map.put(key, simplified);
-    }
-
-    @Override
-    public void setValueUnsafe(@NonNull String key, Object value) {
-        this.map.put(key, value);
-    }
-
-    @Override
-    public Object getValue(@NonNull String key) {
-        return this.map.get(key);
-    }
-
-    @Override
-    public Object remove(@NonNull String key) {
-        return this.map.remove(key);
-    }
-
-    @Override
-    public boolean keyExists(@NonNull String key) {
-        return this.map.containsKey(key);
-    }
-
-    @Override
-    public List<String> getAllKeys() {
-        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
-    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-
+    public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         String data = ConfigPostprocessor.of(inputStream).getContext();
-        this.map = (Map<String, Object>) this.parser.parse(data, CONTAINER_FACTORY);
-
-        if (this.map != null) {
-            return;
-        }
-
-        this.map = new LinkedHashMap<>();
+        return (Map<String, Object>) this.parser.parse(data, CONTAINER_FACTORY);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        Map<Object, Object> cleanedMap = this.removeNullsRecursively(this.map);
+    public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
+        Map<Object, Object> cleanedMap = this.removeNullsRecursively(data);
         String jsonString = JSONObject.toJSONString(cleanedMap);
         ConfigPostprocessor.of(jsonString).write(outputStream);
     }

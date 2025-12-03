@@ -26,14 +26,8 @@ import java.util.*;
 public class YamlSnakeYamlConfigurer extends Configurer {
 
     private Yaml yaml;
-    private Map<String, Object> map = new LinkedHashMap<>();
 
     @Setter private String commentPrefix = "# ";
-
-    public YamlSnakeYamlConfigurer(@NonNull Yaml yaml, @NonNull Map<String, Object> map) {
-        this.yaml = yaml;
-        this.map = map;
-    }
 
     public YamlSnakeYamlConfigurer(@NonNull Yaml yaml) {
         this.yaml = yaml;
@@ -76,47 +70,13 @@ public class YamlSnakeYamlConfigurer extends Configurer {
     }
 
     @Override
-    public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
-        Object simplified = this.simplify(value, type, SerdesContext.of(this, field), true);
-        this.map.put(key, simplified);
+    public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
+        return this.yaml.load(inputStream);
     }
 
     @Override
-    public void setValueUnsafe(@NonNull String key, Object value) {
-        this.map.put(key, value);
-    }
-
-    @Override
-    public Object getValue(@NonNull String key) {
-        return this.map.get(key);
-    }
-
-    @Override
-    public Object remove(@NonNull String key) {
-        return this.map.remove(key);
-    }
-
-    @Override
-    public boolean keyExists(@NonNull String key) {
-        return this.map.containsKey(key);
-    }
-
-    @Override
-    public List<String> getAllKeys() {
-        return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
-    }
-
-    @Override
-    public void load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        // try loading from input stream
-        this.map = this.yaml.load(inputStream);
-        // when no map was loaded reset with empty
-        if (this.map == null) this.map = new LinkedHashMap<>();
-    }
-
-    @Override
-    public void write(@NonNull OutputStream outputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        ConfigPostprocessor.of(this.yaml.dump(this.map))
+    public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
+        ConfigPostprocessor.of(this.yaml.dump(data))
             .removeLines(line -> line.startsWith(this.commentPrefix.trim()))
             .updateContext(ctx -> YamlSourceWalker.of(ctx).insertComments(declaration, this.commentPrefix))
             .write(outputStream);
