@@ -35,6 +35,18 @@ public class OkaeriConfigException extends OkaeriException {
         return (this.configurer != null) ? this.configurer.getRawContent() : null;
     }
 
+    /**
+     * Returns true if the formatted message is sufficient for the user to understand
+     * the problem, meaning the full stacktrace can be safely omitted.
+     * <p>
+     * This is true when the exception has a cause (containing error details)
+     * but that cause has no deeper cause chain.
+     */
+    public boolean isMessageSufficient() {
+        Throwable cause = this.getCause();
+        return (cause != null) && (cause.getCause() == null);
+    }
+
     public String getShortDescription() {
         StringBuilder sb = new StringBuilder();
         if ((this.path != null) && !this.path.isEmpty()) {
