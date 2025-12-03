@@ -88,7 +88,6 @@ public class OkaeriConfigOptions {
      * if available.
      *
      * @param configurer the new configurer
-     * @param serdesPacks the serdes packs to register
      * @return this configurer for chaining
      */
     public OkaeriConfigOptions configurer(@NonNull Configurer configurer, @NonNull OkaeriSerdes... serdes) {
