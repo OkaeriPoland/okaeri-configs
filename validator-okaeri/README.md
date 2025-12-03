@@ -15,14 +15,14 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-validator-okaeri</artifactId>
-  <version>6.0.0-beta.19</version>
+  <version>6.0.0-beta.20</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin)
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-validator-okaeri:6.0.0-beta.19")
+implementation("eu.okaeri:okaeri-configs-validator-okaeri:6.0.0-beta.20")
 ```
 
 ## Usage
