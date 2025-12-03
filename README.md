@@ -47,11 +47,15 @@ Special implementations for safe use in specific environments, e.g., game server
 Supported formats provide precise error messages that pinpoint exactly where serdes failed:
 
 ```
-error[StringToIntegerTransformer]: Cannot transform 'database.port' to Integer from String
- --> config.yml:3:9
-  |
-3 |   port: not_a_port
-  |         ^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)
+error[DurationTransformer]: Cannot transform 'scoreboard.dummy.update-rate' to Duration from String
+ --> config.yml:1118:18
+     |
+1114 |     # How often should all players' dummy be refreshed (regardless of other triggers)
+1115 |     # Format: <value><unit><value><unit><...>
+1116 |     # Units: s - seconds, m - minutes, h - hours
+1117 |     # Example: 1m30s
+1118 |     update-rate: hello
+     |                  ^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)
 ```
 
 ## Validation extensions
