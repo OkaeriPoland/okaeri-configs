@@ -20,7 +20,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-serdes-bucket4j</artifactId>
-  <version>6.0.0-beta.21</version>
+  <version>6.0.0-beta.22</version>
 </dependency>
 ```
 
@@ -29,7 +29,7 @@ Add dependency to the `dependencies` section:
 Add dependency to the `dependencies` section:
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-serdes-bucket4j:6.0.0-beta.21")
+implementation("eu.okaeri:okaeri-configs-serdes-bucket4j:6.0.0-beta.22")
 ```
 
 ## Supported types

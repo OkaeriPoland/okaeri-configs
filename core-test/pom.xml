@@ -7,7 +7,7 @@
     <parent>
         <groupId>eu.okaeri</groupId>
         <artifactId>okaeri-configs</artifactId>
-        <version>6.0.0-beta.21</version>
+        <version>6.0.0-beta.22</version>
     </parent>
 
     <artifactId>okaeri-configs-core-test</artifactId>
