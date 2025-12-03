@@ -76,7 +76,7 @@ public class IndexedSetSerializer implements ObjectSerializer<IndexedSet> {
             }
 
             // add the data to the serialization output
-            data.add(strKey, value, GenericsDeclaration.of(value));
+            data.set(strKey, value, GenericsDeclaration.of(value));
         }
     }
 

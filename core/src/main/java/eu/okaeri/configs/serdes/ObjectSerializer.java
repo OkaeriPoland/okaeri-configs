@@ -23,10 +23,10 @@ import lombok.NonNull;
  *
  *     @Override
  *     public void serialize(Location loc, SerializationData data, GenericsDeclaration generics) {
- *         data.add("world", loc.getWorld().getName());
- *         data.add("x", loc.getX());
- *         data.add("y", loc.getY());
- *         data.add("z", loc.getZ());
+ *         data.set("world", loc.getWorld().getName());
+ *         data.set("x", loc.getX());
+ *         data.set("y", loc.getY());
+ *         data.set("z", loc.getZ());
  *     }
  *
  *     @Override
@@ -68,7 +68,7 @@ public interface ObjectSerializer<T> extends OkaeriSerdes {
      * <strong>Warning: DO NOT USE 'THE STRING' DIRECTLY</strong>
      *
      * Example serialization:
-     * - serializationData.addCollection(VALUE, Arrays.asList("my", "list"), String.class);
+     * - serializationData.setCollection(VALUE, Arrays.asList("my", "list"), String.class);
      *
      * Example deserialization:
      * - deserializationData.getAsList(VALUE, String.class)

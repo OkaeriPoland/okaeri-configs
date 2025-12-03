@@ -17,12 +17,12 @@ public class LocationSerializer implements ObjectSerializer<Location> {
 
     @Override
     public void serialize(@NonNull Location location, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("world", location.getWorld(), World.class);
-        data.add("x", location.getX());
-        data.add("y", location.getY());
-        data.add("z", location.getZ());
-        data.add("yaw", location.getYaw());
-        data.add("pitch", location.getPitch());
+        data.set("world", location.getWorld(), World.class);
+        data.set("x", location.getX());
+        data.set("y", location.getY());
+        data.set("z", location.getZ());
+        data.set("yaw", location.getYaw());
+        data.set("pitch", location.getPitch());
     }
 
     @Override

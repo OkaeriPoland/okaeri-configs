@@ -225,7 +225,7 @@ public abstract class Configurer {
                 ConfigDeclaration declaration = ConfigDeclaration.of(value);
                 SerializationData data = new SerializationData(this, serdesContext);
 
-                declaration.getFields().forEach(field -> data.add(field.getName(), field.getValue(), field.getType()));
+                declaration.getFields().forEach(field -> data.set(field.getName(), field.getValue(), field.getType()));
                 LinkedHashMap<Object, Object> serializationMap = new LinkedHashMap<>(data.asMap());
 
                 return this.simplifyMap(serializationMap, GenericsDeclaration.of(Map.class, Collections.singletonList(String.class)), serdesContext, conservative);

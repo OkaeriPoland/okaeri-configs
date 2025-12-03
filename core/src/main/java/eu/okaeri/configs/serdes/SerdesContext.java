@@ -15,11 +15,11 @@ import java.util.Optional;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SerdesContext {
 
-    @NonNull private final Configurer configurer;
+    private final @NonNull Configurer configurer;
     private final ConfigContext configContext;
     private final FieldDeclaration field;
     private final SerdesContextAttachments attachments;
-    @NonNull private final ConfigPath path;
+    private final @NonNull ConfigPath path;
 
     public static SerdesContext of(@NonNull Configurer configurer, ConfigContext configContext, FieldDeclaration field) {
         return of(configurer, configContext, field, (field == null) ? new SerdesContextAttachments() : field.readStaticAnnotations(configurer), ConfigPath.root());

@@ -16,9 +16,9 @@ public class VectorSerializer implements ObjectSerializer<Vector> {
 
     @Override
     public void serialize(@NonNull Vector object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("x", object.getX());
-        data.add("y", object.getY());
-        data.add("z", object.getZ());
+        data.set("x", object.getX());
+        data.set("y", object.getY());
+        data.set("z", object.getZ());
     }
 
     @Override

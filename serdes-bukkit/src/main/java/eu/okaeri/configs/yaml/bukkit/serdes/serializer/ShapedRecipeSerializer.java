@@ -43,12 +43,12 @@ public class ShapedRecipeSerializer implements ObjectSerializer<ShapedRecipe> {
 
         // 1.8.8 does not have NamespacedKey
         if (hasNamespacedKey()) {
-            data.add("key", shapedRecipe.getKey().getKey());
+            data.set("key", shapedRecipe.getKey().getKey());
         }
 
         // okaeri-configs cannot store arrays
         List<String> shapeList = Arrays.asList(shapedRecipe.getShape());
-        data.addCollection("shape", shapeList, String.class);
+        data.setCollection("shape", shapeList, String.class);
 
         // 1.13+ allows exact ItemStack as ingredient
         if (hasRecipeChoices()) {
@@ -73,7 +73,7 @@ public class ShapedRecipeSerializer implements ObjectSerializer<ShapedRecipe> {
                     },
                     LinkedHashMap::new
                 ));
-            data.addRaw("ingredients", choices);
+            data.setRaw("ingredients", choices);
         }
         // versions below allow only Material/MaterialData
         else {
@@ -87,11 +87,11 @@ public class ShapedRecipeSerializer implements ObjectSerializer<ShapedRecipe> {
                     LinkedHashMap::new
                 ));
             GenericsDeclaration valueType = GenericsDeclaration.of(List.class, Collections.singletonList(Material.class));
-            data.addAsMap("ingredients", ingredientMap, GenericsDeclaration.of(Map.class, Arrays.asList(Character.class, valueType)));
+            data.setMap("ingredients", ingredientMap, GenericsDeclaration.of(Map.class, Arrays.asList(Character.class, valueType)));
         }
 
         // finally, the result!
-        data.add("result", shapedRecipe.getResult(), ItemStack.class);
+        data.set("result", shapedRecipe.getResult(), ItemStack.class);
     }
 
     @Override

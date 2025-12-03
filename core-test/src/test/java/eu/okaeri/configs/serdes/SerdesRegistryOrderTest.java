@@ -42,7 +42,7 @@ class SerdesRegistryOrderTest {
 
         @Override
         public void serialize(TestType object, SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "first-serializer");
+            data.set("value", "first-serializer");
         }
 
         @Override
@@ -59,7 +59,7 @@ class SerdesRegistryOrderTest {
 
         @Override
         public void serialize(TestType object, SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "second-serializer");
+            data.set("value", "second-serializer");
         }
 
         @Override
@@ -76,7 +76,7 @@ class SerdesRegistryOrderTest {
 
         @Override
         public void serialize(TestType object, SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "third-serializer");
+            data.set("value", "third-serializer");
         }
 
         @Override
@@ -93,7 +93,7 @@ class SerdesRegistryOrderTest {
 
         @Override
         public void serialize(SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "config-serializable");
+            data.set("value", "config-serializable");
         }
 
         public static ConfigSerializableType deserialize(DeserializationData data, GenericsDeclaration generics) {
@@ -109,7 +109,7 @@ class SerdesRegistryOrderTest {
 
         @Override
         public void serialize(ConfigSerializableType object, SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "override-serializer");
+            data.set("value", "override-serializer");
         }
 
         @Override
@@ -209,7 +209,7 @@ class SerdesRegistryOrderTest {
 
         @Override
         public void serialize(ParentType object, SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "parent-serializer");
+            data.set("value", "parent-serializer");
         }
 
         @Override
@@ -226,7 +226,7 @@ class SerdesRegistryOrderTest {
 
         @Override
         public void serialize(ChildType object, SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "child-serializer");
+            data.set("value", "child-serializer");
         }
 
         @Override

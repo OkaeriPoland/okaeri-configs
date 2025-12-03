@@ -430,9 +430,9 @@ class OrphanHandlingTest {
             @Override
             public void serialize(@NonNull CustomObject object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
                 // Add metadata fields that serializer injects
-                data.add("__type", "CustomObject");
-                data.add("__version", 1);
-                data.add("value", object.getValue());
+                data.set("__type", "CustomObject");
+                data.set("__version", 1);
+                data.set("value", object.getValue());
             }
 
             @Override

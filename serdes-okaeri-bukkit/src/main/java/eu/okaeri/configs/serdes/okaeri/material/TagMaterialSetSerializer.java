@@ -21,8 +21,8 @@ public class TagMaterialSetSerializer implements ObjectSerializer<TagMaterialSet
 
     @Override
     public void serialize(@NonNull TagMaterialSet set, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.addCollection("tags", set.getTags(), Tag.class);
-        data.addCollection("materials", set.getMaterials(), Material.class);
+        data.setCollection("tags", set.getTags(), Tag.class);
+        data.setCollection("materials", set.getMaterials(), Material.class);
     }
 
     @Override

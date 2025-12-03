@@ -48,7 +48,7 @@ class SerdesAnnotationTest {
 
         @Override
         public void serialize(@NonNull String object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-            data.add(VALUE, "A:" + object);
+            data.set(VALUE, "A:" + object);
         }
 
         @Override
@@ -69,7 +69,7 @@ class SerdesAnnotationTest {
 
         @Override
         public void serialize(@NonNull String object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-            data.add(VALUE, "B:" + object);
+            data.set(VALUE, "B:" + object);
         }
 
         @Override
@@ -96,7 +96,7 @@ class SerdesAnnotationTest {
 
         @Override
         public void serialize(@NonNull String object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-            data.add(VALUE, object);
+            data.set(VALUE, object);
         }
 
         @Override
@@ -138,7 +138,7 @@ class SerdesAnnotationTest {
 
         @Override
         public void serialize(@NonNull Integer object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-            data.add(VALUE, object);
+            data.set(VALUE, object);
         }
 
         @Override

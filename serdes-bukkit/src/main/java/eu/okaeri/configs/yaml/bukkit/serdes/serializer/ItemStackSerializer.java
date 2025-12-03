@@ -37,14 +37,14 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
     @Override
     public void serialize(@NonNull ItemStack itemStack, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
 
-        data.add("material", itemStack.getType());
+        data.set("material", itemStack.getType());
 
         if (itemStack.getAmount() != 1) {
-            data.add("amount", itemStack.getAmount());
+            data.set("amount", itemStack.getAmount());
         }
 
         if (itemStack.getDurability() != 0) {
-            data.add("durability", itemStack.getDurability());
+            data.set("durability", itemStack.getDurability());
         }
 
         ItemStackFormat format = data.getContext().getAttachment(ItemStackSpecData.class)
@@ -57,7 +57,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
 
         switch (format) {
             case NATURAL:
-                data.add("meta", itemStack.getItemMeta(), ItemMeta.class);
+                data.set("meta", itemStack.getItemMeta(), ItemMeta.class);
                 break;
             case COMPACT:
                 ITEM_META_SERIALIZER.serialize(itemStack.getItemMeta(), data, generics);
@@ -91,7 +91,7 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
         // base64: old default
         if (this.failsafe == ItemStackFailsafe.BASE64) {
             String base64Stack = ITEM_STACK_TRANSFORMER.leftToRight(itemStack, data.getContext());
-            data.add("base64", base64Stack);
+            data.set("base64", base64Stack);
             return;
         }
 

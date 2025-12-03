@@ -17,9 +17,9 @@ public class PotionEffectSerializer implements ObjectSerializer<PotionEffect> {
 
     @Override
     public void serialize(@NonNull PotionEffect potionEffect, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("amplifier", potionEffect.getAmplifier());
-        data.add("duration", potionEffect.getDuration());
-        data.add("type", potionEffect.getType(), PotionEffectType.class);
+        data.set("amplifier", potionEffect.getAmplifier());
+        data.set("duration", potionEffect.getDuration());
+        data.set("type", potionEffect.getType(), PotionEffectType.class);
     }
 
     @Override

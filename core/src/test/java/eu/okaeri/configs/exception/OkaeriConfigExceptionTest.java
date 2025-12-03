@@ -444,8 +444,8 @@ class OkaeriConfigExceptionTest {
 
         @Override
         public void serialize(@NonNull Person object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-            data.add("name", object.getName());
-            data.add("age", object.getAge());
+            data.set("name", object.getName());
+            data.set("age", object.getAge());
         }
 
         @Override
@@ -477,8 +477,8 @@ class OkaeriConfigExceptionTest {
 
         @Override
         public void serialize(@NonNull Team object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-            data.add("name", object.getName());
-            data.addCollection("memberIds", object.getMemberIds(), Integer.class);
+            data.set("name", object.getName());
+            data.setCollection("memberIds", object.getMemberIds(), Integer.class);
         }
 
         @Override

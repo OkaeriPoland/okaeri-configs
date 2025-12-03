@@ -35,7 +35,7 @@ class RawConfigViewTest {
     void testExists_TopLevelKey_ReturnsTrue() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -49,7 +49,7 @@ class RawConfigViewTest {
     void testExists_NonExistentKey_ReturnsFalse() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -63,7 +63,7 @@ class RawConfigViewTest {
     void testExists_NestedKey_ReturnsTrue() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -77,7 +77,7 @@ class RawConfigViewTest {
     void testExists_DeepNestedNonExistent_ReturnsFalse() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -91,7 +91,7 @@ class RawConfigViewTest {
     void testGet_TopLevelKey_ReturnsValue() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -105,7 +105,7 @@ class RawConfigViewTest {
     void testGet_NestedKey_ReturnsValue() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -119,7 +119,7 @@ class RawConfigViewTest {
     void testGet_NonExistentKey_ReturnsNull() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -130,24 +130,24 @@ class RawConfigViewTest {
     }
 
     @Test
-    void testGet_InvalidNestedPath_ThrowsException() {
+    void testGet_InvalidNestedPath_ReturnsNull() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
-        // When/then
-        assertThatThrownBy(() -> view.get("name.invalid"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Cannot extract 'name.invalid'")
-            .hasMessageContaining("not deep enough");
+        // When - "name" is a String, can't traverse into it
+        Object result = view.get("name.invalid");
+
+        // Then - returns null rather than throwing
+        assertThat(result).isNull();
     }
 
     @Test
     void testSet_TopLevelKey_UpdatesValue() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -162,7 +162,7 @@ class RawConfigViewTest {
     void testSet_NestedKey_UpdatesValue() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -177,7 +177,7 @@ class RawConfigViewTest {
     void testSet_NewKey_CreatesKey() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -192,7 +192,7 @@ class RawConfigViewTest {
     void testSet_NewNestedPath_CreatesIntermediateMaps() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -206,7 +206,7 @@ class RawConfigViewTest {
     void testSet_TypeConflict_ThrowsException() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When/then - "name" is a String, can't treat it as a map
@@ -220,7 +220,7 @@ class RawConfigViewTest {
     void testRemove_TopLevelKey_RemovesValue() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // Add a dynamic (undeclared) key to test removal
@@ -238,7 +238,7 @@ class RawConfigViewTest {
     void testRemove_NestedKey_RemovesValue() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // Add a dynamic nested key to test removal
@@ -256,7 +256,7 @@ class RawConfigViewTest {
     void testRemove_NonExistentKey_ReturnsNull() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -270,7 +270,7 @@ class RawConfigViewTest {
     void testRemove_InvalidNestedPath_ReturnsNull() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -284,7 +284,7 @@ class RawConfigViewTest {
     void testCustomSeparator_UsesCustomSeparator() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config, "/");
 
         // When
@@ -298,7 +298,7 @@ class RawConfigViewTest {
     void testSequentialOperations_MaintainsConsistency() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When - perform sequence of operations
@@ -317,7 +317,7 @@ class RawConfigViewTest {
     void testMutatesConfig_AfterSet_ConfigUpdated() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
 
         // When
@@ -331,7 +331,7 @@ class RawConfigViewTest {
     void testMutatesConfig_AfterRemove_ConfigUpdated() {
         // Given
         TestConfig config = ConfigManager.create(TestConfig.class);
-        config.withConfigurer(new InMemoryConfigurer());
+        config.setConfigurer(new InMemoryConfigurer());
         RawConfigView view = new RawConfigView(config);
         view.set("tempField", "temporary");
 

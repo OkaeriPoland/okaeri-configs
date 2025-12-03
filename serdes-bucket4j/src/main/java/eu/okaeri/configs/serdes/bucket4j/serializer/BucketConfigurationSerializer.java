@@ -20,7 +20,7 @@ public class BucketConfigurationSerializer implements ObjectSerializer<BucketCon
 
     @Override
     public void serialize(@NonNull BucketConfiguration bucketConfiguration, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.addArray("bandwidths", bucketConfiguration.getBandwidths(), Bandwidth.class);
+        data.setArray("bandwidths", bucketConfiguration.getBandwidths(), Bandwidth.class);
     }
 
     @Override

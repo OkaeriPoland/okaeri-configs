@@ -32,19 +32,19 @@ public class ItemMetaSerializer implements ObjectSerializer<ItemMeta> {
     public void serialize(@NonNull ItemMeta itemMeta, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
 
         if (itemMeta.hasDisplayName()) {
-            data.add("display", this.decolor(itemMeta.getDisplayName()));
+            data.set("display", this.decolor(itemMeta.getDisplayName()));
         }
 
         if (itemMeta.hasLore()) {
-            data.addCollection("lore", this.decolor(itemMeta.getLore()), String.class);
+            data.setCollection("lore", this.decolor(itemMeta.getLore()), String.class);
         }
 
         if (!itemMeta.getEnchants().isEmpty()) {
-            data.addAsMap("enchantments", itemMeta.getEnchants(), Enchantment.class, Integer.class);
+            data.setMap("enchantments", itemMeta.getEnchants(), Enchantment.class, Integer.class);
         }
 
         if (!itemMeta.getItemFlags().isEmpty()) {
-            data.addCollection("flags", itemMeta.getItemFlags(), ItemFlag.class);
+            data.setCollection("flags", itemMeta.getItemFlags(), ItemFlag.class);
         }
     }
 

@@ -36,8 +36,8 @@ class ConfigSerializableTest {
 
         @Override
         public void serialize(SerializationData data, GenericsDeclaration generics) {
-            data.add("name", this.name);
-            data.add("value", this.value);
+            data.set("name", this.name);
+            data.set("value", this.value);
         }
 
         public static SimpleSerializable deserialize(DeserializationData data, GenericsDeclaration generics) {
@@ -56,8 +56,8 @@ class ConfigSerializableTest {
 
         @Override
         public void serialize(SerializationData data, GenericsDeclaration generics) {
-            data.add("id", this.id);
-            data.add("inner", this.inner, SimpleSerializable.class);
+            data.set("id", this.id);
+            data.set("inner", this.inner, SimpleSerializable.class);
         }
 
         public static NestedSerializable deserialize(DeserializationData data, GenericsDeclaration generics) {
@@ -70,7 +70,7 @@ class ConfigSerializableTest {
     public static class MissingDeserializeMethod implements ConfigSerializable {
         @Override
         public void serialize(SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "test");
+            data.set("value", "test");
         }
         // Missing: public static MissingDeserializeMethod deserialize(...)
     }
@@ -283,7 +283,7 @@ class ConfigSerializableTest {
 
         @Override
         public void serialize(SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "from-configserializable");
+            data.set("value", "from-configserializable");
         }
 
         public static OverridableSerializable deserialize(DeserializationData data, GenericsDeclaration generics) {
@@ -299,7 +299,7 @@ class ConfigSerializableTest {
 
         @Override
         public void serialize(OverridableSerializable object, SerializationData data, GenericsDeclaration generics) {
-            data.add("value", "from-custom-serializer");
+            data.set("value", "from-custom-serializer");
         }
 
         @Override

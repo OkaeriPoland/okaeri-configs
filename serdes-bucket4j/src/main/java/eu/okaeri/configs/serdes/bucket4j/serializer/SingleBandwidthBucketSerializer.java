@@ -21,9 +21,9 @@ public class SingleBandwidthBucketSerializer implements ObjectSerializer<SingleB
     @Override
     public void serialize(@NonNull SingleBandwidthBucket simpleBucket, @NonNull SerializationData serializationData, @NonNull GenericsDeclaration generics) {
         Bandwidth bandwidth = simpleBucket.getBandwidth();
-        serializationData.add("capacity", bandwidth.getCapacity());
-        serializationData.add("refill-period", Duration.ofNanos(bandwidth.getRefillPeriodNanos()), Duration.class);
-        serializationData.add("refill-tokens", bandwidth.getRefillTokens());
+        serializationData.set("capacity", bandwidth.getCapacity());
+        serializationData.set("refill-period", Duration.ofNanos(bandwidth.getRefillPeriodNanos()), Duration.class);
+        serializationData.set("refill-tokens", bandwidth.getRefillTokens());
     }
 
     @Override

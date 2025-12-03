@@ -1,6 +1,10 @@
 package eu.okaeri.configs.migrate.view;
 
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.serdes.SerdesContext;
+import eu.okaeri.configs.serdes.TypedKeyReader;
+import eu.okaeri.configs.serdes.TypedKeyWriter;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -8,37 +12,86 @@ import lombok.RequiredArgsConstructor;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Provides raw key-value access to config data for migrations.
+ * <p>
+ * Supports dot-separated nested key paths (e.g., "section.subsection.key").
+ * Implements both {@link TypedKeyReader} and {@link TypedKeyWriter} for
+ * automatic type resolution and simplification.
+ */
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class RawConfigView {
+public class RawConfigView implements TypedKeyReader, TypedKeyWriter {
 
     private final OkaeriConfig config;
     private String nestedSeparator = "\\.";
 
-    public boolean exists(@NonNull String key) {
-        Map<String, Object> document = this.config.asMap(this.config.getConfigurer(), true);
-        return this.valueExists(document, key);
+    // ==================== INTERFACE REQUIREMENTS ====================
+
+    @Override
+    public Configurer getConfigurer() {
+        return this.config.getConfigurer();
     }
 
-    public Object get(@NonNull String key) {
-        Map<String, Object> document = this.config.asMap(this.config.getConfigurer(), true);
+    @Override
+    public SerdesContext getReaderContext(@NonNull String key) {
+        return SerdesContext.of(this.getConfigurer(), this.config.getContext(), null);
+    }
+
+    @Override
+    public SerdesContext getWriterContext(@NonNull String key) {
+        return SerdesContext.of(this.getConfigurer(), this.config.getContext(), null);
+    }
+
+    @Override
+    public Object getRaw(@NonNull String key) {
+        Map<String, Object> document = this.config.asMap(this.getConfigurer(), true);
         return this.valueExtract(document, key);
     }
 
-    public Object set(@NonNull String key, Object value) {
-
-        Map<String, Object> document = this.config.asMap(this.config.getConfigurer(), true);
-        Object old = this.valuePut(document, key, value);
-
-        // mutate parent
+    @Override
+    public void setRaw(@NonNull String key, Object value) {
+        Map<String, Object> document = this.config.asMap(this.getConfigurer(), true);
+        this.valuePut(document, key, value);
         this.config.load(document);
-
-        return old;
     }
 
-    public Object remove(@NonNull String key) {
+    @Override
+    public Object getRawOrNull(@NonNull String key) {
+        return this.getRaw(key);
+    }
 
-        Map<String, Object> document = this.config.asMap(this.config.getConfigurer(), true);
+    // ==================== MIGRATION CONVENIENCE METHODS ====================
+
+    /**
+     * Gets the raw value at the specified key path (alias for {@link #getRaw}).
+     *
+     * @param key the dot-separated key path
+     * @return the raw value, or null if not found
+     */
+    public Object get(@NonNull String key) {
+        return this.getRaw(key);
+    }
+
+    /**
+     * Checks if a key exists at the specified path.
+     *
+     * @param key the dot-separated key path
+     * @return true if the key exists
+     */
+    public boolean exists(@NonNull String key) {
+        Map<String, Object> document = this.config.asMap(this.getConfigurer(), true);
+        return this.valueExists(document, key);
+    }
+
+    /**
+     * Removes the value at the specified key path.
+     *
+     * @param key the dot-separated key path
+     * @return the previous value, or null
+     */
+    public Object remove(@NonNull String key) {
+        Map<String, Object> document = this.config.asMap(this.getConfigurer(), true);
         Object old = this.valueRemove(document, key);
 
         // top-level keys need to be removed from internalState as well
@@ -49,98 +102,87 @@ public class RawConfigView {
             }
         }
 
-        // mutate parent
         this.config.load(document);
-
         return old;
     }
 
-    protected boolean valueExists(Map document, String path) {
+    // ==================== NESTED PATH HELPERS ====================
+
+    protected boolean valueExists(Map<?, ?> document, String path) {
         String[] split = path.split(this.nestedSeparator);
         for (int i = 0; i < split.length; i++) {
             String part = split[i];
-            // last element reached
             if (i == (split.length - 1)) {
                 return document.containsKey(part);
             }
-            // sub-map
             Object element = document.get(part);
             if (element instanceof Map) {
-                document = (Map) element;
+                document = (Map<?, ?>) element;
                 continue;
             }
-            // cannot go deeper
             return false;
         }
         return false;
     }
 
-    protected Object valueExtract(Map document, String path) {
+    protected Object valueExtract(Map<?, ?> document, String path) {
         String[] split = path.split(this.nestedSeparator);
         for (int i = 0; i < split.length; i++) {
             String part = split[i];
             Object element = document.get(part);
-            // last element reached
             if (i == (split.length - 1)) {
                 return element;
             }
-            // sub-map
             if (element instanceof Map) {
-                document = (Map) element;
+                document = (Map<?, ?>) element;
                 continue;
             }
-            // cannot go deeper
-            String elementStr = (element == null) ? "null" : element.getClass().getSimpleName();
-            throw new IllegalArgumentException("Cannot extract '" + path + "': " +
-                "not deep enough (ended at index " + i + " [" + part + ":" + elementStr + "])");
+            // can't traverse deeper - return null
+            return null;
         }
         return null;
     }
 
     @SuppressWarnings("unchecked")
-    protected Object valuePut(Map document, String path, Object value) {
+    protected Object valuePut(Map<?, ?> document, String path, Object value) {
         String[] split = path.split(this.nestedSeparator);
+        Map<Object, Object> current = (Map<Object, Object>) document;
         for (int i = 0; i < split.length; i++) {
             String part = split[i];
-            // last element reached
             if (i == (split.length - 1)) {
-                return document.put(part, value);
+                return current.put(part, value);
             }
-            // sub-map
-            Object element = document.get(part);
+            Object element = current.get(part);
             if (element instanceof Map) {
-                document = (Map) element;
+                current = (Map<Object, Object>) element;
                 continue;
             }
-            // cannot go deeper and element is not null
             if (element != null) {
                 String elementStr = element.getClass().getSimpleName();
                 throw new IllegalArgumentException("Cannot insert '" + path + "': " +
                     "type conflict (ended at index " + i + " [" + part + ":" + elementStr + "])");
             }
-            // no level, insert empty map
-            Map map = new LinkedHashMap<>();
-            document.put(part, map);
-            document = map;
+            Map<Object, Object> map = new LinkedHashMap<>();
+            current.put(part, map);
+            current = map;
         }
         throw new IllegalArgumentException("Cannot put '" + path + "'");
     }
 
-    protected Object valueRemove(Map document, String path) {
+    @SuppressWarnings("unchecked")
+    protected Object valueRemove(Map<?, ?> document, String path) {
         String[] split = path.split(this.nestedSeparator);
+        Map<Object, Object> current = (Map<Object, Object>) document;
         for (int i = 0; i < split.length; i++) {
             String part = split[i];
-            // last element reached
             if (i == (split.length - 1)) {
-                return document.remove(part);
+                return current.remove(part);
             }
-            // sub-map
-            Object element = document.get(part);
+            Object element = current.get(part);
             if (element instanceof Map) {
-                document = (Map) element;
+                current = (Map<Object, Object>) element;
                 continue;
             }
-            // cannot go deeper
             return null;
         }
         return null;

@@ -35,8 +35,8 @@ public class LongRangeSerializer implements ObjectSerializer<LongRange> {
             data.setValue(range.getMin() + "-" + range.getMax());
         } else {
             // Section format: { min: X, max: Y }
-            data.add("min", range.getMin());
-            data.add("max", range.getMax());
+            data.set("min", range.getMin());
+            data.set("max", range.getMax());
         }
     }
 
