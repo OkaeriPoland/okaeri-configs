@@ -16,7 +16,12 @@ class SourceErrorMarkerTest {
             age: 30""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("age"), "config.yml");
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("age"))
+            .sourceFile("config.yml")
+            .build()
+            .format();
 
         assertThat(marker).isEqualTo("""
              --> config.yml:2:6
@@ -33,7 +38,12 @@ class SourceErrorMarkerTest {
               port: 5432""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("database.port"), "config.yml");
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("database.port"))
+            .sourceFile("config.yml")
+            .build()
+            .format();
 
         assertThat(marker).isEqualTo("""
              --> config.yml:3:9
@@ -52,7 +62,12 @@ class SourceErrorMarkerTest {
                 port: invalid""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("servers[1].port"), "app.yml");
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("servers[1].port"))
+            .sourceFile("app.yml")
+            .build()
+            .format();
 
         assertThat(marker).isEqualTo("""
              --> app.yml:5:11
@@ -68,7 +83,12 @@ class SourceErrorMarkerTest {
               enabled: true""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("settings"), "config.yml");
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("settings"))
+            .sourceFile("config.yml")
+            .build()
+            .format();
 
         // Should underline the key since there's no value
         assertThat(marker).contains("settings");
@@ -84,7 +104,11 @@ class SourceErrorMarkerTest {
         String yaml = yamlBuilder.toString().trim();
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("key12"), null);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("key12"))
+            .build()
+            .format();
 
         // Should handle double-digit line numbers with proper alignment
         assertThat(marker).contains("12 |");
@@ -96,7 +120,11 @@ class SourceErrorMarkerTest {
         String yaml = "name: test";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("name"), null);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("name"))
+            .build()
+            .format();
 
         assertThat(marker).startsWith(" --> 1:7");
         assertThat(marker).doesNotContain("null");
@@ -107,7 +135,12 @@ class SourceErrorMarkerTest {
         String yaml = "name: test";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("nonexistent.path"), "config.yml");
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("nonexistent.path"))
+            .sourceFile("config.yml")
+            .build()
+            .format();
 
         assertThat(marker).isEmpty();
     }
@@ -119,7 +152,13 @@ class SourceErrorMarkerTest {
               port: invalid""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("database.port"), "config.yml", "expected Integer");
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("database.port"))
+            .sourceFile("config.yml")
+            .hint("expected Integer")
+            .build()
+            .format();
 
         assertThat(marker).isEqualTo("""
              --> config.yml:2:9
@@ -138,7 +177,14 @@ class SourceErrorMarkerTest {
             fifth: 5""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("target"), "config.yml", null, -1, 1, yaml, 2, 0);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("target"))
+            .sourceFile("config.yml")
+            .rawContent(yaml)
+            .contextLinesBefore(2)
+            .build()
+            .format();
 
         assertThat(marker).isEqualTo("""
              --> config.yml:4:9
@@ -159,7 +205,15 @@ class SourceErrorMarkerTest {
             fifth: 5""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("target"), "config.yml", "expected Integer", -1, 1, yaml, 0, 2);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("target"))
+            .sourceFile("config.yml")
+            .hint("expected Integer")
+            .rawContent(yaml)
+            .contextLinesAfter(2)
+            .build()
+            .format();
 
         assertThat(marker).isEqualTo("""
              --> config.yml:2:9
@@ -182,7 +236,16 @@ class SourceErrorMarkerTest {
             seventh: 7""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("target"), "config.yml", "expected Integer", -1, 1, yaml, 2, 2);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("target"))
+            .sourceFile("config.yml")
+            .hint("expected Integer")
+            .rawContent(yaml)
+            .contextLinesBefore(2)
+            .contextLinesAfter(2)
+            .build()
+            .format();
 
         assertThat(marker).isEqualTo("""
              --> config.yml:4:9
@@ -203,7 +266,15 @@ class SourceErrorMarkerTest {
             third: 3""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("target"), "config.yml", null, -1, 1, yaml, 2, 1);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("target"))
+            .sourceFile("config.yml")
+            .rawContent(yaml)
+            .contextLinesBefore(2)
+            .contextLinesAfter(1)
+            .build()
+            .format();
 
         // Should not show negative line numbers, just what's available
         assertThat(marker).isEqualTo("""
@@ -222,7 +293,15 @@ class SourceErrorMarkerTest {
             target: invalid""";
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("target"), "config.yml", null, -1, 1, yaml, 1, 2);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("target"))
+            .sourceFile("config.yml")
+            .rawContent(yaml)
+            .contextLinesBefore(1)
+            .contextLinesAfter(2)
+            .build()
+            .format();
 
         // Should not show lines beyond end
         assertThat(marker).isEqualTo("""
@@ -242,7 +321,14 @@ class SourceErrorMarkerTest {
         String yaml = yamlBuilder.toString().trim();
 
         YamlSourceWalker walker = YamlSourceWalker.of(yaml);
-        String marker = SourceErrorMarker.format(walker, ConfigPath.parse("key10"), null, null, -1, 1, yaml, 2, 2);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("key10"))
+            .rawContent(yaml)
+            .contextLinesBefore(2)
+            .contextLinesAfter(2)
+            .build()
+            .format();
 
         // Should align line numbers properly with context spanning single to double digits
         assertThat(marker).contains(" 8 | key8: value8");
@@ -250,5 +336,31 @@ class SourceErrorMarkerTest {
         assertThat(marker).contains("10 | key10: value10");
         assertThat(marker).contains("11 | key11: value11");
         assertThat(marker).contains("12 | key12: value12");
+    }
+
+    @Test
+    void testIncludeCommentsAbove() {
+        String yaml = """
+            first: 1
+            # This is a comment about target
+            # Another comment line
+            target: invalid
+            fifth: 5""";
+
+        YamlSourceWalker walker = YamlSourceWalker.of(yaml);
+        String marker = SourceErrorMarker.builder()
+            .walker(walker)
+            .path(ConfigPath.parse("target"))
+            .sourceFile("config.yml")
+            .rawContent(yaml)
+            .includeCommentsAbove(true)
+            .commentChecker(line -> line.trim().startsWith("#"))
+            .build()
+            .format();
+
+        // Should include both comment lines above target
+        assertThat(marker).contains("# This is a comment about target");
+        assertThat(marker).contains("# Another comment line");
+        assertThat(marker).contains("target: invalid");
     }
 }

@@ -74,6 +74,18 @@ public abstract class Configurer {
         return null;
     }
 
+    /**
+     * Checks if a line is a comment line in this format.
+     * Override in format-specific configurers to handle format-specific comment syntax.
+     * Used by error reporting to include comments above fields when errorComments is enabled.
+     *
+     * @param line the line to check (may include leading whitespace)
+     * @return true if the line is a comment, false otherwise
+     */
+    public boolean isCommentLine(String line) {
+        return false;
+    }
+
     public abstract void setValue(@NonNull String key, Object value, GenericsDeclaration genericType, FieldDeclaration field);
 
     public abstract void setValueUnsafe(@NonNull String key, Object value);

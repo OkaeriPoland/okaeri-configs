@@ -54,4 +54,38 @@ public class SourceLocation {
      */
     @Builder.Default
     private final int indent = 0;
+
+    // ==================== Multiline Content Support ====================
+
+    /**
+     * For multiline block scalars (|, >, |--, etc.), the line number where
+     * actual content starts (1-based). -1 if not multiline.
+     */
+    @Builder.Default
+    private final int contentLineNumber = -1;
+
+    /**
+     * For multiline block scalars, the column where content starts (0-based).
+     */
+    @Builder.Default
+    private final int contentColumn = -1;
+
+    /**
+     * For multiline block scalars, the raw line containing the first line of content.
+     */
+    private final String contentRawLine;
+
+    /**
+     * For multiline block scalars, the last line number of the content (1-based).
+     * Used to calculate how many lines to show or skip with ellipsis.
+     */
+    @Builder.Default
+    private final int contentEndLineNumber = -1;
+
+    /**
+     * Returns true if this location represents a multiline block scalar.
+     */
+    public boolean isMultiline() {
+        return this.contentLineNumber > 0;
+    }
 }

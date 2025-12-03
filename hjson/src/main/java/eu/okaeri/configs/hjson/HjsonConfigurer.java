@@ -28,6 +28,12 @@ public class HjsonConfigurer extends Configurer {
     }
 
     @Override
+    public boolean isCommentLine(String line) {
+        String trimmed = line.trim();
+        return trimmed.startsWith("#") || trimmed.startsWith("//") || trimmed.startsWith("/*");
+    }
+
+    @Override
     public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value == null) {

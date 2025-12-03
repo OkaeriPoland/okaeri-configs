@@ -46,6 +46,11 @@ public class YamlBukkitConfigurer extends Configurer {
     }
 
     @Override
+    public boolean isCommentLine(String line) {
+        return line.trim().startsWith("#");
+    }
+
+    @Override
     public Object simplify(Object value, GenericsDeclaration genericType, @NonNull SerdesContext serdesContext, boolean conservative) throws OkaeriException {
 
         if (value instanceof MemorySection) {

@@ -107,7 +107,24 @@ public class OkaeriConfigException extends OkaeriException {
         String rawContent = (configurer != null) ? configurer.getRawContent() : null;
         boolean hasSourceMarker = false;
         if ((walker != null) && hasPath) {
-            String marker = SourceErrorMarker.format(walker, path, sourceFile, hint, valueOffset, valueLength, rawContent, contextLinesBefore, contextLinesAfter);
+            // Get errorComments setting from parent config
+            boolean includeComments = (configurer.getParent() != null) && configurer.getParent().isErrorComments();
+
+            String marker = SourceErrorMarker.builder()
+                .walker(walker)
+                .path(path)
+                .sourceFile(sourceFile)
+                .hint(hint)
+                .valueOffset(valueOffset)
+                .valueLength(valueLength)
+                .rawContent(rawContent)
+                .contextLinesBefore(contextLinesBefore)
+                .contextLinesAfter(contextLinesAfter)
+                .includeCommentsAbove(includeComments)
+                .commentChecker(includeComments ? configurer::isCommentLine : null)
+                .build()
+                .format();
+
             if (!marker.isEmpty()) {
                 sb.append("\n").append(marker);
                 hasSourceMarker = true;

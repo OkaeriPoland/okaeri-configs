@@ -4,6 +4,10 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriConfigException;
+import eu.okaeri.configs.exception.ValueIndexedException;
+import eu.okaeri.configs.schema.GenericsPair;
+import eu.okaeri.configs.serdes.ObjectTransformer;
+import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.commons.SerdesCommons;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
 import eu.okaeri.configs.yaml.bungee.YamlBungeeConfigurer;
@@ -668,7 +672,30 @@ class YamlErrorMessageTest {
     private <T extends OkaeriConfig> T loadConfigWithCommons(Class<T> clazz, Configurer configurer, String yaml) {
         T config = ConfigManager.create(clazz);
         configurer.register(new SerdesCommons());
+        // Register custom test transformers for range testing
+        configurer.register(registry -> {
+            registry.register(new RangeTestTransformer());
+            registry.register(new MultiLineRangeTestTransformer());
+            registry.register(new MiddleLineRangeTestTransformer());
+            registry.register(new SingleCharMultilineTransformer());
+            // Context lines control transformers
+            registry.register(new ContextBefore3Transformer());
+            registry.register(new ContextAfter3Transformer());
+            registry.register(new ContextBoth3Transformer());
+            registry.register(new ContextBefore1After1Transformer());
+        });
         config.setConfigurer(configurer);
+        config.load(yaml);
+        return config;
+    }
+
+    private <T extends OkaeriConfig> T loadConfigWithErrorComments(Class<T> clazz, Configurer configurer, String yaml) {
+        T config = ConfigManager.create(clazz, it -> {
+            it.configure(opt -> {
+                opt.configurer(configurer);
+                opt.errorComments(true);
+            });
+        });
         config.load(yaml);
         return config;
     }
@@ -879,5 +906,811 @@ class YamlErrorMessageTest {
     public static class ResourceConfig extends OkaeriConfig {
         private String memory;
         private int cpu;
+    }
+
+    // ==================== Multiline String Styles ====================
+
+    @ParameterizedTest(name = "{0}: Invalid Integer in literal block scalar (|)")
+    @MethodSource("yamlConfigurers")
+    void testError_LiteralBlockScalar(String name, Configurer configurer) {
+        String yaml = """
+            value: |
+              not_a_number
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // Shows key line and content for multiline block
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 2:3
+                      |
+                    1 | value: |
+                    2 |   not_a_number
+                      |   ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid Integer in folded block scalar (>)")
+    @MethodSource("yamlConfigurers")
+    void testError_FoldedBlockScalar(String name, Configurer configurer) {
+        String yaml = """
+            value: >
+              not_a_number
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 2:3
+                      |
+                    1 | value: >
+                    2 |   not_a_number
+                      |   ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid Integer in literal block with strip (|-)")
+    @MethodSource("yamlConfigurers")
+    void testError_LiteralBlockScalarStrip(String name, Configurer configurer) {
+        String yaml = """
+            value: |-
+              not_a_number
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 2:3
+                      |
+                    1 | value: |-
+                    2 |   not_a_number
+                      |   ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid Integer in literal block with keep (|+)")
+    @MethodSource("yamlConfigurers")
+    void testError_LiteralBlockScalarKeep(String name, Configurer configurer) {
+        String yaml = """
+            value: |+
+              not_a_number
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 2:3
+                      |
+                    1 | value: |+
+                    2 |   not_a_number
+                      |   ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid Integer in nested literal block scalar")
+    @MethodSource("yamlConfigurers")
+    void testError_NestedLiteralBlockScalar(String name, Configurer configurer) {
+        String yaml = """
+            database:
+              host: localhost
+              port: |
+                not_a_port
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(NestedConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("database.port");
+                // Shows key line and content for multiline block
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'database.port' to Integer from String
+                     --> 4:5
+                      |
+                    3 |   port: |
+                    4 |     not_a_port
+                      |     ^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid enum in literal block scalar")
+    @MethodSource("yamlConfigurers")
+    void testError_EnumLiteralBlockScalar(String name, Configurer configurer) {
+        String yaml = """
+            level: |
+              MDIUM
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(EnumConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("level");
+                // Shows key line and content for multiline block
+                assertThat(e.getMessage()).isEqualTo("""
+                    Cannot resolve 'level' to Level from String
+                     --> 2:3
+                      |
+                    1 | level: |
+                    2 |   MDIUM
+                      |   ^^^^^ Expected MEDIUM, HIGH or LOW""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Multiline literal block with multiple lines - first line error")
+    @MethodSource("yamlConfigurers")
+    void testError_MultilineLiteralBlock(String name, Configurer configurer) {
+        String yaml = """
+            value: |
+              not_valid
+              second line
+              third line
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // The error points to where the multiline content starts
+                // Points to last content line, showing all lines from key to bottom
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 4:3
+                      |
+                    1 | value: |
+                    2 |   not_valid
+                    3 |   second line
+                    4 |   third line
+                      |   ^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Invalid Pattern in literal block - specific character")
+    @MethodSource("yamlConfigurers")
+    void testError_PatternLiteralBlockScalar_SpecificChar(String name, Configurer configurer) {
+        // Pattern with unclosed bracket - error at specific position within multiline content
+        String yaml = """
+            value: |
+              [invalid(regex
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(PatternConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // Should point to specific character within the multiline content
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[PatternTransformer]: Cannot transform 'value' to Pattern from String
+                     --> 2:16
+                      |
+                    1 | value: |
+                    2 |   [invalid(regex
+                      |                ^ Unclosed character class""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Single char error in middle of multiline content")
+    @MethodSource("yamlConfigurers")
+    void testError_SingleCharMultiline_ErrorInMiddle(String name, Configurer configurer) {
+        // Custom transformer throws at index 13 (the '[' character position)
+        // Content: "^start\nmiddle[broken\nend$" - index 13 is '[' on line 2 of content (line 3 in file)
+        String yaml = """
+            value: |
+              ^start
+              middle[broken
+              end$
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(SingleCharMultilineConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // Index 13 points to '[' on line 3 (content line 2)
+                // Should show key line, content lines, error marker, and remaining content
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[SingleCharMultilineTransformer]: Cannot transform 'value' to SingleCharMultilineType from String
+                     --> 3:9
+                      |
+                    1 | value: |
+                    2 |   ^start
+                    3 |   middle[broken
+                      |         ^ Invalid character at position 13
+                    4 |   end$""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Pattern error detected at end of multiline block")
+    @MethodSource("yamlConfigurers")
+    void testError_PatternMultiline_ErrorAtEnd(String name, Configurer configurer) {
+        // Pattern with unclosed bracket - error is detected at end of string
+        // The regex "[a-z\n0-9" has unclosed [ detected at end
+        // PatternSyntaxException.getIndex() returns position past last char
+        String yaml = """
+            value: |
+              [a-z
+              0-9
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(PatternConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // Error detected at end of content - points to last character
+                // Content: "[a-z\n0-9" - last char is '9' at column 5 (0-indexed: 4)
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[PatternTransformer]: Cannot transform 'value' to Pattern from String
+                     --> 3:5
+                      |
+                    1 | value: |
+                    2 |   [a-z
+                    3 |   0-9
+                      |     ^ Unclosed character class""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Long multiline with ellipsis")
+    @MethodSource("yamlConfigurers")
+    void testError_LongMultilineWithEllipsis(String name, Configurer configurer) {
+        // More than 5 lines between key and error - should show ellipsis
+        String yaml = """
+            value: |
+              line1
+              line2
+              line3
+              line4
+              line5
+              line6
+              not_a_number
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // Should show key line, 2 lines after, ellipsis, 2 lines before error, and error line
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 8:3
+                      |
+                    1 | value: |
+                    2 |   line1
+                    3 |   line2
+                      | ... (2 more lines)
+                    6 |   line5
+                    7 |   line6
+                    8 |   not_a_number
+                      |   ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: ValueIndexedException range within single line in multiline block")
+    @MethodSource("yamlConfigurers")
+    void testError_MultilineRangeWithinSingleLine(String name, Configurer configurer) {
+        // Test that startIndex + length highlights a range within a single line
+        // Uses RangeTestConfig with custom transformer that throws ValueIndexedException
+        String yaml = """
+            value: |
+              hello world foo bar
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(RangeTestConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // RangeTestTransformer throws error at index 6, length 5 ("world")
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[RangeTestTransformer]: Cannot transform 'value' to RangeTestType from String
+                     --> 2:9
+                      |
+                    1 | value: |
+                    2 |   hello world foo bar
+                      |         ^^^^^ Invalid word at position 6""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: ValueIndexedException range spanning multiple lines in multiline block")
+    @MethodSource("yamlConfigurers")
+    void testError_MultilineRangeSpanningLines(String name, Configurer configurer) {
+        // Test that startIndex + length can span multiple lines
+        // Range starts on line 2 and ends on line 3
+        String yaml = """
+            value: |
+              hello world
+              foo bar
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(MultiLineRangeTestConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // MultiLineRangeTestTransformer throws error at index 6, length 13 ("world\nfoo bar")
+                // Spans from "world" on line 2 to "bar" on line 3
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[MultiLineRangeTestTransformer]: Cannot transform 'value' to MultiLineRangeTestType from String
+                     --> 2:9
+                      |
+                    1 | value: |
+                    2 |   hello world
+                      |         ^^^^^
+                    3 |   foo bar
+                      |   ^^^^^^^ Invalid range spanning lines""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: ValueIndexedException range on middle line only in 3-line multiline block")
+    @MethodSource("yamlConfigurers")
+    void testError_MultilineRangeMiddleLineOnly(String name, Configurer configurer) {
+        // Test error on middle line (line 3) with content before and after
+        // 3 content lines: line 2 = "first", line 3 = "hello world", line 4 = "last"
+        String yaml = """
+            value: |
+              first
+              hello world
+              last
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(MiddleLineRangeTestConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // MiddleLineRangeTestTransformer throws error at index 12, length 5 ("world" on line 3)
+                // "first\nhello world\nlast" - index 12 is 'w' in "world"
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[MiddleLineRangeTestTransformer]: Cannot transform 'value' to MiddleLineRangeTestType from String
+                     --> 3:9
+                      |
+                    1 | value: |
+                    2 |   first
+                    3 |   hello world
+                      |         ^^^^^ Invalid word in middle
+                    4 |   last""");
+            });
+    }
+
+    // ==================== ValueIndexedException Context Lines Tests ====================
+    // These tests verify that contextLinesBefore/After shows surrounding YAML content
+    // (other fields, comments) for better error context - NOT multiline block content
+
+    @ParameterizedTest(name = "{0}: contextLinesBefore=2 shows 2 lines before error field")
+    @MethodSource("yamlConfigurers")
+    void testError_ContextLinesBefore_ShowsSurroundingFields(String name, Configurer configurer) {
+        // Regular YAML with multiple fields - error on 'value' field
+        // contextLinesBefore=2 should show the 2 lines before the error line
+        String yaml = """
+            # Configuration file
+            name: test
+            count: 42
+            value: not_an_int
+            enabled: true
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // Default context is 0, so only error line shown
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 4:8
+                      |
+                    4 | value: not_an_int
+                      |        ^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: contextLinesBefore=2, contextLinesAfter=1 shows surrounding context")
+    @MethodSource("yamlConfigurers")
+    void testError_ContextBothDirections_ShowsSurroundingFields(String name, Configurer configurer) {
+        // Test with nested config where we can control context via custom transformer
+        // Using ContextBefore1After1Config which has contextLinesBefore=1, contextLinesAfter=1
+        String yaml = """
+            # Header comment
+            name: test
+            value: hello world
+            count: 42
+            enabled: true
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(ContextBefore1After1Config.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // contextLinesBefore=1 shows 1 line before, contextLinesAfter=1 shows 1 line after
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[ContextBefore1After1Transformer]: Cannot transform 'value' to ContextBefore1After1Type from String
+                     --> 3:14
+                      |
+                    2 | name: test
+                    3 | value: hello world
+                      |              ^^^^^ Error with custom context
+                    4 | count: 42""");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: contextLinesBefore=3 shows comment and fields before error")
+    @MethodSource("yamlConfigurers")
+    void testError_ContextShowsComments(String name, Configurer configurer) {
+        // Test that context includes comments above the error field
+        String yaml = """
+            # Main configuration
+            # Version: 1.0
+            name: myapp
+            # The value below is important
+            value: hello world
+            debug: false
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(ContextBefore3Config.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // contextLinesBefore=3 shows the comment and preceding fields
+                // Index 30 is beyond "hello world" (11 chars), so highlights entire value from column 8
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[ContextBefore3Transformer]: Cannot transform 'value' to ContextBefore3Type from String
+                     --> 5:8
+                      |
+                    2 | # Version: 1.0
+                    3 | name: myapp
+                    4 | # The value below is important
+                    5 | value: hello world
+                      |        ^^^^^^^^^^^ Error with 3 lines before""");
+            });
+    }
+
+    // ==================== errorComments Option Test ====================
+
+    /**
+     * Tests that errorComments(true) config option automatically includes
+     * all consecutive comment lines above the error field.
+     */
+    @ParameterizedTest(name = "{0}: errorComments includes consecutive comments above field")
+    @MethodSource("yamlConfigurers")
+    void testError_ErrorCommentsOption_IncludesConsecutiveComments(String name, Configurer configurer) {
+        String yaml = """
+            name: test
+            # This is a comment about the value
+            # Value must be a valid integer
+            value: invalid
+            debug: false
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithErrorComments(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // errorComments(true) should include both comment lines above the field
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 4:8
+                      |
+                    2 | # This is a comment about the value
+                    3 | # Value must be a valid integer
+                    4 | value: invalid
+                      |        ^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    /**
+     * Tests that errorComments stops at non-comment lines (doesn't cross blank lines).
+     */
+    @ParameterizedTest(name = "{0}: errorComments stops at blank lines")
+    @MethodSource("yamlConfigurers")
+    void testError_ErrorCommentsOption_StopsAtBlankLines(String name, Configurer configurer) {
+        String yaml = """
+            name: test
+            # This comment is separated by blank line
+
+            # This is the only comment directly above
+            value: invalid
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithErrorComments(IntegerConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // Only the comment directly above (no blank line) should be included
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 5:8
+                      |
+                    4 | # This is the only comment directly above
+                    5 | value: invalid
+                      |        ^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    // ==================== Sibling Subconfig Accumulation Test ====================
+
+    /**
+     * Tests that error paths don't accumulate across sibling subconfigs.
+     * This was a bug where processing subconfig A would pollute the parent's basePath,
+     * causing subconfig B's error to show path "A.B.field" instead of just "B.field".
+     */
+    @ParameterizedTest(name = "{0}: Sibling subconfigs don't accumulate paths")
+    @MethodSource("yamlConfigurers")
+    void testError_SiblingSubconfigsDoNotAccumulatePaths(String name, Configurer configurer) {
+        // Config with 3 sibling subconfigs, error in the last one
+        String yaml = """
+            sectionA:
+              valueA: 100
+            sectionB:
+              valueB: 200
+            sectionC:
+              valueC: not_a_number
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(SiblingSubconfigsConfig.class, configurer, yaml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                // Path should be just "sectionC.valueC", NOT "sectionA.sectionB.sectionC.valueC"
+                assertThat(e.getPath().toString()).isEqualTo("sectionC.valueC");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'sectionC.valueC' to Integer from String
+                     --> 6:11
+                      |
+                    6 |   valueC: not_a_number
+                      |           ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SiblingSubconfigsConfig extends OkaeriConfig {
+        private SectionA sectionA = new SectionA();
+        private SectionB sectionB = new SectionB();
+        private SectionC sectionC = new SectionC();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SectionA extends OkaeriConfig {
+        private int valueA = 0;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SectionB extends OkaeriConfig {
+        private int valueB = 0;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SectionC extends OkaeriConfig {
+        private int valueC = 0;
+    }
+
+    // ==================== Range Test Types and Transformers ====================
+
+    // Marker type for single-line range test
+    public static class RangeTestType {
+    }
+
+    // Marker type for multi-line range test
+    public static class MultiLineRangeTestType {
+    }
+
+    // Marker type for middle line range test
+    public static class MiddleLineRangeTestType {
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class RangeTestConfig extends OkaeriConfig {
+        private RangeTestType value;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class MultiLineRangeTestConfig extends OkaeriConfig {
+        private MultiLineRangeTestType value;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class MiddleLineRangeTestConfig extends OkaeriConfig {
+        private MiddleLineRangeTestType value;
+    }
+
+    // Marker type for single char in multiline test
+    public static class SingleCharMultilineType {}
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SingleCharMultilineConfig extends OkaeriConfig {
+        private SingleCharMultilineType value;
+    }
+
+    // Transformer that throws ValueIndexedException with index=6, length=5 ("world")
+    public static class RangeTestTransformer extends ObjectTransformer<String, RangeTestType> {
+        @Override
+        public GenericsPair<String, RangeTestType> getPair() {
+            return this.genericsPair(String.class, RangeTestType.class);
+        }
+
+        @Override
+        public RangeTestType transform(String data, SerdesContext serdesContext) {
+            throw new ValueIndexedException("Invalid word at position 6", 6, 5);
+        }
+    }
+
+    // Transformer that throws ValueIndexedException with index=6, length=13 spanning lines
+    public static class MultiLineRangeTestTransformer extends ObjectTransformer<String, MultiLineRangeTestType> {
+        @Override
+        public GenericsPair<String, MultiLineRangeTestType> getPair() {
+            return this.genericsPair(String.class, MultiLineRangeTestType.class);
+        }
+
+        @Override
+        public MultiLineRangeTestType transform(String data, SerdesContext serdesContext) {
+            // "hello world\nfoo bar" - index 6 is 'w', length 13 covers "world\nfoo bar"
+            throw new ValueIndexedException("Invalid range spanning lines", 6, 13);
+        }
+    }
+
+    // Transformer that throws ValueIndexedException with index=12, length=5 ("world" on middle line)
+    public static class MiddleLineRangeTestTransformer extends ObjectTransformer<String, MiddleLineRangeTestType> {
+        @Override
+        public GenericsPair<String, MiddleLineRangeTestType> getPair() {
+            return this.genericsPair(String.class, MiddleLineRangeTestType.class);
+        }
+
+        @Override
+        public MiddleLineRangeTestType transform(String data, SerdesContext serdesContext) {
+            // "first\nhello world\nlast" - index 12 is 'w' in "world"
+            throw new ValueIndexedException("Invalid word in middle", 12, 5);
+        }
+    }
+
+    // Transformer that throws ValueIndexedException at index 13 (single char in middle of multiline)
+    // For content "^start\nmiddle[broken\nend$" - index 13 is the '[' character
+    public static class SingleCharMultilineTransformer extends ObjectTransformer<String, SingleCharMultilineType> {
+        @Override
+        public GenericsPair<String, SingleCharMultilineType> getPair() {
+            return this.genericsPair(String.class, SingleCharMultilineType.class);
+        }
+
+        @Override
+        public SingleCharMultilineType transform(String data, SerdesContext serdesContext) {
+            // "^start\nmiddle[broken\nend$" - index 13 is '[' on line 2 of content
+            throw new ValueIndexedException("Invalid character at position 13", 13, 1);
+        }
+    }
+
+    // ==================== Context Lines Test Types ====================
+
+    public static class ContextBefore3Type {}
+    public static class ContextAfter3Type {}
+    public static class ContextBoth3Type {}
+    public static class ContextBefore1After1Type {}
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ContextBefore3Config extends OkaeriConfig {
+        private ContextBefore3Type value;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ContextAfter3Config extends OkaeriConfig {
+        private ContextAfter3Type value;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ContextBoth3Config extends OkaeriConfig {
+        private ContextBoth3Type value;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ContextBefore1After1Config extends OkaeriConfig {
+        private ContextBefore1After1Type value;
+    }
+
+    // Transformer with contextLinesBefore=3 - error at index 30 in long content
+    public static class ContextBefore3Transformer extends ObjectTransformer<String, ContextBefore3Type> {
+        @Override
+        public GenericsPair<String, ContextBefore3Type> getPair() {
+            return this.genericsPair(String.class, ContextBefore3Type.class);
+        }
+
+        @Override
+        public ContextBefore3Type transform(String data, SerdesContext serdesContext) {
+            throw ValueIndexedException.builder()
+                .message("Error with 3 lines before")
+                .startIndex(30)
+                .length(5)
+                .contextLinesBefore(3)
+                .contextLinesAfter(0)
+                .build();
+        }
+    }
+
+    // Transformer with contextLinesAfter=3 - error at index 6 in long content
+    public static class ContextAfter3Transformer extends ObjectTransformer<String, ContextAfter3Type> {
+        @Override
+        public GenericsPair<String, ContextAfter3Type> getPair() {
+            return this.genericsPair(String.class, ContextAfter3Type.class);
+        }
+
+        @Override
+        public ContextAfter3Type transform(String data, SerdesContext serdesContext) {
+            throw ValueIndexedException.builder()
+                .message("Error with 3 lines after")
+                .startIndex(6)
+                .length(5)
+                .contextLinesBefore(0)
+                .contextLinesAfter(3)
+                .build();
+        }
+    }
+
+    // Transformer with contextLinesBefore=3 and contextLinesAfter=3
+    public static class ContextBoth3Transformer extends ObjectTransformer<String, ContextBoth3Type> {
+        @Override
+        public GenericsPair<String, ContextBoth3Type> getPair() {
+            return this.genericsPair(String.class, ContextBoth3Type.class);
+        }
+
+        @Override
+        public ContextBoth3Type transform(String data, SerdesContext serdesContext) {
+            throw ValueIndexedException.builder()
+                .message("Error with 3 lines before and after")
+                .startIndex(24)
+                .length(5)
+                .contextLinesBefore(3)
+                .contextLinesAfter(3)
+                .build();
+        }
+    }
+
+    // Transformer with contextLinesBefore=1 and contextLinesAfter=1 (forces ellipsis even for short content)
+    public static class ContextBefore1After1Transformer extends ObjectTransformer<String, ContextBefore1After1Type> {
+        @Override
+        public GenericsPair<String, ContextBefore1After1Type> getPair() {
+            return this.genericsPair(String.class, ContextBefore1After1Type.class);
+        }
+
+        @Override
+        public ContextBefore1After1Type transform(String data, SerdesContext serdesContext) {
+            throw ValueIndexedException.builder()
+                .message("Error with custom context")
+                .startIndex(6)
+                .length(5)
+                .contextLinesBefore(1)
+                .contextLinesAfter(1)
+                .build();
+        }
     }
 }

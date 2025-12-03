@@ -21,7 +21,7 @@ public class YamlSourceWalker implements SourceWalker {
 
     private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("^(\\s*)([^#:\\-][^:]*?):\\s*(.*)$");
     private static final Pattern LIST_ITEM_PATTERN = Pattern.compile("^(\\s*)-\\s*(.*)$");
-    private static final Set<String> MULTILINE_INDICATORS = new HashSet<>(Arrays.asList("|", "|-", ">", ">-"));
+    private static final Set<String> MULTILINE_INDICATORS = new HashSet<>(Arrays.asList("|", "|-", ">", ">-", "|+", ">+"));
 
     @Getter
     private final List<SourceLocation> locations = new ArrayList<>();
@@ -118,6 +118,11 @@ public class YamlSourceWalker implements SourceWalker {
 
         boolean inMultiline = false;
         int multilineBaseIndent = 0;
+        ConfigPath multilinePath = null;
+        int multilineKeyLine = -1;
+        int multilineFirstContentLine = -1;
+        int multilineFirstContentColumn = -1;
+        String multilineFirstContentRawLine = null;
 
         for (int i = 0; i < rawLines.length; i++) {
             String rawLine = rawLines[i];
@@ -128,8 +133,18 @@ public class YamlSourceWalker implements SourceWalker {
             // Handle multiline content
             if (inMultiline) {
                 if (!trimmed.isEmpty() && (indent <= multilineBaseIndent)) {
+                    // Multiline ended - update the location with content info
+                    this.updateMultilineLocation(multilinePath, multilineFirstContentLine,
+                        multilineFirstContentColumn, multilineFirstContentRawLine, lineNumber - 1);
                     inMultiline = false;
+                    multilinePath = null;
                 } else {
+                    // Track first content line
+                    if ((multilineFirstContentLine == -1) && !trimmed.isEmpty()) {
+                        multilineFirstContentLine = lineNumber;
+                        multilineFirstContentColumn = indent;
+                        multilineFirstContentRawLine = rawLine;
+                    }
                     this.locations.add(SourceLocation.builder()
                         .lineNumber(lineNumber)
                         .indent(indent)
@@ -218,6 +233,11 @@ public class YamlSourceWalker implements SourceWalker {
                     if (isMultilineIndicator(value)) {
                         inMultiline = true;
                         multilineBaseIndent = listIndent;
+                        multilinePath = fullPath;
+                        multilineKeyLine = lineNumber;
+                        multilineFirstContentLine = -1;
+                        multilineFirstContentColumn = -1;
+                        multilineFirstContentRawLine = null;
                     }
                 } else {
                     // Simple list item
@@ -269,6 +289,11 @@ public class YamlSourceWalker implements SourceWalker {
                 if (isMultilineIndicator(value)) {
                     inMultiline = true;
                     multilineBaseIndent = indent;
+                    multilinePath = fullPath;
+                    multilineKeyLine = lineNumber;
+                    multilineFirstContentLine = -1;
+                    multilineFirstContentColumn = -1;
+                    multilineFirstContentRawLine = null;
                 }
                 continue;
             }
@@ -280,6 +305,51 @@ public class YamlSourceWalker implements SourceWalker {
                 .rawLine(rawLine)
                 .build());
         }
+
+        // Handle multiline that extends to end of file
+        if (inMultiline && (multilinePath != null)) {
+            // Find last non-empty content line (skip trailing empty lines)
+            int lastContentLine = rawLines.length;
+            while (lastContentLine > multilineFirstContentLine &&
+                   (lastContentLine - 1 < rawLines.length) &&
+                   rawLines[lastContentLine - 1].trim().isEmpty()) {
+                lastContentLine--;
+            }
+            this.updateMultilineLocation(multilinePath, multilineFirstContentLine,
+                multilineFirstContentColumn, multilineFirstContentRawLine, lastContentLine);
+        }
+    }
+
+    /**
+     * Updates a previously stored location with multiline content information.
+     */
+    private void updateMultilineLocation(ConfigPath path, int contentLineNumber, int contentColumn,
+                                         String contentRawLine, int contentEndLineNumber) {
+        if (path == null) {
+            return;
+        }
+        SourceLocation existing = this.pathToLocation.get(path);
+        if (existing == null) {
+            return;
+        }
+
+        // Create updated location with multiline info
+        SourceLocation updated = SourceLocation.builder()
+            .lineNumber(existing.getLineNumber())
+            .rawLine(existing.getRawLine())
+            .valueColumn(existing.getValueColumn())
+            .value(existing.getValue())
+            .keyColumn(existing.getKeyColumn())
+            .key(existing.getKey())
+            .configPath(existing.getConfigPath())
+            .indent(existing.getIndent())
+            .contentLineNumber(contentLineNumber)
+            .contentColumn(contentColumn)
+            .contentRawLine(contentRawLine)
+            .contentEndLineNumber(contentEndLineNumber)
+            .build();
+
+        this.pathToLocation.put(path, updated);
     }
 
     private ConfigPath getParentPath(List<PathEntry> pathStack) {

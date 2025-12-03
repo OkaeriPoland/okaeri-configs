@@ -151,4 +151,17 @@ public class OkaeriConfigOptions {
         this.config.setRemoveOrphans(removeOrphans);
         return this;
     }
+
+    /**
+     * Sets whether to include consecutive comments above the field in error messages.
+     * When enabled, error messages will show all comment lines directly above the
+     * field that caused the error, providing additional context.
+     *
+     * @param errorComments true to include comments in errors, false otherwise
+     * @return this configurer for chaining
+     */
+    public OkaeriConfigOptions errorComments(boolean errorComments) {
+        this.config.setErrorComments(errorComments);
+        return this;
+    }
 }

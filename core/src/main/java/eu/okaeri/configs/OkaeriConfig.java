@@ -47,6 +47,10 @@ public abstract class OkaeriConfig {
     @Setter(AccessLevel.PROTECTED)
     private boolean removeOrphans = false;
 
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private boolean errorComments = false;
+
     /**
      * Gets the configuration declaration, initializing it lazily on first access.
      *

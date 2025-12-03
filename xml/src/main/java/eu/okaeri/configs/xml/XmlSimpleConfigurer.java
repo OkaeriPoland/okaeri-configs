@@ -83,6 +83,12 @@ public class XmlSimpleConfigurer extends Configurer {
     }
 
     @Override
+    public boolean isCommentLine(String line) {
+        String trimmed = line.trim();
+        return trimmed.startsWith("<!--");
+    }
+
+    @Override
     public void setValue(@NonNull String key, Object value, GenericsDeclaration type, FieldDeclaration field) {
         Object simplified = this.simplify(value, type, SerdesContext.of(this, field), false);
         this.map.put(key, simplified);

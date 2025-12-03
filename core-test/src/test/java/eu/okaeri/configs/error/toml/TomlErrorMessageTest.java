@@ -352,11 +352,123 @@ class TomlErrorMessageTest {
             });
     }
 
+    // ==================== Sibling Subconfig Accumulation Test ====================
+
+    /**
+     * Tests that error paths don't accumulate across sibling subconfigs.
+     * This was a bug where processing subconfig A would pollute the parent's basePath,
+     * causing subconfig B's error to show path "A.B.field" instead of just "B.field".
+     */
+    @ParameterizedTest(name = "{0}: Sibling subconfigs don't accumulate paths")
+    @MethodSource("tomlConfigurers")
+    void testError_SiblingSubconfigsDoNotAccumulatePaths(String name, Configurer configurer) {
+        // Config with 3 sibling subconfigs, error in the last one
+        String toml = """
+            [sectionA]
+            valueA = 100
+
+            [sectionB]
+            valueB = 200
+
+            [sectionC]
+            valueC = 'not_a_number'
+            """;
+
+        assertThatThrownBy(() -> this.loadConfig(SiblingSubconfigsConfig.class, configurer, toml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                // Path should be just "sectionC.valueC", NOT "sectionA.sectionB.sectionC.valueC"
+                assertThat(e.getPath().toString()).isEqualTo("sectionC.valueC");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'sectionC.valueC' to Integer from String
+                     --> 8:11
+                      |
+                    8 | valueC = 'not_a_number'
+                      |           ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    // ==================== errorComments Option Tests ====================
+
+    /**
+     * Tests that errorComments(true) config option automatically includes
+     * all consecutive comment lines above the error field.
+     */
+    @ParameterizedTest(name = "{0}: errorComments includes consecutive comments above field")
+    @MethodSource("tomlConfigurers")
+    void testError_ErrorCommentsOption_IncludesConsecutiveComments(String name, Configurer configurer) {
+        String toml = """
+            name = 'test'
+            # This is a comment about the value
+            # Value must be a valid integer
+            value = 'invalid'
+            debug = false
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithErrorComments(IntegerConfig.class, configurer, toml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // errorComments(true) should include both comment lines above the field
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 4:10
+                      |
+                    2 | # This is a comment about the value
+                    3 | # Value must be a valid integer
+                    4 | value = 'invalid'
+                      |          ^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    /**
+     * Tests that errorComments stops at non-comment lines (doesn't cross blank lines).
+     */
+    @ParameterizedTest(name = "{0}: errorComments stops at blank lines")
+    @MethodSource("tomlConfigurers")
+    void testError_ErrorCommentsOption_StopsAtBlankLines(String name, Configurer configurer) {
+        String toml = """
+            name = 'test'
+            # This comment is separated by blank line
+
+            # This is the only comment directly above
+            value = 'invalid'
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithErrorComments(IntegerConfig.class, configurer, toml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("value");
+                // Only the comment directly above (no blank line) should be included
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'value' to Integer from String
+                     --> 5:10
+                      |
+                    4 | # This is the only comment directly above
+                    5 | value = 'invalid'
+                      |          ^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
     // ==================== Helper Methods ====================
 
     private <T extends OkaeriConfig> T loadConfig(Class<T> clazz, Configurer configurer, String toml) {
         T config = ConfigManager.create(clazz);
         config.setConfigurer(configurer);
+        config.load(toml);
+        return config;
+    }
+
+    private <T extends OkaeriConfig> T loadConfigWithErrorComments(Class<T> clazz, Configurer configurer, String toml) {
+        T config = ConfigManager.create(clazz, it -> {
+            it.configure(opt -> {
+                opt.configurer(configurer);
+                opt.errorComments(true);
+            });
+        });
         config.load(toml);
         return config;
     }
@@ -457,5 +569,32 @@ class TomlErrorMessageTest {
     public static class ItemConfig extends OkaeriConfig {
         private String name;
         private Map<String, Integer> settings;
+    }
+
+    // Sibling subconfigs for accumulation test
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SiblingSubconfigsConfig extends OkaeriConfig {
+        private SectionA sectionA = new SectionA();
+        private SectionB sectionB = new SectionB();
+        private SectionC sectionC = new SectionC();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SectionA extends OkaeriConfig {
+        private int valueA = 0;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SectionB extends OkaeriConfig {
+        private int valueB = 0;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SectionC extends OkaeriConfig {
+        private int valueC = 0;
     }
 }
