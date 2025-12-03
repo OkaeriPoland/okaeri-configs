@@ -50,7 +50,7 @@ public class ShortRangeSerializer implements ObjectSerializer<ShortRange> {
             String strValue = (String) rawValue;
             ShortRange range = ShortRange.valueOf(strValue);
             if (range == null) {
-                throw new IllegalArgumentException("Invalid ShortRange format: " + strValue);
+                throw new IllegalArgumentException("Expected short range (e.g. 1-10, -32768-32767)");
             }
             return range;
         }

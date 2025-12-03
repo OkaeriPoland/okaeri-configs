@@ -498,7 +498,7 @@ class TomlErrorMessageTest {
                      --> 2:16
                       |
                     2 | update-rate = 'hello'
-                      |                ^^^^^ Text cannot be parsed to a Duration""");
+                      |                ^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)""");
             });
     }
 
@@ -619,7 +619,7 @@ class TomlErrorMessageTest {
                      --> 3:16
                       |
                     3 | update-rate = 'invalid_duration'
-                      |                ^^^^^^^^^^^^^^^^ Text cannot be parsed to a Duration""");
+                      |                ^^^^^^^^^^^^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)""");
             });
     }
 

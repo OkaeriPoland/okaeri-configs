@@ -163,7 +163,7 @@ class StandardSerdesTest {
         // StringToCharacterTransformer enforces single character strings
         assertThatThrownBy(() -> transformer.transform("ABC", this.context))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("too long");
+            .hasMessageContaining("single character");
     }
 
     @Test

@@ -16,6 +16,10 @@ public class StringToByteTransformer extends ObjectTransformer<String, Byte> {
 
     @Override
     public Byte transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return new BigDecimal(data).byteValueExact();
+        try {
+            return new BigDecimal(data).byteValueExact();
+        } catch (NumberFormatException | ArithmeticException e) {
+            throw new IllegalArgumentException("Expected byte number (-128 to 127)");
+        }
     }
 }

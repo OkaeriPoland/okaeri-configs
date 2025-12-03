@@ -142,7 +142,11 @@ public class DurationTransformer extends BidirectionalTransformer<String, Durati
         }
 
         // parse iso spec duration
-        return Duration.parse(data);
+        try {
+            return Duration.parse(data);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Expected duration (e.g. 30s, 5m, 1h30m, 1d)");
+        }
     }
 
     @Override

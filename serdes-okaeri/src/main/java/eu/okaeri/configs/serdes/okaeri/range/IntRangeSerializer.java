@@ -50,7 +50,7 @@ public class IntRangeSerializer implements ObjectSerializer<IntRange> {
             String strValue = (String) rawValue;
             IntRange range = IntRange.valueOf(strValue);
             if (range == null) {
-                throw new IllegalArgumentException("Invalid IntRange format: " + strValue);
+                throw new IllegalArgumentException("Expected int range (e.g. 1-10, -2147483648-2147483647)");
             }
             return range;
         }

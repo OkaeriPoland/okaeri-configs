@@ -1,14 +1,15 @@
 package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
 
-import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.serdes.SerdesContext;
+import eu.okaeri.configs.util.EnumMatcher;
 import lombok.NonNull;
 import org.bukkit.enchantments.Enchantment;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class StringEnchantmentTransformer extends BidirectionalTransformer<String, Enchantment> {
 
@@ -35,8 +36,8 @@ public class StringEnchantmentTransformer extends BidirectionalTransformer<Strin
             enchantment = byName.get(data.toUpperCase(Locale.ROOT));
         }
         if (enchantment == null) {
-            String available = Arrays.stream(Enchantment.values()).map(Enchantment::getName).collect(Collectors.joining(", "));
-            throw new OkaeriException("Unknown enchantment: " + data + " (Available: " + available);
+            String[] names = byName.keySet().toArray(new String[0]);
+            throw new IllegalArgumentException(EnumMatcher.suggest(data, names, 5));
         }
         return enchantment;
     }

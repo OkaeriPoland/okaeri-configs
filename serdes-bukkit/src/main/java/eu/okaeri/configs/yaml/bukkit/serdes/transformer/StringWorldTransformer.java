@@ -16,7 +16,11 @@ public class StringWorldTransformer extends BidirectionalTransformer<String, Wor
 
     @Override
     public World leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return Bukkit.getWorld(data);
+        World world = Bukkit.getWorld(data);
+        if (world == null) {
+            throw new IllegalArgumentException("Unknown world (is the world loaded?)");
+        }
+        return world;
     }
 
     @Override

@@ -390,7 +390,7 @@ class XmlErrorMessageTest {
                      --> 4:20
                       |
                     4 |       <update-rate>hello</update-rate>
-                      |                    ^^^^^ Text cannot be parsed to a Duration""");
+                      |                    ^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)""");
             });
     }
 
@@ -522,7 +522,7 @@ class XmlErrorMessageTest {
                      --> 4:20
                       |
                     4 |       <update-rate>invalid_duration</update-rate>
-                      |                    ^^^^^^^^^^^^^^^^ Text cannot be parsed to a Duration""");
+                      |                    ^^^^^^^^^^^^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)""");
             });
     }
 

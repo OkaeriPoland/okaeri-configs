@@ -50,7 +50,7 @@ public class ByteRangeSerializer implements ObjectSerializer<ByteRange> {
             String strValue = (String) rawValue;
             ByteRange range = ByteRange.valueOf(strValue);
             if (range == null) {
-                throw new IllegalArgumentException("Invalid ByteRange format: " + strValue);
+                throw new IllegalArgumentException("Expected byte range (e.g. 1-10, -128-127)");
             }
             return range;
         }

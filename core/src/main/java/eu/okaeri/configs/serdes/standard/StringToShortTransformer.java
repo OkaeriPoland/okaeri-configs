@@ -16,6 +16,10 @@ public class StringToShortTransformer extends ObjectTransformer<String, Short> {
 
     @Override
     public Short transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return new BigDecimal(data).shortValueExact();
+        try {
+            return new BigDecimal(data).shortValueExact();
+        } catch (NumberFormatException | ArithmeticException e) {
+            throw new IllegalArgumentException("Expected short number (-32768 to 32767)");
+        }
     }
 }

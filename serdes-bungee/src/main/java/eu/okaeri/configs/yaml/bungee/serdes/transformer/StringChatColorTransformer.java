@@ -15,7 +15,11 @@ public class StringChatColorTransformer extends BidirectionalTransformer<String,
 
     @Override
     public ChatColor leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return ChatColor.of(data);
+        try {
+            return ChatColor.of(data);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Expected color name or hex (e.g. RED, #FF0000)");
+        }
     }
 
     @Override

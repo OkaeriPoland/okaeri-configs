@@ -222,7 +222,7 @@ class YamlErrorMessageTest {
                      --> 1:8
                       |
                     1 | value: not_a_duration
-                      |        ^^^^^^^^^^^^^^ Text cannot be parsed to a Duration""");
+                      |        ^^^^^^^^^^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)""");
             });
     }
 
@@ -241,7 +241,7 @@ class YamlErrorMessageTest {
                      --> 1:8
                       |
                     1 | value: not_an_instant
-                      |        ^^^^^^^^^^^^^^ Text 'not_an_instant' could not be parsed at index 0""");
+                      |        ^^^^^^^^^^^^^^ Expected ISO-8601 instant (e.g. 2006-01-02T15:04:05Z)""");
             });
     }
 
@@ -696,7 +696,7 @@ class YamlErrorMessageTest {
                      --> 3:18
                       |
                     3 |     update-rate: invalid_duration
-                      |                  ^^^^^^^^^^^^^^^^ Text cannot be parsed to a Duration""");
+                      |                  ^^^^^^^^^^^^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)""");
             });
     }
 
@@ -1619,7 +1619,7 @@ class YamlErrorMessageTest {
                      --> 3:18
                       |
                     3 |     update-rate: hello
-                      |                  ^^^^^ Text cannot be parsed to a Duration""");
+                      |                  ^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)""");
             });
     }
 

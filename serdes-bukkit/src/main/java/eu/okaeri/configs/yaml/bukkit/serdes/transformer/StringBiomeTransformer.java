@@ -3,11 +3,13 @@ package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.serdes.SerdesContext;
+import eu.okaeri.configs.util.EnumMatcher;
 import lombok.NonNull;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.block.Biome;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public class StringBiomeTransformer extends BidirectionalTransformer<String, Biome> {
@@ -25,14 +27,20 @@ public class StringBiomeTransformer extends BidirectionalTransformer<String, Bio
             : NamespacedKey.minecraft(data.toLowerCase(Locale.ROOT));
 
         if (key == null) {
-            throw new IllegalArgumentException("Invalid biome key: " + data);
+            String[] names = Arrays.stream(Biome.values()).map(Biome::name).toArray(String[]::new);
+            throw new IllegalArgumentException(EnumMatcher.suggest(data, names, 5));
         }
 
         try {
             return Registry.BIOME.getOrThrow(key);
         }
         catch (NoSuchMethodError error) {
-            return Biome.valueOf(data);
+            try {
+                return Biome.valueOf(data.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                String[] names = Arrays.stream(Biome.values()).map(Biome::name).toArray(String[]::new);
+                throw new IllegalArgumentException(EnumMatcher.suggest(data, names, 5));
+            }
         }
     }
 

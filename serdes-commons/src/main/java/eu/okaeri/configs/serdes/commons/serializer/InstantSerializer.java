@@ -37,7 +37,11 @@ public class InstantSerializer implements ObjectSerializer<Instant> {
             return Instant.ofEpochMilli(epochMilli);
         }
         catch (NumberFormatException e) {
-            return Instant.parse(str);
+            try {
+                return Instant.parse(str);
+            } catch (Exception ex) {
+                throw new IllegalArgumentException("Expected ISO-8601 instant (e.g. 2006-01-02T15:04:05Z)");
+            }
         }
     }
 }

@@ -16,7 +16,11 @@ public class InstantTransformer extends BidirectionalTransformer<String, Instant
 
     @Override
     public Instant leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return Instant.parse(data);
+        try {
+            return Instant.parse(data);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Expected ISO-8601 instant (e.g. 2006-01-02T15:04:05Z)");
+        }
     }
 
     @Override

@@ -46,6 +46,6 @@ public class TextColorSerializer implements ObjectSerializer<TextColor> {
             return color;
         }
 
-        throw new IllegalArgumentException("Invalid TextColor: " + text);
+        throw new IllegalArgumentException("Expected color name or hex (e.g. red, #FF0000)");
     }
 }

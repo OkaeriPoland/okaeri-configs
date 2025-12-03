@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -61,7 +60,7 @@ class InstantTransformerTest {
     @ValueSource(strings = {"invalid", "2023/01/15", "2023-01-15", ""})
     void testParseInvalidFormat(String input) {
         assertThatThrownBy(() -> this.transformer.leftToRight(input, this.context))
-            .isInstanceOf(DateTimeParseException.class);
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     // ==================== rightToLeft (Instant → String) ====================

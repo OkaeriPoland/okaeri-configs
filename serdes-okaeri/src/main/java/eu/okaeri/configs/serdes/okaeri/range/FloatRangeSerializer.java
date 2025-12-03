@@ -50,7 +50,7 @@ public class FloatRangeSerializer implements ObjectSerializer<FloatRange> {
             String strValue = (String) rawValue;
             FloatRange range = FloatRange.valueOf(strValue);
             if (range == null) {
-                throw new IllegalArgumentException("Invalid FloatRange format: " + strValue);
+                throw new IllegalArgumentException("Expected float range (e.g. 0.5-1.5, -100.0-100.0)");
             }
             return range;
         }

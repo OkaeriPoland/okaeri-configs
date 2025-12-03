@@ -3,6 +3,7 @@ package eu.okaeri.configs.yaml.bukkit.serdes.transformer;
 import eu.okaeri.configs.schema.GenericsPair;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.serdes.SerdesContext;
+import eu.okaeri.configs.util.EnumMatcher;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.bukkit.Tag;
@@ -42,7 +43,8 @@ public class StringTagTransformer extends BidirectionalTransformer<String, Tag> 
     public Tag leftToRight(@NonNull String data, @NonNull SerdesContext context) {
         Tag tag = this.tagMap.get(data);
         if (tag == null) {
-            throw new IllegalArgumentException("Unknown tag: " + data);
+            String[] names = this.tagMap.keySet().toArray(new String[0]);
+            throw new IllegalArgumentException(EnumMatcher.suggest(data, names, 5));
         }
         return tag;
     }

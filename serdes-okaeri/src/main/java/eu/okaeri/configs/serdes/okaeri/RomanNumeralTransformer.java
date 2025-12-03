@@ -15,7 +15,11 @@ public class RomanNumeralTransformer extends BidirectionalTransformer<String, Ro
 
     @Override
     public RomanNumeral leftToRight(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        return new RomanNumeral(data);
+        try {
+            return new RomanNumeral(data);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Expected roman numeral (e.g. I, V, X, L, C, D, M)");
+        }
     }
 
     @Override

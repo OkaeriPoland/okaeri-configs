@@ -50,7 +50,7 @@ public class LongRangeSerializer implements ObjectSerializer<LongRange> {
             String strValue = (String) rawValue;
             LongRange range = LongRange.valueOf(strValue);
             if (range == null) {
-                throw new IllegalArgumentException("Invalid LongRange format: " + strValue);
+                throw new IllegalArgumentException("Expected long range (e.g. 1-10, -9223372036854775808-9223372036854775807)");
             }
             return range;
         }

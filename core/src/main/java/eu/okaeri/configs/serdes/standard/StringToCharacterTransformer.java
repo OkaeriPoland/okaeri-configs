@@ -14,7 +14,9 @@ public class StringToCharacterTransformer extends ObjectTransformer<String, Char
 
     @Override
     public Character transform(@NonNull String data, @NonNull SerdesContext serdesContext) {
-        if (data.length() > 1) throw new IllegalArgumentException("char '" + data + "' too long: " + data.length() + ">1");
+        if (data.length() != 1) {
+            throw new IllegalArgumentException("Expected single character");
+        }
         return data.charAt(0);
     }
 }

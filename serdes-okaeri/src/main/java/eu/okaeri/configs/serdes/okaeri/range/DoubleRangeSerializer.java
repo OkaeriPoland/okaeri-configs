@@ -50,7 +50,7 @@ public class DoubleRangeSerializer implements ObjectSerializer<DoubleRange> {
             String strValue = (String) rawValue;
             DoubleRange range = DoubleRange.valueOf(strValue);
             if (range == null) {
-                throw new IllegalArgumentException("Invalid DoubleRange format: " + strValue);
+                throw new IllegalArgumentException("Expected double range (e.g. 0.5-1.5, -100.0-100.0)");
             }
             return range;
         }
