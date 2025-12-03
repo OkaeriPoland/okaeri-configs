@@ -88,26 +88,36 @@
   ],
   "subConfig": {
     "subField": "default sub",
-    "subNumber": 42
+    "subNumber": 42,
+    "subEmptyComment": "sub empty",
+    "subHashComment": "sub hash"
   },
   "subConfigList": [
     {
       "subField": "sub1",
-      "subNumber": 10
+      "subNumber": 10,
+      "subEmptyComment": "sub empty",
+      "subHashComment": "sub hash"
     },
     {
       "subField": "sub2",
-      "subNumber": 20
+      "subNumber": 20,
+      "subEmptyComment": "sub empty",
+      "subHashComment": "sub hash"
     }
   ],
   "subConfigMap": {
     "first": {
       "subField": "map1",
-      "subNumber": 100
+      "subNumber": 100,
+      "subEmptyComment": "sub empty",
+      "subHashComment": "sub hash"
     },
     "second": {
       "subField": "map2",
-      "subNumber": 200
+      "subNumber": 200,
+      "subEmptyComment": "sub empty",
+      "subHashComment": "sub hash"
     }
   },
   "nestedMegaConfig": {
@@ -200,26 +210,36 @@
     ],
     "subConfig": {
       "subField": "default sub",
-      "subNumber": 42
+      "subNumber": 42,
+      "subEmptyComment": "sub empty",
+      "subHashComment": "sub hash"
     },
     "subConfigList": [
       {
         "subField": "sub1",
-        "subNumber": 10
+        "subNumber": 10,
+        "subEmptyComment": "sub empty",
+        "subHashComment": "sub hash"
       },
       {
         "subField": "sub2",
-        "subNumber": 20
+        "subNumber": 20,
+        "subEmptyComment": "sub empty",
+        "subHashComment": "sub hash"
       }
     ],
     "subConfigMap": {
       "first": {
         "subField": "map1",
-        "subNumber": 100
+        "subNumber": 100,
+        "subEmptyComment": "sub empty",
+        "subHashComment": "sub hash"
       },
       "second": {
         "subField": "map2",
-        "subNumber": 200
+        "subNumber": 200,
+        "subEmptyComment": "sub empty",
+        "subHashComment": "sub hash"
       }
     },
     "customObj": {
@@ -268,7 +288,9 @@
     ],
     "repeatingCommentField": "test value",
     "spaceCommentField": "after space comment",
-    "emptyCommentField": "after empty line"
+    "emptyCommentField": "after empty line",
+    "singleEmptyComment": "after single empty",
+    "singleHashComment": "after single hash"
   },
   "customObj": {
     "name": "test",
@@ -316,5 +338,7 @@
   ],
   "repeatingCommentField": "test value",
   "spaceCommentField": "after space comment",
-  "emptyCommentField": "after empty line"
+  "emptyCommentField": "after empty line",
+  "singleEmptyComment": "after single empty",
+  "singleHashComment": "after single hash"
 }

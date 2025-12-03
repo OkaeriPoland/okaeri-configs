@@ -221,6 +221,12 @@ public class MegaConfig extends OkaeriConfig {
     @Comment("Field after empty comment line")
     private String emptyCommentField = "after empty line";
 
+    @Comment("")
+    private String singleEmptyComment = "after single empty";
+
+    @Comment(" ")
+    private String singleHashComment = "after single hash";
+
     // === FACTORY METHOD FOR NESTED MEGACONFIG ===
 
     /**
@@ -245,6 +251,19 @@ public class MegaConfig extends OkaeriConfig {
         @Comment("Subconfig field")
         private String subField = "default sub";
         private int subNumber = 42;
+
+        @Comment("")
+        private String subEmptyComment = "sub empty";
+
+        @Comment(" ")
+        private String subHashComment = "sub hash";
+
+        public SubConfig(String subField, int subNumber) {
+            this.subField = subField;
+            this.subNumber = subNumber;
+            this.subEmptyComment = "sub empty";
+            this.subHashComment = "sub hash";
+        }
     }
 
     public enum TestEnum {

@@ -107,22 +107,38 @@ subConfig:
   # Subconfig field
   subField: default sub
   subNumber: 42
+
+  subEmptyComment: sub empty
+  #
+  subHashComment: sub hash
 # List of nested configs
 subConfigList:
 # Subconfig field
 - subField: sub1
   subNumber: 10
+
+  subEmptyComment: sub empty
+  #
+  subHashComment: sub hash
 - subField: sub2
   subNumber: 20
+  subEmptyComment: sub empty
+  subHashComment: sub hash
 # Map of nested configs
 subConfigMap:
   first:
     # Subconfig field
     subField: map1
     subNumber: 100
+
+    subEmptyComment: sub empty
+    #
+    subHashComment: sub hash
   second:
     subField: map2
     subNumber: 200
+    subEmptyComment: sub empty
+    subHashComment: sub hash
 # Complex multi-level subconfig
 # MegaConfig nested inside itself (2 levels deep)
 # Note: Set to null by default to avoid infinite recursion
@@ -233,22 +249,38 @@ nestedMegaConfig:
     # Subconfig field
     subField: default sub
     subNumber: 42
+
+    subEmptyComment: sub empty
+    #
+    subHashComment: sub hash
   # List of nested configs
   subConfigList:
   # Subconfig field
   - subField: sub1
     subNumber: 10
+
+    subEmptyComment: sub empty
+    #
+    subHashComment: sub hash
   - subField: sub2
     subNumber: 20
+    subEmptyComment: sub empty
+    subHashComment: sub hash
   # Map of nested configs
   subConfigMap:
     first:
       # Subconfig field
       subField: map1
       subNumber: 100
+
+      subEmptyComment: sub empty
+      #
+      subHashComment: sub hash
     second:
       subField: map2
       subNumber: 200
+      subEmptyComment: sub empty
+      subHashComment: sub hash
   # Complex multi-level subconfig
   # MegaConfig nested inside itself (2 levels deep)
   # Note: Set to null by default to avoid infinite recursion
@@ -306,6 +338,10 @@ nestedMegaConfig:
 
   # Field after empty comment line
   emptyCommentField: after empty line
+
+  singleEmptyComment: after single empty
+  #
+  singleHashComment: after single hash
 # Serializable custom object
 customObj:
   name: test
@@ -358,3 +394,7 @@ spaceCommentField: after space comment
 
 # Field after empty comment line
 emptyCommentField: after empty line
+
+singleEmptyComment: after single empty
+#
+singleHashComment: after single hash

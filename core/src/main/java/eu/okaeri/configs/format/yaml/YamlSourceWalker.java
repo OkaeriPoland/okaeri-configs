@@ -362,7 +362,14 @@ public class YamlSourceWalker implements SourceWalker {
         String indent = indentStr.toString();
 
         StringBuilder result = new StringBuilder();
-        for (String line : text.split("\n")) {
+        // Use -1 limit to preserve trailing empty strings (important for @Comment(""))
+        String[] lines = text.split("\n", -1);
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            // Skip the last element if it's empty (artifact of trailing newline)
+            if ((i == (lines.length - 1)) && line.isEmpty()) {
+                break;
+            }
             if (line.isEmpty()) {
                 // Don't indent empty lines (from @Comment(""))
                 result.append("\n");

@@ -180,23 +180,20 @@ public class HjsonConfigurer extends Configurer {
     }
 
     private String formatComment(String[] lines) {
-        if (lines == null) return "";
-
-        String prefixTrimmed = this.commentPrefix.trim();
-
+        if ((lines == null) || (lines.length == 0)) {
+            return "";
+        }
         StringBuilder result = new StringBuilder();
         for (String line : lines) {
             if (line.isEmpty()) {
-                // @Comment("") -> empty line (no # at all)
-                result.append("\n");
-            } else if (line.startsWith(prefixTrimmed)) {
-                // Already has prefix (e.g., starts with #)
-                result.append(line).append("\n");
+                // @Comment("") -> empty line (space for HJSON compatibility)
+                result.append(" \n");
             } else if (line.trim().isEmpty()) {
-                // @Comment(" ") -> "#" (just the hash)
-                result.append(prefixTrimmed).append("\n");
+                // @Comment(" ") -> just #
+                result.append(this.commentPrefix.trim()).append("\n");
+            } else if (line.startsWith(this.commentPrefix.trim())) {
+                result.append(line).append("\n");
             } else {
-                // Normal comment text
                 result.append(this.commentPrefix).append(line).append("\n");
             }
         }

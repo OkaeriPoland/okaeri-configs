@@ -233,14 +233,13 @@ class HjsonConfigurerEdgeCasesTest {
         // When: Write to string
         String hjson = config.saveToString();
 
-        // Then: @Comment(" ") creates "#", @Comment("") creates empty line (no #)
-        // Note: HJSON library adds 2-space indentation to empty lines in comments
+        // Then: @Comment(" ") creates "#", @Comment("") creates empty line with space
         assertThat(hjson).isEqualTo("""
                 {
                   #
                   # Field after space comment
                   afterSpaceComment: value1
-                \s\s
+                \s\s\s
                   # Field after empty line
                   afterEmptyLine: value2
                 }""");

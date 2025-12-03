@@ -69,13 +69,19 @@ singleEnum = 'THIRD'
 # List of enums
 enumList = ['FIRST', 'THIRD']
 # List of nested configs
-subConfigList = [{subField = 'sub1', subNumber = 10}, {subField = 'sub2', subNumber = 20}]
+subConfigList = [{subField = 'sub1', subNumber = 10, subEmptyComment = 'sub empty', subHashComment = 'sub hash'}, {subField = 'sub2', subNumber = 20, subEmptyComment = 'sub empty', subHashComment = 'sub hash'}]
 # Map of nested configs
 # Subconfig field
 subConfigMap.first.subField = 'map1'
 subConfigMap.first.subNumber = 100
+
+subConfigMap.first.subEmptyComment = 'sub empty'
+#
+subConfigMap.first.subHashComment = 'sub hash'
 subConfigMap.second.subField = 'map2'
 subConfigMap.second.subNumber = 200
+subConfigMap.second.subEmptyComment = 'sub empty'
+subConfigMap.second.subHashComment = 'sub hash'
 # Serializable custom object
 customObj.name = 'test'
 customObj.id = 999
@@ -111,11 +117,19 @@ spaceCommentField = 'after space comment'
 # Field after empty comment line
 emptyCommentField = 'after empty line'
 
+singleEmptyComment = 'after single empty'
+#
+singleHashComment = 'after single hash'
+
 # Nested subconfig
 [subConfig]
 # Subconfig field
 subField = 'default sub'
 subNumber = 42
+
+subEmptyComment = 'sub empty'
+#
+subHashComment = 'sub hash'
 
 # Complex multi-level subconfig
 # MegaConfig nested inside itself (2 levels deep)
@@ -188,13 +202,19 @@ singleEnum = 'THIRD'
 # List of enums
 enumList = ['FIRST', 'THIRD']
 # List of nested configs
-subConfigList = [{subField = 'sub1', subNumber = 10}, {subField = 'sub2', subNumber = 20}]
+subConfigList = [{subField = 'sub1', subNumber = 10, subEmptyComment = 'sub empty', subHashComment = 'sub hash'}, {subField = 'sub2', subNumber = 20, subEmptyComment = 'sub empty', subHashComment = 'sub hash'}]
 # Map of nested configs
 # Subconfig field
 subConfigMap.first.subField = 'map1'
 subConfigMap.first.subNumber = 100
+
+subConfigMap.first.subEmptyComment = 'sub empty'
+#
+subConfigMap.first.subHashComment = 'sub hash'
 subConfigMap.second.subField = 'map2'
 subConfigMap.second.subNumber = 200
+subConfigMap.second.subEmptyComment = 'sub empty'
+subConfigMap.second.subHashComment = 'sub hash'
 # Complex multi-level subconfig
 # MegaConfig nested inside itself (2 levels deep)
 # Note: Set to null by default to avoid infinite recursion
@@ -235,8 +255,16 @@ spaceCommentField = 'after space comment'
 # Field after empty comment line
 emptyCommentField = 'after empty line'
 
+singleEmptyComment = 'after single empty'
+#
+singleHashComment = 'after single hash'
+
 # Nested subconfig
 [nestedMegaConfig.subConfig]
 # Subconfig field
 subField = 'default sub'
 subNumber = 42
+
+subEmptyComment = 'sub empty'
+#
+subHashComment = 'sub hash'

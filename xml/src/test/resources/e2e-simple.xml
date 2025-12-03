@@ -120,6 +120,8 @@ Line 5 final</multilineString>
     <!-- Subconfig field -->
     <subField>default sub</subField>
     <subNumber>42</subNumber>
+    <subEmptyComment>sub empty</subEmptyComment>
+    <subHashComment>sub hash</subHashComment>
   </subConfig>
   <!-- List of nested configs -->
   <subConfigList>
@@ -127,10 +129,14 @@ Line 5 final</multilineString>
       <!-- Subconfig field -->
       <subField>sub1</subField>
       <subNumber>10</subNumber>
+      <subEmptyComment>sub empty</subEmptyComment>
+      <subHashComment>sub hash</subHashComment>
     </item>
     <item>
       <subField>sub2</subField>
       <subNumber>20</subNumber>
+      <subEmptyComment>sub empty</subEmptyComment>
+      <subHashComment>sub hash</subHashComment>
     </item>
   </subConfigList>
   <!-- Map of nested configs -->
@@ -139,10 +145,14 @@ Line 5 final</multilineString>
       <!-- Subconfig field -->
       <subField>map1</subField>
       <subNumber>100</subNumber>
+      <subEmptyComment>sub empty</subEmptyComment>
+      <subHashComment>sub hash</subHashComment>
     </first>
     <second>
       <subField>map2</subField>
       <subNumber>200</subNumber>
+      <subEmptyComment>sub empty</subEmptyComment>
+      <subHashComment>sub hash</subHashComment>
     </second>
   </subConfigMap>
   <!-- Complex multi-level subconfig -->
@@ -266,16 +276,22 @@ Line 5 final</multilineString>
     <subConfig>
       <subField>default sub</subField>
       <subNumber>42</subNumber>
+      <subEmptyComment>sub empty</subEmptyComment>
+      <subHashComment>sub hash</subHashComment>
     </subConfig>
     <!-- List of nested configs -->
     <subConfigList>
       <item>
         <subField>sub1</subField>
         <subNumber>10</subNumber>
+        <subEmptyComment>sub empty</subEmptyComment>
+        <subHashComment>sub hash</subHashComment>
       </item>
       <item>
         <subField>sub2</subField>
         <subNumber>20</subNumber>
+        <subEmptyComment>sub empty</subEmptyComment>
+        <subHashComment>sub hash</subHashComment>
       </item>
     </subConfigList>
     <!-- Map of nested configs -->
@@ -283,10 +299,14 @@ Line 5 final</multilineString>
       <first>
         <subField>map1</subField>
         <subNumber>100</subNumber>
+        <subEmptyComment>sub empty</subEmptyComment>
+        <subHashComment>sub hash</subHashComment>
       </first>
       <second>
         <subField>map2</subField>
         <subNumber>200</subNumber>
+        <subEmptyComment>sub empty</subEmptyComment>
+        <subHashComment>sub hash</subHashComment>
       </second>
     </subConfigMap>
     <!-- Complex multi-level subconfig -->
@@ -367,6 +387,8 @@ Line 5 final</multilineString>
     <spaceCommentField>after space comment</spaceCommentField>
     <!-- Field after empty comment line -->
     <emptyCommentField>after empty line</emptyCommentField>
+    <singleEmptyComment>after single empty</singleEmptyComment>
+    <singleHashComment>after single hash</singleHashComment>
   </nestedMegaConfig>
   <!-- Serializable custom object -->
   <customObj>
@@ -439,4 +461,6 @@ Line 5 final</multilineString>
   <spaceCommentField>after space comment</spaceCommentField>
   <!-- Field after empty comment line -->
   <emptyCommentField>after empty line</emptyCommentField>
+  <singleEmptyComment>after single empty</singleEmptyComment>
+  <singleHashComment>after single hash</singleHashComment>
 </config>

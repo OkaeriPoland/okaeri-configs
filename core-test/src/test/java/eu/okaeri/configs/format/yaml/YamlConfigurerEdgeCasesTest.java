@@ -213,6 +213,10 @@ class YamlConfigurerEdgeCasesTest {
 
                   # Another field after empty line
                   some-number: 42
+
+                  deep-section:
+                    # Deep field comment
+                    deep-field: deep value
                 """);
     }
 
@@ -449,5 +453,17 @@ class YamlConfigurerEdgeCasesTest {
         @Comment("")
         @Comment("Another field after empty line")
         private int someNumber = 42;
+
+        @Comment("")
+        private DeepSection deepSection = new DeepSection();
+    }
+
+    // Deep nested section to test @Comment("") with indentation > 0
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+    public static class DeepSection extends OkaeriConfig {
+        @Comment("Deep field comment")
+        private String deepField = "deep value";
     }
 }

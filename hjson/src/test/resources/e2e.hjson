@@ -136,6 +136,10 @@
     # Subconfig field
     subField: default sub
     subNumber: 42
+     
+    subEmptyComment: sub empty
+    #
+    subHashComment: sub hash
   }
   # List of nested configs
   subConfigList:
@@ -144,10 +148,16 @@
       # Subconfig field
       subField: sub1
       subNumber: 10
+       
+      subEmptyComment: sub empty
+      #
+      subHashComment: sub hash
     }
     {
       subField: sub2
       subNumber: 20
+      subEmptyComment: sub empty
+      subHashComment: sub hash
     }
   ]
   # Map of nested configs
@@ -157,11 +167,15 @@
     {
       subField: map1
       subNumber: 100
+      subEmptyComment: sub empty
+      subHashComment: sub hash
     }
     second:
     {
       subField: map2
       subNumber: 200
+      subEmptyComment: sub empty
+      subHashComment: sub hash
     }
   }
   # Complex multi-level subconfig
@@ -303,6 +317,10 @@
       # Subconfig field
       subField: default sub
       subNumber: 42
+       
+      subEmptyComment: sub empty
+      #
+      subHashComment: sub hash
     }
     # List of nested configs
     subConfigList:
@@ -311,10 +329,16 @@
         # Subconfig field
         subField: sub1
         subNumber: 10
+         
+        subEmptyComment: sub empty
+        #
+        subHashComment: sub hash
       }
       {
         subField: sub2
         subNumber: 20
+        subEmptyComment: sub empty
+        subHashComment: sub hash
       }
     ]
     # Map of nested configs
@@ -324,11 +348,15 @@
       {
         subField: map1
         subNumber: 100
+        subEmptyComment: sub empty
+        subHashComment: sub hash
       }
       second:
       {
         subField: map2
         subNumber: 200
+        subEmptyComment: sub empty
+        subHashComment: sub hash
       }
     }
     # Complex multi-level subconfig
@@ -407,9 +435,13 @@
     #
     # Field after space-only comment
     spaceCommentField: after space comment
-    
+     
     # Field after empty comment line
     emptyCommentField: after empty line
+     
+    singleEmptyComment: after single empty
+    #
+    singleHashComment: after single hash
   }
   # Serializable custom object
   customObj:
@@ -482,7 +514,11 @@
   #
   # Field after space-only comment
   spaceCommentField: after space comment
-  
+   
   # Field after empty comment line
   emptyCommentField: after empty line
+   
+  singleEmptyComment: after single empty
+  #
+  singleHashComment: after single hash
 }
