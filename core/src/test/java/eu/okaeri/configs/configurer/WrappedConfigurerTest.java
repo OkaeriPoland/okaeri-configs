@@ -136,6 +136,25 @@ class WrappedConfigurerTest {
     }
 
     /**
+     * Verifies that setRawContent propagates to the inner wrapped configurer.
+     * This is critical because format-specific methods like createSourceWalker() are delegated
+     * to the wrapped configurer, and they call getRawContent() on themselves (not on the wrapper).
+     */
+    @Test
+    void testRawContent_PropagatedToInnerConfigurer() {
+        // Given: A base configurer wrapped in a WrappedConfigurer
+        TestConfigurer baseConfigurer = new TestConfigurer();
+        WrappedConfigurer validator = new WrappedConfigurer(baseConfigurer);
+
+        // When: Setting rawContent on the outer wrapper
+        validator.setRawContent("yaml content");
+
+        // Then: The inner configurer should also have the rawContent
+        // This is critical for createSourceWalker() which is delegated and calls this.getRawContent()
+        assertThat(baseConfigurer.getRawContent()).isEqualTo("yaml content");
+    }
+
+    /**
      * Verifies that registry IS shared between parent and child configurers.
      * This is intentional - serializers should be the same across all configs.
      */

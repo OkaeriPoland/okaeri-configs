@@ -45,11 +45,24 @@ public class WrappedConfigurer extends Configurer {
     @NonNull
     private ConfigPath basePath = ConfigPath.root();
 
-    @Setter
-    private String rawContent;
+    protected String rawContent;
 
     public WrappedConfigurer(@NonNull Configurer wrapped) {
         this.wrapped = wrapped;
+    }
+
+    /**
+     * Sets the raw content for this configurer and propagates it to the wrapped configurer.
+     * <p>
+     * This propagation is necessary because format-specific methods like createSourceWalker()
+     * are delegated to the wrapped configurer, and they call getRawContent() on themselves
+     * (not on the wrapper). Without propagation, the wrapped configurer would have null rawContent.
+     *
+     * @param rawContent the raw content to set
+     */
+    public void setRawContent(String rawContent) {
+        this.rawContent = rawContent;
+        this.wrapped.setRawContent(rawContent);
     }
 
     /**

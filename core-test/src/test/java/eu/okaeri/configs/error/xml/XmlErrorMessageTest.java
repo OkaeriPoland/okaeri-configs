@@ -7,6 +7,7 @@ import eu.okaeri.configs.annotation.NameModifier;
 import eu.okaeri.configs.annotation.NameStrategy;
 import eu.okaeri.configs.annotation.Names;
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.configurer.WrappedConfigurer;
 import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.serdes.commons.SerdesCommons;
 import eu.okaeri.configs.xml.XmlSimpleConfigurer;
@@ -486,6 +487,70 @@ class XmlErrorMessageTest {
                     5 |   <!-- This is the only comment directly above -->
                     6 |   <value>invalid</value>
                       |          ^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    // ==================== WrappedConfigurer Integration Tests ====================
+
+    /**
+     * Integration test for WrappedConfigurer wrapping format configurer.
+     * Tests that rawContent is properly propagated for createSourceWalker().
+     */
+    @ParameterizedTest(name = "{0}: WrappedConfigurer integration - @Names HYPHEN_CASE subconfig")
+    @MethodSource("xmlConfigurers")
+    void testError_WrappedConfigurer_HyphenCaseSubconfig(String name, Configurer configurer) {
+        String xml = """
+            <config>
+              <scoreboard>
+                <dummy>
+                  <update-rate>invalid_duration</update-rate>
+                </dummy>
+              </scoreboard>
+            </config>
+            """;
+
+        WrappedConfigurer wrappedConfigurer = new WrappedConfigurer(configurer);
+        wrappedConfigurer.register(new SerdesCommons());
+
+        assertThatThrownBy(() -> this.loadConfig(ScoreboardConfig.class, wrappedConfigurer, xml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("scoreboard.dummy.update-rate");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[DurationTransformer]: Cannot transform 'scoreboard.dummy.update-rate' to Duration from String
+                     --> 4:20
+                      |
+                    4 |       <update-rate>invalid_duration</update-rate>
+                      |                    ^^^^^^^^^^^^^^^^ Text cannot be parsed to a Duration""");
+            });
+    }
+
+    /**
+     * Integration test for WrappedConfigurer with @CustomKey annotation.
+     */
+    @ParameterizedTest(name = "{0}: WrappedConfigurer integration - @CustomKey")
+    @MethodSource("xmlConfigurers")
+    void testError_WrappedConfigurer_CustomKey(String name, Configurer configurer) {
+        String xml = """
+            <config>
+              <custom-value>not_a_number</custom-value>
+            </config>
+            """;
+
+        WrappedConfigurer wrappedConfigurer = new WrappedConfigurer(configurer);
+
+        assertThatThrownBy(() -> this.loadConfig(CustomKeyConfig.class, wrappedConfigurer, xml))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("custom-value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'custom-value' to Integer from String
+                     --> 2:17
+                      |
+                    2 |   <custom-value>not_a_number</custom-value>
+                      |                 ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
             });
     }
 

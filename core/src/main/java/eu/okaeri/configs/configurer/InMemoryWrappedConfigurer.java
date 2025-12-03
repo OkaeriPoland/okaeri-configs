@@ -19,6 +19,20 @@ public class InMemoryWrappedConfigurer extends WrappedConfigurer {
         this.map = map;
     }
 
+    /**
+     * Override to NOT propagate rawContent to the wrapped configurer.
+     * <p>
+     * Subconfigs should not overwrite the root config's rawContent.
+     * When subconfigs need rawContent for error reporting, they access
+     * the parent's rawContent via getRawContent() delegation chain.
+     *
+     * @param rawContent the raw content to set locally
+     */
+    @Override
+    public void setRawContent(String rawContent) {
+        super.rawContent = rawContent;
+    }
+
     @Override
     public List<String> getAllKeys() {
         return Collections.unmodifiableList(new ArrayList<>(this.map.keySet()));
