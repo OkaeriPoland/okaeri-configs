@@ -21,7 +21,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-yaml-bungee</artifactId>
-  <version>6.0.0-beta.18</version>
+  <version>6.0.0-beta.19</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ maven("https://repo.okaeri.cloud/releases")
 Add dependency to the `dependencies` section:
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-yaml-bungee:6.0.0-beta.18")
+implementation("eu.okaeri:okaeri-configs-yaml-bungee:6.0.0-beta.19")
 ```
 
 ## Usage
