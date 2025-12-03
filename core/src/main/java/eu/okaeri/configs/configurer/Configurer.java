@@ -1,5 +1,6 @@
 package eu.okaeri.configs.configurer;
 
+import eu.okaeri.configs.ConfigContext;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.TargetType;
@@ -30,38 +31,6 @@ import java.util.*;
 
 public abstract class Configurer {
 
-    @Getter
-    @Setter
-    private OkaeriConfig parent;
-
-    /**
-     * Base path for error reporting in nested configs.
-     * When a subconfig is loaded, this is set to the parent's path
-     * so errors show the full path from root.
-     */
-    @Getter
-    @Setter
-    private ConfigPath basePath = ConfigPath.root();
-
-    /**
-     * Gets the raw content from the config's context for error reporting.
-     *
-     * @return raw content string, or null if not set
-     */
-    public String getRawContent() {
-        return this.parent.getContext().getRawContent();
-    }
-
-    /**
-     * Checks if errorComments is enabled for this configurer's config hierarchy.
-     * This method checks the parent config's context setting.
-     *
-     * @return true if errorComments is enabled
-     */
-    public boolean isErrorCommentsEnabled() {
-        return this.parent.getContext().isErrorComments();
-    }
-
     @Setter
     @Getter
     @NonNull
@@ -82,28 +51,28 @@ public abstract class Configurer {
      * Creates a SourceWalker for the raw content to enable source-level error markers.
      * Override in format-specific configurers to provide format-aware parsing.
      *
+     * @param rawContent the raw file content
      * @return a SourceWalker, or null if this format doesn't support source markers
      */
-    public SourceWalker createSourceWalker() {
+    public SourceWalker createSourceWalker(String rawContent) {
 
-        String raw = this.getRawContent();
         List<String> extensions = this.getExtensions();
 
-        if ((raw == null) || extensions.isEmpty()) {
+        if ((rawContent == null) || extensions.isEmpty()) {
             return null;
         }
 
         switch (extensions.get(0).toLowerCase(Locale.ROOT)) {
             case "ini":
             case "properties":
-                return IniSourceWalker.of(raw);
+                return IniSourceWalker.of(rawContent);
             case "toml":
-                return TomlSourceWalker.of(raw);
+                return TomlSourceWalker.of(rawContent);
             case "xml":
-                return XmlSourceWalker.of(raw, "config");
+                return XmlSourceWalker.of(rawContent, "config");
             case "yml":
             case "yaml":
-                return YamlSourceWalker.of(raw);
+                return YamlSourceWalker.of(rawContent);
 
         }
 
@@ -157,7 +126,7 @@ public abstract class Configurer {
 
     @Deprecated
     public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
-        return this.isToStringObject(object, genericType, SerdesContext.of(this));
+        return this.isToStringObject(object, genericType, SerdesContext.of(this, null, null));
     }
 
     @SuppressWarnings("unchecked")
@@ -265,8 +234,7 @@ public abstract class Configurer {
             throw new OkaeriException("cannot simplify type " + serializerType + " (" + genericType + "): '" + value + "' [" + value.getClass() + "]");
         }
 
-        Configurer configurer = (this.getParent() == null) ? this : this.getParent().getConfigurer();
-        SerializationData serializationData = new SerializationData(configurer, serdesContext);
+        SerializationData serializationData = new SerializationData(this, serdesContext);
         serializer.serialize(value, serializationData, (genericType == null) ? GenericsDeclaration.of(value) : genericType);
         Map<Object, Object> serializationMap = new LinkedHashMap<>(serializationData.asMap());
 
@@ -287,13 +255,14 @@ public abstract class Configurer {
      * Simplifies a value for storage in a map.
      * This is a convenience method that combines simplify with setValue semantics.
      *
-     * @param value the value to simplify
-     * @param type  the generic type declaration
-     * @param field the field declaration (may be null)
+     * @param value         the value to simplify
+     * @param type          the generic type declaration
+     * @param field         the field declaration (may be null)
+     * @param configContext the config context (may be null)
      * @return the simplified value ready for storage
      */
-    public Object simplifyField(Object value, GenericsDeclaration type, FieldDeclaration field) {
-        return this.simplify(value, type, SerdesContext.of(this, field), true);
+    public Object simplifyField(Object value, GenericsDeclaration type, FieldDeclaration field, ConfigContext configContext) {
+        return this.simplify(value, type, SerdesContext.of(this, configContext, field), true);
     }
 
     /**
@@ -347,10 +316,9 @@ public abstract class Configurer {
         }
 
         if (objectSerializer != null) {
-            Configurer configurer = (this.getParent() == null) ? this : this.getParent().getConfigurer();
             DeserializationData deserializationData = (object instanceof Map)
-                ? new DeserializationData((Map<String, Object>) object, configurer, serdesContext)
-                : new DeserializationData(Collections.singletonMap(ObjectSerializer.VALUE, object), configurer, serdesContext);
+                ? new DeserializationData((Map<String, Object>) object, this, serdesContext)
+                : new DeserializationData(Collections.singletonMap(ObjectSerializer.VALUE, object), this, serdesContext);
             try {
                 Object deserialized = objectSerializer.deserialize(deserializationData, target);
                 return workingClazz.cast(deserialized);
@@ -363,6 +331,7 @@ public abstract class Configurer {
                     .expectedType(target)
                     .actualValue(object)
                     .configurer(this)
+                    .configContext(serdesContext.getConfigContext())
                     .errorCode(objectSerializer.getClass())
                     .cause(e)
                     .build();
@@ -375,14 +344,13 @@ public abstract class Configurer {
             Map<String, Object> configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
 
             // Initialize subconfig with its data and path context
-            OkaeriConfig parentConfig = this.getParent();
             config.setInternalState(configMap);
-            config.setBasePath(serdesContext.getPath());
-            if (parentConfig != null) {
-                config.setContext(parentConfig.getContext());
+            config.setInternalPath(serdesContext.getPath());
+            if (serdesContext.getConfigContext() != null) {
+                config.setContext(serdesContext.getConfigContext());
             }
 
-            return (T) config.updateFromInternalState();
+            return (T) config.update();
         }
 
         // generics
@@ -462,6 +430,7 @@ public abstract class Configurer {
                         .expectedType(target)
                         .actualValue(strObject)
                         .configurer(this)
+                        .configContext(serdesContext.getConfigContext())
                         .cause(new IllegalArgumentException(hint))
                         .build();
                 }
@@ -492,6 +461,7 @@ public abstract class Configurer {
                         .expectedType(e.getExpectedType())
                         .actualValue(object) // Use original value, not simplified
                         .configurer(this)
+                        .configContext(serdesContext.getConfigContext())
                         .errorCode(e.getErrorCode())
                         .cause(e.getCause())
                         .build();
@@ -523,6 +493,7 @@ public abstract class Configurer {
                                 .expectedType(target)
                                 .actualValue(object)
                                 .configurer(this)
+                                .configContext(serdesContext.getConfigContext())
                                 .errorCode(stepTwoTransformer.getOriginalClass())
                                 .cause(e)
                                 .build();
@@ -536,6 +507,7 @@ public abstract class Configurer {
                             .expectedType(target)
                             .actualValue(object)
                             .configurer(this)
+                            .configContext(serdesContext.getConfigContext())
                             .errorCode(stepOneTransformer.getOriginalClass())
                             .cause(e)
                             .build();
@@ -595,6 +567,7 @@ public abstract class Configurer {
                     .expectedType(target)
                     .actualValue(object)
                     .configurer(this)
+                    .configContext(serdesContext.getConfigContext())
                     .cause(exception)
                     .build();
             }
@@ -612,6 +585,7 @@ public abstract class Configurer {
                 .expectedType(target)
                 .actualValue(object)
                 .configurer(this)
+                .configContext(serdesContext.getConfigContext())
                 .errorCode(transformer.getOriginalClass())
                 .cause(e)
                 .build();

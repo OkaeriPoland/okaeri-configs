@@ -29,7 +29,7 @@ class StandardSerdesTest {
     void setUp() {
         this.configurer = new InMemoryConfigurer();
         this.registry = this.configurer.getRegistry();
-        this.context = SerdesContext.of(this.configurer);
+        this.context = SerdesContext.of(this.configurer, null, null);
     }
 
     // ============================================

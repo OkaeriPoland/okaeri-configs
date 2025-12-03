@@ -21,7 +21,7 @@ public class DeserializationData {
      */
     private SerdesContext contextForKey(@NonNull String key) {
         ConfigPath newPath = ObjectSerializer.VALUE.equals(key) ? this.context.getPath() : this.context.getPath().property(key);
-        return SerdesContext.of(this.configurer).withPath(newPath);
+        return SerdesContext.of(this.configurer, this.context.getConfigContext(), null).withPath(newPath);
     }
 
     /**

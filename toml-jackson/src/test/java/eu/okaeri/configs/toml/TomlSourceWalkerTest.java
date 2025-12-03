@@ -135,11 +135,11 @@ class TomlSourceWalkerTest {
         // Simulate what load() does - set rawContent on context
         config.getContext().setRawContent(toml);
 
-        // Verify raw content is accessible via configurer
-        assertThat(configurer.getRawContent()).isEqualTo(toml);
+        // Verify raw content is accessible via context
+        assertThat(config.getContext().getRawContent()).isEqualTo(toml);
 
         // Verify walker can be created and finds the path
-        SourceWalker walker = configurer.createSourceWalker();
+        SourceWalker walker = configurer.createSourceWalker(toml);
         assertThat(walker).isNotNull();
 
         ConfigPath path = ConfigPath.root().property("value");

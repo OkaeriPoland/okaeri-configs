@@ -1,5 +1,6 @@
 package eu.okaeri.configs.exception;
 
+import eu.okaeri.configs.ConfigContext;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.format.SourceErrorMarker;
 import eu.okaeri.configs.format.SourceWalker;
@@ -18,21 +19,26 @@ public class OkaeriConfigException extends OkaeriException {
     private final Object actualValue;
     private final String sourceFile;
     private final Configurer configurer;
+    private final ConfigContext configContext;
     private final String errorCode;
 
-    private OkaeriConfigException(String message, ConfigPath path, GenericsDeclaration expectedType, Class<?> actualType, Object actualValue, String sourceFile, Configurer configurer, String errorCode, Throwable cause) {
-        super(buildMessage(message, path, expectedType, actualType, actualValue, sourceFile, configurer, errorCode, cause), cause);
+    private OkaeriConfigException(String message, ConfigPath path, GenericsDeclaration expectedType, Class<?> actualType, Object actualValue, String sourceFile, Configurer configurer, ConfigContext configContext, String errorCode, Throwable cause) {
+        super(buildMessage(message, path, expectedType, actualType, actualValue, sourceFile, configurer, configContext, errorCode, cause), cause);
         this.path = path;
         this.expectedType = expectedType;
         this.actualType = actualType;
         this.actualValue = actualValue;
         this.sourceFile = sourceFile;
         this.configurer = configurer;
+        this.configContext = configContext;
         this.errorCode = errorCode;
     }
 
     public String getRawContent() {
-        return (this.configurer != null) ? this.configurer.getRawContent() : null;
+        if (this.configContext != null) {
+            return this.configContext.getRawContent();
+        }
+        return null;
     }
 
     /**
@@ -62,7 +68,7 @@ public class OkaeriConfigException extends OkaeriException {
         return sb.toString();
     }
 
-    private static String buildMessage(String customMessage, ConfigPath path, GenericsDeclaration expectedType, Class<?> actualType, Object actualValue, String sourceFile, Configurer configurer, String errorCode, Throwable cause) {
+    private static String buildMessage(String customMessage, ConfigPath path, GenericsDeclaration expectedType, Class<?> actualType, Object actualValue, String sourceFile, Configurer configurer, ConfigContext configContext, String errorCode, Throwable cause) {
         StringBuilder sb = new StringBuilder();
 
         // Error code header like Rust's error[E0080]:
@@ -115,12 +121,12 @@ public class OkaeriConfigException extends OkaeriException {
         }
 
         // Add source marker if walker is available
-        SourceWalker walker = (configurer != null) ? configurer.createSourceWalker() : null;
-        String rawContent = (configurer != null) ? configurer.getRawContent() : null;
+        String rawContent = (configContext != null) ? configContext.getRawContent() : null;
+        SourceWalker walker = (configurer != null) ? configurer.createSourceWalker(rawContent) : null;
         boolean hasSourceMarker = false;
         if ((walker != null) && hasPath) {
-            // Get errorComments setting from configurer chain
-            boolean includeComments = (configurer != null) && configurer.isErrorCommentsEnabled();
+            // Get errorComments setting from context
+            boolean includeComments = (configContext != null) && configContext.isErrorComments();
 
             String marker = SourceErrorMarker.builder()
                 .walker(walker)
@@ -206,6 +212,7 @@ public class OkaeriConfigException extends OkaeriException {
         private Object actualValue;
         private String sourceFile;
         private Configurer configurer;
+        private ConfigContext configContext;
         private String errorCode;
         private Throwable cause;
 
@@ -252,6 +259,11 @@ public class OkaeriConfigException extends OkaeriException {
             return this;
         }
 
+        public Builder configContext(ConfigContext configContext) {
+            this.configContext = configContext;
+            return this;
+        }
+
         public Builder errorCode(String errorCode) {
             this.errorCode = errorCode;
             return this;
@@ -268,7 +280,7 @@ public class OkaeriConfigException extends OkaeriException {
         }
 
         public OkaeriConfigException build() {
-            return new OkaeriConfigException(this.message, this.path, this.expectedType, this.actualType, this.actualValue, this.sourceFile, this.configurer, this.errorCode, this.cause);
+            return new OkaeriConfigException(this.message, this.path, this.expectedType, this.actualType, this.actualValue, this.sourceFile, this.configurer, this.configContext, this.errorCode, this.cause);
         }
     }
 }

@@ -118,6 +118,7 @@ public final class ConfigManager {
 
         // Process each field in target declaration
         Map<String, Object> sourceState = config.getInternalState();
+        ConfigContext copyContext = copy.getContext();
 
         copyDeclaration.getFields().forEach(targetField -> {
             String fieldName = targetField.getName();
@@ -132,13 +133,13 @@ public final class ConfigManager {
                 // If value is OkaeriConfig or needs serialization, simplify it first
                 // This ensures nested objects are properly serialized before transformation
                 if ((value != null) && ((value instanceof OkaeriConfig) || !value.getClass().isPrimitive())) {
-                    value = configurer.simplify(value, sourceField.get().getType(), SerdesContext.of(configurer, sourceField.get()), false);
+                    value = configurer.simplify(value, sourceField.get().getType(), SerdesContext.of(configurer, copyContext, sourceField.get()), false);
                 }
 
                 generics = GenericsDeclaration.of(value);
             }
             // Fallback to internalState (preserves orphans)
-            else if (sourceState != null && sourceState.containsKey(fieldName)) {
+            else if ((sourceState != null) && sourceState.containsKey(fieldName)) {
                 value = sourceState.get(fieldName);
                 generics = GenericsDeclaration.of(value);
             }
@@ -149,7 +150,7 @@ public final class ConfigManager {
 
             // Apply type transformation if needed
             if ((value != null) && ((targetField.getType().getType() != value.getClass()) || (!generics.isPrimitiveWrapper() && !generics.isPrimitive()))) {
-                value = configurer.resolveType(value, generics, targetField.getType().getType(), targetField.getType(), SerdesContext.of(configurer, targetField));
+                value = configurer.resolveType(value, generics, targetField.getType().getType(), targetField.getType(), SerdesContext.of(configurer, copyContext, targetField));
             }
 
             targetField.updateValue(value);
@@ -189,7 +190,7 @@ public final class ConfigManager {
             // Build internalState from fields
             Map<String, Object> state = new LinkedHashMap<>();
             for (FieldDeclaration field : config.getDeclaration().getFields()) {
-                Object simplified = newConfigurer.simplifyField(field.getValue(), field.getType(), field);
+                Object simplified = newConfigurer.simplifyField(field.getValue(), field.getType(), field, copy.getContext());
                 state.put(field.getName(), simplified);
             }
             copy.setInternalState(state);

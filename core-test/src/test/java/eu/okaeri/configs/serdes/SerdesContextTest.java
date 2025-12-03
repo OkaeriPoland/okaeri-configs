@@ -1,5 +1,6 @@
 package eu.okaeri.configs.serdes;
 
+import eu.okaeri.configs.ConfigContext;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
@@ -33,7 +34,7 @@ class SerdesContextTest {
 
     @Test
     void testOf_ConfigurerOnly_CreatesContext() {
-        SerdesContext context = SerdesContext.of(this.configurer);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null);
 
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
         assertThat(context.getField()).isNull();
@@ -43,23 +44,26 @@ class SerdesContextTest {
     @Test
     void testOf_ConfigurerAndField_CreatesContext() {
         TestConfig config = ConfigManager.create(TestConfig.class);
+        config.withConfigurer(this.configurer);
         ConfigDeclaration declaration = ConfigDeclaration.of(config);
         FieldDeclaration field = declaration.getField("testField").get();
 
-        SerdesContext context = SerdesContext.of(this.configurer, field);
+        SerdesContext context = SerdesContext.of(this.configurer, config.getContext(), field);
 
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
         assertThat(context.getField()).isSameAs(field);
+        assertThat(context.getConfigContext()).isSameAs(config.getContext());
     }
 
     @Test
     void testOf_ConfigurerFieldAndAttachments_CreatesContext() {
         TestConfig config = ConfigManager.create(TestConfig.class);
+        config.withConfigurer(this.configurer);
         ConfigDeclaration declaration = ConfigDeclaration.of(config);
         FieldDeclaration field = declaration.getField("testField").get();
         SerdesContextAttachments attachments = new SerdesContextAttachments();
 
-        SerdesContext context = SerdesContext.of(this.configurer, field, attachments);
+        SerdesContext context = SerdesContext.of(this.configurer, config.getContext(), field, attachments, ConfigPath.root());
 
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
         assertThat(context.getField()).isSameAs(field);
@@ -68,7 +72,7 @@ class SerdesContextTest {
 
     @Test
     void testOf_NullField_CreatesContextWithoutField() {
-        SerdesContext context = SerdesContext.of(this.configurer, null);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null);
 
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
         assertThat(context.getField()).isNull();
@@ -84,9 +88,8 @@ class SerdesContextTest {
     void testGetConfigAnnotation_AnnotationPresent_ReturnsAnnotation() {
         AnnotatedConfig config = ConfigManager.create(AnnotatedConfig.class);
         config.withConfigurer(this.configurer);
-        this.configurer.setParent(config);
 
-        SerdesContext context = SerdesContext.of(this.configurer);
+        SerdesContext context = SerdesContext.of(this.configurer, config.getContext(), null);
 
         Optional<Header> header = context.getConfigAnnotation(Header.class);
         assertThat(header).isPresent();
@@ -97,9 +100,8 @@ class SerdesContextTest {
     void testGetConfigAnnotation_AnnotationAbsent_ReturnsEmpty() {
         AnnotatedConfig config = ConfigManager.create(AnnotatedConfig.class);
         config.withConfigurer(this.configurer);
-        this.configurer.setParent(config);
 
-        SerdesContext context = SerdesContext.of(this.configurer);
+        SerdesContext context = SerdesContext.of(this.configurer, config.getContext(), null);
 
         // Deprecated is not present on the config
         Optional<Deprecated> deprecated = context.getConfigAnnotation(Deprecated.class);
@@ -107,9 +109,9 @@ class SerdesContextTest {
     }
 
     @Test
-    void testGetConfigAnnotation_NoParent_ReturnsEmpty() {
-        // Configurer has no parent
-        SerdesContext context = SerdesContext.of(this.configurer);
+    void testGetConfigAnnotation_NoContext_ReturnsEmpty() {
+        // SerdesContext has no ConfigContext
+        SerdesContext context = SerdesContext.of(this.configurer, null, null);
 
         Optional<Header> header = context.getConfigAnnotation(Header.class);
         assertThat(header).isEmpty();
@@ -123,7 +125,7 @@ class SerdesContextTest {
         ConfigDeclaration declaration = ConfigDeclaration.of(config);
         FieldDeclaration field = declaration.getField("commentedField").get();
 
-        SerdesContext context = SerdesContext.of(this.configurer, field);
+        SerdesContext context = SerdesContext.of(this.configurer, null, field);
 
         Optional<Comment> comment = context.getFieldAnnotation(Comment.class);
         assertThat(comment).isPresent();
@@ -136,7 +138,7 @@ class SerdesContextTest {
         ConfigDeclaration declaration = ConfigDeclaration.of(config);
         FieldDeclaration field = declaration.getField("testField").get();
 
-        SerdesContext context = SerdesContext.of(this.configurer, field);
+        SerdesContext context = SerdesContext.of(this.configurer, null, field);
 
         // Comment is not present on testField
         Optional<Comment> comment = context.getFieldAnnotation(Comment.class);
@@ -145,7 +147,7 @@ class SerdesContextTest {
 
     @Test
     void testGetFieldAnnotation_NoField_ReturnsEmpty() {
-        SerdesContext context = SerdesContext.of(this.configurer, null);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null);
 
         Optional<Comment> comment = context.getFieldAnnotation(Comment.class);
         assertThat(comment).isEmpty();
@@ -159,7 +161,7 @@ class SerdesContextTest {
         SerdesContextAttachments attachments = new SerdesContextAttachments();
         attachments.put(TestAttachment.class, attachment);
 
-        SerdesContext context = SerdesContext.of(this.configurer, null, attachments);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null, attachments, ConfigPath.root());
 
         Optional<TestAttachment> retrieved = context.getAttachment(TestAttachment.class);
         assertThat(retrieved).isPresent();
@@ -168,7 +170,7 @@ class SerdesContextTest {
 
     @Test
     void testGetAttachment_AttachmentAbsent_ReturnsEmpty() {
-        SerdesContext context = SerdesContext.of(this.configurer);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null);
 
         Optional<TestAttachment> retrieved = context.getAttachment(TestAttachment.class);
         assertThat(retrieved).isEmpty();
@@ -181,7 +183,7 @@ class SerdesContextTest {
         SerdesContextAttachments attachments = new SerdesContextAttachments();
         attachments.put(TestAttachment.class, attachment);
 
-        SerdesContext context = SerdesContext.of(this.configurer, null, attachments);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null, attachments, ConfigPath.root());
 
         TestAttachment retrieved = context.getAttachment(TestAttachment.class, defaultAttachment);
         assertThat(retrieved).isSameAs(attachment);
@@ -190,7 +192,7 @@ class SerdesContextTest {
     @Test
     void testGetAttachment_WithDefault_AttachmentAbsent_ReturnsDefault() {
         TestAttachment defaultAttachment = new TestAttachment("default");
-        SerdesContext context = SerdesContext.of(this.configurer);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null);
 
         TestAttachment retrieved = context.getAttachment(TestAttachment.class, defaultAttachment);
         assertThat(retrieved).isSameAs(defaultAttachment);
@@ -202,7 +204,6 @@ class SerdesContextTest {
     void testFullContext_AllFieldsPopulated() {
         AnnotatedConfig config = ConfigManager.create(AnnotatedConfig.class);
         config.withConfigurer(this.configurer);
-        this.configurer.setParent(config);
 
         ConfigDeclaration declaration = ConfigDeclaration.of(config);
         FieldDeclaration field = declaration.getField("commentedField").get();
@@ -211,7 +212,7 @@ class SerdesContextTest {
         SerdesContextAttachments attachments = new SerdesContextAttachments();
         attachments.put(TestAttachment.class, attachment);
 
-        SerdesContext context = SerdesContext.of(this.configurer, field, attachments);
+        SerdesContext context = SerdesContext.of(this.configurer, config.getContext(), field, attachments, ConfigPath.root());
 
         // Verify all components
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
@@ -223,7 +224,7 @@ class SerdesContextTest {
 
     @Test
     void testGetConfigurer_ReturnsConfigurer() {
-        SerdesContext context = SerdesContext.of(this.configurer);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null);
 
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
     }
@@ -234,14 +235,14 @@ class SerdesContextTest {
         ConfigDeclaration declaration = ConfigDeclaration.of(config);
         FieldDeclaration field = declaration.getField("testField").get();
 
-        SerdesContext context = SerdesContext.of(this.configurer, field);
+        SerdesContext context = SerdesContext.of(this.configurer, null, field);
 
         assertThat(context.getField()).isSameAs(field);
     }
 
     @Test
     void testGetField_WithoutField_ReturnsNull() {
-        SerdesContext context = SerdesContext.of(this.configurer);
+        SerdesContext context = SerdesContext.of(this.configurer, null, null);
 
         assertThat(context.getField()).isNull();
     }

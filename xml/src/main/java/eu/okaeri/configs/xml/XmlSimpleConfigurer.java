@@ -67,9 +67,8 @@ public class XmlSimpleConfigurer extends Configurer {
     }
 
     @Override
-    public SourceWalker createSourceWalker() {
-        String raw = this.getRawContent();
-        return (raw == null) ? null : XmlSourceWalker.of(raw, this.rootElement);
+    public SourceWalker createSourceWalker(String rawContent) {
+        return (rawContent == null) ? null : XmlSourceWalker.of(rawContent, this.rootElement);
     }
 
     @Override

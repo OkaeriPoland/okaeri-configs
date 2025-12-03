@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.util.logging.Logger;
+
 /**
  * Shared context for a configuration tree.
  * <p>
@@ -60,12 +62,21 @@ public class ConfigContext {
     private ConfigValidator validator;
 
     /**
+     * Logger for the configuration tree.
+     * Shared across root and all nested configs.
+     */
+    @Getter
+    @Setter
+    private Logger logger;
+
+    /**
      * Creates a new context for the given root config.
      *
      * @param rootConfig the root configuration that owns this context
      */
     public ConfigContext(@NonNull OkaeriConfig rootConfig) {
         this.rootConfig = rootConfig;
+        this.logger = Logger.getLogger(rootConfig.getClass().getSimpleName());
     }
 
     /**

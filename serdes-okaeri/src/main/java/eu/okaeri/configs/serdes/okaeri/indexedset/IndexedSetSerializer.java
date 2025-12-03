@@ -64,11 +64,11 @@ public class IndexedSetSerializer implements ObjectSerializer<IndexedSet> {
             }
 
             // get string key and the data from the set
-            String strKey = configurer.resolveType(key, keyType, String.class, null, SerdesContext.of(configurer));
+            String strKey = configurer.resolveType(key, keyType, String.class, null, data.getContext());
             Object value = set.get(key);
 
             // manually simplify the element for further manipulation
-            value = configurer.simplify(value, valueType, SerdesContext.of(configurer), true);
+            value = configurer.simplify(value, valueType, data.getContext(), true);
 
             // if simplified to map, hide key field
             if (value instanceof Map) {
@@ -107,11 +107,11 @@ public class IndexedSetSerializer implements ObjectSerializer<IndexedSet> {
 
             // resolve type of current value to map for mutations
             GenericsDeclaration objectMapType = GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class));
-            Map<String, Object> objectMap = configurer.resolveType(value, GenericsDeclaration.of(value), Map.class, objectMapType, SerdesContext.of(configurer));
+            Map<String, Object> objectMap = configurer.resolveType(value, GenericsDeclaration.of(value), Map.class, objectMapType, data.getContext());
 
             // add key as data and transform to the target generic type
             objectMap.put(keyFieldName, key);
-            Object result = configurer.resolveType(objectMap, objectMapType, targetValueType.getType(), targetValueType, SerdesContext.of(configurer));
+            Object result = configurer.resolveType(objectMap, objectMapType, targetValueType.getType(), targetValueType, data.getContext());
 
             // add to the set
             set.add(result);

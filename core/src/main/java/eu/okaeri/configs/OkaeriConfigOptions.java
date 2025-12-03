@@ -132,13 +132,18 @@ public class OkaeriConfigOptions {
     }
 
     /**
-     * Sets the logger for this configuration.
+     * Sets the logger for this configuration tree.
      *
      * @param logger the logger to use
      * @return this configurer for chaining
+     * @throws IllegalStateException if context is not initialized (configurer not set)
      */
     public OkaeriConfigOptions logger(@NonNull Logger logger) {
-        this.config.setLogger(logger);
+        ConfigContext context = this.config.getContext();
+        if (context == null) {
+            throw new IllegalStateException("configurer must be set before setting logger");
+        }
+        context.setLogger(logger);
         return this;
     }
 
