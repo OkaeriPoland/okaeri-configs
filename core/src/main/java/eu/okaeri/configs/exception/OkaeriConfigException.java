@@ -280,7 +280,12 @@ public class OkaeriConfigException extends OkaeriException {
         }
 
         public OkaeriConfigException build() {
-            return new OkaeriConfigException(this.message, this.path, this.expectedType, this.actualType, this.actualValue, this.sourceFile, this.configurer, this.configContext, this.errorCode, this.cause);
+            // Derive sourceFile from configContext if not explicitly set
+            String effectiveSourceFile = this.sourceFile;
+            if ((effectiveSourceFile == null) && (this.configContext != null)) {
+                effectiveSourceFile = this.configContext.getRootConfig().getBindFileName();
+            }
+            return new OkaeriConfigException(this.message, this.path, this.expectedType, this.actualType, this.actualValue, effectiveSourceFile, this.configurer, this.configContext, this.errorCode, this.cause);
         }
     }
 }

@@ -664,6 +664,40 @@ class YamlErrorMessageTest {
             });
     }
 
+    // ==================== Source File in Error Messages ====================
+
+    @ParameterizedTest(name = "{0}: Error message includes source file name")
+    @MethodSource("yamlConfigurers")
+    void testError_SourceFileNameIncluded(String name, Configurer configurer) {
+        String yaml = "value: not_a_number";
+
+        assertThatThrownBy(() -> this.loadConfigWithBindFile(IntegerConfig.class, configurer, yaml, "config.yml"))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getSourceFile()).isEqualTo("config.yml");
+                assertThat(e.getMessage()).contains(" --> config.yml:1:8");
+            });
+    }
+
+    @ParameterizedTest(name = "{0}: Error message includes source file name for nested path")
+    @MethodSource("yamlConfigurers")
+    void testError_SourceFileNameIncluded_NestedPath(String name, Configurer configurer) {
+        String yaml = """
+            database:
+              host: localhost
+              port: invalid
+            """;
+
+        assertThatThrownBy(() -> this.loadConfigWithBindFile(NestedConfig.class, configurer, yaml, "application.yml"))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getSourceFile()).isEqualTo("application.yml");
+                assertThat(e.getMessage()).contains(" --> application.yml:3:9");
+            });
+    }
+
     // ==================== Helper Methods ====================
 
     private <T extends OkaeriConfig> T loadConfig(Class<T> clazz, Configurer configurer, String yaml) {
@@ -698,6 +732,17 @@ class YamlErrorMessageTest {
             it.configure(opt -> {
                 opt.configurer(configurer);
                 opt.errorComments(true);
+            });
+        });
+        config.load(yaml);
+        return config;
+    }
+
+    private <T extends OkaeriConfig> T loadConfigWithBindFile(Class<T> clazz, Configurer configurer, String yaml, String fileName) {
+        T config = ConfigManager.create(clazz, it -> {
+            it.configure(opt -> {
+                opt.configurer(configurer);
+                opt.bindFile(fileName);
             });
         });
         config.load(yaml);

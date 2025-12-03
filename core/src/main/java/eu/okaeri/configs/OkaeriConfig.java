@@ -94,6 +94,25 @@ public abstract class OkaeriConfig {
     }
 
     /**
+     * Gets the source file name for error reporting.
+     * For root configs, extracts filename from bindFile.
+     * For subconfigs, delegates to root config via context.
+     *
+     * @return the source file name, or null if no bind file is set
+     */
+    public String getBindFileName() {
+        Path file = this.bindFile;
+        if ((file == null) && (this.context != null)) {
+            file = this.context.getRootConfig().getBindFile();
+        }
+        if (file != null) {
+            Path fileName = file.getFileName();
+            return (fileName != null) ? fileName.toString() : null;
+        }
+        return null;
+    }
+
+    /**
      * Gets the configuration declaration, initializing it lazily on first access.
      *
      * @return the config declaration
