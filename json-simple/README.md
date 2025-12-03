@@ -21,7 +21,7 @@ Add dependency to the `dependencies` section:
 <dependency>
   <groupId>eu.okaeri</groupId>
   <artifactId>okaeri-configs-json-simple</artifactId>
-  <version>6.0.0-beta.14</version>
+  <version>6.0.0-beta.15</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ maven("https://repo.okaeri.cloud/releases")
 Add dependency to the `dependencies` section:
 
 ```kotlin
-implementation("eu.okaeri:okaeri-configs-json-simple:6.0.0-beta.14")
+implementation("eu.okaeri:okaeri-configs-json-simple:6.0.0-beta.15")
 ```
 
 ## Limitations
