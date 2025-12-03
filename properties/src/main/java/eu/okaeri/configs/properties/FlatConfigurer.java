@@ -1,8 +1,6 @@
 package eu.okaeri.configs.properties;
 
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.format.SourceWalker;
-import eu.okaeri.configs.format.ini.IniSourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -34,12 +32,6 @@ public abstract class FlatConfigurer extends Configurer {
     protected @Setter int simpleListMaxLineLength = DEFAULT_SIMPLE_LIST_MAX_LINE_LENGTH;
 
     protected FlatConfigurer() {
-    }
-
-    @Override
-    public SourceWalker createSourceWalker() {
-        String raw = this.getRawContent();
-        return (raw == null) ? null : IniSourceWalker.of(raw);
     }
 
     @Override

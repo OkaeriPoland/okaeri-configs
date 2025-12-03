@@ -6,6 +6,10 @@ import eu.okaeri.configs.annotation.TargetType;
 import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.format.SourceWalker;
+import eu.okaeri.configs.format.ini.IniSourceWalker;
+import eu.okaeri.configs.format.toml.TomlSourceWalker;
+import eu.okaeri.configs.format.xml.XmlSourceWalker;
+import eu.okaeri.configs.format.yaml.YamlSourceWalker;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -81,6 +85,28 @@ public abstract class Configurer {
      * @return a SourceWalker, or null if this format doesn't support source markers
      */
     public SourceWalker createSourceWalker() {
+
+        String raw = this.getRawContent();
+        List<String> extensions = this.getExtensions();
+
+        if ((raw == null) || extensions.isEmpty()) {
+            return null;
+        }
+
+        switch (extensions.get(0).toLowerCase(Locale.ROOT)) {
+            case "ini":
+            case "properties":
+                return IniSourceWalker.of(raw);
+            case "toml":
+                return TomlSourceWalker.of(raw);
+            case "xml":
+                return XmlSourceWalker.of(raw, "config");
+            case "yml":
+            case "yaml":
+                return YamlSourceWalker.of(raw);
+
+        }
+
         return null;
     }
 
@@ -274,9 +300,9 @@ public abstract class Configurer {
      * Resolves a raw value from the map to the target type.
      * This is a convenience method for deserializing map values.
      *
-     * @param value       the raw value from the map
-     * @param clazz       the target class
-     * @param genericType the generic type declaration
+     * @param value         the raw value from the map
+     * @param clazz         the target class
+     * @param genericType   the generic type declaration
      * @param serdesContext the serialization context
      * @return the resolved value, or null if input is null
      */

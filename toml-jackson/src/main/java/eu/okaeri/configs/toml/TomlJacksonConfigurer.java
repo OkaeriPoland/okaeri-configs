@@ -59,12 +59,6 @@ public class TomlJacksonConfigurer extends Configurer {
     }
 
     @Override
-    public SourceWalker createSourceWalker() {
-        String raw = this.getRawContent();
-        return (raw == null) ? null : TomlSourceWalker.of(raw);
-    }
-
-    @Override
     public boolean isCommentLine(String line) {
         return line.trim().startsWith("#");
     }

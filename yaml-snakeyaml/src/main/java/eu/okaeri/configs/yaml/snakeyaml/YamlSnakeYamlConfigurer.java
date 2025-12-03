@@ -59,12 +59,6 @@ public class YamlSnakeYamlConfigurer extends Configurer {
     }
 
     @Override
-    public SourceWalker createSourceWalker() {
-        String raw = this.getRawContent();
-        return (raw == null) ? null : YamlSourceWalker.of(raw);
-    }
-
-    @Override
     public boolean isCommentLine(String line) {
         return line.trim().startsWith("#");
     }
