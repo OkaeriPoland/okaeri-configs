@@ -39,6 +39,18 @@ public interface TypedKeyReader {
     Object getRaw(@NonNull String key);
 
     /**
+     * Gets the raw value at the specified key, or returns the default if not found.
+     *
+     * @param key the key
+     * @param defaultValue the default value to return if key not found or value is null
+     * @return the raw value, or defaultValue if not found
+     */
+    default Object getRawOr(@NonNull String key, Object defaultValue) {
+        Object value = this.getRaw(key);
+        return value != null ? value : defaultValue;
+    }
+
+    /**
      * Gets the value at the specified key, resolved using a full {@link GenericsDeclaration}.
      * <p>
      * Use this for complex generic types that cannot be expressed with a simple class.
@@ -64,6 +76,20 @@ public interface TypedKeyReader {
      */
     default <T> T get(@NonNull String key, @NonNull Class<T> type) {
         return this.get(key, GenericsDeclaration.of(type));
+    }
+
+    /**
+     * Gets the value at the specified key, or returns the default if not found.
+     *
+     * @param key the key
+     * @param type the target type class
+     * @param defaultValue the default value to return if key not found or value is null
+     * @param <T> the target type
+     * @return the resolved value, or defaultValue if not found
+     */
+    default <T> T getOr(@NonNull String key, @NonNull Class<T> type, T defaultValue) {
+        T value = this.get(key, type);
+        return value != null ? value : defaultValue;
     }
 
     /**
