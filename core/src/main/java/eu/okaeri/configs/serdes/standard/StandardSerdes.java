@@ -1,11 +1,11 @@
 package eu.okaeri.configs.serdes.standard;
 
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.serdes.serializable.ConfigSerializableSerializer;
 import lombok.NonNull;
 
-public class StandardSerdes implements OkaeriSerdesPack {
+public class StandardSerdes implements OkaeriSerdes {
 
     @Override
     public void register(@NonNull SerdesRegistry registry) {

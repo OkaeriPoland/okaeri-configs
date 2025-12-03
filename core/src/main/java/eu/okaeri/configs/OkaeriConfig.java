@@ -12,7 +12,7 @@ import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.ConfigPath;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import lombok.*;
@@ -195,7 +195,7 @@ public abstract class OkaeriConfig {
      * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
     @Deprecated
-    public OkaeriConfig withConfigurer(@NonNull Configurer configurer, @NonNull OkaeriSerdesPack... serdesPack) {
+    public OkaeriConfig withConfigurer(@NonNull Configurer configurer, @NonNull OkaeriSerdes... serdesPack) {
         if (this.getConfigurer() != null) configurer.setRegistry(this.getConfigurer().getRegistry());
         this.setConfigurer(configurer);
         Arrays.stream(serdesPack).forEach(this.getConfigurer()::register);
@@ -210,7 +210,7 @@ public abstract class OkaeriConfig {
      * @deprecated Use {@link #configure(Consumer)} instead. This method will be removed in a future version.
      */
     @Deprecated
-    public OkaeriConfig withSerdesPack(@NonNull OkaeriSerdesPack serdesPack) {
+    public OkaeriConfig withSerdesPack(@NonNull OkaeriSerdes serdesPack) {
 
         if (this.getConfigurer() == null) {
             throw new IllegalStateException("configurer cannot be null");

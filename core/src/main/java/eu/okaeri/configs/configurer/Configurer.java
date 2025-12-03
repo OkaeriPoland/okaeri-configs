@@ -39,7 +39,7 @@ public abstract class Configurer {
         this.registry.register(new StandardSerdes());
     }
 
-    public void register(@NonNull OkaeriSerdesPack pack) {
+    public void register(@NonNull OkaeriSerdes pack) {
         this.registry.register(pack);
     }
 

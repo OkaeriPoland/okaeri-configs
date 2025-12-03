@@ -1,11 +1,11 @@
 package eu.okaeri.configs.serdes.okaeri;
 
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.serdes.okaeri.material.TagMaterialSetSerializer;
 import lombok.NonNull;
 
-public class SerdesOkaeriBukkit implements OkaeriSerdesPack {
+public class SerdesOkaeriBukkit implements OkaeriSerdes {
 
     @Override
     public void register(@NonNull SerdesRegistry registry) {

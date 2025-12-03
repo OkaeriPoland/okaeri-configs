@@ -8,6 +8,34 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 
+/**
+ * Data container for {@link ObjectSerializer#serialize} output.
+ * <p>
+ * Provides methods to add serialized values under keys. Values are automatically
+ * simplified using the attached {@link Configurer}.
+ * <p>
+ * <b>Multi-key output:</b>
+ * <pre>{@code
+ * public void serialize(Location loc, SerializationData data, GenericsDeclaration generics) {
+ *     data.add("world", loc.getWorld().getName());
+ *     data.add("x", loc.getX());
+ *     data.add("y", loc.getY());
+ *     data.add("z", loc.getZ());
+ * }
+ * // Output: {world: "overworld", x: 100.5, y: 64.0, z: -200.5}
+ * }</pre>
+ * <p>
+ * <b>Single value output:</b>
+ * <pre>{@code
+ * public void serialize(Duration duration, SerializationData data, GenericsDeclaration generics) {
+ *     data.setValue(duration.toString());
+ * }
+ * // Output: "PT1H30M" (not a map)
+ * }</pre>
+ *
+ * @see ObjectSerializer#serialize
+ * @see DeserializationData
+ */
 @RequiredArgsConstructor
 public class SerializationData {
 

@@ -1,13 +1,13 @@
 package eu.okaeri.configs.serdes.okaeri;
 
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.serdes.okaeri.indexedset.IndexedSetAttachmentResolver;
 import eu.okaeri.configs.serdes.okaeri.indexedset.IndexedSetSerializer;
 import eu.okaeri.configs.serdes.okaeri.range.*;
 import lombok.NonNull;
 
-public class SerdesOkaeri implements OkaeriSerdesPack {
+public class SerdesOkaeri implements OkaeriSerdes {
 
     @Override
     public void register(@NonNull SerdesRegistry registry) {

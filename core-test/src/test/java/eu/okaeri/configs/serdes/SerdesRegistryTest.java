@@ -326,7 +326,7 @@ class SerdesRegistryTest {
         this.registry.register(new StandardSerdes());
 
         // Get allSerdes pack
-        OkaeriSerdesPack allSerdes = this.registry.allSerdes();
+        OkaeriSerdes allSerdes = this.registry.allSerdes();
         assertThat(allSerdes).isNotNull();
 
         // Register to new registry

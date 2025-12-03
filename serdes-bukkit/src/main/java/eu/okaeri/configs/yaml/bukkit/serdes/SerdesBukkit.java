@@ -1,6 +1,6 @@
 package eu.okaeri.configs.yaml.bukkit.serdes;
 
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.yaml.bukkit.serdes.itemstack.ItemStackAttachmentResolver;
 import eu.okaeri.configs.yaml.bukkit.serdes.serializer.*;
@@ -8,7 +8,7 @@ import eu.okaeri.configs.yaml.bukkit.serdes.transformer.*;
 import lombok.NonNull;
 import org.bukkit.block.Biome;
 
-public class SerdesBukkit implements OkaeriSerdesPack {
+public class SerdesBukkit implements OkaeriSerdes {
 
     @Override
     public void register(@NonNull SerdesRegistry registry) {

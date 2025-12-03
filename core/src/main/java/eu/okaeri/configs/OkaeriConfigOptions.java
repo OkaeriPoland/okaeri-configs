@@ -1,7 +1,7 @@
 package eu.okaeri.configs;
 
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.validator.ConfigValidator;
 import lombok.AccessLevel;
 import lombok.NonNull;
@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
@@ -92,42 +91,37 @@ public class OkaeriConfigOptions {
      * @param serdesPacks the serdes packs to register
      * @return this configurer for chaining
      */
-    public OkaeriConfigOptions configurer(@NonNull Configurer configurer, @NonNull OkaeriSerdesPack... serdesPacks) {
+    public OkaeriConfigOptions configurer(@NonNull Configurer configurer, @NonNull OkaeriSerdes... serdes) {
         if (this.config.getConfigurer() != null) {
             configurer.setRegistry(this.config.getConfigurer().getRegistry());
         }
         this.config.setConfigurer(configurer);
-        Arrays.stream(serdesPacks).forEach(this.config.getConfigurer()::register);
+        this.config.getConfigurer().getRegistry().add(serdes);
         return this;
     }
 
     /**
-     * Registers a serdes pack in the current configurer.
+     * Registers one or more serdes components (transformers, serializers, packs, or annotation resolvers).
+     * <p>
+     * All serdes types implement {@link OkaeriSerdes}, allowing unified registration:
+     * <pre>{@code
+     * opt.serdes(
+     *     new SerdesCommons(),           // pack
+     *     new MyTransformer(),           // transformer
+     *     new MySerializer(),            // serializer
+     *     new MyAnnotationResolver()     // annotation resolver
+     * );
+     * }</pre>
      *
-     * @param serdesPack the serdes pack to register
-     * @return this configurer for chaining
+     * @param serdes the serdes components to register
+     * @return this options for chaining
      * @throws IllegalStateException if configurer is null
      */
-    public OkaeriConfigOptions serdes(@NonNull OkaeriSerdesPack serdesPack) {
+    public OkaeriConfigOptions serdes(@NonNull OkaeriSerdes... serdes) {
         if (this.config.getConfigurer() == null) {
             throw new IllegalStateException("configurer cannot be null");
         }
-        this.config.getConfigurer().register(serdesPack);
-        return this;
-    }
-
-    /**
-     * Registers multiple serdes packs in the current configurer.
-     *
-     * @param serdesPacks the serdes packs to register
-     * @return this configurer for chaining
-     * @throws IllegalStateException if configurer is null
-     */
-    public OkaeriConfigOptions serdes(@NonNull OkaeriSerdesPack... serdesPacks) {
-        if (this.config.getConfigurer() == null) {
-            throw new IllegalStateException("configurer cannot be null");
-        }
-        Arrays.stream(serdesPacks).forEach(this.config.getConfigurer()::register);
+        this.config.getConfigurer().getRegistry().add(serdes);
         return this;
     }
 

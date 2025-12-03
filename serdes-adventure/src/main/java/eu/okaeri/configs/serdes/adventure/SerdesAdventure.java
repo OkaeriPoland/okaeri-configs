@@ -2,11 +2,11 @@ package eu.okaeri.configs.serdes.adventure;
 
 import eu.okaeri.configs.serdes.adventure.serializer.MiniComponentSerializer;
 import eu.okaeri.configs.serdes.adventure.serializer.TextColorSerializer;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import lombok.NonNull;
 
-public class SerdesAdventure implements OkaeriSerdesPack {
+public class SerdesAdventure implements OkaeriSerdes {
 
     @Override
     public void register(@NonNull SerdesRegistry registry) {

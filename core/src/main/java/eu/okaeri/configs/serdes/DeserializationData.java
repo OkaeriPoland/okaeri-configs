@@ -8,6 +8,37 @@ import lombok.NonNull;
 
 import java.util.*;
 
+/**
+ * Data container for {@link ObjectSerializer#deserialize} input.
+ * <p>
+ * Provides methods to read values from keys with automatic type resolution
+ * using the attached {@link Configurer}.
+ * <p>
+ * <b>Multi-key input:</b>
+ * <pre>{@code
+ * public Location deserialize(DeserializationData data, GenericsDeclaration generics) {
+ *     return new Location(
+ *         Bukkit.getWorld(data.get("world", String.class)),
+ *         data.get("x", Double.class),
+ *         data.get("y", Double.class),
+ *         data.get("z", Double.class)
+ *     );
+ * }
+ * }</pre>
+ * <p>
+ * <b>Single value input:</b>
+ * <pre>{@code
+ * public Duration deserialize(DeserializationData data, GenericsDeclaration generics) {
+ *     if (data.isValue()) {
+ *         return Duration.parse(data.getValue(String.class));
+ *     }
+ *     // fallback to multi-key format
+ * }
+ * }</pre>
+ *
+ * @see ObjectSerializer#deserialize
+ * @see SerializationData
+ */
 @AllArgsConstructor
 public class DeserializationData {
 

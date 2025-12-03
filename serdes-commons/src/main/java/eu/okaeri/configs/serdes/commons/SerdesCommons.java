@@ -1,6 +1,6 @@
 package eu.okaeri.configs.serdes.commons;
 
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.serdes.SerdesRegistry;
 import eu.okaeri.configs.serdes.commons.duration.DurationAttachmentResolver;
 import eu.okaeri.configs.serdes.commons.duration.DurationTransformer;
@@ -10,7 +10,7 @@ import eu.okaeri.configs.serdes.commons.transformer.PatternTransformer;
 import lombok.NonNull;
 
 // types that exceed standard typeset
-public class SerdesCommons implements OkaeriSerdesPack {
+public class SerdesCommons implements OkaeriSerdes {
 
     @Override
     public void register(@NonNull SerdesRegistry registry) {
