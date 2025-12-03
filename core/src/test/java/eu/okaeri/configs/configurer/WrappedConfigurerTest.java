@@ -78,6 +78,64 @@ class WrappedConfigurerTest {
     }
 
     /**
+     * Verifies that rawContent set on a WrappedConfigurer can be retrieved via getRawContent().
+     * This tests for field shadowing bugs where setter and getter access different fields.
+     */
+    @Test
+    void testRawContent_SetAndGetOnWrappedConfigurer() {
+        // Given: A wrapped configurer
+        TestConfigurer innerConfigurer = new TestConfigurer();
+        WrappedConfigurer wrappedConfigurer = new WrappedConfigurer(innerConfigurer);
+
+        // When: Setting raw content on the wrapped configurer
+        wrappedConfigurer.setRawContent("test content");
+
+        // Then: getRawContent should return the same content
+        // This fails if there's a field shadowing bug (setter sets one field, getter reads another)
+        assertThat(wrappedConfigurer.getRawContent()).isEqualTo("test content");
+    }
+
+    /**
+     * Verifies that a child WrappedConfigurer can access parent's rawContent when its own is null.
+     * This is needed for subconfigs to access the root config's YAML content for error reporting.
+     */
+    @Test
+    void testRawContent_ChildCanAccessParentRawContentWhenOwnIsNull() {
+        // Given: A parent configurer with raw content
+        TestConfigurer parentConfigurer = new TestConfigurer();
+        parentConfigurer.setRawContent("parent yaml content");
+
+        // When: Creating a child wrapped configurer WITHOUT setting its raw content
+        Map<String, Object> childData = new LinkedHashMap<>();
+        InMemoryWrappedConfigurer childConfigurer = new InMemoryWrappedConfigurer(parentConfigurer, childData);
+        // Note: We intentionally don't call childConfigurer.setRawContent()
+
+        // Then: Child should be able to access parent's raw content for error reporting
+        // This is the key scenario for error reporting: subconfigs need root's rawContent
+        assertThat(childConfigurer.getRawContent()).isEqualTo("parent yaml content");
+    }
+
+    /**
+     * Verifies rawContent propagation through double-wrapped configurers.
+     * This mimics setups where a validator wraps a configurer (e.g., OkaeriValidator wraps YamlBukkitConfigurer),
+     * then InMemoryWrappedConfigurer wraps OkaeriValidator for subconfigs.
+     */
+    @Test
+    void testRawContent_DoubleWrappedConfigurer() {
+        // Given: A base configurer wrapped in another WrappedConfigurer (like OkaeriValidator)
+        TestConfigurer baseConfigurer = new TestConfigurer();
+        WrappedConfigurer validator = new WrappedConfigurer(baseConfigurer);
+        validator.setRawContent("yaml content from file");
+
+        // When: Creating a subconfig's configurer that wraps the validator
+        Map<String, Object> childData = new LinkedHashMap<>();
+        InMemoryWrappedConfigurer subconfigConfigurer = new InMemoryWrappedConfigurer(validator, childData);
+
+        // Then: The subconfig should be able to access the rawContent through the chain
+        assertThat(subconfigConfigurer.getRawContent()).isEqualTo("yaml content from file");
+    }
+
+    /**
      * Verifies that registry IS shared between parent and child configurers.
      * This is intentional - serializers should be the same across all configs.
      */

@@ -2,6 +2,10 @@ package eu.okaeri.configs.error.ini;
 
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.NameModifier;
+import eu.okaeri.configs.annotation.NameStrategy;
+import eu.okaeri.configs.annotation.Names;
 import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.properties.IniConfigurer;
@@ -434,6 +438,125 @@ class IniErrorMessageTest {
             });
     }
 
+    // ==================== @CustomKey Annotation Tests ====================
+
+    /**
+     * Tests that error messages work correctly with @CustomKey annotation.
+     * The INI uses the custom key name (e.g., "custom-value"), and the error
+     * message should correctly locate and display the source line.
+     */
+    @ParameterizedTest(name = "{0}: @CustomKey simple field")
+    @MethodSource("iniConfigurers")
+    void testError_CustomKey_SimpleField(String name, Configurer configurer) {
+        String ini = "custom-value=not_a_number";
+
+        assertThatThrownBy(() -> this.loadConfig(CustomKeyConfig.class, configurer, ini))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("custom-value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'custom-value' to Integer from String
+                     --> 1:14
+                      |
+                    1 | custom-value=not_a_number
+                      |              ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    /**
+     * Tests that error messages work correctly with nested @CustomKey annotations.
+     * Both the parent field and nested field use custom key names.
+     */
+    @ParameterizedTest(name = "{0}: @CustomKey nested field")
+    @MethodSource("iniConfigurers")
+    void testError_CustomKey_NestedField(String name, Configurer configurer) {
+        String ini = "some.custom-key.nested-value=not_a_number";
+
+        assertThatThrownBy(() -> this.loadConfig(NestedCustomKeyConfig.class, configurer, ini))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("some.custom-key.nested-value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'some.custom-key.nested-value' to Integer from String
+                     --> 1:30
+                      |
+                    1 | some.custom-key.nested-value=not_a_number
+                      |                              ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    /**
+     * Tests that error messages work correctly when only the parent has @CustomKey.
+     */
+    @ParameterizedTest(name = "{0}: @CustomKey on parent only")
+    @MethodSource("iniConfigurers")
+    void testError_CustomKey_ParentOnly(String name, Configurer configurer) {
+        String ini = "custom-parent.value=not_a_number";
+
+        assertThatThrownBy(() -> this.loadConfig(CustomKeyParentConfig.class, configurer, ini))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("custom-parent.value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'custom-parent.value' to Integer from String
+                     --> 1:21
+                      |
+                    1 | custom-parent.value=not_a_number
+                      |                     ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
+    // ==================== @Names Annotation Tests (HYPHEN_CASE) ====================
+
+    /**
+     * Tests that error messages work correctly with @Names(strategy = HYPHEN_CASE).
+     * This tests configs using @Names strategy where field names are transformed
+     * to hyphen-case (e.g., updateRate -> update-rate).
+     */
+    @ParameterizedTest(name = "{0}: @Names HYPHEN_CASE nested field (scoreboard.dummy.update-rate pattern)")
+    @MethodSource("iniConfigurers")
+    void testError_Names_HyphenCase_NestedField(String name, Configurer configurer) {
+        String ini = "scoreboard.dummy.update-rate=hello";
+
+        assertThatThrownBy(() -> this.loadConfigWithCommons(ScoreboardConfig.class, configurer, ini))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("scoreboard.dummy.update-rate");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[DurationTransformer]: Cannot transform 'scoreboard.dummy.update-rate' to Duration from String
+                     --> 1:30
+                      |
+                    1 | scoreboard.dummy.update-rate=hello
+                      |                              ^^^^^ Text cannot be parsed to a Duration""");
+            });
+    }
+
+    /**
+     * Tests @Names HYPHEN_CASE with a simple nested field.
+     */
+    @ParameterizedTest(name = "{0}: @Names HYPHEN_CASE simple nested")
+    @MethodSource("iniConfigurers")
+    void testError_Names_HyphenCase_SimpleNested(String name, Configurer configurer) {
+        String ini = "my-section.my-value=not_a_number";
+
+        assertThatThrownBy(() -> this.loadConfig(HyphenCaseConfig.class, configurer, ini))
+            .isInstanceOf(OkaeriConfigException.class)
+            .satisfies(ex -> {
+                OkaeriConfigException e = (OkaeriConfigException) ex;
+                assertThat(e.getPath().toString()).isEqualTo("my-section.my-value");
+                assertThat(e.getMessage()).isEqualTo("""
+                    error[StringToIntegerTransformer]: Cannot transform 'my-section.my-value' to Integer from String
+                     --> 1:21
+                      |
+                    1 | my-section.my-value=not_a_number
+                      |                     ^^^^^^^^^^^^ Expected whole number (e.g. 42, -10, 0)""");
+            });
+    }
+
     // ==================== errorComments Option Tests ====================
 
     /**
@@ -684,5 +807,89 @@ class IniErrorMessageTest {
     @EqualsAndHashCode(callSuper = false)
     public static class SectionC extends OkaeriConfig {
         private int valueC = 0;
+    }
+
+    // ==================== @CustomKey Config Classes ====================
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class CustomKeyConfig extends OkaeriConfig {
+        @CustomKey("custom-value")
+        private int myValue;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class NestedCustomKeyConfig extends OkaeriConfig {
+        private SomeConfig some = new SomeConfig();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class SomeConfig extends OkaeriConfig {
+        @CustomKey("custom-key")
+        private InnerCustomKeyConfig customKey = new InnerCustomKeyConfig();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class InnerCustomKeyConfig extends OkaeriConfig {
+        @CustomKey("nested-value")
+        private int nestedValue;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class CustomKeyParentConfig extends OkaeriConfig {
+        @CustomKey("custom-parent")
+        private ChildConfig customParent = new ChildConfig();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ChildConfig extends OkaeriConfig {
+        private int value;
+    }
+
+    // ==================== @Names HYPHEN_CASE Config Classes ====================
+
+    /**
+     * Tests deeply nested config structure with @Names(strategy = HYPHEN_CASE)
+     */
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class ScoreboardConfig extends OkaeriConfig {
+        private ScoreboardSection scoreboard = new ScoreboardSection();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+    public static class ScoreboardSection extends OkaeriConfig {
+        private DummySection dummy = new DummySection();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+    public static class DummySection extends OkaeriConfig {
+        private Duration updateRate = Duration.ofMinutes(1);
+    }
+
+    /**
+     * Simple config with @Names HYPHEN_CASE for testing field name transformation.
+     */
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+    public static class HyphenCaseConfig extends OkaeriConfig {
+        private HyphenCaseSection mySection = new HyphenCaseSection();
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+    public static class HyphenCaseSection extends OkaeriConfig {
+        private int myValue;
     }
 }

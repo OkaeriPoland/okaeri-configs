@@ -45,11 +45,31 @@ public class WrappedConfigurer extends Configurer {
     @NonNull
     private ConfigPath basePath = ConfigPath.root();
 
-    @Getter
     @Setter
     private String rawContent;
 
     public WrappedConfigurer(@NonNull Configurer wrapped) {
         this.wrapped = wrapped;
+    }
+
+    /**
+     * Gets the raw content for this configurer.
+     * <p>
+     * This method is overridden to fix a field shadowing bug: the parent class (Configurer)
+     * has a rawContent field with getter, and this class has its own rawContent field with
+     * setter only. Without this override, getRawContent() would read the parent's field
+     * (always null) while setRawContent() writes to this class's field.
+     * <p>
+     * If this configurer doesn't have its own rawContent, delegates to wrapped configurer.
+     * This allows subconfigs to access parent's rawContent for error reporting.
+     *
+     * @return the raw content from this configurer or from the wrapped configurer chain
+     */
+    @Override
+    public String getRawContent() {
+        if (this.rawContent != null) {
+            return this.rawContent;
+        }
+        return this.wrapped.getRawContent();
     }
 }
