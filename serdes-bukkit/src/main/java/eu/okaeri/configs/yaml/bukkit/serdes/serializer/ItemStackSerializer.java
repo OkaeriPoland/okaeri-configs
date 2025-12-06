@@ -127,7 +127,27 @@ public class ItemStackSerializer implements ObjectSerializer<ItemStack> {
 
         // human-friendly
         String materialName = data.get("material", String.class);
-        Material material = Material.valueOf(materialName);
+        Material material;
+        try {
+            material = Material.valueOf(materialName);
+        } catch (IllegalArgumentException e) {
+            // Fallback: try stripping LEGACY_ prefix
+            // When a plugin runs on 1.13+ without api-version in plugin.yml, Bukkit provides
+            // LEGACY_* materials dynamically for backwards compatibility. If items are saved
+            // in this mode and then api-version is added to plugin.yml, the LEGACY_* constants
+            // no longer exist. Try stripping the prefix - probably won't work for all materials,
+            // but better than failing completely.
+            if (materialName.startsWith("LEGACY_")) {
+                try {
+                    material = Material.valueOf(materialName.substring(7));
+                } catch (IllegalArgumentException ignored) {
+                    // Re-throw original exception if fallback also fails
+                    throw e;
+                }
+            } else {
+                throw e;
+            }
+        }
 
         int amount = data.containsKey("amount")
             ? data.get("amount", Integer.class)
