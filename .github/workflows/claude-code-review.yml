@@ -35,19 +35,60 @@ jobs:
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            Review PR #${{ github.event.pull_request.number }} for okaeri-configs.
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            **Module Types:**
+            - `core`: Config framework (OkaeriConfig, Configurer, exception handling)
+            - `serdes-*`: Domain-specific type handlers (bukkit, commons, adventure, okaeri)
+            - `validator-*`: Validation extensions (jakarta-ee, okaeri)
+            - Formats: `yaml-*`, `json-*`, `xml`, `toml-*`, `hjson`, `binary`, `properties`, `ini`
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            ---
+
+            ## CHANGES TO `core` MODULE
+
+            **Exception Handling:**
+            - Framework exceptions wrapped in `OkaeriConfigException.builder()` for Rust-style error reporting
+
+            ---
+
+            ## SERDES/TRANSFORMERS
+
+            **Common Requirements:**
+            - Throw `IllegalArgumentException` with user-friendly message:
+              - "Expected duration (e.g. 30s, 5m, 1h)"
+              - "Unknown world (is the world loaded?)"
+            - Use `ValueIndexedException(message, startIndex, length)` for position errors
+            - Enum-like options use `EnumMatcher.suggest()` for exception messages
+
+            **Type Matching:**
+            - ObjectTransformer: `getPair()` returns EXACT types (HashMap lookup, no inheritance)
+            - ObjectSerializer: `supports()` uses `isAssignableFrom()` for inheritance support
+
+            **Testing:**
+            - Round-trip verified (serialize → deserialize → compare)
+
+            ---
+
+            ## GENERAL
+
+            **Codestyle Rules:**
+            - All `@NonNull` params marked consistently
+
+            **Backwards Compatibility:**
+            - Serialization format changes support old deserialization (fallback paths)
+            - Deprecated APIs preserved with @Deprecated + migration javadoc
+
+            **Performance:**
+            - Flag obvious issues (hot path allocations, reflection in loops)
+            - Don't overthink - this is a config library, not a realtime driver
+
+            **When in Doubt:**
+            - Look for similar implementations in the codebase (e.g., other transformers, serializers)
+            - Check existing test patterns for the module type
+            - Follow established naming and structure conventions
 
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
 
