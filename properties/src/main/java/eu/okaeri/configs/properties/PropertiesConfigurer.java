@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Properties configurer using Java's built-in Properties format with dot notation for nesting.
@@ -133,7 +132,7 @@ public class PropertiesConfigurer extends FlatConfigurer {
      */
     private static class OrderedProperties extends Properties {
         private static final long serialVersionUID = 1L;
-        private List<String> orderedKeys = new CopyOnWriteArrayList<>();
+        private List<String> orderedKeys = new ArrayList<>();
 
         @Override
         public synchronized Object put(Object key, Object value) {
@@ -151,7 +150,7 @@ public class PropertiesConfigurer extends FlatConfigurer {
         @Override
         public synchronized Object clone() {
             OrderedProperties clone = (OrderedProperties) super.clone();
-            clone.orderedKeys = new CopyOnWriteArrayList<>(this.orderedKeys);
+            clone.orderedKeys = new ArrayList<>(this.orderedKeys);
             return clone;
         }
     }
