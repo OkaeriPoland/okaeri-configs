@@ -31,16 +31,6 @@ public class JsonSimpleConfigurer extends Configurer {
         }
     };
 
-    private JSONParser parser;
-
-    public JsonSimpleConfigurer() {
-        this.parser = new JSONParser();
-    }
-
-    public JsonSimpleConfigurer(@NonNull JSONParser parser) {
-        this.parser = parser;
-    }
-
     @Override
     public List<String> getExtensions() {
         return Collections.singletonList("json");
@@ -65,7 +55,7 @@ public class JsonSimpleConfigurer extends Configurer {
     @SuppressWarnings("unchecked")
     public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
         String data = ConfigPostprocessor.of(inputStream).getContext();
-        return (Map<String, Object>) this.parser.parse(data, CONTAINER_FACTORY);
+        return (Map<String, Object>) new JSONParser().parse(data, CONTAINER_FACTORY);
     }
 
     @Override
