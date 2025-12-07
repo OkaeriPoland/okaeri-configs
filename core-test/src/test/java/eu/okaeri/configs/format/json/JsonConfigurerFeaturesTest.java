@@ -9,17 +9,14 @@ import eu.okaeri.configs.json.jackson.JsonJacksonConfigurer;
 import eu.okaeri.configs.json.simple.JsonSimpleConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.json.simple.parser.JSONParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -162,14 +159,6 @@ class JsonConfigurerFeaturesTest {
         JsonSimpleConfigurer configurer = new JsonSimpleConfigurer();
         assertThat(configurer).isNotNull();
     }
-
-    @Test
-    void testJsonSimple_ConstructorWithParser() {
-        JSONParser parser = new JSONParser();
-        JsonSimpleConfigurer configurer = new JsonSimpleConfigurer(parser);
-        assertThat(configurer).isNotNull();
-    }
-
 
     @Test
     void testJsonSimple_GetExtensions() {

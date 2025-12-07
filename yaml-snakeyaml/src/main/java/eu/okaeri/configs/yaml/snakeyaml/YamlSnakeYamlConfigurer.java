@@ -1,13 +1,9 @@
 package eu.okaeri.configs.yaml.snakeyaml;
 
 import eu.okaeri.configs.configurer.Configurer;
-import eu.okaeri.configs.format.SourceWalker;
 import eu.okaeri.configs.format.yaml.YamlSourceWalker;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
-import eu.okaeri.configs.schema.FieldDeclaration;
-import eu.okaeri.configs.schema.GenericsDeclaration;
-import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -20,21 +16,23 @@ import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 @Accessors(chain = true)
 public class YamlSnakeYamlConfigurer extends Configurer {
 
-    private Yaml yaml;
-
-    @Setter private String commentPrefix = "# ";
-
-    public YamlSnakeYamlConfigurer(@NonNull Yaml yaml) {
-        this.yaml = yaml;
-    }
+    private final Supplier<Yaml> yaml;
+    private @Setter String commentPrefix = "# ";
 
     public YamlSnakeYamlConfigurer() {
-        this(createYaml());
+        this(YamlSnakeYamlConfigurer::createYaml);
+    }
+
+    public YamlSnakeYamlConfigurer(@NonNull Supplier<Yaml> yaml) {
+        this.yaml = yaml;
     }
 
     private static Yaml createYaml() {
@@ -65,12 +63,12 @@ public class YamlSnakeYamlConfigurer extends Configurer {
 
     @Override
     public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        return this.yaml.load(inputStream);
+        return this.yaml.get().load(inputStream);
     }
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
-        ConfigPostprocessor.of(this.yaml.dump(data))
+        ConfigPostprocessor.of(this.yaml.get().dump(data))
             .removeLines(line -> line.startsWith(this.commentPrefix.trim()))
             .updateContext(ctx -> YamlSourceWalker.of(ctx).insertComments(declaration, this.commentPrefix))
             .write(outputStream);

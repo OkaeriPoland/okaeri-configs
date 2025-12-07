@@ -48,7 +48,7 @@ class YamlSnakeYamlConfigurerFeaturesTest {
     @Test
     void testConstructorWithYaml() {
         Yaml yaml = new Yaml();
-        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer(yaml);
+        YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer(() -> yaml);
         assertThat(configurer).isNotNull();
     }
 

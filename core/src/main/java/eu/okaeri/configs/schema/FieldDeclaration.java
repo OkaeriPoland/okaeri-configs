@@ -24,7 +24,7 @@ public class FieldDeclaration {
 
     private static final Logger LOGGER = Logger.getLogger(FieldDeclaration.class.getSimpleName());
     private static final Map<CacheEntry, FieldDeclaration> DECLARATION_CACHE = new ConcurrentHashMap<>();
-    private static final Set<String> FINAL_WARNS = new HashSet<>();
+    private static final Set<String> FINAL_WARNS = ConcurrentHashMap.newKeySet();
 
     private Object startingValue;
     private String name;
