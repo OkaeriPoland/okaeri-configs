@@ -21,6 +21,10 @@ public class SerdesContext {
     private final SerdesContextAttachments attachments;
     private final @NonNull ConfigPath path;
 
+    public static SerdesContext of(@NonNull Configurer configurer) {
+        return of(configurer, null, null);
+    }
+
     public static SerdesContext of(@NonNull Configurer configurer, ConfigContext configContext, FieldDeclaration field) {
         return of(configurer, configContext, field, (field == null) ? new SerdesContextAttachments() : field.readStaticAnnotations(configurer), ConfigPath.root());
     }

@@ -126,7 +126,7 @@ public abstract class Configurer {
 
     @Deprecated
     public boolean isToStringObject(@NonNull Object object, GenericsDeclaration genericType) {
-        return this.isToStringObject(object, genericType, SerdesContext.of(this, null, null));
+        return this.isToStringObject(object, genericType, SerdesContext.of(this));
     }
 
     @SuppressWarnings("unchecked")

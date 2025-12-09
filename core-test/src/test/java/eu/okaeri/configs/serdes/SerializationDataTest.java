@@ -23,7 +23,7 @@ class SerializationDataTest {
     @BeforeEach
     void setUp() {
         this.configurer = new YamlSnakeYamlConfigurer();
-        this.context = SerdesContext.of(this.configurer, null, null);
+        this.context = SerdesContext.of(this.configurer);
         this.data = new SerializationData(this.configurer, this.context);
     }
 

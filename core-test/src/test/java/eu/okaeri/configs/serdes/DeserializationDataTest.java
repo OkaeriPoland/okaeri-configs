@@ -22,7 +22,7 @@ class DeserializationDataTest {
     @BeforeEach
     void setUp() {
         this.configurer = new YamlSnakeYamlConfigurer();
-        this.context = SerdesContext.of(this.configurer, null, null);
+        this.context = SerdesContext.of(this.configurer);
     }
 
     // === BASIC OPERATIONS TESTS ===

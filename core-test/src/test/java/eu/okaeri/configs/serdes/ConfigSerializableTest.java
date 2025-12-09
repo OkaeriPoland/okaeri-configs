@@ -126,7 +126,7 @@ class ConfigSerializableTest {
     @Test
     void testConfigSerializableSerializer_SerializeViaRegistry() throws Exception {
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
-        SerdesContext context = SerdesContext.of(configurer, null, null);
+        SerdesContext context = SerdesContext.of(configurer);
 
         SimpleSerializable obj = new SimpleSerializable("test", 123);
         Object simplifiedObj = configurer.simplify(obj, GenericsDeclaration.of(SimpleSerializable.class), context, true);
@@ -141,7 +141,7 @@ class ConfigSerializableTest {
     @Test
     void testConfigSerializableSerializer_DeserializeViaRegistry() throws Exception {
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
-        SerdesContext context = SerdesContext.of(configurer, null, null);
+        SerdesContext context = SerdesContext.of(configurer);
 
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("name", "deserialized");
@@ -162,7 +162,7 @@ class ConfigSerializableTest {
     @Test
     void testConfigSerializableSerializer_NestedSerialization() throws Exception {
         YamlSnakeYamlConfigurer configurer = new YamlSnakeYamlConfigurer();
-        SerdesContext context = SerdesContext.of(configurer, null, null);
+        SerdesContext context = SerdesContext.of(configurer);
 
         NestedSerializable obj = new NestedSerializable("outer", new SimpleSerializable("inner", 999));
         Object simplifiedObj = configurer.simplify(obj, GenericsDeclaration.of(NestedSerializable.class), context, true);

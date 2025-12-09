@@ -34,7 +34,7 @@ class SerdesContextTest {
 
     @Test
     void testOf_ConfigurerOnly_CreatesContext() {
-        SerdesContext context = SerdesContext.of(this.configurer, null, null);
+        SerdesContext context = SerdesContext.of(this.configurer);
 
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
         assertThat(context.getField()).isNull();
@@ -72,7 +72,7 @@ class SerdesContextTest {
 
     @Test
     void testOf_NullField_CreatesContextWithoutField() {
-        SerdesContext context = SerdesContext.of(this.configurer, null, null);
+        SerdesContext context = SerdesContext.of(this.configurer);
 
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
         assertThat(context.getField()).isNull();
@@ -111,7 +111,7 @@ class SerdesContextTest {
     @Test
     void testGetConfigAnnotation_NoContext_ReturnsEmpty() {
         // SerdesContext has no ConfigContext
-        SerdesContext context = SerdesContext.of(this.configurer, null, null);
+        SerdesContext context = SerdesContext.of(this.configurer);
 
         Optional<Header> header = context.getConfigAnnotation(Header.class);
         assertThat(header).isEmpty();
@@ -147,7 +147,7 @@ class SerdesContextTest {
 
     @Test
     void testGetFieldAnnotation_NoField_ReturnsEmpty() {
-        SerdesContext context = SerdesContext.of(this.configurer, null, null);
+        SerdesContext context = SerdesContext.of(this.configurer);
 
         Optional<Comment> comment = context.getFieldAnnotation(Comment.class);
         assertThat(comment).isEmpty();
@@ -170,7 +170,7 @@ class SerdesContextTest {
 
     @Test
     void testGetAttachment_AttachmentAbsent_ReturnsEmpty() {
-        SerdesContext context = SerdesContext.of(this.configurer, null, null);
+        SerdesContext context = SerdesContext.of(this.configurer);
 
         Optional<TestAttachment> retrieved = context.getAttachment(TestAttachment.class);
         assertThat(retrieved).isEmpty();
@@ -192,7 +192,7 @@ class SerdesContextTest {
     @Test
     void testGetAttachment_WithDefault_AttachmentAbsent_ReturnsDefault() {
         TestAttachment defaultAttachment = new TestAttachment("default");
-        SerdesContext context = SerdesContext.of(this.configurer, null, null);
+        SerdesContext context = SerdesContext.of(this.configurer);
 
         TestAttachment retrieved = context.getAttachment(TestAttachment.class, defaultAttachment);
         assertThat(retrieved).isSameAs(defaultAttachment);
@@ -224,7 +224,7 @@ class SerdesContextTest {
 
     @Test
     void testGetConfigurer_ReturnsConfigurer() {
-        SerdesContext context = SerdesContext.of(this.configurer, null, null);
+        SerdesContext context = SerdesContext.of(this.configurer);
 
         assertThat(context.getConfigurer()).isSameAs(this.configurer);
     }
@@ -242,7 +242,7 @@ class SerdesContextTest {
 
     @Test
     void testGetField_WithoutField_ReturnsNull() {
-        SerdesContext context = SerdesContext.of(this.configurer, null, null);
+        SerdesContext context = SerdesContext.of(this.configurer);
 
         assertThat(context.getField()).isNull();
     }
