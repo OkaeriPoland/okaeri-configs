@@ -453,48 +453,172 @@ noop(false)  // Always returns false
 
 ## RawConfigView
 
-`RawConfigView` provides low-level access to config data for migrations.
+`RawConfigView` provides low-level access to config data for migrations. It implements `TypedKeyReader` and `TypedKeyWriter` interfaces, giving you a rich set of methods for reading and writing values with automatic type resolution and simplification.
 
-### Methods
+All key access uses dot notation for nested keys (e.g., `"server.database.host"`).
+
+### Basic Methods
 
 | Method | Description | Example |
 |--------|-------------|---------|
 | `exists(key)` | Check if key exists | `view.exists("server.host")` |
-| `get(key)` | Get value | `view.get("server.port")` |
-| `set(key, value)` | Set value | `view.set("timeout", 30)` |
-| `remove(key)` | Remove key | `view.remove("obsolete")` |
+| `get(key)` | Get raw value (untyped) | `Object port = view.get("server.port")` |
+| `set(key, value)` | Set value with auto-simplification | `view.set("timeout", 30)` |
+| `remove(key)` | Remove key and return old value | `Object old = view.remove("obsolete")` |
+
+### Typed Read Methods (TypedKeyReader)
+
+All read methods support automatic type resolution and conversion:
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `get(key, Class<T>)` | `T` | Get value resolved to type |
+| `get(key, GenericsDeclaration)` | `T` | Get value with full generic type |
+| `getOr(key, Class<T>, defaultValue)` | `T` | Get typed value with fallback |
+| `getAsList(key, elementType)` | `List<T>` | Get list with element type |
+| `getAsSet(key, elementType)` | `Set<T>` | Get set with element type |
+| `getAsCollection(key, GenericsDeclaration)` | `Collection<T>` | Get complex collection type |
+| `getAsMap(key, keyType, valueType)` | `Map<K,V>` | Get map with key/value types |
+| `getAsMap(key, GenericsDeclaration)` | `Map<K,V>` | Get complex map type |
+
+**Read examples:**
+```java
+// Simple typed reads
+Integer port = view.get("server.port", Integer.class);
+String host = view.get("server.host", String.class);
+Boolean enabled = view.get("feature.enabled", Boolean.class);
+
+// With defaults
+Integer timeout = view.getOr("timeout", Integer.class, 30);
+String mode = view.getOr("mode", String.class, "production");
+
+// Lists and sets
+List<String> tags = view.getAsList("tags", String.class);
+Set<Integer> ports = view.getAsSet("allowed-ports", Integer.class);
+
+// Maps
+Map<String, Integer> limits = view.getAsMap("limits", String.class, Integer.class);
+
+// Complex generic types
+GenericsDeclaration listMapType = GenericsDeclaration.of(
+    List.class,
+    Collections.singletonList(
+        GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Duration.class))
+    )
+);
+List<Map<String, Duration>> complex = view.get("schedule", listMapType);
+```
+
+### Typed Write Methods (TypedKeyWriter)
+
+All write methods support automatic simplification for serialization:
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `set(key, value)` | `Object` | Set with auto-simplification, returns old value |
+| `set(key, value, Class<T>)` | `Object` | Set with explicit type |
+| `set(key, value, GenericsDeclaration)` | `Object` | Set with full generic type |
+| `setCollection(key, collection, elementType)` | `void` | Set collection with element type |
+| `setCollection(key, collection, GenericsDeclaration)` | `void` | Set collection with full type |
+| `setArray(key, array, elementType)` | `void` | Set array with element type |
+| `setMap(key, map, keyType, valueType)` | `void` | Set map with key/value types |
+| `setMap(key, map, GenericsDeclaration)` | `void` | Set map with full type |
+
+**Write examples:**
+```java
+// Simple writes with auto-simplification
+view.set("server.port", 8080);
+view.set("server.host", "localhost");
+view.set("enabled", true);
+
+// With explicit types
+view.set("timeout", Duration.ofSeconds(30), Duration.class);
+
+// Collections
+view.setCollection("tags", Arrays.asList("prod", "web"), String.class);
+view.setArray("ports", new Integer[]{80, 443}, Integer.class);
+
+// Maps
+Map<String, Integer> limits = new HashMap<>();
+limits.put("max-connections", 100);
+view.setMap("limits", limits, String.class, Integer.class);
+
+// Complex generic types
+List<Map<String, String>> records = createRecords();
+GenericsDeclaration type = GenericsDeclaration.of(
+    List.class,
+    Collections.singletonList(
+        GenericsDeclaration.of(Map.class, Arrays.asList(String.class, String.class))
+    )
+);
+view.setCollection("records", records, type);
+```
 
 ### Nested Key Access
 
-Uses dot notation for nested keys:
+All methods support dot notation for nested structures:
 
 ```java
-// Access nested structure
-view.get("server.database.host")
-view.set("server.database.port", 5432)
+// Read nested values
+String dbHost = view.get("server.database.host", String.class);
+Integer dbPort = view.get("server.database.port", Integer.class);
 
-// Create nested structure
-view.set("new.nested.key", "value")
+// Write nested values (creates intermediate maps automatically)
+view.set("server.database.host", "localhost");
+view.set("server.database.port", 5432);
+
+// Check and remove nested keys
+if (view.exists("server.old.config")) {
+    view.remove("server.old.config");
+}
 ```
 
-### Direct Usage Example
+### Migration Example
 
+**Recommended: Use DSL helpers for simple transformations**
 ```java
+import static eu.okaeri.configs.migrate.ConfigMigrationDsl.*;
+
+// Convert old timeout formats to Duration objects using move() with transform function
+ConfigMigration migration = multi(
+    move("timeout-seconds", "timeout", seconds -> Duration.ofSeconds((Integer) seconds)),
+    move("retry-delay-ms", "retry-delay", millis -> Duration.ofMillis((Integer) millis)),
+    move("blacklist", "security.blocked-users", str ->
+        new HashSet<>(Arrays.asList(((String) str).split(","))))
+);
+```
+
+**Manual approach with RawConfigView for complex scenarios:**
+```java
+// Use RawConfigView when you need conditional logic or multi-step transformations
 ConfigMigration migration = (config, view) -> {
-    // Check nested key
-    if (view.exists("server.old-host")) {
-        // Get value
-        String host = (String) view.get("server.old-host");
-
-        // Set new key
-        view.set("server.host", host);
-
-        // Remove old key
-        view.remove("server.old-host");
-
-        return true;
+    if (!view.exists("connection.pool")) {
+        return false;
     }
-    return false;
+
+    // Read old pool configuration
+    Map<String, Object> oldPool = view.getAsMap("connection.pool", String.class, Object.class);
+    Integer maxSize = (Integer) oldPool.get("max-size");
+    Integer minSize = (Integer) oldPool.get("min-size");
+
+    // Transform: split into separate pools by priority
+    if (maxSize != null && maxSize > 10) {
+        // High-load config: create separate pools
+        view.set("connection.primary-pool.size", maxSize / 2);
+        view.set("connection.secondary-pool.size", maxSize / 2);
+        view.set("connection.strategy", "load-balanced");
+    } else {
+        // Low-load config: single pool
+        view.set("connection.primary-pool.size", maxSize != null ? maxSize : 5);
+        view.set("connection.strategy", "single");
+    }
+
+    // Copy timeout with type conversion
+    Duration timeout = view.getOr("connection.timeout-ms", Integer.class, 5000);
+    view.set("connection.primary-pool.timeout", Duration.ofMillis(timeout), Duration.class);
+
+    view.remove("connection.pool");
+    return true;
 };
 ```
 
@@ -659,15 +783,7 @@ config.migrate(versionMigration);
    C0003_Third_migration.java
    ```
 
-2. **Always check conditions:**
-   ```java
-   when(
-       exists("old-key"),
-       move("old-key", "new-key")
-   )
-   ```
-
-3. **Add descriptive migration names:**
+2. **Add descriptive migration names:**
    ```java
    new NamedMigration(
        "migrates server config from flat to nested structure",
@@ -675,7 +791,7 @@ config.migrate(versionMigration);
    )
    ```
 
-4. **Document what changed:**
+3. **Document what changed:**
    ```java
    /**
     * Migration C0001: Server key case fix
@@ -686,7 +802,7 @@ config.migrate(versionMigration);
     */
    ```
 
-5. **Test migrations:**
+4. **Test migrations:**
    ```java
    @Test
    void testC0001_FixesServerKeyCase() {
@@ -702,7 +818,7 @@ config.migrate(versionMigration);
    }
    ```
 
-6. **Use DSL helpers:**
+5. **Use DSL helpers:**
    ```java
    // ✅ Good - clear intent
    move("old-key", "new-key")
@@ -720,16 +836,7 @@ config.migrate(versionMigration);
 
 ### ❌ Don'ts
 
-1. **Don't skip version checks:**
-   ```java
-   // ❌ Bad - runs every time
-   move("old-key", "new-key")
-
-   // ✅ Good - conditional
-   when(exists("old-key"), move("old-key", "new-key"))
-   ```
-
-2. **Don't modify migrations after release:**
+1. **Don't modify migrations after release:**
    ```java
    // ❌ Bad - breaks existing deployments
    // Changed C0001 after users already applied it
@@ -738,24 +845,6 @@ config.migrate(versionMigration);
    // C0002_Fix_C0001_issue.java
    ```
 
-3. **Don't forget to save:**
-   ```java
-   // Migrations are saved automatically by migrate()
-   config.migrate(migration);
-   // No need for manual save()
-   ```
-
-4. **Don't lose data:**
-   ```java
-   // ❌ Bad - data lost if new-key exists
-   move("old-key", "new-key")
-
-   // ✅ Good - backup first
-   multi(
-       copy("old-key", "old-key-backup"),
-       move("old-key", "new-key")
-   )
-   ```
 
 ## Complex Migration Scenarios
 
