@@ -1,7 +1,6 @@
 package eu.okaeri.configs.validator.jakartaee;
 
 import eu.okaeri.configs.exception.ValidationException;
-import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.validator.ConfigValidator;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -13,6 +12,9 @@ import java.util.stream.Collectors;
 
 /**
  * ConfigValidator implementation using Jakarta Bean Validation.
+ * <p>
+ * Validates the entire configuration entity, supporting both field-level constraints
+ * and class-level constraints (e.g., {@code @PasswordMatches}, {@code @ValidDateRange}).
  * <p>
  * Usage:
  * <pre>{@code
@@ -32,20 +34,39 @@ public class JakartaValidator implements ConfigValidator {
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
+    /**
+     * Validates the entire configuration entity.
+     * <p>
+     * This method validates all field constraints and class-level constraints
+     * (e.g., JSR-380 cross-field validation like {@code @PasswordMatches}).
+     *
+     * @param entity the configuration object to validate
+     * @return true if valid
+     * @throws ValidationException if validation fails
+     */
     @Override
-    @SuppressWarnings("unchecked")
-    public boolean isValid(@NonNull FieldDeclaration declaration, Object value) {
-        Class<Object> parent = (Class<Object>) declaration.getObject().getClass();
-        String realFieldName = declaration.getField().getName();
-        Set<ConstraintViolation<Object>> violations = this.validator.validateValue(parent, realFieldName, value);
+    public boolean isValid(@NonNull Object entity) {
 
-        if (!violations.isEmpty()) {
-            String reason = violations.stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining(", "));
-            throw new ValidationException(declaration.getName() + " (" + value + ") is invalid: " + reason);
+        Set<ConstraintViolation<Object>> violations = this.validator.validate(entity);
+        if (violations.isEmpty()) {
+            return true;
         }
 
-        return true;
+        String reason = violations.stream()
+            .map(violation -> {
+                String propertyPath = violation.getPropertyPath().toString();
+                String message = violation.getMessage();
+                Object invalidValue = violation.getInvalidValue();
+                if (propertyPath.isEmpty()) {
+                    // Class-level constraint
+                    return message;
+                } else {
+                    // Field-level constraint
+                    return propertyPath + " (" + invalidValue + ") " + message;
+                }
+            })
+            .collect(Collectors.joining(", "));
+
+        throw new ValidationException(entity.getClass().getSimpleName() + " is invalid: " + reason);
     }
 }

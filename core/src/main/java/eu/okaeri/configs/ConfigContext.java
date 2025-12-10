@@ -1,7 +1,6 @@
 package eu.okaeri.configs;
 
 import eu.okaeri.configs.exception.ValidationException;
-import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.validator.ConfigValidator;
 import lombok.Getter;
 import lombok.NonNull;
@@ -89,31 +88,43 @@ public class ConfigContext {
     }
 
     /**
-     * Validates a field value using the registered validator.
+     * Validates the entire configuration entity using the registered validator.
+     * Validates unconditionally regardless of validateOnLoad/validateOnSave settings.
      *
-     * @param declaration the field being validated
-     * @param value the value to validate
-     * @param isLoad true if this is during load, false if during save
+     * @param entity the configuration object to validate
      * @throws ValidationException if validator fails
      */
-    public void validate(@NonNull FieldDeclaration declaration, Object value, boolean isLoad) {
+    public void validate(@NonNull Object entity) {
+        this.validate(entity, null);
+    }
+
+    /**
+     * Validates the entire configuration entity using the registered validator.
+     *
+     * @param entity the configuration object to validate
+     * @param isLoad true if during load, false if during save, null to validate unconditionally
+     * @throws ValidationException if validator fails
+     */
+    public void validate(@NonNull Object entity, Boolean isLoad) {
         if (this.validator == null) {
             return;
         }
 
-        // Check if validator should run for this operation
-        if (isLoad && !this.validator.validateOnLoad()) {
-            return;
-        }
-        if (!isLoad && !this.validator.validateOnSave()) {
-            return;
+        // Check if validator should run for this operation (null = always validate)
+        if (isLoad != null) {
+            if (isLoad && !this.validator.validateOnLoad()) {
+                return;
+            }
+            if (!isLoad && !this.validator.validateOnSave()) {
+                return;
+            }
         }
 
-        // Run validation - may throw ValidationException
-        if (!this.validator.isValid(declaration, value)) {
+        // Run entity-level validation - may throw ValidationException
+        if (!this.validator.isValid(entity)) {
             throw new ValidationException(
-                this.validator.getClass().getSimpleName() + " marked " + declaration.getName() +
-                " as invalid without throwing an exception"
+                this.validator.getClass().getSimpleName() + " marked entity " +
+                    entity.getClass().getSimpleName() + " as invalid without throwing an exception"
             );
         }
     }

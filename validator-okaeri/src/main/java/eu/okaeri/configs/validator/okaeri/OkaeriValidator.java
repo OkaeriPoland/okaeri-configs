@@ -1,18 +1,18 @@
 package eu.okaeri.configs.validator.okaeri;
 
 import eu.okaeri.configs.exception.ValidationException;
-import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.validator.ConfigValidator;
 import eu.okaeri.validator.ConstraintViolation;
 import eu.okaeri.validator.policy.NullPolicy;
 import lombok.NonNull;
 
-import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * ConfigValidator implementation using okaeri-validator.
+ * <p>
+ * Validates the entire entity using okaeri-validator's constraint annotations.
  * <p>
  * Usage:
  * <pre>{@code
@@ -38,19 +38,25 @@ public class OkaeriValidator implements ConfigValidator {
         );
     }
 
+    /**
+     * Validates the entire configuration entity.
+     *
+     * @param entity the configuration object to validate
+     * @return true if valid
+     * @throws ValidationException if validation fails
+     */
     @Override
-    public boolean isValid(@NonNull FieldDeclaration declaration, Object value) {
-        Class<?> parent = declaration.getObject().getClass();
-        Field field = declaration.getField();
-        Set<ConstraintViolation> violations = this.validator.validatePropertyValue(parent, field, value);
+    public boolean isValid(@NonNull Object entity) {
 
-        if (!violations.isEmpty()) {
-            String reason = violations.stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining(", "));
-            throw new ValidationException(declaration.getName() + " (" + value + ") is invalid: " + reason);
+        Set<ConstraintViolation> violations = this.validator.validate(entity);
+        if (violations.isEmpty()) {
+            return true;
         }
 
-        return true;
+        String reason = violations.stream()
+            .map(violation -> violation.getField() + " (" + violation.getType() + ") " + violation.getMessage())
+            .collect(Collectors.joining(", "));
+
+        throw new ValidationException(entity.getClass().getSimpleName() + " is invalid: " + reason);
     }
 }

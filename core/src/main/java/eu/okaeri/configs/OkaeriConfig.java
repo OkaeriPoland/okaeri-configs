@@ -18,7 +18,6 @@ import eu.okaeri.configs.serdes.SerdesRegistry;
 import lombok.*;
 
 import java.io.*;
-import java.util.Map;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -507,6 +506,11 @@ public abstract class OkaeriConfig {
             throw new IllegalStateException("configurer cannot be null");
         }
 
+        // Validate entity before serialization (enables cross-field validation)
+        if (this.context.hasValidator()) {
+            this.context.validate(this, false);
+        }
+
         // Build the data map from declared fields
         Map<String, Object> data = new LinkedHashMap<>();
 
@@ -514,11 +518,6 @@ public abstract class OkaeriConfig {
             Object valueToSave = field.getAnnotation(ReadOnly.class).isPresent()
                 ? field.getStartingValue()
                 : field.getValue();
-
-            // Validate using context validator
-            if (this.context.hasValidator()) {
-                this.context.validate(field, valueToSave, false);
-            }
 
             try {
                 Object simplified = this.getConfigurer().simplifyField(valueToSave, field.getType(), field, this.context);
@@ -670,8 +669,7 @@ public abstract class OkaeriConfig {
             // Parse from buffered content and store in internalState
             Map<String, Object> loaded = this.getConfigurer().load(new ByteArrayInputStream(contentBytes), this.getDeclaration());
             this.internalState = (loaded != null) ? loaded : new LinkedHashMap<>();
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             throw new OkaeriException("failed #load", exception);
         }
 
@@ -745,6 +743,28 @@ public abstract class OkaeriConfig {
         }
 
         return this.load(otherConfig.asMap(this.getConfigurer(), true));
+    }
+
+    /**
+     * Validates the entire configuration entity using the registered validator.
+     * This allows runtime validation without saving the config.
+     * <p>
+     * Supports both field-level and entity-level validation, including cross-field
+     * constraints (e.g., JSR-380 class-level constraints).
+     * <p>
+     * If no validator is registered, this is a no-op.
+     *
+     * @return this instance
+     * @throws OkaeriException if validation fails
+     */
+    public OkaeriConfig validate() throws OkaeriException {
+
+        if (!this.context.hasValidator()) {
+            return this;
+        }
+
+        this.context.validate(this);
+        return this;
     }
 
     /**
@@ -842,6 +862,12 @@ public abstract class OkaeriConfig {
 
         this.loadValuesFromInternalState();
         this.processVariablesRecursively(this.getDeclaration(), this, new HashSet<>());
+
+        // Validate entity after @Variable processing (values may have changed)
+        if (this.context.hasValidator()) {
+            this.context.validate(this, true);
+        }
+
         return this;
     }
 
@@ -891,13 +917,13 @@ public abstract class OkaeriConfig {
                     .build();
             }
 
-            // Validate using context validator
-            if (this.context.hasValidator()) {
-                this.context.validate(field, value, true);
-            }
-
             field.updateValue(value);
             field.setStartingValue(value);
+        }
+
+        // Validate entity after all fields are loaded (enables cross-field validation)
+        if (this.context.hasValidator()) {
+            this.context.validate(this, true);
         }
     }
 
@@ -949,11 +975,6 @@ public abstract class OkaeriConfig {
                             .configContext(this.context)
                             .cause(exception)
                             .build();
-                    }
-
-                    // Validate using context validator
-                    if (this.context.hasValidator()) {
-                        this.context.validate(field, value, true);
                     }
 
                     field.updateValue(value);
