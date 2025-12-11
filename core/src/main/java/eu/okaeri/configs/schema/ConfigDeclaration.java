@@ -137,6 +137,10 @@ public class ConfigDeclaration {
         return this.fieldMap.values();
     }
 
+    public Set<String> getFieldNames() {
+        return this.fieldMap.keySet();
+    }
+
     /**
      * Finds how many leading parts of a dotted path are OkaeriConfig fields.
      * Used for determining section depth in formats like TOML and INI.

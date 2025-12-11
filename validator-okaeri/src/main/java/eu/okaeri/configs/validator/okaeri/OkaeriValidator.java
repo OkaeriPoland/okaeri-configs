@@ -1,6 +1,8 @@
 package eu.okaeri.configs.validator.okaeri;
 
+import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.exception.ValidationException;
+import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.validator.ConfigValidator;
 import eu.okaeri.validator.ConstraintViolation;
 import eu.okaeri.validator.policy.NullPolicy;
@@ -39,24 +41,48 @@ public class OkaeriValidator implements ConfigValidator {
     }
 
     /**
-     * Validates the entire configuration entity.
+     * Validates the configuration entity by iterating through declared fields.
+     * Only validates fields present in ConfigDeclaration (excludes transient/@Exclude fields).
+     * <p>
+     * Note: okaeri-validator does not support cross-field validation, so we validate
+     * each declared field individually.
      *
      * @param entity the configuration object to validate
      * @return true if valid
      * @throws ValidationException if validation fails
+     * @throws IllegalArgumentException if entity is not an OkaeriConfig instance
      */
     @Override
     public boolean isValid(@NonNull Object entity) {
 
-        Set<ConstraintViolation> violations = this.validator.validate(entity);
+        if (!(entity instanceof OkaeriConfig)) {
+            throw new IllegalArgumentException("OkaeriValidator can only validate OkaeriConfig instances, got: " + entity.getClass().getName());
+        }
+
+        OkaeriConfig config = (OkaeriConfig) entity;
+        for (FieldDeclaration field : config.getDeclaration().getFields()) {
+            this.validateField(entity, field);
+        }
+
+        return true;
+    }
+
+    private void validateField(Object entity, FieldDeclaration field) {
+
+        Set<ConstraintViolation> violations = this.validator.validatePropertyValue(
+            entity.getClass(),
+            field.getField(),
+            field.getValue()
+        );
+
         if (violations.isEmpty()) {
-            return true;
+            return;
         }
 
         String reason = violations.stream()
-            .map(violation -> violation.getField() + " (" + violation.getType() + ") " + violation.getMessage())
+            .map(ConstraintViolation::getMessage)
             .collect(Collectors.joining(", "));
 
-        throw new ValidationException(entity.getClass().getSimpleName() + " is invalid: " + reason);
+        throw new ValidationException(field.getName() + " (" + field.getValue() + ") is invalid: " + reason);
     }
 }
