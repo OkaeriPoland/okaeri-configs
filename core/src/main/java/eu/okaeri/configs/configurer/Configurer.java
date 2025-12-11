@@ -344,6 +344,7 @@ public abstract class Configurer {
             Map<String, Object> configMap = this.resolveType(object, source, Map.class, GenericsDeclaration.of(Map.class, Arrays.asList(String.class, Object.class)), serdesContext);
 
             // Initialize subconfig with its data and path context
+            config.setConfigurer(this);
             config.setInternalState(configMap);
             config.setInternalPath(serdesContext.getPath());
             if (serdesContext.getConfigContext() != null) {

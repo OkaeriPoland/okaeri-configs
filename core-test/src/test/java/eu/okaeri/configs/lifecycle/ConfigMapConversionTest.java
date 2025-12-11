@@ -36,7 +36,7 @@ class ConfigMapConversionTest {
         config.setDoubleValue(3.14);
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), false);
+        Map<String, Object> map = config.asMap(false);
 
         // Assert
         assertThat(map).containsKeys("boolValue", "intValue", "doubleValue");
@@ -55,7 +55,7 @@ class ConfigMapConversionTest {
         config.setDoubleValue(2.71);
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map = config.asMap();
 
         // Assert - conservative mode preserves types
         assertThat(map.get("boolValue")).isInstanceOf(Boolean.class).isEqualTo(false);
@@ -70,7 +70,7 @@ class ConfigMapConversionTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map = config.asMap();
 
         // Assert - all primitive fields should be present
         assertThat(map).containsKeys(
@@ -96,7 +96,7 @@ class ConfigMapConversionTest {
         config.load(yamlContent);
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map = config.asMap();
 
         // Assert - orphans should be included
         assertThat(map).containsKeys("orphanKey", "anotherOrphan");
@@ -153,7 +153,7 @@ class ConfigMapConversionTest {
         config.getNested().setSubValue(456);
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map = config.asMap();
 
         // Assert
         assertThat(map).containsKeys("name", "value", "nested");
@@ -184,7 +184,7 @@ class ConfigMapConversionTest {
         config.setShortValue((short) 555);
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map = config.asMap();
 
         // Assert - types preserved in conservative mode
         assertThat(map.get("boolValue")).isInstanceOf(Boolean.class);
@@ -213,7 +213,7 @@ class ConfigMapConversionTest {
         config.setShortValue((short) 555);
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), false);
+        Map<String, Object> map = config.asMap(false);
 
         // Assert - most should be strings in non-conservative mode
         assertThat(map.get("boolValue")).isInstanceOf(String.class);
@@ -236,7 +236,7 @@ class ConfigMapConversionTest {
         config1.setDoubleValue(7.77);
 
         // Act - convert to map
-        Map<String, Object> map = config1.asMap(config1.getConfigurer(), true);
+        Map<String, Object> map = config1.asMap();
 
         // Create new config and load from map
         PrimitivesTestConfig config2 = ConfigManager.create(PrimitivesTestConfig.class);
@@ -256,7 +256,7 @@ class ConfigMapConversionTest {
         config.withConfigurer(new YamlSnakeYamlConfigurer());
 
         // Act - don't modify any values, use defaults
-        Map<String, Object> map = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map = config.asMap();
 
         // Assert - should contain default values from class
         assertThat(map).isNotEmpty();
@@ -273,7 +273,7 @@ class ConfigMapConversionTest {
         config.setIntWrapper(null);
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map = config.asMap();
 
         // Assert - null should be included
         assertThat(map).containsKey("intWrapper");
@@ -288,7 +288,7 @@ class ConfigMapConversionTest {
         config.setIntValue(999);
 
         // Act
-        Map<String, Object> map = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map = config.asMap();
         map.put("intValue", 111); // Modify the map
 
         // Assert - config should not be affected
@@ -304,8 +304,8 @@ class ConfigMapConversionTest {
         config.setIntValue(777);
 
         // Act
-        Map<String, Object> map1 = config.asMap(config.getConfigurer(), true);
-        Map<String, Object> map2 = config.asMap(config.getConfigurer(), true);
+        Map<String, Object> map1 = config.asMap();
+        Map<String, Object> map2 = config.asMap();
 
         // Assert - multiple conversions should produce same result
         assertThat(map1).isEqualTo(map2);

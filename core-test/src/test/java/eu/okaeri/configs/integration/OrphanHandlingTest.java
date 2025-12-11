@@ -175,7 +175,7 @@ class OrphanHandlingTest {
         config.load();
 
         // Get as map - should include orphans
-        var map = config.asMap(config.getConfigurer(), true);
+        var map = config.asMap();
 
         assertThat(map).containsKey("declaredField");
         assertThat(map).containsKey("orphan1");

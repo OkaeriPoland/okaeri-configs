@@ -596,6 +596,30 @@ public abstract class OkaeriConfig {
     }
 
     /**
+     * Converts current configuration state to map using this instance's configurer.
+     * Conservative simplification is used (basic types are preserved).
+     *
+     * @return resulting map
+     * @throws OkaeriException if simplification process fails
+     * @see #asMap(Configurer, boolean)
+     */
+    public Map<String, Object> asMap() throws OkaeriException {
+        return this.asMap(this.getConfigurer(), true);
+    }
+
+    /**
+     * Converts current configuration state to map using this instance's configurer.
+     *
+     * @param conservative should basic types be preserved
+     * @return resulting map
+     * @throws OkaeriException if simplification process fails
+     * @see #asMap(Configurer, boolean)
+     */
+    public Map<String, Object> asMap(boolean conservative) throws OkaeriException {
+        return this.asMap(this.getConfigurer(), conservative);
+    }
+
+    /**
      * Loads new state to the configuration from its {@link #bindFile}.
      *
      * @param update should configuration be saved afterwards

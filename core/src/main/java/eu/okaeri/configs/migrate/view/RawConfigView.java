@@ -45,13 +45,13 @@ public class RawConfigView implements TypedKeyReader, TypedKeyWriter {
 
     @Override
     public Object getRaw(@NonNull String key) {
-        Map<String, Object> document = this.config.asMap(this.getConfigurer(), true);
+        Map<String, Object> document = this.config.asMap();
         return this.valueExtract(document, key);
     }
 
     @Override
     public void setRaw(@NonNull String key, Object value) {
-        Map<String, Object> document = this.config.asMap(this.getConfigurer(), true);
+        Map<String, Object> document = this.config.asMap();
         this.valuePut(document, key, value);
         this.config.load(document);
     }
@@ -80,7 +80,7 @@ public class RawConfigView implements TypedKeyReader, TypedKeyWriter {
      * @return true if the key exists
      */
     public boolean exists(@NonNull String key) {
-        Map<String, Object> document = this.config.asMap(this.getConfigurer(), true);
+        Map<String, Object> document = this.config.asMap();
         return this.valueExists(document, key);
     }
 
@@ -91,7 +91,7 @@ public class RawConfigView implements TypedKeyReader, TypedKeyWriter {
      * @return the previous value, or null
      */
     public Object remove(@NonNull String key) {
-        Map<String, Object> document = this.config.asMap(this.getConfigurer(), true);
+        Map<String, Object> document = this.config.asMap();
         Object old = this.valueRemove(document, key);
 
         // top-level keys need to be removed from internalState as well

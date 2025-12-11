@@ -178,7 +178,7 @@ class CrossFormatTest {
         config1.save();
 
         // Convert to map
-        Map<String, Object> map = config1.asMap(config1.getConfigurer(), true);
+        Map<String, Object> map = config1.asMap();
 
         // Create new config and load from map
         SimpleConfig config2 = ConfigManager.create(SimpleConfig.class);
