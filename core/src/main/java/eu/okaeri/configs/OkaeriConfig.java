@@ -13,8 +13,10 @@ import eu.okaeri.configs.schema.FieldDeclaration;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.ConfigPath;
 import eu.okaeri.configs.serdes.OkaeriSerdes;
+import eu.okaeri.configs.serdes.PreProcessResult;
 import eu.okaeri.configs.serdes.SerdesContext;
 import eu.okaeri.configs.serdes.SerdesRegistry;
+import eu.okaeri.configs.serdes.ValuePreProcessor;
 import lombok.*;
 
 import java.io.*;
@@ -749,8 +751,10 @@ public abstract class OkaeriConfig {
             throw new IllegalStateException("configurer cannot be null");
         }
 
-        map.forEach(this::set);
-        return this;
+        // Store in internalState and go through update() to ensure
+        // pre-processors and other load-time processing is applied
+        this.internalState.putAll(map);
+        return this.update();
     }
 
     /**
@@ -925,6 +929,35 @@ public abstract class OkaeriConfig {
                 .withPath(fieldPath);
 
             Object rawValue = this.internalState.get(fieldName);
+
+            // Pre-process raw value (e.g., resolve ${} placeholders)
+            ValuePreProcessor preProcessor = this.context.getValuePreProcessor();
+            if (preProcessor != null) {
+                try {
+                    PreProcessResult result = preProcessor.process(rawValue, serdesContext);
+                    if (result.isModified()) {
+                        if (!result.isWriteToFile()) {
+                            field.setStartingValue(rawValue);  // Preserve original for save
+                            field.setVariableHide(true);
+                        }
+                        rawValue = result.getValue();
+                    }
+                } catch (OkaeriConfigException exception) {
+                    throw exception;
+                } catch (Exception exception) {
+                    throw OkaeriConfigException.builder()
+                        .message("Cannot pre-process")
+                        .path(fieldPath)
+                        .expectedType(genericType)
+                        .actualValue(rawValue)
+                        .configurer(effectiveConfigurer)
+                        .configContext(this.context)
+                        .errorCode(preProcessor.getClass())
+                        .cause(exception)
+                        .build();
+                }
+            }
+
             Object value;
             try {
                 value = effectiveConfigurer.resolveValue(rawValue, type, genericType, serdesContext);
@@ -942,7 +975,10 @@ public abstract class OkaeriConfig {
             }
 
             field.updateValue(value);
-            field.setStartingValue(value);
+            // Only set startingValue if not already set by pre-processor
+            if (!field.isVariableHide()) {
+                field.setStartingValue(value);
+            }
         }
 
         // Validate entity after all fields are loaded (enables cross-field validation)

@@ -1,7 +1,10 @@
 package eu.okaeri.configs;
 
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.serdes.ChainedPreProcessor;
 import eu.okaeri.configs.serdes.OkaeriSerdes;
+import eu.okaeri.configs.serdes.ValuePreProcessor;
+import eu.okaeri.configs.serdes.standard.EnvironmentPlaceholderProcessor;
 import eu.okaeri.configs.validator.ConfigValidator;
 import lombok.AccessLevel;
 import lombok.NonNull;
@@ -200,5 +203,105 @@ public class OkaeriConfigOptions {
         }
         context.setValidator(validator);
         return this;
+    }
+
+    /**
+     * Sets the value pre-processor for this configuration.
+     * <p>
+     * The pre-processor transforms raw values from the config file before type resolution.
+     * This allows processing like environment variable placeholder resolution to happen
+     * before values are converted to their target types.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * config.configure(opt -> {
+     *     opt.configurer(new YamlBukkitConfigurer());
+     *     opt.valuePreProcessor(new EnvironmentPlaceholderProcessor());
+     * });
+     * }</pre>
+     *
+     * @param preProcessor the pre-processor to set
+     * @return this options for chaining
+     * @throws IllegalStateException if context is not initialized (configurer not set)
+     * @see EnvironmentPlaceholderProcessor
+     * @see #resolvePlaceholders()
+     */
+    public OkaeriConfigOptions valuePreProcessor(@NonNull ValuePreProcessor preProcessor) {
+        ConfigContext context = this.config.getContext();
+        if (context == null) {
+            throw new IllegalStateException("configurer must be set before setting valuePreProcessor");
+        }
+        context.setValuePreProcessor(preProcessor);
+        return this;
+    }
+
+    /**
+     * Sets multiple value pre-processors for this configuration, chained in order.
+     * <p>
+     * Each processor receives the output of the previous one. This allows combining
+     * built-in processors like {@link EnvironmentPlaceholderProcessor} with custom ones.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * config.configure(opt -> {
+     *     opt.configurer(new YamlBukkitConfigurer());
+     *     opt.valuePreProcessor(
+     *         new EnvironmentPlaceholderProcessor(),
+     *         new MyCustomProcessor()
+     *     );
+     * });
+     * }</pre>
+     *
+     * @param preProcessors the pre-processors to chain, in order
+     * @return this options for chaining
+     * @throws IllegalStateException if context is not initialized (configurer not set)
+     * @throws IllegalArgumentException if no processors are provided
+     * @see ChainedPreProcessor
+     * @see #valuePreProcessor(ValuePreProcessor)
+     */
+    public OkaeriConfigOptions valuePreProcessor(@NonNull ValuePreProcessor... preProcessors) {
+        if (preProcessors.length == 0) {
+            throw new IllegalArgumentException("at least one pre-processor is required");
+        }
+        if (preProcessors.length == 1) {
+            return this.valuePreProcessor(preProcessors[0]);
+        }
+        return this.valuePreProcessor(new ChainedPreProcessor(preProcessors));
+    }
+
+    /**
+     * Enables environment variable placeholder resolution.
+     * <p>
+     * This is a convenience method that sets up {@link EnvironmentPlaceholderProcessor}
+     * to resolve Spring Boot compatible placeholders:
+     * <ul>
+     *   <li>{@code ${VAR}} - resolves from environment</li>
+     *   <li>{@code ${VAR:default}} - uses default value if variable is not set</li>
+     *   <li>{@code $${VAR}} - escapes to literal {@code ${VAR}}</li>
+     * </ul>
+     * <p>
+     * Example configuration file:
+     * <pre>{@code
+     * database:
+     *   host: ${DB_HOST:localhost}
+     *   port: ${DB_PORT:5432}
+     *   password: ${DB_PASSWORD}
+     * }</pre>
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * config.configure(opt -> {
+     *     opt.configurer(new YamlBukkitConfigurer());
+     *     opt.resolvePlaceholders();
+     * });
+     * }</pre>
+     *
+     * @return this options for chaining
+     * @throws IllegalStateException if context is not initialized (configurer not set)
+     * @see EnvironmentPlaceholderProcessor
+     * @see #valuePreProcessor(ValuePreProcessor)
+     */
+    public OkaeriConfigOptions resolvePlaceholders() {
+        return this.valuePreProcessor(new EnvironmentPlaceholderProcessor());
     }
 }

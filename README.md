@@ -40,7 +40,9 @@ Special implementations for safe use in specific environments, e.g., game server
 | **BungeeCord/Waterfall** | 🌟 [yaml-bungee](https://github.com/OkaeriPoland/okaeri-configs/tree/master/yaml-bungee) | ✅        | ✅      | No extra dependencies needed                                                                         |
 | **Velocity/Sponge**      | yaml-snakeyaml or json-gson                                                              | Varies   | Varies | Exclude format deps when shading (provided by environment)                                           |
 
-**Legend:** Comments = `@Comment`/`@Header` support | Errors = Rust-style error markers (see below)
+**Legend:**
+- Comments: `@Comment`/`@Header` support
+- Errors: Rust-style error markers (see below)
 
 ### Rust-style error messages
 
@@ -56,6 +58,16 @@ error[DurationTransformer]: Cannot transform 'scoreboard.dummy.update-rate' to D
 1117 |     # Example: 1m30s
 1118 |     update-rate: hello
      |                  ^^^^^ Expected duration (e.g. 30s, 5m, 1h30m, 1d)
+```
+
+```
+error[EnvironmentPlaceholderProcessor]: Cannot pre-process 'database.password' to String from String
+ --> config.yml:14:13
+   |
+12 |   host: ${DB_HOST:localhost}
+13 |   port: ${DB_PORT:5432}
+14 |   password: ${DB_PASSWORD}
+   |             ^^^^^^^^^^^^^^ Unresolved property or env
 ```
 
 ## Validation extensions
@@ -102,9 +114,10 @@ public class AppConfig extends OkaeriConfig {
     private String appName = "MyApp";
     private Integer maxConnections = 100;
 
-    @Variable("API_KEY")
-    @Comment("API key (can be set via environment variable)")
-    private String apiKey = "your-key-here";
+    @Comment("API key from properties (-DAPI_KEY=1234) or environment")
+    private String apiKey = "${API_KEY}";
+    // use ${API_KEY:default} for fallback value
+    // or @Variable("API_KEY") annotation with field value as fallback
 
     @Comment("Server configuration (subconfig)")
     private ServerConfig server = new ServerConfig();
@@ -152,6 +165,7 @@ TestConfig config = ConfigManager.create(TestConfig.class, it -> {
         opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
         opt.bindFile(new File(this.getDataFolder(), "config.yml")); // specify Path, File or pathname
         opt.removeOrphans(true); // automatic removal of undeclared keys
+        opt.resolvePlaceholders(); // resolve ${VAR} and ${VAR:default} from environment
     });
     it.saveDefaults(); // save file if it does not exist
     it.load(true); // load and save to update comments/new fields
@@ -166,6 +180,7 @@ TestConfig config = (TestConfig) ConfigManager.create(TestConfig.class)
         opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
         opt.bindFile(new File(this.getDataFolder(), "config.yml")); // specify Path, File or pathname
         opt.removeOrphans(true); // automatic removal of undeclared keys
+        opt.resolvePlaceholders(); // resolve ${VAR} and ${VAR:default} from environment
     })
     .saveDefaults() // save file if it does not exist
     .load(true); // load and save to update comments/new fields
@@ -179,6 +194,7 @@ config.configure(opt -> {
     opt.configurer(new YamlBukkitConfigurer(), new SerdesBukkit()); // specify configurer implementation, optionally additional serdes packages
     opt.bindFile(new File(this.getDataFolder(), "config.yml")); // specify Path, File or pathname
     opt.removeOrphans(true); // automatic removal of undeclared keys
+    opt.resolvePlaceholders(); // resolve ${VAR} and ${VAR:default} from properties/environment
 });
 config.saveDefaults(); // save file if it does not exist
 config.load(true); // load and save to update comments/new fields

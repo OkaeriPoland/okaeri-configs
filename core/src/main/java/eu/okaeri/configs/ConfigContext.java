@@ -1,6 +1,7 @@
 package eu.okaeri.configs;
 
 import eu.okaeri.configs.exception.ValidationException;
+import eu.okaeri.configs.serdes.ValuePreProcessor;
 import eu.okaeri.configs.validator.ConfigValidator;
 import lombok.Getter;
 import lombok.NonNull;
@@ -61,6 +62,16 @@ public class ConfigContext {
     private ConfigValidator validator;
 
     /**
+     * Pre-processor for raw values before type resolution.
+     * Commonly used for environment variable placeholder resolution.
+     *
+     * @see eu.okaeri.configs.serdes.standard.EnvironmentPlaceholderProcessor
+     */
+    @Getter
+    @Setter
+    private ValuePreProcessor valuePreProcessor;
+
+    /**
      * Logger for the configuration tree.
      * Shared across root and all nested configs.
      */
@@ -85,6 +96,15 @@ public class ConfigContext {
      */
     public boolean hasValidator() {
         return this.validator != null;
+    }
+
+    /**
+     * Returns true if a value pre-processor is registered.
+     *
+     * @return true if pre-processor exists
+     */
+    public boolean hasValuePreProcessor() {
+        return this.valuePreProcessor != null;
     }
 
     /**
