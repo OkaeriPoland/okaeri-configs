@@ -59,6 +59,10 @@ public class FieldDeclaration {
                 return null;
             }
 
+            if (Modifier.isStatic(field.getModifiers())) {
+                return null;
+            }
+
             if ("serialVersionUID".equals(field.getName())) {
                 return null;
             }
