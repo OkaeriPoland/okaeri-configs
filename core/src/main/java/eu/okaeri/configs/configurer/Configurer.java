@@ -172,6 +172,20 @@ public abstract class Configurer {
             genericType = GenericsDeclaration.of(value);
         }
 
+        // If the value's runtime type isn't assignable to the declared type, use the runtime
+        // type so transformers route correctly. This happens for "${VAR:default}" placeholders
+        // preserved on save: the field is typed (e.g. Duration) but the value-to-write is the
+        // raw String. Routing through the declared type's transformer would crash; using the
+        // runtime type writes the raw value verbatim. Primitive declared types are checked
+        // against their wrapper class so autoboxing isn't treated as a mismatch.
+        if (genericType != null) {
+            Class<?> declaredClass = genericType.getType();
+            Class<?> checkClass = declaredClass.isPrimitive() ? genericType.wrap() : declaredClass;
+            if (!checkClass.isInstance(value)) {
+                genericType = GenericsDeclaration.of(value);
+            }
+        }
+
         Class<?> serializerType = (genericType != null) ? genericType.getType() : value.getClass();
 
         // check for field-level @Serdes override first

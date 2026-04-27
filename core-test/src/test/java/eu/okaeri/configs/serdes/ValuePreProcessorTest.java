@@ -114,6 +114,13 @@ class ValuePreProcessorTest {
         private Duration timeout = Duration.ofSeconds(30);
     }
 
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class NestedTypedConfig extends OkaeriConfig {
+        private String label = "outer";
+        private TypedFieldConfig fee = new TypedFieldConfig();
+    }
+
     // Tests
 
     @Test
@@ -584,6 +591,53 @@ class ValuePreProcessorTest {
                 it.load();
             });
             assertThat(reloaded.getTimeout()).isEqualTo(Duration.ofSeconds(10));
+        } finally {
+            System.clearProperty("TEST_TIMEOUT");
+        }
+    }
+
+    /**
+     * Same regression as {@link #testPlaceholder_TypedFieldRoundTrip} but the typed field
+     * lives inside a nested OkaeriConfig. Nested configs route through {@code asMap} on save,
+     * not through the root save loop, so the simplify-side fix must apply there too.
+     */
+    @Test
+    void testPlaceholder_NestedTypedFieldRoundTrip(@TempDir Path tempDir) throws Exception {
+        System.setProperty("TEST_TIMEOUT", "10s");
+        File file = tempDir.resolve("nested.yml").toFile();
+
+        try {
+            NestedTypedConfig config = ConfigManager.create(NestedTypedConfig.class, it -> {
+                it.configure(opt -> {
+                    opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+                    opt.bindFile(file);
+                    opt.resolvePlaceholders();
+                });
+            });
+
+            Map<String, Object> nested = new HashMap<>();
+            nested.put("timeout", "${TEST_TIMEOUT:5s}");
+            Map<String, Object> data = new HashMap<>();
+            data.put("label", "outer-loaded");
+            data.put("fee", nested);
+            config.load(data);
+
+            assertThat(config.getFee().getTimeout()).isEqualTo(Duration.ofSeconds(10));
+
+            config.save();
+
+            String fileContent = new String(Files.readAllBytes(file.toPath()));
+            assertThat(fileContent).contains("${TEST_TIMEOUT:5s}");
+
+            NestedTypedConfig reloaded = ConfigManager.create(NestedTypedConfig.class, it -> {
+                it.configure(opt -> {
+                    opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+                    opt.bindFile(file);
+                    opt.resolvePlaceholders();
+                });
+                it.load();
+            });
+            assertThat(reloaded.getFee().getTimeout()).isEqualTo(Duration.ofSeconds(10));
         } finally {
             System.clearProperty("TEST_TIMEOUT");
         }

@@ -521,24 +521,8 @@ public abstract class OkaeriConfig {
                 ? field.getStartingValue()
                 : field.getValue();
 
-            // Normally simplify with the declared field type so transformers route correctly.
-            // When the value-to-save's runtime type is not assignable to the declared type
-            // (e.g. a "${VAR:default}" placeholder String preserved for write-back on a typed
-            // Duration field), routing through the declared type's bidirectional transformer
-            // would crash. Fall back to the runtime type so the raw value is written verbatim.
-            GenericsDeclaration typeToSimplify = field.getType();
-            if (valueToSave != null) {
-                Class<?> declaredClass = typeToSimplify.getType();
-                Class<?> checkClass = declaredClass.isPrimitive()
-                    ? typeToSimplify.wrap()
-                    : declaredClass;
-                if (!checkClass.isInstance(valueToSave)) {
-                    typeToSimplify = GenericsDeclaration.of(valueToSave);
-                }
-            }
-
             try {
-                Object simplified = this.getConfigurer().simplifyField(valueToSave, typeToSimplify, field, this.context);
+                Object simplified = this.getConfigurer().simplifyField(valueToSave, field.getType(), field, this.context);
                 data.put(field.getName(), simplified);
             } catch (Exception exception) {
                 throw new OkaeriException("failed to simplify " + field.getName(), exception);
