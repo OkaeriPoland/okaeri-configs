@@ -39,6 +39,9 @@
         <!-- minecraft -->
         <spigot-api.version>1.21.5-R0.1-SNAPSHOT</spigot-api.version>
         <bungeecord-api.version>1.21-R0.2</bungeecord-api.version>
+
+        <!-- kotlin (test-only) -->
+        <kotlin.version>2.2.20</kotlin.version>
     </properties>
 
     <modules>
@@ -47,6 +50,7 @@
         <!-- test modules -->
         <module>core-test-commons</module>
         <module>core-test</module>
+        <module>core-test-kotlin</module>
 
         <!-- validators -->
         <module>validator-jakartaee</module>
