@@ -4,12 +4,19 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.configurer.InMemoryConfigurer;
 import eu.okaeri.configs.exception.OkaeriException;
+import eu.okaeri.configs.serdes.commons.SerdesCommons;
 import eu.okaeri.configs.serdes.standard.EnvironmentPlaceholderProcessor;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,6 +106,12 @@ class ValuePreProcessorTest {
     @EqualsAndHashCode(callSuper = false)
     public static class PasswordConfig extends OkaeriConfig {
         private String password = "default";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class TypedFieldConfig extends OkaeriConfig {
+        private Duration timeout = Duration.ofSeconds(30);
     }
 
     // Tests
@@ -522,5 +535,57 @@ class ValuePreProcessorTest {
         // And - Transformed value written to file (not original)
         Map<String, Object> saved = config.asMap();
         assertThat(saved.get("password")).isEqualTo("mypassword");
+    }
+
+    /**
+     * Regression: placeholder syntax on a typed field (e.g. {@code Duration}) used to crash on
+     * save with {@code ClassCastException} because the save path simplified the raw placeholder
+     * String through the declared field type's bidirectional transformer.
+     *
+     * <p>Save now bypasses type-aware simplification when {@code variableHide} is set, writing
+     * the raw placeholder back to the file verbatim while the in-memory field stays typed.
+     */
+    @Test
+    void testPlaceholder_TypedFieldRoundTrip(@TempDir Path tempDir) throws Exception {
+        // Given
+        System.setProperty("TEST_TIMEOUT", "10s");
+        File file = tempDir.resolve("config.yml").toFile();
+
+        try {
+            TypedFieldConfig config = ConfigManager.create(TypedFieldConfig.class, it -> {
+                it.configure(opt -> {
+                    opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+                    opt.bindFile(file);
+                    opt.resolvePlaceholders();
+                });
+            });
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("timeout", "${TEST_TIMEOUT:5s}");
+            config.load(data);
+
+            // Then - Placeholder resolves to typed Duration on load
+            assertThat(config.getTimeout()).isEqualTo(Duration.ofSeconds(10));
+
+            // When - save
+            config.save();
+
+            // Then - file contains the placeholder text verbatim, not the resolved Duration
+            String fileContent = new String(Files.readAllBytes(file.toPath()));
+            assertThat(fileContent).contains("${TEST_TIMEOUT:5s}");
+
+            // And - reloading still resolves to the typed Duration
+            TypedFieldConfig reloaded = ConfigManager.create(TypedFieldConfig.class, it -> {
+                it.configure(opt -> {
+                    opt.configurer(new YamlSnakeYamlConfigurer(), new SerdesCommons());
+                    opt.bindFile(file);
+                    opt.resolvePlaceholders();
+                });
+                it.load();
+            });
+            assertThat(reloaded.getTimeout()).isEqualTo(Duration.ofSeconds(10));
+        } finally {
+            System.clearProperty("TEST_TIMEOUT");
+        }
     }
 }
