@@ -93,7 +93,8 @@ public class HjsonConfigurer extends Configurer {
         json.setFullComment(CommentType.BOL, header);
 
         // save
-        ConfigPostprocessor.of(json.toString(Stringify.HJSON_COMMENTS)).write(outputStream);
+        String hjson = json.toString(Stringify.HJSON_COMMENTS).replace("\r\n", "\n");
+        ConfigPostprocessor.of(hjson).write(outputStream);
     }
 
     @SuppressWarnings("unchecked")
