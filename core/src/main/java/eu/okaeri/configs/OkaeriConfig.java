@@ -720,9 +720,9 @@ public abstract class OkaeriConfig {
      * @throws OkaeriException if {@link #configurer} or {@link #bindFile} is null or loading fails
      */
     public OkaeriConfig load(@NonNull File file) throws OkaeriException {
-        try {
-            return this.load(new FileInputStream(file));
-        } catch (FileNotFoundException exception) {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return this.load(inputStream);
+        } catch (IOException exception) {
             throw new OkaeriException("failed #load using file " + file, exception);
         }
     }
