@@ -7,6 +7,8 @@ import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.migrate.ConfigMigration;
 import eu.okaeri.configs.migrate.builtin.NamedMigration;
+import eu.okaeri.configs.migrate.view.ConfigView;
+import eu.okaeri.configs.migrate.view.InternalStateView;
 import eu.okaeri.configs.migrate.view.RawConfigView;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
@@ -835,6 +837,35 @@ public abstract class OkaeriConfig {
     }
 
     /**
+     * This will run TRUE raw migrations (ZERO (de)serialization) on values.
+     * This allows for migrations to complete with values that don't satisfy a
+     * serializer's requirements (yet).
+     * <p>
+     * By the end of ALL given migrations, serializer requirements should
+     * be satisfied (unless the user just has an invalid structure).
+     * For the regular {@code migrate} methods, serializer requirements must
+     * be satisfied after EACH migration, which is more restrictive but allows
+     * for interacting with (de)serialized values.
+     * <p>
+     * Internal state migrations should be called BEFORE {@code migrate}
+     * (if {@code migrate} is called at all). If it's called after, serializers
+     * may not have their requirements met and thus fail when loading the config.
+     */
+    public OkaeriConfig migrateInternalState(@NonNull ConfigMigration... migrations) throws OkaeriException {
+        return this.migrateInternalState(
+            (performed) -> {
+                try {
+                    this.update();
+                } catch (OkaeriException exception) {
+                    throw new OkaeriException("failed #migrateInternalState due to update error after migrations (not saving)", exception);
+                }
+                this.save();
+            },
+            migrations
+        );
+    }
+
+    /**
      * Performs migrations on the current in-memory config state and invokes callback
      * with the count of performed migrations.
      * <p>
@@ -852,7 +883,29 @@ public abstract class OkaeriConfig {
      * @see #migrate(ConfigMigration...) for typical usage with automatic save
      */
     public OkaeriConfig migrate(@NonNull Consumer<Long> callback, @NonNull ConfigMigration... migrations) throws OkaeriException {
-        RawConfigView view = new RawConfigView(this);
+        return this.migrate(new RawConfigView(this), callback, migrations);
+    }
+
+    /**
+     * This will run TRUE raw migrations (ZERO (de)serialization) on values.
+     * This allows for migrations to complete with values that don't satisfy a
+     * serializer's requirements (yet).
+     * <p>
+     * By the end of ALL given migrations, serializer requirements should
+     * be satisfied (unless the user just has an invalid structure).
+     * For the regular {@code migrate} methods, serializer requirements must
+     * be satisfied after EACH migration, which is more restrictive but allows
+     * for interacting with (de)serialized values.
+     * <p>
+     * Internal state migrations should be called BEFORE {@code migrate}
+     * (if {@code migrate} is called at all). If it's called after, serializers
+     * may not have their requirements met and thus fail when loading the config.
+     */
+    public OkaeriConfig migrateInternalState(@NonNull Consumer<Long> callback, @NonNull ConfigMigration... migrations) throws OkaeriException {
+        return this.migrate(new InternalStateView(this), callback, migrations);
+    }
+
+    private OkaeriConfig migrate(@NonNull ConfigView view, @NonNull Consumer<Long> callback, @NonNull ConfigMigration... migrations) throws OkaeriException {
         long performed = Arrays.stream(migrations)
             .filter(migration -> {
                 try {

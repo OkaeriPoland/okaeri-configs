@@ -14,6 +14,7 @@ import java.util.*;
  *
  * @see DeserializationData
  * @see eu.okaeri.configs.migrate.view.RawConfigView
+ * @see eu.okaeri.configs.migrate.view.InternalStateView
  */
 public interface TypedKeyReader {
 
