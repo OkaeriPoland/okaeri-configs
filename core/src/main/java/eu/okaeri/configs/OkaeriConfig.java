@@ -842,7 +842,7 @@ public abstract class OkaeriConfig {
      * <p>
      * <b>IMPORTANT: Call order matters!</b> This method is <b>imperative</b> and runs
      * immediately on the current state. You MUST call {@link #load()} BEFORE migrate(),
-     * otherwise migrations will run on default field values instead of your saved data.
+     * otherwise migrations will run on nothing (internal state will be empty).
      * <p>
      * This will run TRUE raw migrations (ZERO (de)serialization) on values.
      * This allows for migrations to complete with values that don't satisfy a
@@ -867,7 +867,7 @@ public abstract class OkaeriConfig {
      * <p>
      * Incorrect usage (common mistake):
      * <pre>{@code
-     * config.migrateInternalState(migration);  // WRONG: Runs on defaults, not saved data!
+     * config.migrateInternalState(migration);  // WRONG: Runs on nothing, not saved data!
      * config.load();                           // Data loaded but migration already ran
      * }</pre>
      *
@@ -917,7 +917,7 @@ public abstract class OkaeriConfig {
      * <p>
      * <b>IMPORTANT: Call order matters!</b> This method is <b>imperative</b> and runs
      * immediately on the current state. You MUST call {@link #load()} BEFORE migrate(),
-     * otherwise migrations will run on default field values instead of your saved data.
+     * otherwise migrations will run on nothing (internal state will be empty).
      * <p>
      * This will run TRUE raw migrations (ZERO (de)serialization) on values.
      * This allows for migrations to complete with values that don't satisfy a
