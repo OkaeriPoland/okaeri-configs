@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Provides raw key-value access to internalState config data for migrations.
+ * Provides TRUE raw key-value access to internalState config data for migrations.
  * <p>
  * Supports dot-separated nested key paths (e.g., "section.subsection.key").
  * <p>
@@ -55,6 +55,11 @@ public class InternalStateView extends ConfigView {
 
     // ==================== MIGRATION CONVENIENCE METHODS ====================
 
+    /**
+     * Returns the internal state map from the associated {@link OkaeriConfig}.
+     *
+     * @return the internal state map
+     */
     public Map<String, Object> getInternalState() {
         return this.config.getInternalState();
     }

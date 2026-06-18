@@ -799,7 +799,7 @@ public abstract class OkaeriConfig {
 
     /**
      * Performs migrations on the current in-memory config state, validates the result,
-     * and saves to file.
+     * and {@link #save() saves to file}.
      * <p>
      * <b>IMPORTANT: Call order matters!</b> This method is <b>imperative</b> and runs
      * immediately on the current state. You MUST call {@link #load()} BEFORE migrate(),
@@ -837,6 +837,13 @@ public abstract class OkaeriConfig {
     }
 
     /**
+     * Performs migrations on the current internal state config state, validates the result,
+     * {@link #update() updates the config object's fields}, and {@link #save() saves to file}.
+     * <p>
+     * <b>IMPORTANT: Call order matters!</b> This method is <b>imperative</b> and runs
+     * immediately on the current state. You MUST call {@link #load()} BEFORE migrate(),
+     * otherwise migrations will run on default field values instead of your saved data.
+     * <p>
      * This will run TRUE raw migrations (ZERO (de)serialization) on values.
      * This allows for migrations to complete with values that don't satisfy a
      * serializer's requirements (yet).
@@ -850,6 +857,24 @@ public abstract class OkaeriConfig {
      * Internal state migrations should be called BEFORE {@code migrate}
      * (if {@code migrate} is called at all). If it's called after, serializers
      * may not have their requirements met and thus fail when loading the config.
+     * <p>
+     * Correct usage:
+     * <pre>{@code
+     * config.load();                           // 1. Load existing data first
+     * config.migrateInternalState(migration);  // 2. Migrate loaded data
+     * // update() is called automatically by migrateInternalState()
+     * }</pre>
+     * <p>
+     * Incorrect usage (common mistake):
+     * <pre>{@code
+     * config.migrateInternalState(migration);  // WRONG: Runs on defaults, not saved data!
+     * config.load();                           // Data loaded but migration already ran
+     * }</pre>
+     *
+     * @param migrations migrations to be performed
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or migration fails
+     * @see #migrate(ConfigMigration...) for migrations with (de)serialized values
      */
     public OkaeriConfig migrateInternalState(@NonNull ConfigMigration... migrations) throws OkaeriException {
         return this.migrateInternalState(
@@ -887,6 +912,13 @@ public abstract class OkaeriConfig {
     }
 
     /**
+     * Performs migrations on the current internal state config state and invokes callback
+     * with the count of performed migrations.
+     * <p>
+     * <b>IMPORTANT: Call order matters!</b> This method is <b>imperative</b> and runs
+     * immediately on the current state. You MUST call {@link #load()} BEFORE migrate(),
+     * otherwise migrations will run on default field values instead of your saved data.
+     * <p>
      * This will run TRUE raw migrations (ZERO (de)serialization) on values.
      * This allows for migrations to complete with values that don't satisfy a
      * serializer's requirements (yet).
@@ -900,6 +932,13 @@ public abstract class OkaeriConfig {
      * Internal state migrations should be called BEFORE {@code migrate}
      * (if {@code migrate} is called at all). If it's called after, serializers
      * may not have their requirements met and thus fail when loading the config.
+     *
+     * @param callback   consumer invoked with performed migrations count (if > 0)
+     * @param migrations migrations to be performed
+     * @return this instance
+     * @throws OkaeriException if {@link #configurer} is null or migration fails
+     * @see #migrateInternalState(ConfigMigration...) for typical usage with automatic save
+     * @see #migrate(Consumer, ConfigMigration...) for migrations with (de)serialized values
      */
     public OkaeriConfig migrateInternalState(@NonNull Consumer<Long> callback, @NonNull ConfigMigration... migrations) throws OkaeriException {
         return this.migrate(new InternalStateView(this), callback, migrations);
