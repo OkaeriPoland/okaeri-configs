@@ -136,8 +136,8 @@ public class GoldenFileAssertion {
         String goldenContent = Files.readString(goldenPath);
 
         // Apply normalizers to both contents
-        String normalizedGolden = this.applyNormalizers(goldenContent);
-        String normalizedCurrent = this.applyNormalizers(this.currentContent);
+        String normalizedGolden = this.applyNormalizers(goldenContent).replace("\r\n", "\n");
+        String normalizedCurrent = this.applyNormalizers(this.currentContent).replace("\r\n", "\n");
 
         if (!normalizedCurrent.equals(normalizedGolden)) {
             if (this.verbose) {

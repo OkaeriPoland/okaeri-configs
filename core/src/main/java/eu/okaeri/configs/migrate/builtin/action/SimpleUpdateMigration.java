@@ -2,7 +2,7 @@ package eu.okaeri.configs.migrate.builtin.action;
 
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.migrate.ConfigMigration;
-import eu.okaeri.configs.migrate.view.RawConfigView;
+import eu.okaeri.configs.migrate.view.ConfigView;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -18,7 +18,7 @@ public class SimpleUpdateMigration implements ConfigMigration {
     private final Function<Object, Object> function;
 
     @Override
-    public boolean migrate(@NonNull OkaeriConfig config, @NonNull RawConfigView view) {
+    public boolean migrate(@NonNull OkaeriConfig config, @NonNull ConfigView view) {
         Object oldValue = view.get(this.key);
         Object newValue = this.function.apply(oldValue);
         view.set(this.key, newValue);

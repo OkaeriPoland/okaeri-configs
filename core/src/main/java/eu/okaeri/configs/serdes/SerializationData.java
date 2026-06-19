@@ -69,8 +69,8 @@ public class SerializationData implements TypedKeyWriter {
     // ==================== CORE WRITE METHOD ====================
 
     @Override
-    public void setRaw(@NonNull String key, Object value) {
-        this.data.put(key, value);
+    public Object setRaw(@NonNull String key, Object value) {
+        return this.data.put(key, value);
     }
 
     // ==================== VALUE METHODS ====================
