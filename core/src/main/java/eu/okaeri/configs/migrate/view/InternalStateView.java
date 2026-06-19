@@ -56,15 +56,6 @@ public class InternalStateView extends ConfigView {
     // ==================== MIGRATION CONVENIENCE METHODS ====================
 
     /**
-     * Returns the internal state map from the associated {@link OkaeriConfig}.
-     *
-     * @return the internal state map
-     */
-    public Map<String, Object> getInternalState() {
-        return this.config.getInternalState();
-    }
-
-    /**
      * Checks if a key exists at the specified path.
      *
      * @param key the dot-separated key path

@@ -59,6 +59,15 @@ public abstract class ConfigView implements TypedKeyReader, TypedKeyWriter {
     // ==================== MIGRATION CONVENIENCE METHODS ====================
 
     /**
+     * Returns the internal state map from the associated {@link OkaeriConfig}.
+     *
+     * @return the internal state map
+     */
+    public Map<String, Object> getInternalState() {
+        return this.config.getInternalState();
+    }
+
+    /**
      * Gets the raw value at the specified key path (alias for {@link #getRaw}).
      *
      * @param key the dot-separated key path

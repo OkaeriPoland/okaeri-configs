@@ -67,7 +67,7 @@ public class RawConfigView extends ConfigView {
 
         // top-level keys need to be removed from internalState as well
         if (key.split(this.nestedSeparator).length == 1) {
-            Map<String, Object> internalState = this.config.getInternalState();
+            Map<String, Object> internalState = this.getInternalState();
             if (internalState != null) {
                 internalState.remove(key);
             }
