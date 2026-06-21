@@ -10,18 +10,17 @@ import eu.okaeri.configs.configurer.Configurer;
 import eu.okaeri.configs.format.yaml.YamlSourceWalker;
 import eu.okaeri.configs.postprocessor.ConfigPostprocessor;
 import eu.okaeri.configs.schema.ConfigDeclaration;
-import eu.okaeri.configs.schema.FieldDeclaration;
-import eu.okaeri.configs.schema.GenericsDeclaration;
-import eu.okaeri.configs.serdes.SerdesContext;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.yaml.snakeyaml.DumperOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * YAML configurer using Jackson's YAML dataformat for parsing and serialization.
@@ -40,23 +39,48 @@ public class YamlJacksonConfigurer extends Configurer {
     private static final TypeReference<LinkedHashMap<String, Object>> MAP_TYPE = new TypeReference<LinkedHashMap<String, Object>>() {
     };
 
-    private @Setter ObjectMapper mapper;
+    // Need to cache for things like lineWidth to work with default mapper.
+    // Else, createDefaultMapper would be called, creating a new mapper, every read/write (not needed as ObjectMapper is thread-safe).
+    private ObjectMapper cachedMapper;
+    private Supplier<ObjectMapper> mapper;
     private @Setter String commentPrefix = "# ";
+    private int lineWidth = 80;
 
     public YamlJacksonConfigurer() {
-        this.mapper = createDefaultMapper();
+        this.mapper = this::createDefaultMapper;
     }
 
     public YamlJacksonConfigurer(@NonNull ObjectMapper mapper) {
-        this.mapper = mapper;
+        this.mapper = () -> mapper;
     }
 
-    private static ObjectMapper createDefaultMapper() {
+    public YamlJacksonConfigurer setMapper(@NonNull ObjectMapper mapper) {
+        this.mapper = () -> mapper;
+
+        // Reset cached mapper
+        this.cachedMapper = null;
+        return this;
+    }
+
+    public YamlJacksonConfigurer setLineWidth(int lineWidth) {
+        this.lineWidth = lineWidth;
+
+        // Reset cached mapper
+        this.cachedMapper = null;
+        return this;
+    }
+
+    private ObjectMapper createDefaultMapper() {
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setWidth(this.lineWidth);
+
         YAMLFactory factory = YAMLFactory.builder()
+            .dumperOptions(dumperOptions)
             .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
             .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
             .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
             .build();
+
         YAMLMapper mapper = new YAMLMapper(factory);
         mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
         return mapper;
@@ -69,14 +93,21 @@ public class YamlJacksonConfigurer extends Configurer {
 
     @Override
     public Map<String, Object> load(@NonNull InputStream inputStream, @NonNull ConfigDeclaration declaration) throws Exception {
-        return this.mapper.readValue(inputStream, MAP_TYPE);
+        if (this.cachedMapper == null) {
+            this.cachedMapper = this.mapper.get();
+        }
+
+        return this.cachedMapper.readValue(inputStream, MAP_TYPE);
     }
 
     @Override
     public void write(@NonNull OutputStream outputStream, @NonNull Map<String, Object> data, @NonNull ConfigDeclaration declaration) throws Exception {
+        if (this.cachedMapper == null) {
+            this.cachedMapper = this.mapper.get();
+        }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        this.mapper.writeValue(baos, data);
+        this.cachedMapper.writeValue(baos, data);
 
         ConfigPostprocessor.of(baos.toString(StandardCharsets.UTF_8.name()))
             .removeLines(line -> line.startsWith(this.commentPrefix.trim()))

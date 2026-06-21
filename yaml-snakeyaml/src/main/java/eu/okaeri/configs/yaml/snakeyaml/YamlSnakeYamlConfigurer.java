@@ -26,21 +26,23 @@ public class YamlSnakeYamlConfigurer extends Configurer {
 
     private final Supplier<Yaml> yaml;
     private @Setter String commentPrefix = "# ";
+    private @Setter int lineWidth = 80;
 
     public YamlSnakeYamlConfigurer() {
-        this(YamlSnakeYamlConfigurer::createYaml);
+        this.yaml = this::createYaml;
     }
 
     public YamlSnakeYamlConfigurer(@NonNull Supplier<Yaml> yaml) {
         this.yaml = yaml;
     }
 
-    private static Yaml createYaml() {
+    private Yaml createYaml() {
 
         LoaderOptions loaderOptions = new LoaderOptions();
         Constructor constructor = new Constructor(loaderOptions);
 
         DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setWidth(this.lineWidth);
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
         Representer representer = new Representer(dumperOptions);
