@@ -21,6 +21,7 @@ import java.util.Map;
 public class YamlBukkitConfigurer extends Configurer {
 
     @Setter private String commentPrefix = "# ";
+    @Setter private int lineWidth = 80;
 
     @Override
     public List<String> getExtensions() {
@@ -47,6 +48,11 @@ public class YamlBukkitConfigurer extends Configurer {
 
         YamlConfiguration config = new YamlConfiguration();
         config.options().pathSeparator((char) 29); // 'group separator': disables dot parsing in set/get
+        try {
+            config.options().width(this.lineWidth);
+        } catch (NoSuchMethodError e) {
+            // width option not supported in older versions, ignore
+        }
 
         for (Map.Entry<String, Object> entry : data.entrySet()) {
             config.set(entry.getKey(), entry.getValue());
