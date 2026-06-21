@@ -26,7 +26,7 @@ public class YamlSnakeYamlConfigurer extends Configurer {
 
     private final Supplier<Yaml> yaml;
     private @Setter String commentPrefix = "# ";
-    private @Setter int lineWidth = Integer.MAX_VALUE;
+    private @Setter int lineWidth = 80;
 
     public YamlSnakeYamlConfigurer() {
         this.yaml = this::createYaml;
