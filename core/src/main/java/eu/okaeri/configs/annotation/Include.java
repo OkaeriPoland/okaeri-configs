@@ -9,4 +9,6 @@ import java.lang.annotation.*;
 @Repeatable(Includes.class)
 public @interface Include {
     Class<? extends OkaeriConfig> value();
+
+    IncludePosition position() default IncludePosition.AFTER;
 }

@@ -43,8 +43,13 @@ public class ConfigDeclaration {
         declaration.setHeader(template.getHeader());
         declaration.setReal(template.isReal());
         declaration.setType(template.getType());
-        declaration.setFieldMap(readFields(clazz, declaration, object));
 
+        // Get fields from this class (call before @Include readFields for correct cache)
+        Map<String, FieldDeclaration> thisFields = readFields(clazz, declaration, object);
+
+        // Get @Include fields
+        Map<String, FieldDeclaration> includeFieldsBefore = new LinkedHashMap<>();
+        Map<String, FieldDeclaration> includeFieldsAfter = new LinkedHashMap<>();
         Include[] subs = clazz.getDeclaredAnnotationsByType(Include.class);
         for (Include sub : subs) {
             if (!sub.value().isAssignableFrom(clazz)) {
@@ -53,14 +58,39 @@ public class ConfigDeclaration {
                     "Cannot include fields from " + sub.value().getName() + " because it is not a superclass of " + clazz.getName()
                 );
             }
+
+            // Get target map
+            Map<String, FieldDeclaration> target;
+            switch (sub.position()) {
+                case BEFORE:
+                    target = includeFieldsBefore;
+                    break;
+                case AFTER:
+                    target = includeFieldsAfter;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                        "Unknown @Include position: " + sub.position() + ". " +
+                        "Cannot include fields from " + sub.value().getName() + " because it has an unknown position"
+                    );
+            }
+
+            // Add fields to target
             Map<String, FieldDeclaration> subFields = readFields(sub.value(), declaration, object);
-            subFields.forEach((key, value) -> {
-                if (declaration.getFieldMap().containsKey(key)) {
-                    return;
-                }
-                declaration.getFieldMap().put(key, value);
-            });
+            subFields.forEach(target::putIfAbsent);
         }
+
+        // @Include position = before (overwriting is not a concern)
+        Map<String, FieldDeclaration> allFields = new LinkedHashMap<>(includeFieldsBefore);
+        // Fields from this class (move conflicts down)
+        thisFields.forEach((string, field) -> {
+            allFields.remove(string);
+            allFields.put(string, field);
+        });
+        // @Include position = after (overwriting is NOT okay)
+        includeFieldsAfter.forEach(allFields::putIfAbsent);
+
+        declaration.setFieldMap(allFields);
 
         return declaration;
     }

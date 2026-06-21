@@ -3,6 +3,7 @@ package eu.okaeri.configs.annotations;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Include;
+import eu.okaeri.configs.annotation.IncludePosition;
 import eu.okaeri.configs.annotation.Includes;
 import eu.okaeri.configs.schema.ConfigDeclaration;
 import eu.okaeri.configs.schema.FieldDeclaration;
@@ -10,6 +11,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -78,6 +81,40 @@ class IncludeAnnotationTest {
     @EqualsAndHashCode(callSuper = false)
     @Include(ConflictingBase.class)
     public static class ConflictingIncludeConfig extends ConflictingBase {
+        private String conflictField = "from child";
+        private String childField = "child";
+    }
+
+    // ===== Test Configs - Position (BEFORE) =====
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Include(value = BaseConfig.class, position = IncludePosition.BEFORE)
+    public static class BeforeIncludeConfig extends BaseConfig {
+        private String ownField = "own";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Include(value = ConflictingBase.class, position = IncludePosition.BEFORE)
+    public static class BeforeConflictingConfig extends ConflictingBase {
+        private String conflictField = "from child";
+        private String childField = "child";
+    }
+
+    // ===== Test Configs - Position (AFTER explicit) =====
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Include(value = BaseConfig.class, position = IncludePosition.AFTER)
+    public static class AfterIncludeConfig extends BaseConfig {
+        private String ownField = "own";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Include(value = ConflictingBase.class, position = IncludePosition.AFTER)
+    public static class AfterConflictingConfig extends ConflictingBase {
         private String conflictField = "from child";
         private String childField = "child";
     }
@@ -185,5 +222,95 @@ class IncludeAnnotationTest {
         assertThat(field1.getStartingValue()).isEqualTo("base1");
         assertThat(field2).isNotNull();
         assertThat(field2.getStartingValue()).isEqualTo("base2");
+    }
+
+    // ===== Position Tests =====
+
+    @Test
+    void testInclude_DefaultPosition_IsAfter() {
+        // Given
+        ConfigDeclaration declaration = ConfigDeclaration.of(SingleIncludeConfig.class);
+
+        // When
+        Set<String> fieldNames = declaration.getFieldNames();
+
+        // Then - @Include without explicit position should behave as AFTER
+        assertThat(fieldNames).containsExactly("ownField", "baseField1", "baseField2");
+    }
+
+    @Test
+    void testInclude_PositionBefore_IncludedFieldsAppearFirst() {
+        // Given
+        ConfigDeclaration declaration = ConfigDeclaration.of(BeforeIncludeConfig.class);
+
+        // When
+        Set<String> fieldNames = declaration.getFieldNames();
+
+        // Then
+        assertThat(fieldNames).containsExactly("baseField1", "baseField2", "ownField");
+    }
+
+    @Test
+    void testInclude_PositionAfter_IncludedFieldsAppearLast() {
+        // Given
+        ConfigDeclaration declaration = ConfigDeclaration.of(AfterIncludeConfig.class);
+
+        // When
+        Set<String> fieldNames = declaration.getFieldNames();
+
+        // Then
+        assertThat(fieldNames).containsExactly("ownField", "baseField1", "baseField2");
+    }
+
+    @Test
+    void testInclude_PositionBefore_ConflictingField_ChildWins() {
+        // Given
+        BeforeConflictingConfig config = ConfigManager.create(BeforeConflictingConfig.class);
+
+        // When
+        ConfigDeclaration declaration = config.getDeclaration();
+        FieldDeclaration conflictField = declaration.getField("conflictField").orElse(null);
+
+        // Then
+        assertThat(conflictField).isNotNull();
+        assertThat(conflictField.getStartingValue()).isEqualTo("from child");
+    }
+
+    @Test
+    void testInclude_PositionBefore_ConflictingField_OrderedAtClassPosition() {
+        // Given
+        ConfigDeclaration declaration = ConfigDeclaration.of(BeforeConflictingConfig.class);
+
+        // When
+        Set<String> fieldNames = declaration.getFieldNames();
+
+        // Then - Non-conflicting BEFORE fields come first; conflicting field appears at its class-declared position
+        assertThat(fieldNames).containsExactly("uniqueField", "conflictField", "childField");
+    }
+
+    @Test
+    void testInclude_PositionAfter_ConflictingField_ChildWins() {
+        // Given
+        AfterConflictingConfig config = ConfigManager.create(AfterConflictingConfig.class);
+
+        // When
+        ConfigDeclaration declaration = config.getDeclaration();
+        FieldDeclaration conflictField = declaration.getField("conflictField").orElse(null);
+
+        // Then
+        assertThat(conflictField).isNotNull();
+        assertThat(conflictField.getStartingValue()).isEqualTo("from child");
+    }
+
+    @Test
+    void testInclude_PositionAfter_ConflictingField_ClassFieldsOrderedFirst() {
+        // Given
+        ConfigDeclaration declaration = ConfigDeclaration.of(AfterConflictingConfig.class);
+
+        // When
+        Set<String> fieldNames = declaration.getFieldNames();
+
+        // Then - Class fields come first; non-conflicting AFTER fields are appended
+        assertThat(fieldNames).containsExactly("conflictField", "childField", "uniqueField");
     }
 }
