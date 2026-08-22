@@ -262,7 +262,7 @@ public abstract class Configurer {
         }
 
         // serialize as map
-        return this.simplifyMap(serializationMap, GenericsDeclaration.of(Map.class, Collections.singletonList(String.class)), serdesContext, conservative);
+        return this.simplifyMap(serializationMap, GenericsDeclaration.of(Map.class, Collections.singletonList(String.class)), serdesContext.withField(null), conservative);
     }
 
     /**
