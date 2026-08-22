@@ -13,10 +13,14 @@ import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -147,6 +151,42 @@ class SerdesAnnotationTest {
         }
     }
 
+    /**
+     * Plain data type serialized via multiple keys (name/amount), mirroring
+     * real-world serializers like an ItemStack serializer.
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TestItem {
+        private String name;
+        private int amount;
+    }
+
+    /**
+     * Multi-key serializer - writes several entries via {@code data.set(key, value)}
+     * instead of a single {@code VALUE}. Regression coverage for the field-scope leak
+     * where the recursive re-simplification pass reapplied this serializer to its own
+     * already-simplified output (e.g. calling this on the plain String "sword").
+     */
+    public static class TestItemSerializer implements ObjectSerializer<TestItem> {
+        @Override
+        public boolean supports(@NonNull Class<?> type) {
+            return TestItem.class.equals(type);
+        }
+
+        @Override
+        public void serialize(@NonNull TestItem object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+            data.set("name", object.getName());
+            data.set("amount", object.getAmount());
+        }
+
+        @Override
+        public TestItem deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+            return new TestItem(data.get("name", String.class), data.get("amount", Integer.class));
+        }
+    }
+
     // Test Config Classes
 
     @Data
@@ -192,6 +232,27 @@ class SerdesAnnotationTest {
         @Comment("This is a custom field")
         @Serdes(serializer = TestStringSerializerA.class)
         private String customField = "value";
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class MultiKeySerdesConfig extends OkaeriConfig {
+        @Serdes(serializer = TestItemSerializer.class)
+        private TestItem item = new TestItem("sword", 1);
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    public static class NestedMultiKeySerdesConfig extends OkaeriConfig {
+        private String topLevel = "top";
+        private SubConfig sub = new SubConfig();
+
+        @Data
+        @EqualsAndHashCode(callSuper = false)
+        public static class SubConfig extends OkaeriConfig {
+            @Serdes(serializer = TestItemSerializer.class)
+            private TestItem item = new TestItem("shield", 2);
+        }
     }
 
     @Data
@@ -324,6 +385,67 @@ class SerdesAnnotationTest {
         // The innerField value will be in the nested map under "sub"
         assertThat(config.getInternalState().containsKey("sub")).isTrue();
         assertThat(config.getInternalState().get("topLevel")).isEqualTo("top");
+    }
+
+    @Test
+    void testSerdes_MultiKeySerializer_SerializesWithoutError() {
+        // Given
+        MultiKeySerdesConfig config = ConfigManager.create(MultiKeySerdesConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When/Then - must not throw ClassCastException from re-simplifying
+        // the serializer's own already-simplified multi-key output
+        config.saveToString();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void testSerdes_MultiKeySerializer_ProducesExpectedMap() {
+        // Given
+        MultiKeySerdesConfig config = ConfigManager.create(MultiKeySerdesConfig.class);
+        config.withConfigurer(new InMemoryConfigurer());
+
+        // When
+        config.saveToString();
+
+        // Then
+        Map<String, Object> item = (Map<String, Object>) config.getInternalState().get("item");
+        assertThat(item).containsEntry("name", "sword");
+        assertThat(item).containsEntry("amount", 1);
+    }
+
+    @Test
+    void testSerdes_MultiKeySerializer_RoundTrip() {
+        // Given
+        MultiKeySerdesConfig config1 = ConfigManager.create(MultiKeySerdesConfig.class);
+        config1.withConfigurer(new YamlSnakeYamlConfigurer());
+
+        // When - save and load
+        String yaml = config1.saveToString();
+
+        MultiKeySerdesConfig config2 = ConfigManager.create(MultiKeySerdesConfig.class);
+        config2.withConfigurer(new YamlSnakeYamlConfigurer());
+        config2.load(yaml);
+
+        // Then - value survives round-trip
+        assertThat(config2.getItem()).isEqualTo(config1.getItem());
+    }
+
+    @Test
+    void testSerdes_MultiKeySerializer_WithNestedConfig() {
+        // Given
+        NestedMultiKeySerdesConfig config = ConfigManager.create(NestedMultiKeySerdesConfig.class);
+        config.withConfigurer(new YamlSnakeYamlConfigurer());
+
+        // When - must not throw through the nested config simplify path
+        String yaml = config.saveToString();
+
+        NestedMultiKeySerdesConfig loaded = ConfigManager.create(NestedMultiKeySerdesConfig.class);
+        loaded.withConfigurer(new YamlSnakeYamlConfigurer());
+        loaded.load(yaml);
+
+        // Then
+        assertThat(loaded.getSub().getItem()).isEqualTo(config.getSub().getItem());
     }
 
     @Test
